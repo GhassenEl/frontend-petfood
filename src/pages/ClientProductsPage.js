@@ -1,0 +1,424 @@
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { MapPin, Flame, Sparkles, ShoppingCart } from 'lucide-react';
+import api from '../utils/api';
+
+
+
+const ClientProductsPage = () => {
+  const [recommendations, setRecommendations] = useState([]);
+  const [nearby, setNearby] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [products, setProducts] = useState([]);
+  const [soldes, setSoldes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const productsRes = await api.get('/products');
+      setProducts(productsRes.data || []);
+      setSoldes((productsRes.data || []).filter(p => (p.discount || 0) > 0));
+    } catch (err) {
+      console.error('Products error:', err);
+      setError('Erreur chargement produits principaux');
+    }
+
+    try {
+      const recsRes = await api.get('/products/recommendations');
+      setRecommendations(recsRes.data || []);
+    } catch (err) {
+      console.error('Recommendations error:', err);
+    }
+
+    try {
+      const nearbyRes = await api.get('/products/nearby');
+      setNearby(nearbyRes.data || []);
+    } catch (err) {
+      console.error('Nearby error:', err);
+    }
+
+    setLoading(false);
+  };
+
+  const fetchFastAPIRecommendations = async () => {
+    try {
+      const userRes = await api.get('/users/profile');
+      const user = userRes.data;
+      
+      const res = await fetch('/fastapi/recommendations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user._id || 'demo_user',
+          limit: 8
+        })
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setRecommendations(data.map(d => ({ ...d.product, recommendedReason: d.reason, score: d.score })));
+      }
+    } catch (err) {
+      console.error('FastAPI error:', err);
+    }
+  };
+
+  const filteredProducts = products.filter(p =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const addToCart = (product) => {
+    window.dispatchEvent(new CustomEvent('addToCart', { detail: product }));
+    
+    const viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
+    if (!viewed.includes(product._id)) {
+      viewed.push(product._id);
+      localStorage.setItem('viewedProducts', JSON.stringify(viewed.slice(-20)));
+    }
+  };
+
+  const likeProduct = (product) => {
+    const liked = JSON.parse(localStorage.getItem('likedProducts') || '[]');
+    if (!liked.includes(product._id)) {
+      liked.push(product._id);
+      localStorage.setItem('likedProducts', JSON.stringify(liked.slice(-50)));
+      window.alert('Produit ajouté à vos favoris !');
+    }
+  };
+
+  const getPrice = (product) => {
+    const discount = product.discount || 0;
+    return (product.price * (1 - discount / 100)).toFixed(2);
+  };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+        <div style={{ fontSize: '3rem', animation: 'float 2s ease-in-out infinite' }}>🐾</div>
+        <p style={{ color: '#888' }}>Chargement des produits...</p>
+      </div>
+    );
+  }
+
+  if (error && products.length === 0) {
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+        <p style={{ color: '#dc2626', fontWeight: 600 }}>{error}</p>
+        <button onClick={fetchData} style={{ padding: '12px 24px', background: '#10b981', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>
+          🔄 Réessayer
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 16px' }}>
+      {/* Hero */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          textAlign: 'center',
+          marginBottom: '32px',
+          padding: '40px 24px',
+          background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
+          borderRadius: '24px',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <h1 style={{ fontSize: '36px', fontWeight: 800, color: '#065f46', margin: '0 0 8px' }}>
+            🛒 Nos Produits
+          </h1>
+          <p style={{ fontSize: '16px', color: '#6b7280', margin: '0 0 20px' }}>
+            Découvrez notre sélection premium pour vos animaux
+          </p>
+          <button
+            onClick={fetchFastAPIRecommendations}
+            style={{
+              padding: '10px 20px',
+              background: 'linear-gradient(135deg, #e67e22, #d35400)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              fontSize: '14px',
+              boxShadow: '0 4px 14px rgba(230,126,34,0.3)',
+            }}
+          >
+            <Sparkles size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
+            Recommandations IA (FastAPI)
+          </button>
+        </div>
+      </motion.div>
+
+      {/* Search */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        background: 'white',
+        padding: '14px 20px',
+        borderRadius: '16px',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+        marginBottom: '32px',
+        border: '2px solid #e5e7eb',
+      }}>
+        <span style={{ fontSize: '18px' }}>🔍</span>
+        <input
+          type="text"
+          placeholder="Rechercher un produit..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ flex: 1, border: 'none', outline: 'none', fontSize: '15px', background: 'transparent' }}
+        />
+        {searchTerm && (
+          <span style={{ fontSize: '13px', color: '#9ca3af' }}>{filteredProducts.length} résultat(s)</span>
+        )}
+      </div>
+
+      {/* Promotions */}
+      {soldes.length > 0 && (
+        <Section title="🔥 Promotions" titleColor="#dc2626" icon={<Flame size={20} />}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+            {soldes.map(product => (
+              <ProductCard key={product._id} product={product} onAdd={addToCart} onLike={likeProduct} getPrice={getPrice} isPromo />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* Recommendations */}
+      {recommendations.length > 0 && (
+        <Section title="✨ Recommandés pour vous" titleColor="#059669" icon={<Sparkles size={20} />}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+            {recommendations.map(product => (
+              <ProductCard key={product._id} product={product} onAdd={addToCart} onLike={likeProduct} getPrice={getPrice} isRec />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* Nearby */}
+      {nearby.length > 0 && (
+        <Section title="📍 Près de chez vous" titleColor="#8b5cf6" icon={<MapPin size={20} />}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+            {nearby.map(product => (
+              <ProductCard key={product._id} product={product} onAdd={addToCart} onLike={likeProduct} getPrice={getPrice} isNearby />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* All Products */}
+      <Section title={`Tous les produits (${filteredProducts.length})`} titleColor="#374151">
+        {filteredProducts.length === 0 ? (
+          <p style={{ textAlign: 'center', color: '#9ca3af', padding: '40px', fontSize: '15px' }}>Aucun produit trouvé pour "{searchTerm}"</p>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+            {filteredProducts.map(product => (
+              <ProductCard key={product._id} product={product} onAdd={addToCart} onLike={likeProduct} getPrice={getPrice} />
+            ))}
+          </div>
+        )}
+      </Section>
+    </div>
+  );
+};
+
+const Section = ({ title, titleColor, icon, children }) => (
+  <motion.section
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    style={{ marginBottom: '36px' }}
+  >
+    <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '16px', paddingLeft: '4px', color: titleColor, display: 'flex', alignItems: 'center', gap: '8px' }}>
+      {icon} {title}
+    </h2>
+    {children}
+  </motion.section>
+);
+
+const PRODUCT_IMAGE_META = {
+  dog: { icon: '🐕', label: 'Chien', from: '#fef3c7', to: '#f59e0b' },
+  cat: { icon: '🐈', label: 'Chat', from: '#ede9fe', to: '#8b5cf6' },
+  bird: { icon: '🐦', label: 'Oiseau', from: '#dbeafe', to: '#2563eb' },
+  fish: { icon: '🐟', label: 'Poisson', from: '#cffafe', to: '#0891b2' },
+  other: { icon: '🐾', label: 'Petfood', from: '#dcfce7', to: '#16a34a' },
+};
+
+const productFallbackImage = (product) => {
+  const meta = PRODUCT_IMAGE_META[product.animalType] || PRODUCT_IMAGE_META.other;
+  const title = (product.name || meta.label).slice(0, 28);
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="600" height="360" viewBox="0 0 600 360">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="${meta.from}"/>
+          <stop offset="1" stop-color="${meta.to}"/>
+        </linearGradient>
+      </defs>
+      <rect width="600" height="360" rx="32" fill="url(#g)"/>
+      <circle cx="500" cy="70" r="90" fill="rgba(255,255,255,0.18)"/>
+      <circle cx="88" cy="300" r="120" fill="rgba(255,255,255,0.14)"/>
+      <text x="300" y="155" text-anchor="middle" font-size="86">${meta.icon}</text>
+      <text x="300" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="white">${title}</text>
+      <text x="300" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="600" fill="rgba(255,255,255,0.85)">PetfoodTN Premium</text>
+    </svg>
+  `;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+};
+
+const getProductImage = (product) => product.imageUrl || product.image || productFallbackImage(product);
+
+const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearby }) => {
+  const discount = product.discount || 0;
+  const finalPrice = getPrice(product);
+
+  return (
+    <motion.div
+      whileHover={{ y: -6, scale: 1.02 }}
+      transition={{ type: 'spring', stiffness: 300 }}
+      style={{
+        background: 'white',
+        borderRadius: '20px',
+        overflow: 'hidden',
+        border: `2px solid ${isPromo ? '#fca5a5' : isRec ? '#6ee7b7' : isNearby ? '#c4b5fd' : '#e5e7eb'}`,
+        boxShadow: isPromo ? '0 8px 24px rgba(220,38,38,0.12)' : isRec ? '0 8px 24px rgba(5,150,105,0.12)' : isNearby ? '0 8px 24px rgba(139,92,246,0.12)' : '0 4px 12px rgba(0,0,0,0.06)',
+        transition: 'box-shadow 0.3s',
+      }}
+    >
+      <div style={{ position: 'relative', overflow: 'hidden' }}>
+        <motion.img
+          whileHover={{ scale: 1.08 }}
+          transition={{ duration: 0.4 }}
+          src={getProductImage(product)}
+          alt={product.name}
+          style={{ width: '100%', height: '180px', objectFit: 'cover', display: 'block' }}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = productFallbackImage(product);
+          }}
+        />
+        {discount > 0 && (
+          <span style={{
+            position: 'absolute',
+            top: '10px',
+            left: '10px',
+            background: '#ef4444',
+            color: 'white',
+            padding: '4px 12px',
+            borderRadius: '20px',
+            fontSize: '12px',
+            fontWeight: 800,
+            boxShadow: '0 2px 8px rgba(239,68,68,0.3)',
+          }}>
+            -{discount}%
+          </span>
+        )}
+        {isNearby && product.distance && (
+          <span style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            background: '#8b5cf6',
+            color: 'white',
+            padding: '4px 12px',
+            borderRadius: '20px',
+            fontSize: '12px',
+            fontWeight: 700,
+            boxShadow: '0 2px 8px rgba(139,92,246,0.3)',
+          }}>
+            <MapPin size={12} style={{ verticalAlign: 'middle', marginRight: '2px' }} /> {product.distance}km
+          </span>
+        )}
+        <button
+          onClick={() => onLike(product)}
+          style={{
+            position: 'absolute',
+            bottom: '10px',
+            right: '10px',
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            background: 'white',
+            border: 'none',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '16px',
+          }}
+        >
+          🤍
+        </button>
+      </div>
+
+      <div style={{ padding: '18px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>{product.name}</h3>
+        <p style={{ fontSize: '13px', color: '#6b7280', margin: '0 0 12px', lineHeight: '1.4', minHeight: '36px' }}>
+          {product.description || 'Nourriture premium pour animaux'}
+        </p>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+          <span style={{ fontSize: '20px', fontWeight: 800, color: '#059669' }}>{finalPrice} DT</span>
+          {discount > 0 && (
+            <span style={{ fontSize: '14px', color: '#9ca3af', textDecoration: 'line-through' }}>{product.price} DT</span>
+          )}
+        </div>
+
+        {product.recommendedReason && (
+          <p style={{
+            fontSize: '12px',
+            color: '#6b7280',
+            fontStyle: 'italic',
+            margin: '0 0 12px',
+            padding: '4px 10px',
+            background: isRec ? 'rgba(5,150,105,0.08)' : 'rgba(139,92,246,0.08)',
+            borderRadius: '8px',
+            display: 'inline-block',
+          }}>
+            {product.recommendedReason}
+          </p>
+        )}
+
+        <button
+          onClick={() => onAdd(product)}
+          disabled={!product.stock}
+          style={{
+            width: '100%',
+            padding: '12px',
+            border: 'none',
+            borderRadius: '12px',
+            color: 'white',
+            fontWeight: 700,
+            fontSize: '14px',
+            cursor: product.stock ? 'pointer' : 'not-allowed',
+            background: product.stock ? (isPromo ? '#dc2626' : '#10b981') : '#9ca3af',
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+          }}
+        >
+          <ShoppingCart size={16} />
+          {product.stock ? '🛒 Ajouter' : '❌ Rupture'}
+        </button>
+      </div>
+    </motion.div>
+  );
+};
+
+export default ClientProductsPage;
