@@ -44,9 +44,15 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (!error.response) {
-      const msg = 'Backend unreachable (network error). Vérifie backend sur http://localhost:5001';
+      const msg = 'Backend injoignable. Démarrez le backend (dossier backend) et vérifiez que le proxy Vite pointe vers le même port que PORT dans backend/.env (ex. http://127.0.0.1:5002).';
       console.error(msg, error);
       error.isBackendOffline = true;
+      error.backendErrorMessage = msg;
+    } else if (error.response?.status === 502 || error.response?.status === 503) {
+      const msg =
+        'Passerelle API (502/503) : le proxy Vite ne joint pas le backend. Vérifiez VITE_API_PROXY_TARGET ou le PORT dans backend/.env, puis relancez npm run dev.';
+      console.error(msg, error.config?.url);
+      error.isBadGateway = true;
       error.backendErrorMessage = msg;
     } else if (error.response?.status === 404) {
       console.error(`API 404: ${error.config?.url} not found.`);

@@ -18,8 +18,25 @@ const VeterinaryPage = () => {
   const [expandedId, setExpandedId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Vet contact with client (demandes)
+  const [contactLoading, setContactLoading] = useState(false);
+  const [contactError, setContactError] = useState('');
+  const [contactSuccess, setContactSuccess] = useState('');
+  const [contactRequests, setContactRequests] = useState([]);
+
+  const [contactForm, setContactForm] = useState({
+    animalType: 'dog',
+    petName: '',
+    subject: '',
+    message: '',
+    preferredDate: '',
+  });
+
   useEffect(() => {
     fetchData();
+    // best-effort load requests if backend supports it
+    loadContactRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {
@@ -34,6 +51,17 @@ const VeterinaryPage = () => {
       console.error('Veterinary data error', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadContactRequests = async () => {
+    try {
+      // endpoint candidat (si existe)
+      const res = await api.get('/veterinary/contact/requests');
+      setContactRequests(Array.isArray(res.data) ? res.data : []);
+    } catch {
+      // fallback: rien à afficher si endpoint non dispo
+      setContactRequests([]);
     }
   };
 
@@ -55,6 +83,39 @@ const VeterinaryPage = () => {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const submitContactRequest = async (e) => {
+    e.preventDefault();
+    setContactError('');
+    setContactSuccess('');
+    setContactLoading(true);
+
+    try {
+      // endpoint candidat (si existe). Structure envoyée = simple et compatible.
+      const payload = {
+        animalType: contactForm.animalType,
+        petName: contactForm.petName || undefined,
+        subject: contactForm.subject,
+        message: contactForm.message,
+        preferredDate: contactForm.preferredDate || undefined,
+      };
+
+      await api.post('/veterinary/contact', payload);
+      setContactSuccess('Demande envoyée. Un vétérinaire vous contactera bientôt.');
+
+      // best-effort refresh list
+      await loadContactRequests();
+      setContactForm({ animalType: contactForm.animalType, petName: '', subject: '', message: '', preferredDate: '' });
+    } catch (error) {
+      // UI fallback si endpoint non implémenté côté backend
+      setContactError(
+        error?.response?.data?.error ||
+          "Impossible d'envoyer la demande pour le moment (endpoint vétérinaire de contact non disponible)."
+      );
+    } finally {
+      setContactLoading(false);
+    }
   };
 
   if (loading) {
@@ -96,6 +157,154 @@ const VeterinaryPage = () => {
         </button>
       </div>
 
+      {/* Veterinary contact section */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={styles.section}>
+        <h2 style={styles.sectionTitle}>💬 Vétérinaire : contact avec le client</h2>
+
+        <div style={{ background: 'white', borderRadius: 18, padding: 18, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
+          <form onSubmit={submitContactRequest} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <span style={styles.label}>Type d’animal</span>
+                <select
+                  value={contactForm.animalType}
+                  onChange={(e) => setContactForm((p) => ({ ...p, animalType: e.target.value }))}
+                  style={styles.input}
+                >
+                  <option value="dog">Chien</option>
+                  <option value="cat">Chat</option>
+                  <option value="bird">Oiseau</option>
+                  <option value="fish">Poisson</option>
+                  <option value="rabbit">Lapin</option>
+                  <option value="other">Autre</option>
+                </select>
+              </label>
+
+              <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <span style={styles.label}>Nom animal (optionnel)</span>
+                <input
+                  value={contactForm.petName}
+                  onChange={(e) => setContactForm((p) => ({ ...p, petName: e.target.value }))}
+                  placeholder="Ex: Rex / Mimi"
+                  style={styles.input}
+                />
+              </label>
+            </div>
+
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span style={styles.label}>Sujet</span>
+              <input
+                required
+                value={contactForm.subject}
+                onChange={(e) => setContactForm((p) => ({ ...p, subject: e.target.value }))}
+                placeholder="Ex: Contrôle / Aliment adapté / Symptômes"
+                style={styles.input}
+              />
+            </label>
+
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span style={styles.label}>Message</span>
+              <textarea
+                required
+                value={contactForm.message}
+                onChange={(e) => setContactForm((p) => ({ ...p, message: e.target.value }))}
+                placeholder="Décrivez la situation (symptômes, évolution, contraintes, etc.)"
+                style={{ ...styles.input, resize: 'vertical', minHeight: 110 }}
+              />
+            </label>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <span style={styles.label}>Date souhaitée (optionnel)</span>
+                <input
+                  type="date"
+                  value={contactForm.preferredDate}
+                  onChange={(e) => setContactForm((p) => ({ ...p, preferredDate: e.target.value }))}
+                  style={styles.input}
+                />
+              </label>
+
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', gap: 10 }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setContactForm({ animalType: contactForm.animalType, petName: '', subject: '', message: '', preferredDate: '' });
+                    setContactError('');
+                    setContactSuccess('');
+                  }}
+                  style={styles.secondaryBtn}
+                >
+                  Effacer
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={contactLoading}
+                  style={{
+                    ...styles.primaryBtn,
+                    opacity: contactLoading ? 0.7 : 1,
+                    cursor: contactLoading ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {contactLoading ? 'Envoi...' : 'Envoyer au vétérinaire'}
+                </button>
+              </div>
+            </div>
+
+            {contactError ? <div style={styles.errorBox}>{contactError}</div> : null}
+            {contactSuccess ? <div style={styles.successBox}>{contactSuccess}</div> : null}
+          </form>
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <h3 style={{ fontWeight: 900, margin: '0 0 12px', fontSize: 16 }}>Dernières demandes</h3>
+          {contactRequests.length === 0 ? (
+            <div style={styles.infoBox}>
+              Aucune demande trouvée. Envoyez une demande pour démarrer la conversation.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {contactRequests.slice(0, 6).map((r) => (
+                <div key={r._id || r.id} style={{ background: '#fafafa', border: '1px solid #f3f4f6', borderRadius: 14, padding: 14 }}>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <div style={{ width: 34, height: 34, borderRadius: 12, background: 'rgba(230,126,34,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
+                      🩺
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 900, color: '#111827', marginBottom: 4, fontSize: 14 }}>{r.subject || 'Demande'}</div>
+                      <div style={{ color: '#6b7280', fontSize: 13, marginBottom: 6, lineHeight: 1.4 }}>
+                        <strong>Animal :</strong>{' '}
+                        {r.petName ? `${r.animalType || ''} • ${r.petName}` : (r.animalType || '')}
+                      </div>
+                      <div style={{ color: '#374151', fontSize: 13, whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{r.message || ''}</div>
+                      <div style={{ marginTop: 8, color: '#9ca3af', fontSize: 12 }}>
+                        {r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR') : ''}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+
+      {/* Conseils santé (section ajoutée) */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={styles.section}>
+        <h2 style={styles.sectionTitle}>✅ Conseils santé (rapides)</h2>
+        <div style={styles.staticAdviceBox}>
+          <ul style={styles.adviceList}>
+            <li>Surveillez l’appétit, l’énergie et la prise de boisson : tout changement peut être un signal.</li>
+            <li>Respectez les doses de médicaments et évitez l’automédication sans avis vétérinaire.</li>
+            <li>Gardez les vaccins à jour (calendrier) et notez les dates de traitements.</li>
+            <li>En cas de symptômes persistants (vomissements, diarrhée, léthargie, douleur), contactez rapidement un vétérinaire.</li>
+          </ul>
+          <div style={styles.adviceDisclaimer}>
+            <strong>Note :</strong> Ces conseils sont informatifs et ne remplacent pas un diagnostic vétérinaire.
+          </div>
+        </div>
+      </motion.div>
+
       {/* Weight History Mini-Chart */}
       {Object.keys(weightHistory).length > 0 && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={styles.section}>
@@ -135,6 +344,7 @@ const VeterinaryPage = () => {
       )}
 
       {/* Upcoming Visits */}
+
       {upcoming.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={styles.section}>
           <h2 style={styles.sectionTitle}>📅 Prochaines visites</h2>
@@ -312,6 +522,25 @@ const styles = {
   detailLabel: { fontSize: '12px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' },
   detailText: { fontSize: '14px', color: '#374151', lineHeight: 1.5 },
   medicationItem: { display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 0', fontSize: '13px', color: '#4b5563' },
+
+  // Contact form styles
+  label: { fontSize: 13, fontWeight: 800, color: '#111827' },
+  input: { width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #e5e7eb', fontSize: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' },
+  primaryBtn: { padding: '12px 18px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #e67e22, #d35400)', color: 'white', fontWeight: 900, boxShadow: '0 10px 30px rgba(211,84,0,0.18)' },
+  secondaryBtn: { padding: '12px 18px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.1)', background: 'white', color: '#111827', fontWeight: 900 },
+  errorBox: { background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#b91c1c', fontWeight: 800, padding: 12, borderRadius: 14 },
+  successBox: { background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)', color: '#065f46', fontWeight: 800, padding: 12, borderRadius: 14 },
+
+  // Static advice section
+  staticAdviceBox: {
+    background: 'linear-gradient(135deg, rgba(230,126,34,0.10) 0%, rgba(39,174,96,0.06) 100%)',
+    borderRadius: 18,
+    padding: 16,
+    border: '1px solid rgba(0,0,0,0.04)',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
+  },
+  adviceList: { margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 10, color: '#374151', fontSize: 14, lineHeight: 1.5 },
+  adviceDisclaimer: { marginTop: 12, background: 'rgba(230,126,34,0.08)', border: '1px solid rgba(230,126,34,0.18)', padding: 12, borderRadius: 14, color: '#92400e', fontSize: 13, fontWeight: 700 },
 };
 
 export default VeterinaryPage;

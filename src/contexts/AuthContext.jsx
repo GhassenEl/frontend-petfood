@@ -87,6 +87,15 @@ export const AuthProvider = ({ children }) => {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       return { success: true, user };
     } catch (error) {
+      const st = error.response?.status;
+      if (!error.response || st === 502 || st === 503) {
+        return {
+          success: false,
+          error:
+            error.backendErrorMessage ||
+            'Le serveur API ne répond pas (502). Lancez le backend sur le port indiqué dans backend/.env et vérifiez VITE_API_PROXY_TARGET dans le frontend.',
+        };
+      }
       return { success: false, error: error.response?.data?.error || error.response?.data?.message || error.message || 'Erreur login' };
     }
   };
@@ -101,6 +110,15 @@ export const AuthProvider = ({ children }) => {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       return { success: true, user };
     } catch (error) {
+      const st = error.response?.status;
+      if (!error.response || st === 502 || st === 503) {
+        return {
+          success: false,
+          error:
+            error.backendErrorMessage ||
+            'Le serveur API ne répond pas. Vérifiez que le backend tourne et que le proxy Vite (VITE_API_PROXY_TARGET) correspond au PORT du backend.',
+        };
+      }
       return { success: false, error: error.response?.data?.error || error.response?.data?.message || error.message || 'Erreur register' };
     }
   };

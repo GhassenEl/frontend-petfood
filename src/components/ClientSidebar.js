@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import NotificationBell from './NotificationBell';
+import { useTheme } from '../contexts/ThemeContext';
 
 const petEmojis = {
   dog: '🐶',
@@ -19,7 +20,8 @@ const petLabels = {
   other: 'Autre'
 };
 
-const ClientSidebar = ({ onLogout }) => {
+const ClientSidebar = ({ onLogout, onNavigate }) => {
+  const { isDark, toggleDark } = useTheme();
   const [sidebarImageError, setSidebarImageError] = useState(false);
   const navigate = useNavigate();
   const [profile, setProfile] = useState({
@@ -66,6 +68,8 @@ const ClientSidebar = ({ onLogout }) => {
     {
       title: '🐾 Services',
       items: [
+        { id: '__open-chat__', label: 'Assistant en ligne', icon: '💬', action: 'open-chat' },
+        { id: 'smart-food-agent', label: 'Régime IA', icon: '🧑‍⚕️' },
         { id: 'pet-advice', label: 'Conseils', icon: '💡' },
         { id: 'veterinary', label: 'Vétérinaire', icon: '🩺' },
         { id: 'store-locator', label: 'Magasins', icon: '📍' },
@@ -75,8 +79,8 @@ const ClientSidebar = ({ onLogout }) => {
     {
       title: '⚙️ Compte',
       items: [
-{ id: 'client-profile', label: 'Mon Profil', icon: '👤' },
-
+        { id: 'client-profile', label: 'Mon Profil', icon: '👤' },
+        { id: 'change-password', label: 'Mot de passe', icon: '🔐' },
       ]
     }
   ];
@@ -85,7 +89,7 @@ const ClientSidebar = ({ onLogout }) => {
   const petLabel = petLabels[profile.petType] || null;
 
   return (
-    <aside className="admin-sidebar" style={{ display: 'flex', flexDirection: 'column' }}>
+    <aside className="admin-sidebar" style={{ display: 'flex', flexDirection: 'column' }} aria-label="Navigation client">
       {/* Brand Header */}
       <div style={{
         padding: '20px',
@@ -193,23 +197,48 @@ const ClientSidebar = ({ onLogout }) => {
             <p className="admin-sidebar-section-title animate-fade-in" style={{ animationDelay: `${idx * 0.1}s` }}>
               {section.title}
             </p>
-            {section.items.map(item => (
-              <NavLink
-                key={item.id}
-                to={`/${item.id}`}
-                className={({ isActive }) =>
-                  `admin-sidebar-item ${isActive ? 'active' : ''} animate-slide-left`
-                }
-                style={({ isActive }) => ({
-                  textDecoration: 'none',
-                  width: '100%',
-                  boxSizing: 'border-box',
-                })}
-              >
-                <span className="icon">{item.icon}</span>
-                <span>{item.label}</span>
-              </NavLink>
-            ))}
+            {section.items.map((item) =>
+              item.action === 'open-chat' ? (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="admin-sidebar-item animate-slide-left"
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    border: 'none',
+                    background: 'transparent',
+                    font: 'inherit',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent('petfood:open-chat'));
+                    onNavigate?.();
+                  }}
+                >
+                  <span className="icon">{item.icon}</span>
+                  <span>{item.label}</span>
+                </button>
+              ) : (
+                <NavLink
+                  key={item.id}
+                  to={`/${item.id}`}
+                  onClick={() => onNavigate?.()}
+                  className={({ isActive }) =>
+                    `admin-sidebar-item ${isActive ? 'active' : ''} animate-slide-left`
+                  }
+                  style={({ isActive }) => ({
+                    textDecoration: 'none',
+                    width: '100%',
+                    boxSizing: 'border-box',
+                  })}
+                >
+                  <span className="icon">{item.icon}</span>
+                  <span>{item.label}</span>
+                </NavLink>
+              )
+            )}
           </div>
         ))}
       </nav>
@@ -223,6 +252,16 @@ const ClientSidebar = ({ onLogout }) => {
         gap: '8px',
       }}>
         <button
+          type="button"
+          onClick={toggleDark}
+          className="btn btn-outline"
+          style={{ width: '100%', justifyContent: 'flex-start', padding: '10px 14px' }}
+        >
+          <span>{isDark ? '☀️' : '🌙'}</span>
+          <span>{isDark ? 'Mode clair' : 'Mode sombre'}</span>
+        </button>
+        <button
+          type="button"
           onClick={onLogout}
           className="btn btn-danger"
           style={{ width: '100%', justifyContent: 'flex-start', padding: '10px 14px' }}

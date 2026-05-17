@@ -1,8 +1,13 @@
-import { defineConfig, transformWithOxc } from 'vite'
+import { defineConfig, loadEnv, transformWithOxc } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
-export default defineConfig({
+/** Doit correspondre à `PORT` dans `backend/.env` (souvent 5002). Surcharge : `VITE_API_PROXY_TARGET` dans `.env`. */
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:5002'
+
+  return {
   plugins: [
     {
       name: 'load-js-files-as-jsx',
@@ -56,14 +61,13 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5002',
+        target: apiProxyTarget,
         changeOrigin: true,
         secure: false,
-        // Helps avoid Vite proxy returning 502 when backend closes connection
         configure: (proxyServer) => {
           proxyServer.on('error', (err) => {
-            console.error('Vite proxy /api error:', err);
-          });
+            console.error(`Vite proxy /api -> ${apiProxyTarget} error:`, err.message)
+          })
         },
       },
       '/fastapi': {
@@ -76,5 +80,6 @@ export default defineConfig({
   css: {
     postcss: './postcss.config.js',
   },
-})
+  }
+});
 

@@ -1,5 +1,12 @@
-- [ ] Fix backend startup: set required env vars (JWT_SECRET, MONGODB_USER, MONGODB_PASSWORD, MONGODB_CLUSTER OR MONGO_URI)
-- [ ] Ensure backend runs on a free port (5002)
-- [ ] Confirm frontend can reach backend (/api) and platform loads
-- [ ] Clean up any port conflicts for Vite (3000/3001/3002)
+# TODO
+
+## Vet contact fix (crash)
+- [x] Add backend routes for `GET /api/veterinary/contact/requests` and `POST /api/veterinary/contact`
+
+- [x] Implement controller handlers (demo/in-memory storage)
+- [x] Update backend veterinary routes to register those endpoints
+- [x] Keep response schema compatible with `src/pages/VeterinaryPage.js`
+
+- [x] Smoke test: open `/veterinary`, send a request, verify list refresh
+
 

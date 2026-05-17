@@ -23,6 +23,7 @@ import ClientProfilePage from './pages/ClientProfilePage';
 import ClientInvoicesPage from './pages/ClientInvoicesPage';
 import ClientHistoryPage from './pages/ClientHistoryPage';
 import ClientPetAdvicePage from './pages/ClientPetAdvicePage';
+import SmartFoodAgentPage2 from './pages/SmartFoodAgentPage2.js';
 import ContactPage from './pages/ContactPage';
 import StoreLocatorPage from './pages/StoreLocatorPage';
 import VeterinaryPage from './pages/VeterinaryPage';
@@ -55,7 +56,14 @@ const App = () => {
   const { user, loading } = useAuth();
   const userHome = homeByRole[user?.role] || '/';
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="app-auth-loading" role="status" aria-live="polite">
+        <div className="app-auth-loading__mark" aria-hidden>🐾</div>
+        <p className="app-auth-loading__text">Chargement de PetfoodTN…</p>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -89,6 +97,16 @@ const App = () => {
       <Route path="/client-invoices" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientInvoicesPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-history" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientHistoryPage /></ClientLayout></RoleRoute>} />
       <Route path="/pet-advice" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetAdvicePage /></ClientLayout></RoleRoute>} />
+      <Route
+        path="/smart-food-agent"
+        element={
+          <RoleRoute user={user} roles={['client']}>
+            <ClientLayout>
+              <SmartFoodAgentPage2 />
+            </ClientLayout>
+          </RoleRoute>
+        }
+      />
       <Route path="/contact" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ContactPage /></ClientLayout></RoleRoute>} />
       <Route path="/store-locator" element={<RoleRoute user={user} roles={['client']}><ClientLayout><StoreLocatorPage /></ClientLayout></RoleRoute>} />
       <Route path="/veterinary" element={<RoleRoute user={user} roles={['client']}><ClientLayout><VeterinaryPage /></ClientLayout></RoleRoute>} />

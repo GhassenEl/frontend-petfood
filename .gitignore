@@ -51,3 +51,6 @@ test-results/
 # Backup files
 *.bak
 *.backup
+
+# Auto-generated agent rules (personalized per developer)
+.brainsync/agent-rules.md

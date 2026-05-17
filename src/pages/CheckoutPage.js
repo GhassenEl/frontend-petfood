@@ -27,6 +27,7 @@ const CheckoutForm = ({ cart, totalCart, onPlaceOrder, onClose }) => {
   const [phone, setPhone] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [clientSecret, setClientSecret] = useState(null);
+  const [stripeDemo, setStripeDemo] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState('idle'); // idle, processing, succeeded, error
 
   useEffect(() => {
@@ -42,8 +43,11 @@ const CheckoutForm = ({ cart, totalCart, onPlaceOrder, onClose }) => {
         currency: 'tnd'
       });
       setClientSecret(res.data.clientSecret);
+      setStripeDemo(!!res.data.demo);
     } catch (error) {
       console.error('Payment intent error:', error);
+      setClientSecret(null);
+      setStripeDemo(false);
     }
   };
 
@@ -56,27 +60,52 @@ const CheckoutForm = ({ cart, totalCart, onPlaceOrder, onClose }) => {
     setLoading(true);
     setPaymentStatus('processing');
 
-    try {
-      if (paymentMethod === 'card' && stripe && elements) {
-        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-          payment_method: {
-            card: elements.getElement(CardElement),
-            billing_details: {
-              name: address,
-              phone: phone,
-            },
-          }
-        });
+    let cardPaid = false;
 
-        if (error) {
+    try {
+      if (paymentMethod === 'card') {
+        if (stripeDemo) {
+          cardPaid = true;
+          setPaymentStatus('succeeded');
+        } else if (stripe && elements && clientSecret) {
+          const cardEl = elements.getElement(CardElement);
+          if (!cardEl) {
+            window.alert('Saisissez les informations de carte ou réessayez.');
+            setPaymentStatus('error');
+            setLoading(false);
+            return;
+          }
+          const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: {
+              card: cardEl,
+              billing_details: {
+                name: address,
+                phone: phone,
+              },
+            }
+          });
+
+          if (error) {
+            setPaymentStatus('error');
+            window.alert(error.message);
+            setLoading(false);
+            return;
+          }
+
+          if (paymentIntent?.status === 'succeeded') {
+            cardPaid = true;
+            setPaymentStatus('succeeded');
+          } else {
+            setPaymentStatus('error');
+            window.alert(`Paiement incomplet (statut : ${paymentIntent?.status || 'inconnu'}).`);
+            setLoading(false);
+            return;
+          }
+        } else {
           setPaymentStatus('error');
-          window.alert(error.message);
+          window.alert('Paiement par carte indisponible (clé Stripe ou intent manquant).');
           setLoading(false);
           return;
-        }
-
-        if (paymentIntent.status === 'succeeded') {
-          setPaymentStatus('succeeded');
         }
       }
 
@@ -87,7 +116,7 @@ const CheckoutForm = ({ cart, totalCart, onPlaceOrder, onClose }) => {
         phone,
         items: cart,
         total: totalCart,
-        paid: paymentMethod === 'card'
+        paid: cardPaid
       });
 
     } catch (error) {
@@ -354,7 +383,7 @@ const CheckoutForm = ({ cart, totalCart, onPlaceOrder, onClose }) => {
         </button>
         <button
           onClick={handleCheckout}
-          disabled={loading || !address || !phone || (paymentMethod === 'card' && !stripe)}
+          disabled={loading || !address || !phone || (paymentMethod === 'card' && !stripeDemo && (!stripe || !clientSecret))}
           style={{
             padding: '14px 32px',
             background: loading ? '#9ca3af' : 'linear-gradient(135deg, #e67e22, #d35400)',

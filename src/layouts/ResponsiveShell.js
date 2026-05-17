@@ -1,0 +1,65 @@
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
+
+/**
+ * En-tête mobile + panneau latéral coulissant pour les trois plateformes (client / admin / livreur).
+ */
+const ResponsiveShell = ({ children, sidebar, roleBadge, className = '' }) => {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location.pathname]);
+
+  const closeNav = () => setMobileNavOpen(false);
+  const toggleNav = () => setMobileNavOpen((o) => !o);
+
+  return (
+    <div
+      className={`workspace flex platform-workspace ${mobileNavOpen ? 'platform-workspace--nav-open' : ''} ${className}`.trim()}
+    >
+      <a href="#contenu-principal" className="skip-to-content">
+        Aller au contenu
+      </a>
+
+      <header className="platform-mobile-header">
+        <button
+          type="button"
+          className="platform-mobile-menu-btn"
+          onClick={toggleNav}
+          aria-expanded={mobileNavOpen}
+          aria-controls="platform-sidebar-panel"
+        >
+          {mobileNavOpen ? <X size={22} strokeWidth={2.25} aria-hidden /> : <Menu size={22} strokeWidth={2.25} aria-hidden />}
+          <span className="sr-only">{mobileNavOpen ? 'Fermer le menu' : 'Ouvrir le menu'}</span>
+        </button>
+        {roleBadge ? (
+          <span className="platform-mobile-role" aria-hidden="true">
+            {roleBadge}
+          </span>
+        ) : null}
+      </header>
+
+      {mobileNavOpen ? (
+        <button
+          type="button"
+          className="platform-sidebar-backdrop"
+          aria-label="Fermer le menu de navigation"
+          onClick={closeNav}
+        />
+      ) : null}
+
+      <div id="platform-sidebar-panel" className="platform-sidebar-panel">
+        {typeof sidebar === 'function' ? sidebar(closeNav) : sidebar}
+      </div>
+
+      <main id="contenu-principal" className="main-area main-area--platform" tabIndex={-1}>
+        {children}
+      </main>
+    </div>
+  );
+};
+
+export default ResponsiveShell;

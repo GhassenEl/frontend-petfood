@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
+import { useTheme } from '../contexts/ThemeContext';
 
-const LivreurSidebar = ({ onLogout, user }) => {
+const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
+  const { isDark, toggleDark } = useTheme();
   const [sidebarImageError, setSidebarImageError] = useState(false);
   const sections = [
     {
@@ -23,6 +25,7 @@ const LivreurSidebar = ({ onLogout, user }) => {
     {
       title: '💬 Communications',
       items: [
+        { id: '__open-chat__', label: 'Assistant en ligne', icon: '🤖', action: 'open-chat' },
         { id: 'messages', label: 'Messages', icon: '💬' },
       ]
     },
@@ -36,7 +39,7 @@ const LivreurSidebar = ({ onLogout, user }) => {
   ];
 
   return (
-    <aside className="livreur-sidebar">
+    <aside className="livreur-sidebar" aria-label="Navigation livreur">
       {/* Brand Header */}
       <div className="sidebar-header">
         <div className="sidebar-logo">
@@ -78,18 +81,43 @@ const LivreurSidebar = ({ onLogout, user }) => {
             <p className="admin-sidebar-section-title">
               {section.title}
             </p>
-            {section.items.map(item => (
-              <NavLink
-                key={item.id}
-                to={`/livreur/${item.id}`}
-                className={({ isActive }) =>
-                  `admin-sidebar-item ${isActive ? 'active' : ''}`
-                }
-              >
-                <span className="icon">{item.icon}</span>
-                <span>{item.label}</span>
-              </NavLink>
-            ))}
+            {section.items.map((item) =>
+              item.action === 'open-chat' ? (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="admin-sidebar-item"
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    border: 'none',
+                    background: 'transparent',
+                    font: 'inherit',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent('petfood:open-chat'));
+                    onNavigate?.();
+                  }}
+                >
+                  <span className="icon">{item.icon}</span>
+                  <span>{item.label}</span>
+                </button>
+              ) : (
+                <NavLink
+                  key={item.id}
+                  to={`/livreur/${item.id}`}
+                  onClick={() => onNavigate?.()}
+                  className={({ isActive }) =>
+                    `admin-sidebar-item ${isActive ? 'active' : ''}`
+                  }
+                >
+                  <span className="icon">{item.icon}</span>
+                  <span>{item.label}</span>
+                </NavLink>
+              )
+            )}
           </div>
         ))}
       </nav>
@@ -97,6 +125,16 @@ const LivreurSidebar = ({ onLogout, user }) => {
       {/* Bottom Actions */}
       <div className="sidebar-footer">
         <button
+          type="button"
+          onClick={toggleDark}
+          className="btn btn-outline"
+          style={{ width: '100%', justifyContent: 'flex-start', padding: '12px 14px', marginBottom: '8px' }}
+        >
+          <span>{isDark ? '☀️' : '🌙'}</span>
+          <span>{isDark ? 'Mode clair' : 'Mode sombre'}</span>
+        </button>
+        <button
+          type="button"
           onClick={onLogout}
           className="btn btn-danger"
         >

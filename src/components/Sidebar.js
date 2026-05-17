@@ -1,23 +1,18 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Sidebar = ({ onNavigate, onLogout, user }) => {
   const [sidebarImageError, setSidebarImageError] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
-
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    if (!isDarkMode) {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-  };
+  const { isDark, toggleDark } = useTheme();
 
   const sections = [
+    {
+      title: '🤖 Assistant',
+      items: [{ id: '__open-chat__', label: 'Chat assistant', icon: '💬', action: 'open-chat' }],
+    },
     {
       title: '📊 Analytics',
       items: [
@@ -51,7 +46,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
   ];
 
   return (
-    <aside className="admin-sidebar" style={{ display: 'flex', flexDirection: 'column' }}>
+    <aside className="admin-sidebar" style={{ display: 'flex', flexDirection: 'column' }} aria-label="Navigation administration">
       {/* Brand Header */}
       <div style={{
         padding: '20px',
@@ -128,24 +123,50 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
             <p className="admin-sidebar-section-title animate-fade-in" style={{ animationDelay: `${idx * 0.1}s` }}>
               {section.title}
             </p>
-            {section.items.map(item => (
-              <NavLink
-                key={item.id}
-                to={`/admin/${item.id}`}
-                onClick={() => onNavigate && onNavigate(item.id)}
-                className={({ isActive }) =>
-                  `admin-sidebar-item ${isActive ? 'active' : ''} animate-slide-left`
-                }
-                style={({ isActive }) => ({
-                  textDecoration: 'none',
-                  width: '100%',
-                  boxSizing: 'border-box',
-                })}
-              >
-                <span className="icon">{item.icon}</span>
-                <span>{item.label}</span>
-              </NavLink>
-            ))}
+            {section.items.map((item) =>
+              item.action === 'open-chat' ? (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="admin-sidebar-item animate-slide-left"
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    border: 'none',
+                    background: 'transparent',
+                    font: 'inherit',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent('petfood:open-chat'));
+                    onNavigate?.(item.id);
+                  }}
+                >
+                  <span className="icon">{item.icon}</span>
+                  <span>{item.label}</span>
+                </button>
+              ) : (
+                <NavLink
+                  key={item.id}
+                  to={`/admin/${item.id}`}
+                  onClick={() => {
+                    onNavigate?.(item.id);
+                  }}
+                  className={({ isActive }) =>
+                    `admin-sidebar-item ${isActive ? 'active' : ''} animate-slide-left`
+                  }
+                  style={({ isActive }) => ({
+                    textDecoration: 'none',
+                    width: '100%',
+                    boxSizing: 'border-box',
+                  })}
+                >
+                  <span className="icon">{item.icon}</span>
+                  <span>{item.label}</span>
+                </NavLink>
+              )
+            )}
           </div>
         ))}
       </nav>
@@ -159,12 +180,13 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         gap: '8px',
       }}>
         <button
-          onClick={toggleDarkMode}
+          type="button"
+          onClick={toggleDark}
           className="btn btn-outline"
           style={{ width: '100%', justifyContent: 'flex-start', padding: '10px 14px' }}
         >
-          <span>{isDarkMode ? '☀️' : '🌙'}</span>
-          <span>{isDarkMode ? 'Mode Clair' : 'Mode Sombre'}</span>
+          <span>{isDark ? '☀️' : '🌙'}</span>
+          <span>{isDark ? 'Mode clair' : 'Mode sombre'}</span>
         </button>
 
         <button
