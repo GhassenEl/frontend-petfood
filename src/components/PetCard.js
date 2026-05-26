@@ -2,8 +2,12 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Edit, Trash2 } from 'lucide-react';
 
-
 const animalEmojis = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐟', rabbit: '🐰', other: '🐾' };
+
+const getPetAvatarUrl = (pet) => {
+  const seed = `${pet.name || pet.type || 'pet'}-${pet.breed || 'portrait'}`.trim();
+  return `https://api.dicebear.com/6.x/adventurer/svg?seed=${encodeURIComponent(seed)}&backgroundType=gradientLinear&backgroundColor=F8FAFC,DBEAFE&radius=30`;
+};
 
 const PetCard = ({ pet, petIndex, onEdit, onDelete }) => {
   const handleEdit = () => onEdit(pet, petIndex);
@@ -16,8 +20,16 @@ const PetCard = ({ pet, petIndex, onEdit, onDelete }) => {
       className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6 border border-gray-100"
     >
       <div className="flex items-start gap-4 mb-4">
-        <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-2xl flex items-center justify-center text-2xl font-bold shadow-lg">
-          {animalEmojis[pet.type] || '🐾'}
+        <div className="w-16 h-16 rounded-2xl overflow-hidden bg-white shadow-lg flex items-center justify-center">
+          <img
+            src={getPetAvatarUrl(pet)}
+            alt={`Avatar humain de ${pet.name || pet.type}`}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = 'https://api.dicebear.com/6.x/adventurer/svg?seed=pet-default&backgroundType=gradientLinear&backgroundColor=F8FAFC,DBEAFE&radius=30';
+            }}
+          />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-xl font-bold text-gray-900 mb-1">{pet.name}</h3>

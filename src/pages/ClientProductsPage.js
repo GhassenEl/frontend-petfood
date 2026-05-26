@@ -48,24 +48,60 @@ const ClientProductsPage = () => {
     setLoading(false);
   };
 
+  const normalizeProduct = (p) => {
+    if (!p) return p;
+
+    const stockRaw = p.stock ?? p.quantity ?? p.availableStock ?? p.available ?? 0;
+    const discountRaw = p.discount ?? p.promoPercent ?? p.promo ?? 0;
+    const priceRaw = p.price ?? p.unitPrice ?? p.unit_price ?? 0;
+
+    return {
+      ...p,
+      stock: Number(stockRaw || 0),
+      discount: Number(discountRaw || 0),
+      price: Number(priceRaw || 0),
+      imageUrl: p.imageUrl ?? p.image ?? undefined,
+    };
+  };
+
+  const normalizeRecommendationsPayload = (raw) => {
+    if (!raw) return [];
+
+    // Possible shapes:
+    // - [{ product: {...}, reason: '...', score: ... }]
+    // - [{ ...product, reason: '...', score: ... }]
+    // - [{ product: {...} }, ...]
+    // - { recommendations: [...] }
+    const list = Array.isArray(raw) ? raw : (raw.recommendations || []);
+
+    return (list || []).map((d) => {
+      const product = d?.product ?? d;
+      return normalizeProduct({
+        ...product,
+        recommendedReason: d?.reason ?? d?.recommendedReason ?? d?.reasonText ?? undefined,
+        score: d?.score ?? d?.similarity ?? undefined,
+      });
+    });
+  };
+
   const fetchFastAPIRecommendations = async () => {
     try {
       const userRes = await api.get('/users/profile');
       const user = userRes.data;
-      
+
       const res = await fetch('/fastapi/recommendations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user._id || 'demo_user',
-          limit: 8
-        })
+          limit: 8,
+        }),
       });
-      
-      if (res.ok) {
-        const data = await res.json();
-        setRecommendations(data.map(d => ({ ...d.product, recommendedReason: d.reason, score: d.score })));
-      }
+
+      if (!res.ok) return;
+
+      const data = await res.json();
+      setRecommendations(normalizeRecommendationsPayload(data));
     } catch (err) {
       console.error('FastAPI error:', err);
     }
@@ -75,8 +111,27 @@ const ClientProductsPage = () => {
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const inStock = (p) => Number(p?.stock || 0) > 0;
+  const inStockFilteredProducts = filteredProducts.filter(inStock);
+  const inStockSoldes = soldes.filter(inStock);
+  const inStockRecommendations = recommendations.filter(inStock);
+  const inStockNearby = nearby.filter(inStock);
+
+
+  const getDiscountedPriceValue = (product) => {
+    const price = Number(product.price || 0);
+    const discount = Number(product.discount || 0);
+    return Number((price * (1 - discount / 100)).toFixed(2));
+  };
+
+  const getCartProduct = (product) => ({
+    ...product,
+    originalPrice: Number(product.price || 0),
+    price: getDiscountedPriceValue(product),
+  });
+
   const addToCart = (product) => {
-    window.dispatchEvent(new CustomEvent('addToCart', { detail: product }));
+    window.dispatchEvent(new CustomEvent('addToCart', { detail: getCartProduct(product) }));
     
     const viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
     if (!viewed.includes(product._id)) {
@@ -95,8 +150,7 @@ const ClientProductsPage = () => {
   };
 
   const getPrice = (product) => {
-    const discount = product.discount || 0;
-    return (product.price * (1 - discount / 100)).toFixed(2);
+    return getDiscountedPriceValue(product).toFixed(2);
   };
 
   if (loading) {
@@ -187,22 +241,36 @@ const ClientProductsPage = () => {
         )}
       </div>
 
+      {/* Produits sans remise */}
+      {inStockFilteredProducts.filter((p) => (p.discount || 0) === 0).length > 0 && (
+        <Section title="🛍️ Produits sans remise" titleColor="#374151" icon={<ShoppingCart size={20} />}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+            {inStockFilteredProducts
+              .filter((p) => (p.discount || 0) === 0)
+              .map((product) => (
+                <ProductCard key={product._id} product={product} onAdd={addToCart} onLike={likeProduct} getPrice={getPrice} />
+              ))}
+          </div>
+        </Section>
+      )}
+
       {/* Promotions */}
-      {soldes.length > 0 && (
+      {inStockSoldes.length > 0 && (
         <Section title="🔥 Promotions" titleColor="#dc2626" icon={<Flame size={20} />}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
-            {soldes.map(product => (
+            {inStockSoldes.map(product => (
               <ProductCard key={product._id} product={product} onAdd={addToCart} onLike={likeProduct} getPrice={getPrice} isPromo />
             ))}
           </div>
         </Section>
       )}
 
+
       {/* Recommendations */}
-      {recommendations.length > 0 && (
+      {inStockRecommendations.length > 0 && (
         <Section title="✨ Recommandés pour vous" titleColor="#059669" icon={<Sparkles size={20} />}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
-            {recommendations.map(product => (
+            {inStockRecommendations.map(product => (
               <ProductCard key={product._id} product={product} onAdd={addToCart} onLike={likeProduct} getPrice={getPrice} isRec />
             ))}
           </div>
@@ -210,10 +278,10 @@ const ClientProductsPage = () => {
       )}
 
       {/* Nearby */}
-      {nearby.length > 0 && (
+      {inStockNearby.length > 0 && (
         <Section title="📍 Près de chez vous" titleColor="#8b5cf6" icon={<MapPin size={20} />}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
-            {nearby.map(product => (
+            {inStockNearby.map(product => (
               <ProductCard key={product._id} product={product} onAdd={addToCart} onLike={likeProduct} getPrice={getPrice} isNearby />
             ))}
           </div>
@@ -221,17 +289,18 @@ const ClientProductsPage = () => {
       )}
 
       {/* All Products */}
-      <Section title={`Tous les produits (${filteredProducts.length})`} titleColor="#374151">
-        {filteredProducts.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#9ca3af', padding: '40px', fontSize: '15px' }}>Aucun produit trouvé pour "{searchTerm}"</p>
+      <Section title={`Tous les produits (${inStockFilteredProducts.length})`} titleColor="#374151">
+        {inStockFilteredProducts.length === 0 ? (
+          <p style={{ textAlign: 'center', color: '#9ca3af', padding: '40px', fontSize: '15px' }}>Aucun produit disponible pour l’instant (stock insuffisant).</p>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
-            {filteredProducts.map(product => (
+            {inStockFilteredProducts.map(product => (
               <ProductCard key={product._id} product={product} onAdd={addToCart} onLike={likeProduct} getPrice={getPrice} />
             ))}
           </div>
         )}
       </Section>
+
     </div>
   );
 };

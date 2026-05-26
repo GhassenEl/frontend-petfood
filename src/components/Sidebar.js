@@ -27,8 +27,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'invoices', label: 'Factures', icon: '🧾' },
         { id: 'products', label: 'Produits', icon: '🏷️' },
         { id: 'users', label: 'Utilisateurs', icon: '👥' },
-        { id: 'veterinary', label: 'Suivi Vétérinaire', icon: '🩺' },
-      ]
+        { id: 'veterinary', label: 'Suivi Vétérinaire', icon: '🩺' },        { id: 'events', label: 'Événements', icon: '📅' },      ]
     },
     {
       title: '💬 Feedback',

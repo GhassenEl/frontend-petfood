@@ -13,6 +13,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
         { id: 'dashboard', label: 'Tableau de bord', icon: '📊' },
         { id: 'orders', label: 'Commandes', icon: '📦' },
         { id: 'map', label: 'Carte', icon: '🗺️' },
+        { id: 'availability', label: 'Disponibilité', icon: '🟢' },
       ]
     },
     {

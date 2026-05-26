@@ -8,4 +8,3 @@
 - [ ] Ajouter logique d’affichage : si réponse contient demande validation véto => bouton “Contacter vétérinaire”
 - [ ] Ajouter navigation : lien dans `src/components/ClientSidebar.js` (et/ou Header)
 - [ ] Vérifier compilation `npm run dev` / `npm run build`
-

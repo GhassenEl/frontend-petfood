@@ -18,7 +18,18 @@ const CartModal = ({ cart, total, onClose, onCheckout }) => {
                                 <div key={index} style={styles.cartItem}>
                                     <div>
                                         <strong>{item.name}</strong>
-                                        <p style={styles.itemPrice}>{item.price} DT</p>
+                                        <span style={styles.quantity}>x{Number(item.quantity || 1)}</span>
+
+                                        <p style={styles.itemPrice}>
+
+                                            {Number(item.discount || 0) > 0 && item.originalPrice ? (
+                                                <>
+                                                    <span style={styles.originalPrice}>{item.originalPrice} DT</span>
+                                                    <span style={styles.discountBadge}>-{item.discount}%</span>
+                                                </>
+                                            ) : null}
+                                            <span>{Number(item.price || 0).toFixed(2)} DT</span>
+                                        </p>
                                     </div>
                                 </div>
                             ))}
@@ -90,6 +101,24 @@ const styles = {
     itemPrice: {
         fontSize: '12px',
         color: '#6b7280',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        flexWrap: 'wrap',
+    },
+    quantity: {
+        marginLeft: '8px',
+        color: '#6b7280',
+        fontSize: '12px',
+        fontWeight: 700,
+    },
+    originalPrice: {
+        color: '#9ca3af',
+        textDecoration: 'line-through',
+    },
+    discountBadge: {
+        color: '#dc2626',
+        fontWeight: 700,
     },
     cartTotal: {
         display: 'flex',

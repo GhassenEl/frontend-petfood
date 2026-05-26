@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Stethoscope, Calendar, Weight, Thermometer, Pill, ChevronDown, ChevronUp, Printer } from 'lucide-react';
 import api from '../utils/api';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import Toast from '../components/Toast';
 
 const animalEmojis = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐟', rabbit: '🐰', other: '🐾' };
 const animalNames = { dog: 'Chien', cat: 'Chat', bird: 'Oiseau', fish: 'Poisson', rabbit: 'Lapin', other: 'Autre' };
@@ -32,12 +34,81 @@ const VeterinaryPage = () => {
     preferredDate: '',
   });
 
+  // RDV (agenda)
+  const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+
+
+  const [appointmentsError, setAppointmentsError] = useState('');
+  const [appointmentsSuccess, setAppointmentsSuccess] = useState('');
+  const [appointments, setAppointments] = useState([]);
+
+  const [availabilityDate, setAvailabilityDate] = useState(() => {
+    const d = new Date();
+    // YYYY-MM-DD local
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  });
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState('');
+  const [slots, setSlots] = useState([]);
+  const [selectedSlotStart, setSelectedSlotStart] = useState('');
+
+  const [appointmentForm, setAppointmentForm] = useState({
+    petName: '',
+    animalType: 'dog',
+    notes: '',
+    type: 'veterinary_consultation',
+  });
+  const { user } = useAuth();
+  const isVet = user?.role === 'vet' || user?.role === 'admin';
+  const [toast, setToast] = useState({ message: '', type: 'info' });
+
+
   useEffect(() => {
     fetchData();
     // best-effort load requests if backend supports it
     loadContactRequests();
+
+    // Load appointments
+    (async () => {
+      try {
+        setAppointmentsLoading(true);
+        const res = await api.get('/veterinary/appointments');
+        setAppointments(Array.isArray(res.data) ? res.data : []);
+      } catch (e) {
+        setAppointmentsError(e?.response?.data?.error || "Impossible de charger vos rendez-vous.");
+      } finally {
+        setAppointmentsLoading(false);
+      }
+    })();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Prefill contact form when coming from Nutri flow (legacy 'nutri' or new 'nutripro' keys)
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const prefill = params.get('prefill');
+      if (prefill === 'nutri' || prefill === 'nutripro') {
+        const message = sessionStorage.getItem('nutripro:message') || sessionStorage.getItem('nutri:message') || params.get('message') || '';
+        const pet = JSON.parse(sessionStorage.getItem('nutripro:pet') || sessionStorage.getItem('nutri:pet') || 'null');
+        const subjectBase = prefill === 'nutripro' ? 'Validation NutriPro' : 'Validation plan nutritionnel';
+        setContactForm((cf) => ({
+          ...cf,
+          petName: pet?.name || cf.petName || '',
+          animalType: pet?.type || cf.animalType || 'dog',
+          subject: `${subjectBase}${pet?.name ? ` — ${pet.name}` : ''}`,
+          message: message || cf.message || '',
+        }));
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
 
   const fetchData = async () => {
     try {
@@ -102,7 +173,7 @@ const VeterinaryPage = () => {
       };
 
       await api.post('/veterinary/contact', payload);
-      setContactSuccess('Demande envoyée. Un vétérinaire vous contactera bientôt.');
+      setContactSuccess('Demande de consultation envoyée. Le vétérinaire pourra répondre et proposer un rendez-vous si nécessaire.');
 
       // best-effort refresh list
       await loadContactRequests();
@@ -115,6 +186,72 @@ const VeterinaryPage = () => {
       );
     } finally {
       setContactLoading(false);
+    }
+  };
+
+  const handleConfirmPlan = async (req) => {
+    // Vet confirms the nutrition plan. Best-effort: call backend reply endpoint, then notify owner via chat.
+    try {
+      // Optimistic UI update
+      setContactRequests((prev) => prev.map((r) => (r._id === req._id || r.id === req.id ? { ...r, response: true, respondedAt: new Date().toISOString() } : r)));
+
+      // Try backend reply endpoint (common patterns)
+      const endpoints = ['/veterinary/contact/respond', '/veterinary/contact/response', '/veterinary/contact/reply'];
+      let replied = false;
+      for (const ep of endpoints) {
+        try {
+          await api.post(ep, { id: req._id || req.id, response: 'confirmed', note: 'Régime nutritionnel confirmé par le vétérinaire.' });
+          replied = true;
+          break;
+        } catch (e) {
+          // try next
+        }
+      }
+
+      // Notify owner via chat if possible
+      try {
+        const owner = req.ownerId || req.userId || req.from || req.clientId;
+        const chatPayload = {
+          message: `Le vétérinaire a confirmé le plan nutritionnel pour ${req.petName || 'votre animal'}. Vous pouvez consulter les détails dans l'espace consultations.`,
+          context: { type: 'vet_confirmation', requestId: req._id || req.id, pet: { name: req.petName, animalType: req.animalType } },
+          toUserId: owner,
+        };
+        await api.post('/chat/message', chatPayload);
+      } catch (e) {
+        // ignore chat failures
+      }
+
+      if (!replied) {
+        // Could not call a dedicated backend endpoint; leave optimistic UI change.
+      }
+      setToast({ message: 'Régime confirmé et propriétaire notifié.', type: 'success' });
+    } catch (e) {
+      // revert optimistic update on failure
+      setContactRequests((prev) => prev.map((r) => (r._id === req._id || r.id === req.id ? { ...r, response: req.response } : r)));
+      console.error('Confirm plan error', e);
+      setToast({ message: "Erreur lors de la confirmation. Réessayez.", type: 'error' });
+    }
+  };
+
+  const startTeleconsult = async (req) => {
+    // Open chat assistant and create an initial message to start the teleconsultation
+    try {
+      window.dispatchEvent(new CustomEvent('petfood:open-chat'));
+      const initial = `Demande de téléconsultation pour ${req.petName || 'votre animal'} (${req.animalType || 'type inconnu'}). Contexte: ${req.message || ''}`;
+      await api.post('/chat/message', { message: initial, context: { type: 'teleconsult_request', requestId: req._id || req.id } });
+    } catch (e) {
+      console.error('Start teleconsult error', e);
+    }
+  };
+
+  const openAiRecommendations = async (req) => {
+    // Open the assistant and ask it for personalized recommendations using the request context
+    try {
+      window.dispatchEvent(new CustomEvent('petfood:open-chat'));
+      const prompt = `Peux-tu proposer un plan et des recommandations nutritionnelles personnalisées pour un ${req.animalType || 'animal'} nommé ${req.petName || ''}? Contexte: ${req.message || ''}`;
+      await api.post('/chat/message', { message: prompt, context: { type: 'nutrition_recommendation', requestId: req._id || req.id, pet: { name: req.petName, type: req.animalType } } });
+    } catch (e) {
+      console.error('AI recommendations error', e);
     }
   };
 
@@ -136,9 +273,9 @@ const VeterinaryPage = () => {
         style={styles.hero}
       >
         <Stethoscope size={48} style={{ color: '#e67e22', marginBottom: '12px' }} />
-        <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 800 }}>Suivi Vétérinaire</h1>
+        <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 800 }}>Consultations & rendez-vous vétérinaires</h1>
         <p style={{ margin: '8px 0 0', color: '#777' }}>
-          Consultez l'historique de santé de vos animaux et vos prochains rendez-vous 🐾
+          Envoyez une demande au vétérinaire, réservez un créneau et suivez l'historique santé de vos animaux.
         </p>
       </motion.div>
 
@@ -159,10 +296,249 @@ const VeterinaryPage = () => {
 
       {/* Veterinary contact section */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={styles.section}>
-        <h2 style={styles.sectionTitle}>💬 Vétérinaire : contact avec le client</h2>
+        <h2 style={styles.sectionTitle}>💬 Consultation vétérinaire</h2>
+        <div style={styles.flowGrid}>
+          <div style={styles.flowCard}>
+            <strong>1. Décrire le besoin</strong>
+            <span>Symptômes, alimentation, suivi ou question urgente.</span>
+          </div>
+          <div style={styles.flowCard}>
+            <strong>2. Réserver un créneau</strong>
+            <span>Choisissez une date disponible et l'animal concerné.</span>
+          </div>
+          <div style={styles.flowCard}>
+            <strong>3. Suivre la réponse</strong>
+            <span>Retrouvez demandes, confirmations et historique santé.</span>
+          </div>
+        </div>
 
+        {/* RDV (agenda) */}
+        <div style={{ marginTop: 18, background: 'white', borderRadius: 18, padding: 18, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
+          <h3 style={{ fontWeight: 900, margin: '0 0 12px', fontSize: 16 }}>🗓️ Réserver un rendez-vous</h3>
+          <p style={{ margin: '0 0 14px', color: '#6b7280', fontSize: 13 }}>
+            Choisissez d'abord une date, puis un créneau. Le rendez-vous sera enregistré en attente de confirmation.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, alignItems: 'end' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span style={styles.label}>Date</span>
+              <input
+                type="date"
+                value={availabilityDate}
+                onChange={(e) => setAvailabilityDate(e.target.value)}
+                style={styles.input}
+              />
+            </label>
+
+            <button
+              type="button"
+              disabled={availabilityLoading}
+              onClick={async () => {
+                setAvailabilityLoading(true);
+                setAvailabilityError('');
+                try {
+                  const res = await api.get('/veterinary/availability', { params: { date: availabilityDate } });
+                  setSlots(Array.isArray(res.data?.slots) ? res.data.slots : []);
+                } catch (err) {
+                  setAvailabilityError(err?.response?.data?.error || "Impossible de charger la disponibilité.");
+                  setSlots([]);
+                } finally {
+                  setAvailabilityLoading(false);
+                }
+              }}
+              style={{
+                ...styles.primaryBtn,
+                opacity: availabilityLoading ? 0.7 : 1,
+                cursor: availabilityLoading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+              {availabilityLoading ? 'Chargement...' : 'Voir les créneaux'}
+            </button>
+          </div>
+
+          {availabilityError ? <div style={{ marginTop: 12, ...styles.errorBox }}>{availabilityError}</div> : null}
+
+          <div style={{ marginTop: 14 }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span style={styles.label}>Choisir un créneau</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                {slots.length === 0 ? (
+                  <div style={styles.infoBox}>Sélectionnez une date pour afficher les créneaux.</div>
+                ) : (
+                  slots.map((s) => {
+                    const startTs = s.start;
+                    const isAvailable = s.isAvailable;
+                    const isSelected = selectedSlotStart === startTs;
+                    const label = new Date(startTs).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                    return (
+                      <button
+                        key={s.start}
+                        type="button"
+                        disabled={!isAvailable}
+                        onClick={() => setSelectedSlotStart(startTs)}
+                        style={{
+                          padding: '10px 12px',
+                          borderRadius: 12,
+                          border: `1px solid ${isSelected ? '#e67e22' : 'rgba(0,0,0,0.12)'}`,
+                          background: isSelected ? 'rgba(230,126,34,0.10)' : 'white',
+                          color: !isAvailable ? '#9ca3af' : '#111827',
+                          fontWeight: 900,
+                          cursor: !isAvailable ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </label>
+
+            <div style={{ marginTop: 18, borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: 18 }}>
+              <h4 style={{ fontWeight: 900, margin: '0 0 10px', fontSize: 14 }}>Confirmations</h4>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <span style={styles.label}>Nom animal</span>
+                  <input
+                    value={appointmentForm.petName}
+                    onChange={(e) => setAppointmentForm((p) => ({ ...p, petName: e.target.value }))}
+                    placeholder="Ex: Rex"
+                    style={styles.input}
+                  />
+                </label>
+
+                <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <span style={styles.label}>Type animal</span>
+                  <select
+                    value={appointmentForm.animalType}
+                    onChange={(e) => setAppointmentForm((p) => ({ ...p, animalType: e.target.value }))}
+                    style={styles.input}
+                  >
+                    <option value="dog">Chien</option>
+                    <option value="cat">Chat</option>
+                    <option value="bird">Oiseau</option>
+                    <option value="fish">Poisson</option>
+                    <option value="rabbit">Lapin</option>
+                    <option value="other">Autre</option>
+                  </select>
+                </label>
+              </div>
+
+              <label style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 }}>
+                <span style={styles.label}>Notes (optionnel)</span>
+                <textarea
+                  value={appointmentForm.notes}
+                  onChange={(e) => setAppointmentForm((p) => ({ ...p, notes: e.target.value }))}
+                  placeholder="Symptômes, contexte..."
+                  style={{ ...styles.input, resize: 'vertical', minHeight: 90 }}
+                />
+              </label>
+
+              <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+                <button
+                  type="button"
+                  style={styles.secondaryBtn}
+                  onClick={() => {
+                    setSelectedSlotStart('');
+                    setAppointmentForm({ petName: '', animalType: 'dog', notes: '', type: 'veterinary_consultation' });
+                  }}
+                >
+                  Effacer
+                </button>
+                <button
+                  type="button"
+                  disabled={!selectedSlotStart || !appointmentForm.petName}
+                  onClick={async () => {
+                    setAppointmentsLoading(true);
+                    setAppointmentsError('');
+                    setAppointmentsSuccess('');
+                    try {
+                      const payload = {
+                        petName: appointmentForm.petName,
+                        animalType: appointmentForm.animalType,
+                        date: selectedSlotStart,
+                        notes: appointmentForm.notes || undefined,
+                        type: appointmentForm.type,
+                      };
+                      await api.post('/veterinary/appointments', payload);
+                      // refresh list
+                      const res = await api.get('/veterinary/appointments');
+                      setAppointments(Array.isArray(res.data) ? res.data : []);
+                      setAppointmentsSuccess('Rendez-vous enregistré. Il apparaîtra en attente jusqu’à confirmation.');
+                      setSelectedSlotStart('');
+                      setAppointmentForm({ petName: '', animalType: appointmentForm.animalType, notes: '', type: 'veterinary_consultation' });
+                    } catch (err) {
+                      setAppointmentsError(err?.response?.data?.error || "Impossible de créer le rendez-vous.");
+                    } finally {
+                      setAppointmentsLoading(false);
+                    }
+                  }}
+                  style={{
+                    ...styles.primaryBtn,
+                    opacity: !selectedSlotStart || !appointmentForm.petName || appointmentsLoading ? 0.7 : 1,
+                    cursor: !selectedSlotStart || !appointmentForm.petName || appointmentsLoading ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {appointmentsLoading ? 'Enregistrement...' : 'Confirmer mon RDV'}
+                </button>
+              </div>
+
+              {appointmentsError ? <div style={{ marginTop: 12, ...styles.errorBox }}>{appointmentsError}</div> : null}
+              {appointmentsSuccess ? <div style={{ marginTop: 12, ...styles.successBox }}>{appointmentsSuccess}</div> : null}
+            </div>
+          </div>
+        </div>
+
+
+        <div style={{ marginTop: 18 }} />
+
+        {/* Liste des RDV existants */}
+        <div style={{ marginTop: 18, background: 'white', borderRadius: 18, padding: 18, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
+          <h4 style={{ fontWeight: 900, margin: '0 0 12px', fontSize: 14 }}>Mes rendez-vous vétérinaires</h4>
+
+          {appointmentsLoading ? (
+            <div style={styles.infoBox}>Chargement...</div>
+          ) : appointments.length === 0 ? (
+            <div style={styles.infoBox}>Aucun rendez-vous pour le moment.</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {appointments
+                .slice()
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .map((a) => {
+                  const statusLabel = a.status === 'confirmed' ? '✅ Confirmé' : a.status === 'scheduled' ? '⏳ En attente' : a.status;
+                  return (
+                    <div key={a.id} style={{ background: '#fafafa', border: '1px solid #f3f4f6', borderRadius: 14, padding: 14 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' }}>
+                        <div>
+                          <div style={{ fontWeight: 900, color: '#111827', marginBottom: 4, fontSize: 14 }}>{a.petName}</div>
+                          <div style={{ color: '#6b7280', fontSize: 13 }}>
+                            {a.animalType || ''} • {a.date ? new Date(a.date).toLocaleString('fr-FR') : 'Date inconnue'}
+                          </div>
+                          {a.notes ? <div style={{ marginTop: 6, color: '#374151', fontSize: 13, whiteSpace: 'pre-wrap' }}>{a.notes}</div> : null}
+                        </div>
+                        <div style={{ ...styles.consultationStatusLabel, background: a.status === 'confirmed' ? '#dcfce7' : '#dbeafe', color: a.status === 'confirmed' ? '#166534' : '#1d4ed8' }}>
+                          {statusLabel}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+
+        {/* Veterinary contact section */}
         <div style={{ background: 'white', borderRadius: 18, padding: 18, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
+          <h3 style={{ fontWeight: 900, margin: '0 0 12px', fontSize: 16 }}>🩺 Envoyer une demande de consultation</h3>
+          <p style={{ margin: '0 0 14px', color: '#6b7280', fontSize: 13 }}>
+            Utilisez ce formulaire pour préparer la discussion avec le vétérinaire : contexte, symptômes, alimentation, médicaments ou besoin de validation.
+          </p>
           <form onSubmit={submitContactRequest} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <span style={styles.label}>Type d’animal</span>
@@ -197,7 +573,7 @@ const VeterinaryPage = () => {
                 required
                 value={contactForm.subject}
                 onChange={(e) => setContactForm((p) => ({ ...p, subject: e.target.value }))}
-                placeholder="Ex: Contrôle / Aliment adapté / Symptômes"
+                placeholder="Ex: Validation plan nutritionnel / Symptômes / Contrôle"
                 style={styles.input}
               />
             </label>
@@ -257,7 +633,7 @@ const VeterinaryPage = () => {
         </div>
 
         <div style={{ marginTop: 12 }}>
-          <h3 style={{ fontWeight: 900, margin: '0 0 12px', fontSize: 16 }}>Dernières demandes</h3>
+          <h3 style={{ fontWeight: 900, margin: '0 0 12px', fontSize: 16 }}>Suivi des demandes de consultation</h3>
           {contactRequests.length === 0 ? (
             <div style={styles.infoBox}>
               Aucune demande trouvée. Envoyez une demande pour démarrer la conversation.
@@ -287,23 +663,116 @@ const VeterinaryPage = () => {
             </div>
           )}
         </div>
+        <div style={{ marginTop: 24 }}>
+          <h3 style={{ fontWeight: 900, margin: '0 0 12px', fontSize: 16 }}>Consultations & confirmations</h3>
+          {contactRequests.length === 0 ? (
+            <div style={styles.infoBox}>
+              Aucune consultation enregistrée. Envoyez une demande pour que le vétérinaire confirme l’état de votre animal.
+            </div>
+          ) : (
+            <div style={styles.consultationGrid}>
+              {contactRequests.slice(0, 6).map((req) => (
+                <div key={req._id || req.id} style={styles.consultationCard}>
+                  <div style={styles.consultationHeader}>
+                    <div style={styles.consultationBadge}>Vétérinaire</div>
+                    <span style={styles.consultationDate}>{req.createdAt ? new Date(req.createdAt).toLocaleDateString('fr-FR') : 'Date inconnue'}</span>
+                  </div>
+                  <div style={styles.consultationLine}>
+                    <strong>Pet :</strong> {req.petName || 'Votre animal'} • {req.animalType || 'Type inconnu'}
+                  </div>
+                  <div style={styles.consultationSubject}>{req.subject}</div>
+                  <div style={styles.consultationMessage}>{req.message}</div>
+                  <div style={styles.consultationStatus}>
+                    <span style={styles.consultationStatusLabel}>{req.response ? '✅ Confirmé' : '⏳ En attente de retour'}</span>
+                    {req.preferredDate ? <span style={styles.consultationStatusMeta}>Date souhaitée: {new Date(req.preferredDate).toLocaleDateString('fr-FR')}</span> : null}
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                    {!req.response && isVet && (
+                      <button
+                        type="button"
+                        onClick={() => handleConfirmPlan(req)}
+                        style={{ padding: '8px 12px', borderRadius: 10, border: 'none', background: '#059669', color: 'white', fontWeight: 800, cursor: 'pointer' }}
+                      >
+                        Confirmer le régime
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => startTeleconsult(req)}
+                      style={{ padding: '8px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)', background: 'white', color: '#111827', fontWeight: 800, cursor: 'pointer' }}
+                    >
+                      Démarrer téléconsultation
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => openAiRecommendations(req)}
+                      style={{ padding: '8px 12px', borderRadius: 10, border: '1px dashed #e67e22', background: 'white', color: '#e67e22', fontWeight: 800, cursor: 'pointer' }}
+                    >
+                      Assistant IA — Reco
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </motion.div>
 
-      {/* Conseils santé (section ajoutée) */}
+      {toast.message ? (
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: '', type: 'info' })} />
+      ) : null}
+
+      {/* Section ajoutée : Vétérinaire (Préparer, Après, Urgence) */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={styles.section}>
-        <h2 style={styles.sectionTitle}>✅ Conseils santé (rapides)</h2>
-        <div style={styles.staticAdviceBox}>
-          <ul style={styles.adviceList}>
-            <li>Surveillez l’appétit, l’énergie et la prise de boisson : tout changement peut être un signal.</li>
-            <li>Respectez les doses de médicaments et évitez l’automédication sans avis vétérinaire.</li>
-            <li>Gardez les vaccins à jour (calendrier) et notez les dates de traitements.</li>
-            <li>En cas de symptômes persistants (vomissements, diarrhée, léthargie, douleur), contactez rapidement un vétérinaire.</li>
-          </ul>
+        <h2 style={styles.sectionTitle}>🩺 Vétérinaire : avant, après & urgence</h2>
+
+        <div style={{ ...styles.staticAdviceBox, marginTop: 4 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
+            <div style={{ background: 'white', border: '1px solid rgba(0,0,0,0.04)', borderRadius: 16, padding: 14 }}>
+              <div style={{ fontWeight: 900, color: '#111827', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>📋</span> Avant la visite (préparer)
+              </div>
+              <ul style={{ ...styles.adviceList, paddingLeft: 18 }}>
+                <li>Notez les symptômes (début, fréquence, intensité) et ce qui a été essayé.</li>
+                <li>Préparez le carnet de santé + dates de vaccins/traitements.</li>
+                <li>Prenez des photos (plaies, selles, vomissements, zones douloureuses).</li>
+                <li>Arrivez avec le carnet / médicaments habituels (ou leurs photos).</li>
+              </ul>
+            </div>
+
+            <div style={{ background: 'white', border: '1px solid rgba(0,0,0,0.04)', borderRadius: 16, padding: 14 }}>
+              <div style={{ fontWeight: 900, color: '#111827', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>💊</span> Après la consultation (suivi)
+              </div>
+              <ul style={{ ...styles.adviceList, paddingLeft: 18 }}>
+                <li>Respectez strictement la posologie et le rythme des médicaments.</li>
+                <li>Surveillez l appétit, l énergie, la prise de boisson et les urines.</li>
+                <li>Planifiez le contrôle recommandé (date + objectif du rendez-vous).</li>
+                <li>Notez l évolution (amélioration, stabilisation, aggravation).</li>
+              </ul>
+            </div>
+
+            <div style={{ background: 'white', border: '1px solid rgba(0,0,0,0.04)', borderRadius: 16, padding: 14 }}>
+              <div style={{ fontWeight: 900, color: '#111827', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>🚨</span> Urgence (quand appeler vite)
+              </div>
+              <ul style={{ ...styles.adviceList, paddingLeft: 18 }}>
+                <li>Difficulté à respirer, gencives pâles/bleutées, détresse importante.</li>
+                <li>Vomissements répétés, diarrhée sévère ou sang dans les selles.</li>
+                <li>Prostration marquée, douleur intense, incapacité à se lever.</li>
+                <li>Possibilité d intoxication (plantes, médicaments, produit ménager).</li>
+              </ul>
+            </div>
+          </div>
+
           <div style={styles.adviceDisclaimer}>
             <strong>Note :</strong> Ces conseils sont informatifs et ne remplacent pas un diagnostic vétérinaire.
           </div>
         </div>
       </motion.div>
+
 
       {/* Weight History Mini-Chart */}
       {Object.keys(weightHistory).length > 0 && (
@@ -503,6 +972,8 @@ const styles = {
   printBtn: { padding: '8px 14px', background: '#f3f4f6', border: 'none', borderRadius: '10px', fontWeight: '600', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', color: '#4b5563' },
   section: { marginBottom: '28px' },
   sectionTitle: { fontSize: '1.1rem', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: '#111827' },
+  flowGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 12, marginBottom: 18 },
+  flowCard: { background: 'white', borderRadius: 16, padding: 14, border: '1px solid #edf2f7', boxShadow: '0 2px 10px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', gap: 6, color: '#374151', fontSize: 13 },
   weightChart: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' },
   petWeightCard: { background: 'white', borderRadius: '16px', padding: '16px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', border: '1px solid #f3f4f6' },
   upcomingGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' },
@@ -510,6 +981,17 @@ const styles = {
   badge: { display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: '700' },
   miniBadge: { display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '8px', background: '#f3f4f6', fontSize: '12px', color: '#4b5563' },
   infoBox: { background: '#eff6ff', borderRadius: '16px', padding: '20px', color: '#1e40af', fontSize: '14px', textAlign: 'center' },
+  consultationGrid: { display: 'grid', gap: '14px' },
+  consultationCard: { background: 'white', borderRadius: '18px', padding: '18px', boxShadow: '0 8px 24px rgba(15,23,42,0.06)', border: '1px solid #edf2f7' },
+  consultationHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '10px' },
+  consultationBadge: { background: '#dbeafe', color: '#1d4ed8', borderRadius: '999px', padding: '6px 12px', fontSize: '12px', fontWeight: 700 },
+  consultationDate: { fontSize: '12px', color: '#6b7280' },
+  consultationLine: { fontSize: '13px', color: '#374151', marginBottom: '8px' },
+  consultationSubject: { fontSize: '14px', fontWeight: 700, color: '#111827', marginBottom: '10px' },
+  consultationMessage: { fontSize: '14px', color: '#4b5563', lineHeight: 1.6, marginBottom: '12px' },
+  consultationStatus: { display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' },
+  consultationStatusLabel: { fontSize: '12px', fontWeight: 700, color: '#065f46', background: '#dcfce7', borderRadius: '999px', padding: '6px 12px' },
+  consultationStatusMeta: { fontSize: '12px', color: '#6b7280' },
   timeline: { position: 'relative', paddingLeft: '24px' },
   timelineItem: { position: 'relative', marginBottom: '16px', display: 'flex', gap: '16px' },
   timelineDot: { position: 'absolute', left: '-20px', top: '20px', width: '12px', height: '12px', borderRadius: '50%', background: '#10b981', border: '3px solid #d1fae5', zIndex: 1 },

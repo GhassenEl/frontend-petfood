@@ -1,12 +1,7 @@
-# TODO
-
-## Vet contact fix (crash)
-- [x] Add backend routes for `GET /api/veterinary/contact/requests` and `POST /api/veterinary/contact`
-
-- [x] Implement controller handlers (demo/in-memory storage)
-- [x] Update backend veterinary routes to register those endpoints
-- [x] Keep response schema compatible with `src/pages/VeterinaryPage.js`
-
-- [x] Smoke test: open `/veterinary`, send a request, verify list refresh
-
+- [ ] Understand request and existing code paths
+- [x] Gather context: read EventsPage.js + backend review/chat controllers
+- [ ] Fix runtime/logic issues in EventsPage.js (undefined variables)
+- [ ] Ensure client "Laisser un avis" calls /api/reviews with correct productId mapping
+- [ ] Build/lint/verify app compiles
+- [ ] Document what changed
 

@@ -23,7 +23,10 @@ import ClientProfilePage from './pages/ClientProfilePage';
 import ClientInvoicesPage from './pages/ClientInvoicesPage';
 import ClientHistoryPage from './pages/ClientHistoryPage';
 import ClientPetAdvicePage from './pages/ClientPetAdvicePage';
-import SmartFoodAgentPage2 from './pages/SmartFoodAgentPage2.js';
+import EventsPage from './pages/EventsPage';
+import NutriProPage from './pages/NutriProPage.js';
+import NutriProHistory from './pages/NutriProHistory.js';
+
 import ContactPage from './pages/ContactPage';
 import StoreLocatorPage from './pages/StoreLocatorPage';
 import VeterinaryPage from './pages/VeterinaryPage';
@@ -37,6 +40,7 @@ import LivreurMessagesPage from './pages/LivreurMessagesPage';
 import LivreurEarningsPage from './pages/LivreurEarningsPage';
 import LivreurHistoryPage from './pages/LivreurHistoryPage';
 import LivreurProfilePage from './pages/LivreurProfilePage';
+import LivreurAvailabilityPage from './pages/LivreurAvailabilityPage';
 
 const homeByRole = {
   admin: '/admin/dashboard',
@@ -87,6 +91,7 @@ const App = () => {
       <Route path="/admin/invoices" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminInvoices /></AdminLayout></RoleRoute>} />
       <Route path="/admin/history" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminHistory /></AdminLayout></RoleRoute>} />
       <Route path="/admin/veterinary" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVeterinary /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/events" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><EventsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/profile" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminProfilePage /></AdminLayout></RoleRoute>} />
 
       <Route path="/client-products" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientProductsPage /></ClientLayout></RoleRoute>} />
@@ -96,17 +101,19 @@ const App = () => {
       <Route path="/client-profile" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientProfilePage /></ClientLayout></RoleRoute>} />
       <Route path="/client-invoices" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientInvoicesPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-history" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientHistoryPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-events" element={<RoleRoute user={user} roles={['client']}><ClientLayout><EventsPage /></ClientLayout></RoleRoute>} />
       <Route path="/pet-advice" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetAdvicePage /></ClientLayout></RoleRoute>} />
       <Route
         path="/smart-food-agent"
         element={
           <RoleRoute user={user} roles={['client']}>
             <ClientLayout>
-              <SmartFoodAgentPage2 />
+              <NutriProPage />
             </ClientLayout>
           </RoleRoute>
         }
       />
+      <Route path="/nutripro-history" element={<RoleRoute user={user} roles={['client']}><ClientLayout><NutriProHistory /></ClientLayout></RoleRoute>} />
       <Route path="/contact" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ContactPage /></ClientLayout></RoleRoute>} />
       <Route path="/store-locator" element={<RoleRoute user={user} roles={['client']}><ClientLayout><StoreLocatorPage /></ClientLayout></RoleRoute>} />
       <Route path="/veterinary" element={<RoleRoute user={user} roles={['client']}><ClientLayout><VeterinaryPage /></ClientLayout></RoleRoute>} />
@@ -116,6 +123,7 @@ const App = () => {
       <Route path="/livreur/dashboard" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurDashboard /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/orders" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurOrdersPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/map" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMapPage /></LivreurLayout></RoleRoute>} />
+      <Route path="/livreur/availability" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurAvailabilityPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/stats" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurStatsPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/messages" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMessagesPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/earnings" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurEarningsPage /></LivreurLayout></RoleRoute>} />

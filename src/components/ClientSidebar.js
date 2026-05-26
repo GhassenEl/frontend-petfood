@@ -69,9 +69,9 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
       title: '🐾 Services',
       items: [
         { id: '__open-chat__', label: 'Assistant en ligne', icon: '💬', action: 'open-chat' },
-        { id: 'smart-food-agent', label: 'Régime IA', icon: '🧑‍⚕️' },
-        { id: 'pet-advice', label: 'Conseils', icon: '💡' },
-        { id: 'veterinary', label: 'Vétérinaire', icon: '🩺' },
+        { id: 'smart-food-agent', label: 'NutriPro', icon: '🥗' },
+        { id: 'nutripro-history', label: 'Historique NutriPro', icon: '📚' },
+        { id: 'pet-advice', label: 'Conseils', icon: '💡' },        { id: 'client-events', label: 'Événements', icon: '📅' },        { id: 'veterinary', label: 'Vétérinaire', icon: '🩺' },
         { id: 'store-locator', label: 'Magasins', icon: '📍' },
         { id: 'contact', label: 'Contact', icon: '📧' },
       ]

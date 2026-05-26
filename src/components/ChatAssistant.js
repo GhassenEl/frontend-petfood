@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, ShoppingCart, Sparkles, MessageSquarePlus } from 'lucide-react';
+import { MessageCircle, X, Send, ShoppingCart, MessageSquarePlus } from 'lucide-react';
 import api from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
+import useSocket from '../hooks/useSocket';
+import { useNavigate } from 'react-router-dom';
 
 const VARIANT_CONFIG = {
   client: {
-    title: 'Assistant PetfoodTN',
+    title: 'Assistant PetFoodTN',
     makeGreeting: () => ({
       role: 'assistant',
       content:
-        'Bonjour ! Je suis votre assistant PetfoodTN. Je peux vous recommander des produits pour votre compagnon, répondre sur les promotions ou vous orienter vers votre profil. De quoi avez-vous besoin ?',
+        'Bonjour ! Je suis votre assistant PetFoodTN. Je peux vous recommander des produits pour votre compagnon, répondre sur les promotions ou vous orienter vers votre profil. De quoi avez-vous besoin ?',
       quickReplies: ['Recommandations', 'Promotions', 'Mon profil'],
       products: [],
     }),
@@ -19,7 +22,7 @@ const VARIANT_CONFIG = {
     makeGreeting: () => ({
       role: 'assistant',
       content:
-        "Bonjour. Je suis l'assistant PetfoodTN pour l'administration. Je peux vous orienter vers les commandes, produits, avis, réclamations, factures ou utilisateurs. Que cherchez-vous ?",
+        "Bonjour. Je suis l'assistant PetFoodTN pour l'administration. Je peux vous orienter vers les commandes, produits, avis, réclamations, factures ou utilisateurs. Que cherchez-vous ?",
       quickReplies: ['Commandes', 'Produits', 'Avis', 'Réclamations', 'Dashboard'],
       products: [],
     }),
@@ -29,11 +32,16 @@ const VARIANT_CONFIG = {
     makeGreeting: () => ({
       role: 'assistant',
       content:
-        'Bonjour. Assistant livreur PetfoodTN : je peux vous rappeler où voir vos commandes, la carte, les messages et vos gains. Comment puis-je vous aider ?',
+        'Bonjour. Assistant livreur PetFoodTN : je peux vous rappeler où voir vos commandes, la carte, les messages et vos gains. Comment puis-je vous aider ?',
       quickReplies: ['Commandes', 'Carte', 'Messages', 'Gains', 'Tableau de bord'],
       products: [],
     }),
   },
+};
+
+const getAssistantAvatarUrl = (variant) => {
+  const seed = variant === 'admin' ? 'veterinary-specialist' : variant === 'livreur' ? 'delivery-helper' : 'petfood-advisor';
+  return `https://api.dicebear.com/6.x/adventurer/svg?seed=${encodeURIComponent(seed)}&backgroundType=gradientLinear&gradientRotation=45&radius=20`;
 };
 
 const mapHistoryRow = (m) => ({
@@ -41,6 +49,7 @@ const mapHistoryRow = (m) => ({
   content: m.content,
   products: m.products || [],
   quickReplies: m.quickReplies || [],
+  shouldShowVetCTA: !!m.shouldShowVetCTA,
 });
 
 /**
@@ -49,6 +58,7 @@ const mapHistoryRow = (m) => ({
 const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
   const cfg = VARIANT_CONFIG[variant] || VARIANT_CONFIG.client;
   const displayTitle = titleOverride || cfg.title;
+  const assistantAvatarUrl = useMemo(() => getAssistantAvatarUrl(variant), [variant]);
 
   const makeGreetingMessage = useMemo(() => {
     const g = cfg.makeGreeting();
@@ -67,6 +77,28 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const { user } = useAuth();
+  const socket = useSocket(user ? `user-${user.id || user._id}` : 'global');
+  const navigate = useNavigate();
+
+  const shouldShowVetCTA = (text) => {
+    const t = String(text || '').toLowerCase();
+    return (
+      t.includes('vétérinaire') ||
+      t.includes('veterinaire') ||
+      t.includes('validation') ||
+      t.includes('contacter') ||
+      t.includes('contact')
+    );
+  };
+
+  // Prevent duplicate assistant bubbles when an assistant reply is received both via HTTP response
+  // and via Socket.IO broadcast.
+  const lastHttpAssistantContentRef = useRef('');
+  const lastHttpAssistantAtRef = useRef(0);
+
+
+
 
   useEffect(() => {
     if (!isOpen) return;
@@ -119,6 +151,33 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
   }, [messages]);
 
   useEffect(() => {
+    if (!socket) return;
+    const handler = (payload) => {
+      if (!payload) return;
+      const incomingContent = payload.content || payload.message || '';
+
+      // If we just received the same assistant content via the HTTP request, ignore the socket broadcast.
+      const now = Date.now();
+      if (
+        incomingContent &&
+        incomingContent === lastHttpAssistantContentRef.current &&
+        now - lastHttpAssistantAtRef.current < 2000
+      ) {
+        return;
+      }
+
+
+      const incoming = { role: 'assistant', content: incomingContent };
+      setMessages((prev) => [...prev, incoming]);
+    };
+
+    socket.on('chat:message', handler);
+    return () => {
+      socket.off('chat:message', handler);
+    };
+  }, [socket]);
+
+  useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 300);
     }
@@ -138,15 +197,23 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
         context: context || undefined,
       });
 
-      const data = res.data;
+      const data = res.data || {};
+      const assistantText = data.message ?? data.content ?? '';
+      // Mark the last HTTP assistant reply to ignore the matching socket broadcast.
+      lastHttpAssistantContentRef.current = String(assistantText || '');
+      lastHttpAssistantAtRef.current = Date.now();
+
       const assistantMsg = {
         role: 'assistant',
-        content: data.message,
+        content: String(assistantText),
         products: data.products || [],
         quickReplies: data.quickReplies || [],
       };
       setMessages((prev) => [...prev, assistantMsg]);
       setIsBackendOnline(true);
+      // Socket emit removed: backend HTTP endpoint already returns the assistant reply,
+      // and the backend socket handler broadcasts the same message to the room,
+      // causing duplicate assistant bubbles on the sender.
     } catch (err) {
       const isOffline = err?.isBackendOffline || !err?.response;
       const isNotFound = err?.isNotFound || err?.response?.status === 404;
@@ -182,6 +249,72 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
 
   const handleQuickReply = (reply) => {
     const cleanReply = reply.replace(/^\p{Extended_Pictographic}\s*/u, '').trim() || reply;
+
+    if (cleanReply === 'Aller sur Événements') {
+      navigate('/events');
+      return;
+    }
+
+    // Auto-workflow triggers
+    if (cleanReply === 'Lancer automatiquement') {
+
+      // 1) Aller chercher les produits remisés côté serveur
+      // 2) Les mettre au panier via event addToCart
+      // 3) Ouvrir le checkout (puis créer commande via la page)
+      (async () => {
+        try {
+          const res = await api.get('/products');
+          const discounted = (res.data || []).filter(p => (p.discount || 0) > 0);
+          discounted.slice(0, 4).forEach(addToCart);
+          navigate('/checkout');
+        } catch (e) {
+          setMessages((prev) => [
+            ...prev,
+            { role: 'assistant', content: 'Impossible de récupérer les produits avec remise pour l\'instant.', quickReplies: [], products: [] },
+          ]);
+        }
+      })();
+      return;
+    }
+
+    if (cleanReply === 'Passer commande') {
+      navigate('/checkout');
+      return;
+    }
+
+    if (cleanReply === 'Payer mes factures') {
+      // Auto-paiement: payer toutes les factures non payées
+      (async () => {
+        try {
+          const res = await api.get('/invoices');
+          const pending = (res.data || []).filter(inv => inv.status !== 'paid');
+          if (pending.length === 0) {
+            setMessages((prev) => [
+              ...prev,
+              { role: 'assistant', content: 'Toutes vos factures sont déjà payées ✅', quickReplies: [], products: [] },
+            ]);
+            return;
+          }
+
+          for (const inv of pending) {
+            // paymentMethod par défaut : cash
+            await api.post(`/invoices/${inv._id}/pay`, { paymentMethod: inv.paymentMethod || 'cash' });
+          }
+
+          setMessages((prev) => [
+            ...prev,
+            { role: 'assistant', content: `Paiement terminé: ${pending.length} facture(s) payée(s) ✅`, quickReplies: [], products: [] },
+          ]);
+        } catch (e) {
+          setMessages((prev) => [
+            ...prev,
+            { role: 'assistant', content: 'Erreur lors du paiement automatique des factures. Essayez depuis la page Factures.', quickReplies: ['Payer mes factures'], products: [] },
+          ]);
+        }
+      })();
+      return;
+    }
+
     sendMessage(cleanReply);
   };
 
@@ -195,13 +328,25 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
     setIsBackendOnline(true);
   };
 
+  const getDiscountedPriceValue = (product) => {
+    const price = Number(product.price || 0);
+    const discount = Number(product.discount || 0);
+    return Number((price * (1 - discount / 100)).toFixed(2));
+  };
+
+  const getCartProduct = (product) => ({
+    ...product,
+    originalPrice: Number(product.price || 0),
+    price: getDiscountedPriceValue(product),
+  });
+
   const addToCart = (product) => {
-    window.dispatchEvent(new CustomEvent('addToCart', { detail: product }));
+    window.dispatchEvent(new CustomEvent('addToCart', { detail: getCartProduct(product) }));
   };
 
   const formatPrice = (price, discount) => {
     if (!discount || discount <= 0) return price + ' DT';
-    const discounted = price * (1 - discount / 100);
+    const discounted = Number(price || 0) * (1 - Number(discount || 0) / 100);
     return (
       <span>
         <span
@@ -250,7 +395,7 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
             <div style={styles.header}>
               <div style={styles.headerLeft}>
                 <div style={styles.headerIcon}>
-                  <Sparkles size={18} color="white" />
+                    <img src={assistantAvatarUrl} alt={`${displayTitle} avatar`} style={styles.assistantAvatar} />
                 </div>
                 <div>
                   <div style={styles.headerTitle}>{displayTitle}</div>
@@ -315,26 +460,28 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
 
                   {msg.products && msg.products.length > 0 && (
                     <div style={styles.productsGrid}>
-                      {msg.products.map((product, pidx) => (
-                        <motion.div key={pidx} whileHover={{ scale: 1.03 }} style={styles.productCard}>
-                          <div style={styles.productIcon}>{product.icon || '📦'}</div>
-                          <div style={styles.productInfo}>
-                            <div style={styles.productName}>{product.name}</div>
-                            <div style={styles.productReason}>{product.reason}</div>
-                            <div style={styles.productPrice}>{formatPrice(product.price, product.discount)}</div>
-                          </div>
-                          {variant === 'client' && (
-                            <button
-                              type="button"
-                              onClick={() => addToCart(product)}
-                              style={styles.addToCartBtn}
-                              title="Ajouter au panier"
-                            >
-                              <ShoppingCart size={14} color="white" />
-                            </button>
-                          )}
-                        </motion.div>
-                      ))}
+                      {msg.products
+                        .filter((product) => (product.stock ?? 0) > 0)
+                        .map((product, pidx) => (
+                          <motion.div key={pidx} whileHover={{ scale: 1.03 }} style={styles.productCard}>
+                            <div style={styles.productIcon}>{product.icon || '📦'}</div>
+                            <div style={styles.productInfo}>
+                              <div style={styles.productName}>{product.name}</div>
+                              <div style={styles.productReason}>{product.reason}</div>
+                              <div style={styles.productPrice}>{formatPrice(product.price, product.discount)}</div>
+                            </div>
+                            {variant === 'client' && (
+                              <button
+                                type="button"
+                                onClick={() => addToCart(product)}
+                                style={styles.addToCartBtn}
+                                title="Ajouter au panier"
+                              >
+                                <ShoppingCart size={14} color="white" />
+                              </button>
+                            )}
+                          </motion.div>
+                        ))}
                     </div>
                   )}
 
@@ -347,6 +494,22 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
                       ))}
                     </div>
                   )}
+
+                  {(msg.role === 'assistant' && (msg.shouldShowVetCTA || shouldShowVetCTA(msg.content))) && (
+                    <div style={styles.vetCtaWrap}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpen(false);
+                          navigate('/veterinary');
+                        }}
+                        style={styles.vetCtaBtn}
+                      >
+                        Contacter vétérinaire
+                      </button>
+                    </div>
+                  )}
+
                 </motion.div>
               ))}
 
@@ -463,6 +626,12 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0 4px 12px rgba(230,126,34,0.25)',
+  },
+  assistantAvatar: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '12px',
+    objectFit: 'cover',
   },
   headerTitle: {
     fontSize: '15px',
@@ -637,7 +806,22 @@ const styles = {
     boxShadow: '0 4px 12px rgba(230,126,34,0.25)',
     transition: 'all 0.2s',
   },
+
+  vetCtaWrap: {
+    marginTop: '10px',
+    display: 'flex',
+    justifyContent: 'flex-start',
+  },
+  vetCtaBtn: {
+    padding: '8px 14px',
+    borderRadius: 16,
+    border: '1px solid rgba(220,38,38,0.25)',
+    background: 'rgba(220,38,38,0.08)',
+    color: '#b91c1c',
+    fontSize: 12,
+    fontWeight: 900,
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
 };
-
 export default ChatAssistant;
-

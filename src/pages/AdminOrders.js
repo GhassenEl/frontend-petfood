@@ -13,6 +13,13 @@ const emptyForm = {
 
 const statusOptions = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'];
 const statusLabels = { pending: '⏳ En attente', paid: '💰 Payée', shipped: '🚚 Expédiée', delivered: '✅ Livrée', cancelled: '❌ Annulée' };
+
+const getDiscountedPrice = (product) => {
+  const price = Number(product?.price || 0);
+  const discount = Number(product?.discount || 0);
+  return Number((price * (1 - discount / 100)).toFixed(2));
+};
+
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
@@ -136,7 +143,7 @@ const AdminOrders = () => {
       items[idx] = { ...items[idx], [field]: value };
       if (field === 'productId') {
         const prod = products.find(p => p._id === value);
-        if (prod) items[idx].price = prod.price;
+        if (prod) items[idx].price = getDiscountedPrice(prod);
       }
       const total = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
       return { ...prev, items, total: total.toFixed(2) };
@@ -275,9 +282,15 @@ const AdminOrders = () => {
                     style={{ ...styles.input, flex: 2 }}
                   >
                     <option value="">Choisir un produit</option>
-                    {products.map((p) => (
-                      <option key={p._id} value={p._id}>{p.name} — {p.price} DT</option>
-                    ))}
+                    {products.map((p) => {
+                      const finalPrice = getDiscountedPrice(p);
+                      const discount = Number(p.discount || 0);
+                      return (
+                        <option key={p._id} value={p._id}>
+                          {p.name} — {finalPrice.toFixed(2)} DT{discount > 0 ? ` (-${discount}%)` : ''}
+                        </option>
+                      );
+                    })}
                   </select>
                   <input type="number" min="1" placeholder="Qté" value={item.quantity} onChange={(e) => updateItem(idx, 'quantity', e.target.value)} style={{ ...styles.input, width: '70px' }} />
                   <input type="number" step="0.01" placeholder="Prix" value={item.price} onChange={(e) => updateItem(idx, 'price', e.target.value)} style={{ ...styles.input, width: '90px' }} />

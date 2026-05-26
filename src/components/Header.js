@@ -49,7 +49,13 @@ const Header = ({ title, cartCount, onCartClick, onLogout, user, isAdmin }) => {
           <div style={styles.userSection}>
             {!isAdmin && (
               <Link to="/client-profile" style={styles.avatar} title="Mon Profil">
-                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                <img
+                  src={getUserAvatarUrl(user)}
+                  alt={`Avatar de ${displayName}`}
+                  style={styles.avatarImage}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+                <span style={styles.avatarInitials}>{user?.name ? user.name.charAt(0).toUpperCase() : 'U'}</span>
               </Link>
             )}
             {isAdmin && (
@@ -81,6 +87,11 @@ const getNavStyle = (isActive) => ({
   border: isActive ? '1px solid rgba(230, 126, 34, 0.2)' : '1px solid transparent',
 });
 
+const getUserAvatarUrl = (user) => {
+  const seed = encodeURIComponent((user?.name || user?.email || 'client').trim());
+  return `https://api.dicebear.com/6.x/adventurer/svg?seed=${seed}&backgroundType=gradientLinear&backgroundColor=F8FAFC,DBEAFE&radius=50`;
+};
+
 const styles = {
   header: {
     background: 'rgba(255, 255, 255, 0.9)',
@@ -100,6 +111,48 @@ const styles = {
     padding: '0 24px',
     maxWidth: '1400px',
     margin: '0 auto',
+  },
+  avatarImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    borderRadius: '50%',
+    zIndex: 1,
+  },
+  avatarInitials: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'white',
+    fontWeight: 700,
+    fontSize: '0.9rem',
+    letterSpacing: '0.02em',
+    background: 'linear-gradient(135deg, rgba(230,126,34,0.85), rgba(211,84,0,0.85))',
+    borderRadius: '50%',
+    zIndex: 0,
+  },
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'white',
+    fontWeight: 700,
+    fontSize: '0.9rem',
+    letterSpacing: '0.02em',
+    background: 'linear-gradient(135deg, rgba(230,126,34,0.85), rgba(211,84,0,0.85))',
+    borderRadius: '50%',
   },
   logo: {
     display: 'flex',
@@ -179,6 +232,8 @@ const styles = {
     gap: '10px',
   },
   avatar: {
+    position: 'relative',
+    overflow: 'hidden',
     width: '34px',
     height: '34px',
     borderRadius: '50%',
