@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CardElement } from '@stripe/react-stripe-js';
-import { Lock, Building2, FileText, Banknote } from 'lucide-react';
+import { Lock, Building2, FileText, Banknote, Wallet, Plus } from 'lucide-react';
 import { DEFAULT_BANK_TRANSFER } from '../constants/paymentMethods';
+import { topUpWallet } from '../services/walletService';
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
@@ -32,8 +33,72 @@ const PaymentMethodDetails = ({
   onPaymentNoteChange,
   stripeReady,
   stripeDemo,
+  walletBalance,
+  onWalletBalanceChange,
+  amountDue = 0,
 }) => {
+  const [topUpLoading, setTopUpLoading] = useState(false);
+
+  const handleTopUp = async (amt) => {
+    setTopUpLoading(true);
+    try {
+      const result = await topUpWallet(amt, 'demo');
+      onWalletBalanceChange?.(result.balance);
+    } catch (err) {
+      window.alert(err?.response?.data?.error || 'Recharge impossible');
+    } finally {
+      setTopUpLoading(false);
+    }
+  };
+
   if (!method) return null;
+
+  if (method === 'wallet') {
+    const balance = walletBalance ?? 0;
+    const insufficient = amountDue > 0 && balance < amountDue;
+    return (
+      <div style={boxStyle}>
+        <p style={{ margin: '0 0 10px', fontWeight: 700 }}>
+          <Wallet size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+          Portefeuille électronique
+        </p>
+        <p style={{ margin: '0 0 8px', fontSize: '1.2rem', fontWeight: 800, color: '#854d0e' }}>
+          {balance.toFixed(2)} DT
+        </p>
+        {amountDue > 0 && (
+          <p style={{ margin: '0 0 12px', color: insufficient ? '#dc2626' : '#059669', fontWeight: 600 }}>
+            {insufficient
+              ? `Solde insuffisant (manque ${(amountDue - balance).toFixed(2)} DT)`
+              : `Montant à payer : ${amountDue.toFixed(2)} DT`}
+          </p>
+        )}
+        <p style={{ margin: '0 0 10px', fontSize: '0.85rem', color: '#64748b' }}>
+          Rechargez votre portefeuille pour payer vos commandes et réservations.
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {[20, 50, 100].map((amt) => (
+            <button
+              key={amt}
+              type="button"
+              disabled={topUpLoading}
+              onClick={() => handleTopUp(amt)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: 10,
+                border: '1px solid #fde047',
+                background: '#fefce8',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+              }}
+            >
+              <Plus size={12} style={{ verticalAlign: 'middle' }} /> +{amt} DT
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (method === 'stripe' || method === 'card') {
     return (

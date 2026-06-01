@@ -31,43 +31,40 @@ async function run() {
     await login(page);
     pass('Connexion client');
 
-    // --- Portefeuille ---
-    await page.goto(`${BASE}/client-wallet`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    // --- Portefeuille (via checkout / moyens de paiement) ---
+    await page.goto(`${BASE}/checkout`, { waitUntil: 'domcontentloaded', timeout: 20000 });
     await page.waitForTimeout(2000);
-    const walletText = await page.textContent('body');
-    if (walletText.includes('Portefeuille') && walletText.includes('DT')) {
-      pass('Page portefeuille affichée', 'Solde DT visible');
+    const checkoutText = await page.textContent('body');
+    if (checkoutText.includes('Méthode de paiement') && checkoutText.includes('Portefeuille')) {
+      pass('Portefeuille dans moyens de paiement', 'Checkout affiche le portefeuille');
     } else {
-      fail('Page portefeuille', 'Contenu attendu absent');
+      fail('Portefeuille dans moyens de paiement', 'Contenu attendu absent');
     }
 
-    const rechargeBtn = page.locator('button', { hasText: /Recharger/i }).first();
-    if (await rechargeBtn.isVisible()) {
-      await rechargeBtn.click();
-      await page.waitForTimeout(2500);
-      const afterRecharge = await page.textContent('body');
-      if (afterRecharge.includes('ajoutés') || afterRecharge.includes('Crédit')) {
-        pass('Recharge portefeuille', 'Toast ou historique mis à jour');
-      } else {
-        pass('Recharge portefeuille', 'Bouton cliqué sans erreur bloquante');
-      }
+    await page.locator('button', { hasText: 'Portefeuille' }).first().click();
+    await page.waitForTimeout(500);
+    const topUpBtn = page.locator('button', { hasText: /\+20 DT/i }).first();
+    if (await topUpBtn.isVisible()) {
+      await topUpBtn.click();
+      await page.waitForTimeout(2000);
+      pass('Recharge portefeuille', 'Bouton +20 DT cliqué');
     } else {
-      fail('Recharge portefeuille', 'Bouton introuvable');
+      fail('Recharge portefeuille', 'Bouton recharge introuvable');
     }
 
-    // --- Rappels vaccins ---
-    await page.goto(`${BASE}/client-vaccines`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    // --- Rappels vaccins (dossier médical) ---
+    await page.goto(`${BASE}/medical-dossier`, { waitUntil: 'domcontentloaded', timeout: 20000 });
     await page.waitForTimeout(2000);
     const vaccineText = await page.textContent('body');
     if (vaccineText.includes('Rappels vaccins') || vaccineText.includes('vaccin')) {
-      pass('Page rappels vaccins');
+      pass('Rappels vaccins dans dossier médical');
       if (vaccineText.includes('Rage') || vaccineText.includes('Typhus') || vaccineText.includes('Vaccins suivis')) {
         pass('Données vaccins démo', 'Échantillons visibles');
       } else {
-        pass('Page rappels vaccins', 'Structure OK (données vides possibles)');
+        pass('Rappels vaccins dossier médical', 'Structure OK (données vides possibles)');
       }
     } else {
-      fail('Page rappels vaccins');
+      fail('Rappels vaccins dans dossier médical');
     }
 
     // --- Services / réservation ---
@@ -104,7 +101,7 @@ async function run() {
     }
 
     if (modalVisible) {
-      await page.locator('.cc-pay-method', { hasText: 'Portefeuille' }).click();
+      await page.locator('button', { hasText: 'Portefeuille' }).first().click();
       await page.locator('button', { hasText: /Confirmer le paiement/i }).click();
       await page.waitForTimeout(3000);
       const paidText = await page.textContent('body');

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import { exportMedicalDossierPdf } from '../utils/medicalDossierPdf';
 import ClientPrescriptionCard from '../components/ClientPrescriptionCard';
+import ClientVaccineRemindersPanel from '../components/ClientVaccineRemindersPanel';
 
 const animalEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', other: '🐾' };
 
@@ -98,6 +99,17 @@ const ClientMedicalDossierPage = () => {
             </p>
           )}
         </div>
+
+        {/* Rappels vaccins */}
+        <section style={{ marginBottom: 28 }}>
+          <h2 style={{ fontSize: '1.1rem', margin: '0 0 12px', fontWeight: 800 }}>
+            💉 Rappels vaccins — {selected.petName}
+          </h2>
+          <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: 14 }}>
+            Prochaines échéances vaccinales pour cet animal.
+          </p>
+          <ClientVaccineRemindersPanel petName={selected.petName} compact />
+        </section>
 
         {/* Ordonnances */}
         <section style={{ marginBottom: 28 }}>
@@ -203,6 +215,14 @@ const ClientMedicalDossierPage = () => {
       <p style={{ color: '#64748b' }}>
         Consultez l&apos;historique clinique signé par votre vétérinaire.
       </p>
+
+      <section style={{ marginBottom: 28 }}>
+        <h2 style={{ fontSize: '1.1rem', margin: '0 0 12px', fontWeight: 800 }}>💉 Rappels vaccins</h2>
+        <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: 14 }}>
+          Suivez les échéances vaccinales de tous vos animaux.
+        </p>
+        <ClientVaccineRemindersPanel />
+      </section>
 
       {dossiers.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>

@@ -57,7 +57,6 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         { id: 'client-invoices', label: 'Factures', icon: '🧾' },
         { id: 'client-history', label: 'Historique', icon: '📜' },
         { id: 'client-loyalty', label: 'Fidélité & promos', icon: '🎁' },
-        { id: 'client-wallet', label: 'Portefeuille', icon: '👛' },
       ]
     },
     {
@@ -75,7 +74,6 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         { id: 'smart-food-agent', label: 'NutriPro', icon: '🥗' },
         { id: 'nutripro-history', label: 'Historique NutriPro', icon: '📚' },
         { id: 'pet-advice', label: 'Conseils', icon: '💡' },
-        { id: 'client-vaccines', label: 'Rappels vaccins', icon: '💉' },
         { id: 'client-services', label: 'Toilettage & Pension', icon: '✂️' },
         { id: 'client-events', label: 'Événements', icon: '📅' },
         { id: 'veterinary', label: 'Santé & Vétérinaire', icon: '🩺' },

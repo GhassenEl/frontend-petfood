@@ -32,8 +32,6 @@ import ClientInvoicesPage from './pages/ClientInvoicesPage';
 import ClientHistoryPage from './pages/ClientHistoryPage';
 import ClientPetAdvicePage from './pages/ClientPetAdvicePage';
 import ClientServicesPage from './pages/ClientServicesPage';
-import ClientWalletPage from './pages/ClientWalletPage';
-import ClientVaccineRemindersPage from './pages/ClientVaccineRemindersPage';
 import ClientAIAgentPage from './pages/ClientAIAgentPage';
 import EventsPage from './pages/EventsPage';
 import NutriProPage from './pages/NutriProPage.js';
@@ -148,8 +146,8 @@ const App = () => {
       <Route path="/client-history" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientHistoryPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-events" element={<RoleRoute user={user} roles={['client']}><ClientLayout><EventsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-services" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientServicesPage /></ClientLayout></RoleRoute>} />
-      <Route path="/client-wallet" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientWalletPage /></ClientLayout></RoleRoute>} />
-      <Route path="/client-vaccines" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientVaccineRemindersPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-wallet" element={<Navigate to="/checkout" replace />} />
+      <Route path="/client-vaccines" element={<Navigate to="/medical-dossier" replace />} />
       <Route path="/pet-advice" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetAdvicePage /></ClientLayout></RoleRoute>} />
       <Route path="/client-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAIAgentPage /></ClientLayout></RoleRoute>} />
       <Route

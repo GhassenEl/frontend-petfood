@@ -8,8 +8,10 @@ import {
   getPaymentLabel,
   isStripeCardMethod,
   isOnlinePayment,
+  isWalletPayment,
   DEFAULT_BANK_TRANSFER,
 } from '../constants/paymentMethods';
+import { getWallet } from '../services/walletService';
 import {
   createStripeIntent,
   confirmStripeCardPayment,
@@ -28,6 +30,7 @@ const InvoicePayForm = ({ invoice, onSuccess, onCancel }) => {
   const [clientSecret, setClientSecret] = useState(null);
   const [stripeDemo, setStripeDemo] = useState(false);
   const [bankTransfer, setBankTransfer] = useState(DEFAULT_BANK_TRANSFER);
+  const [walletBalance, setWalletBalance] = useState(null);
 
   const refreshStripeIntent = useCallback(async () => {
     if (!isStripeCardMethod(paymentMethod) || amount <= 0) {
@@ -48,6 +51,7 @@ const InvoicePayForm = ({ invoice, onSuccess, onCancel }) => {
     api.get('/payments/config').then((res) => {
       if (res.data?.bankTransfer) setBankTransfer(res.data.bankTransfer);
     }).catch(() => {});
+    getWallet().then((w) => setWalletBalance(w?.balance ?? 0)).catch(() => setWalletBalance(0));
   }, []);
 
   useEffect(() => {
@@ -57,7 +61,13 @@ const InvoicePayForm = ({ invoice, onSuccess, onCancel }) => {
   const handlePay = async () => {
     setLoading(true);
     try {
-      if (isOnlinePayment(paymentMethod)) {
+      if (isWalletPayment(paymentMethod)) {
+        if ((walletBalance ?? 0) < amount) {
+          window.alert('Solde portefeuille insuffisant.');
+          setLoading(false);
+          return;
+        }
+      } else if (isOnlinePayment(paymentMethod)) {
         if (isStripeCardMethod(paymentMethod)) {
           const result = await confirmStripeCardPayment({
             stripe,
@@ -96,6 +106,8 @@ const InvoicePayForm = ({ invoice, onSuccess, onCancel }) => {
   const stripeReady = stripeDemo || (stripe && clientSecret);
   const onlineBlocked =
     isStripeCardMethod(paymentMethod) && !stripeDemo && !stripeReady;
+  const walletBlocked =
+    isWalletPayment(paymentMethod) && amount > 0 && (walletBalance ?? 0) < amount;
 
   return (
     <div>
@@ -117,6 +129,9 @@ const InvoicePayForm = ({ invoice, onSuccess, onCancel }) => {
           onPaymentNoteChange={setPaymentNote}
           stripeReady={stripeReady}
           stripeDemo={stripeDemo}
+          walletBalance={walletBalance}
+          onWalletBalanceChange={setWalletBalance}
+          amountDue={amount}
         />
       </div>
 
@@ -138,7 +153,7 @@ const InvoicePayForm = ({ invoice, onSuccess, onCancel }) => {
         <button
           type="button"
           onClick={handlePay}
-          disabled={loading || onlineBlocked}
+          disabled={loading || onlineBlocked || walletBlocked}
           style={{
             padding: '12px 18px',
             background: loading || onlineBlocked ? '#9ca3af' : '#16a34a',

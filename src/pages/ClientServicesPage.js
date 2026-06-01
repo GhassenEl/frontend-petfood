@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Calendar, Send, Trash2, CreditCard, Wallet } from 'lucide-react';
+import { Calendar, Send, Trash2 } from 'lucide-react';
+import PaymentMethodPicker from '../components/PaymentMethodPicker';
+import PaymentMethodDetails from '../components/PaymentMethodDetails';
+import { isWalletPayment } from '../constants/paymentMethods';
+import { getWallet } from '../services/walletService';
 import {
   getServiceCatalog,
   getServiceSlots,
@@ -10,7 +13,6 @@ import {
   cancelServiceBooking,
   estimateServicePrice,
 } from '../services/serviceBookingService';
-import { getWallet } from '../services/walletService';
 import { createStripeIntent, processPayPalPayment } from '../utils/onlinePayment';
 import './ClientComplaintsPage.css';
 import './ClientServicesPage.css';
@@ -27,7 +29,6 @@ const STATUS_LABELS = {
 const ClientServicesPage = () => {
   const [catalog, setCatalog] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [walletBalance, setWalletBalance] = useState(0);
   const [serviceType, setServiceType] = useState('grooming');
   const [form, setForm] = useState({
     petName: '',
@@ -43,6 +44,7 @@ const ClientServicesPage = () => {
   const [listLoading, setListLoading] = useState(true);
   const [payModal, setPayModal] = useState(null);
   const [payMethod, setPayMethod] = useState('wallet');
+  const [walletBalance, setWalletBalance] = useState(0);
   const [toast, setToast] = useState(null);
 
   const showToast = (text, type = 'success') => {
@@ -71,6 +73,10 @@ const ClientServicesPage = () => {
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    getWallet().then((w) => setWalletBalance(w?.balance ?? 0)).catch(() => setWalletBalance(0));
+  }, [payModal]);
 
   useEffect(() => {
     (async () => {
@@ -147,8 +153,8 @@ const ClientServicesPage = () => {
       const price = payModal.price || estimatedPrice || 0;
 
       if (payMethod === 'wallet') {
-        if (walletBalance < price) {
-          showToast('Solde insuffisant — rechargez votre portefeuille.', 'error');
+        if ((walletBalance ?? 0) < price) {
+          showToast('Solde insuffisant — rechargez via le portefeuille dans les moyens de paiement.', 'error');
           return;
         }
         await payServiceBooking(bookingId(payModal), 'wallet');
@@ -196,14 +202,14 @@ const ClientServicesPage = () => {
       <header className="cc-hero cc-hero--services">
         <h1>🐾 Réservation de services</h1>
         <p>
-          Toilettage, pension et dressage — réservez en ligne et payez par portefeuille,
-          carte ou PayPal.
+          Toilettage, pension et dressage — réservez en ligne et payez via vos moyens de paiement
+          (portefeuille, carte, PayPal).
         </p>
-        <p style={{ marginTop: 8, fontSize: '0.85rem' }}>
-          Solde portefeuille : <strong>{walletBalance.toFixed(2)} DT</strong>
-          {' · '}
-          <Link to="/client-wallet" style={{ color: '#059669', fontWeight: 700 }}>Recharger</Link>
-        </p>
+        {walletBalance != null && (
+          <p style={{ marginTop: 8, fontSize: '0.85rem' }}>
+            Solde portefeuille : <strong>{walletBalance.toFixed(2)} DT</strong>
+          </p>
+        )}
       </header>
 
       <div className="cc-service-grid">
@@ -386,31 +392,18 @@ const ClientServicesPage = () => {
               <br />
               Montant : <strong>{payModal.price || estimatedPrice} DT</strong>
             </p>
-            <div className="cc-pay-methods">
-              {[
-                { id: 'wallet', label: 'Portefeuille', icon: '👛' },
-                { id: 'stripe', label: 'Carte', icon: '💳' },
-                { id: 'paypal', label: 'PayPal', icon: '🅿️' },
-              ].map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  className={`cc-pay-method ${payMethod === m.id ? 'active' : ''}`}
-                  onClick={() => setPayMethod(m.id)}
-                >
-                  {m.icon} {m.label}
-                  {m.id === 'wallet' && (
-                    <div style={{ fontSize: '0.75rem', fontWeight: 600, marginTop: 4 }}>
-                      {walletBalance.toFixed(2)} DT
-                    </div>
-                  )}
-                </button>
-              ))}
+            <div className="cc-pay-methods" style={{ flexDirection: 'column', gap: 12 }}>
+              <PaymentMethodPicker value={payMethod} onChange={setPayMethod} layout="flex" />
+              <PaymentMethodDetails
+                method={payMethod}
+                walletBalance={walletBalance}
+                onWalletBalanceChange={setWalletBalance}
+                amountDue={payModal.price || estimatedPrice || 0}
+              />
             </div>
             <div className="cc-modal-actions">
               <button type="button" className="cc-btn-ghost" onClick={() => setPayModal(null)}>Annuler</button>
-              <button type="button" className="cc-btn-primary" onClick={handlePay} disabled={loading}>
-                <Wallet size={16} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+              <button type="button" className="cc-btn-primary" onClick={handlePay} disabled={loading || (isWalletPayment(payMethod) && (walletBalance ?? 0) < (payModal.price || 0))}>
                 {loading ? 'Paiement…' : 'Confirmer le paiement'}
               </button>
             </div>

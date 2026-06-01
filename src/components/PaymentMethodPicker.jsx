@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PAYMENT_METHODS } from '../constants/paymentMethods';
+import { getWallet } from '../services/walletService';
 
 const PaymentMethodPicker = ({ value, onChange, layout = 'grid' }) => {
   const isGrid = layout === 'grid';
+  const [walletBalance, setWalletBalance] = useState(null);
+
+  useEffect(() => {
+    getWallet()
+      .then((w) => setWalletBalance(w?.balance ?? 0))
+      .catch(() => setWalletBalance(null));
+  }, [value]);
 
   return (
     <div
@@ -35,7 +43,20 @@ const PaymentMethodPicker = ({ value, onChange, layout = 'grid' }) => {
           >
             <span style={{ marginRight: '6px' }}>{method.emoji}</span>
             {method.label}
-            {method.online && (
+            {method.id === 'wallet' && walletBalance != null && (
+              <span
+                style={{
+                  display: 'block',
+                  fontSize: '11px',
+                  color: walletBalance > 0 ? '#059669' : '#dc2626',
+                  marginTop: '4px',
+                  fontWeight: 700,
+                }}
+              >
+                Solde : {walletBalance.toFixed(2)} DT
+              </span>
+            )}
+            {method.online && method.id !== 'wallet' && (
               <span
                 style={{
                   display: 'block',
@@ -46,6 +67,19 @@ const PaymentMethodPicker = ({ value, onChange, layout = 'grid' }) => {
                 }}
               >
                 Paiement en ligne
+              </span>
+            )}
+            {method.id === 'wallet' && (
+              <span
+                style={{
+                  display: 'block',
+                  fontSize: '10px',
+                  color: '#6b7280',
+                  marginTop: '4px',
+                  fontWeight: 500,
+                }}
+              >
+                Débit instantané
               </span>
             )}
           </button>

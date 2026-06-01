@@ -10,6 +10,7 @@ import PaymentMethodDetails from '../components/PaymentMethodDetails';
 import {
   isStripeCardMethod,
   isOnlinePayment,
+  isWalletPayment,
   getPaymentLabel,
   DEFAULT_BANK_TRANSFER,
 } from '../constants/paymentMethods';
@@ -18,6 +19,7 @@ import {
   confirmStripeCardPayment,
   processPayPalPayment,
 } from '../utils/onlinePayment';
+import { getWallet } from '../services/walletService';
 
 const CART_STORAGE_KEY = 'petfood_cart';
 
@@ -51,6 +53,7 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
   const [promoApplied, setPromoApplied] = useState(null);
   const [promoLoading, setPromoLoading] = useState(false);
   const [promoError, setPromoError] = useState('');
+  const [walletBalance, setWalletBalance] = useState(null);
   const cart = Array.isArray(cartProp) && cartProp.length > 0 ? cartProp : storedCart;
   const computedSubtotal = cart.reduce(
     (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
@@ -88,6 +91,7 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
 
   useEffect(() => {
     loadPaymentConfig();
+    getWallet().then((w) => setWalletBalance(w?.balance ?? 0)).catch(() => setWalletBalance(0));
     try {
       const prefill = sessionStorage.getItem('petfood_checkout_promo');
       if (prefill) {
@@ -186,7 +190,15 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
     let paidOnline = false;
 
     try {
-      if (isOnlinePayment(paymentMethod)) {
+      if (isWalletPayment(paymentMethod)) {
+        if ((walletBalance ?? 0) < totalCart) {
+          window.alert('Solde portefeuille insuffisant. Rechargez ci-dessous.');
+          setPaymentStatus('error');
+          setLoading(false);
+          return;
+        }
+        paidOnline = true;
+      } else if (isOnlinePayment(paymentMethod)) {
         paidOnline = await runOnlinePayment();
         if (!paidOnline) {
           setPaymentStatus('error');
@@ -216,7 +228,7 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
         : (await api.post('/orders', orderPayload)).data;
 
       const invoiceId = result?.invoice?._id || result?.invoice?.id;
-      if (paidOnline && invoiceId) {
+      if (paidOnline && invoiceId && !isWalletPayment(paymentMethod)) {
         await api.post(`/invoices/${invoiceId}/pay`, { paymentMethod });
       }
 
@@ -236,9 +248,11 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
   const stripeReady = stripeDemo || (stripe && clientSecret);
   const onlineBlocked =
     isStripeCardMethod(paymentMethod) && !stripeDemo && !stripeReady;
+  const walletBlocked =
+    isWalletPayment(paymentMethod) && totalCart > 0 && (walletBalance ?? 0) < totalCart;
 
   if (paymentStatus === 'succeeded') {
-    const offlineMsg = !isOnlinePayment(paymentMethod)
+    const offlineMsg = !isOnlinePayment(paymentMethod) && !isWalletPayment(paymentMethod)
       ? ' Votre facture reste à régler selon la méthode choisie (voir Mes factures).'
       : '';
     return (
@@ -472,6 +486,9 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
             onPaymentNoteChange={setPaymentNote}
             stripeReady={stripeReady}
             stripeDemo={stripeDemo}
+            walletBalance={walletBalance}
+            onWalletBalanceChange={setWalletBalance}
+            amountDue={totalCart}
           />
         </div>
       </motion.div>
@@ -488,10 +505,10 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
         <button
           type="button"
           onClick={handleCheckout}
-          disabled={loading || !address || !phone || onlineBlocked}
+          disabled={loading || !address || !phone || onlineBlocked || walletBlocked}
           style={{
             ...confirmBtnStyle,
-            background: loading || onlineBlocked ? '#9ca3af' : confirmBtnStyle.background,
+            background: loading || onlineBlocked || walletBlocked ? '#9ca3af' : confirmBtnStyle.background,
             cursor: loading || onlineBlocked ? 'not-allowed' : 'pointer',
           }}
         >
