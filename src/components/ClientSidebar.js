@@ -56,7 +56,7 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         { id: 'client-orders', label: 'Mes Commandes', icon: '📦' },
         { id: 'client-invoices', label: 'Factures', icon: '🧾' },
         { id: 'client-history', label: 'Historique', icon: '📜' },
-        { id: 'client-loyalty', label: 'Fidélité & promos', icon: '🎁' },
+        { id: 'client-loyalty', label: 'Fidélité', icon: '🎁' },
       ]
     },
     {

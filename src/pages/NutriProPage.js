@@ -3,15 +3,11 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
-import SmartAgentAvatar from '../components/SmartAgentAvatar';
 import Toast from '../components/Toast';
 
 const NutriProPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-
-  const [avatarFile, setAvatarFile] = useState(null);
-  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState(null);
 
   const [ownerName, setOwnerName] = useState(user?.name || '');
   const [ownerBio, setOwnerBio] = useState('');
@@ -116,11 +112,6 @@ const NutriProPage = () => {
         medications: medications || undefined,
         accessories: accessories || undefined,
       },
-      avatar: avatarPreviewUrl
-        ? {
-            previewUrl: avatarPreviewUrl,
-          }
-        : undefined,
     };
 
     const strip = (obj) => {
@@ -137,16 +128,6 @@ const NutriProPage = () => {
     };
 
     return strip(payload);
-  };
-
-  const handleAvatarChange = (file) => {
-    setAvatarFile(file);
-    if (!file) {
-      setAvatarPreviewUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    setAvatarPreviewUrl(url);
   };
 
   const persistPlanToBackend = async (planText, extra = {}) => {
@@ -363,11 +344,6 @@ const NutriProPage = () => {
       ) : null}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 18 }}>
-        <div style={{ background: 'white', borderRadius: 20, padding: 18, boxShadow: '0 10px 30px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.04)' }}>
-          <h2 style={{ fontWeight: 900, margin: '0 0 12px' }}>Avatar</h2>
-          <SmartAgentAvatar previewUrl={avatarPreviewUrl} onAvatarFile={handleAvatarChange} label="Importer image avatar" />
-        </div>
-
         <div style={{ background: 'white', borderRadius: 20, padding: 18, boxShadow: '0 10px 30px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.04)' }}>
           <h2 style={{ fontWeight: 900, margin: '0 0 12px' }}>Profil animal</h2>
 

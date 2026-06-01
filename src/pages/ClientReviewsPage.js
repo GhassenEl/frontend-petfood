@@ -5,6 +5,7 @@ import { getProducts } from '../services/productService';
 import { getMyReviews, createReview, updateReview, deleteReview } from '../services/reviewService';
 import { productId, dedupeProducts, withProductIds } from '../utils/productId';
 import ClientServiceRatingsPanel from '../components/ClientServiceRatingsPanel';
+import ClientNutritionBlogPanel from '../components/ClientNutritionBlogPanel';
 import './ClientComplaintsPage.css';
 
 const EMOTIONS = [
@@ -46,7 +47,10 @@ const StarRow = ({ value, onChange, size = 28 }) => (
 const ClientReviewsPage = () => {
   const [pageTab, setPageTab] = useState(() => {
     try {
-      return new URLSearchParams(window.location.search).get('tab') === 'services' ? 'services' : 'products';
+      const tab = new URLSearchParams(window.location.search).get('tab');
+      if (tab === 'services') return 'services';
+      if (tab === 'nutrition') return 'nutrition';
+      return 'products';
     } catch {
       return 'products';
     }
@@ -226,8 +230,8 @@ const ClientReviewsPage = () => {
           <div>
             <h1>⭐ Mes avis</h1>
             <p>
-              Notez vos produits, la livraison par région et le service vétérinaire. Vos retours aident
-              toute la communauté PetfoodTN.
+              Notez vos produits, la livraison et le service vétérinaire. Consultez aussi nos conseils
+              nutrition et articles de blog pour mieux nourrir vos compagnons.
             </p>
           </div>
           {pageTab === 'products' && (
@@ -243,6 +247,7 @@ const ClientReviewsPage = () => {
         {[
           { id: 'products', label: '🛍️ Avis produits' },
           { id: 'services', label: '🚚 Livraison & Vétérinaire' },
+          { id: 'nutrition', label: '🥗 Nutrition & Blog' },
         ].map(({ id, label }) => (
           <button
             key={id}
@@ -257,6 +262,8 @@ const ClientReviewsPage = () => {
 
       {pageTab === 'services' ? (
         <ClientServiceRatingsPanel showToast={showToast} />
+      ) : pageTab === 'nutrition' ? (
+        <ClientNutritionBlogPanel />
       ) : (
         <>
           <div className="cc-stats">

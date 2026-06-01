@@ -295,11 +295,6 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
         products: data.products || [],
         quickReplies: data.quickReplies || [],
       };
-      if (data.promoCode) {
-        try {
-          sessionStorage.setItem('petfood_promo_hint', data.promoCode);
-        } catch { /* ignore */ }
-      }
       setMessages((prev) => [...prev, assistantMsg]);
       setIsBackendOnline(true);
       // Socket emit removed: backend HTTP endpoint already returns the assistant reply,
@@ -422,10 +417,6 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
     }
 
     if (cleanReply === 'Passer commande') {
-      try {
-        const hint = sessionStorage.getItem('petfood_promo_hint');
-        if (hint) sessionStorage.setItem('petfood_checkout_promo', hint);
-      } catch { /* ignore */ }
       setIsOpen(false);
       navigate('/checkout');
       return;

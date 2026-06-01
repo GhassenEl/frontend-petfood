@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Elements, useStripe, useElements } from '@stripe/react-stripe-js';
 import { motion } from 'framer-motion';
-import { CreditCard, Truck, CheckCircle, Lock, Tag } from 'lucide-react';
+import { CreditCard, Truck, CheckCircle, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { getStripePromise } from '../utils/stripeLoader';
@@ -43,16 +43,6 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
   const [stripeDemo, setStripeDemo] = useState(false);
   const [bankTransfer, setBankTransfer] = useState(DEFAULT_BANK_TRANSFER);
   const [paymentStatus, setPaymentStatus] = useState('idle');
-  const [promoInput, setPromoInput] = useState(() => {
-    try {
-      return sessionStorage.getItem('petfood_checkout_promo') || '';
-    } catch {
-      return '';
-    }
-  });
-  const [promoApplied, setPromoApplied] = useState(null);
-  const [promoLoading, setPromoLoading] = useState(false);
-  const [promoError, setPromoError] = useState('');
   const [walletBalance, setWalletBalance] = useState(null);
   const cart = Array.isArray(cartProp) && cartProp.length > 0 ? cartProp : storedCart;
   const computedSubtotal = cart.reduce(
@@ -60,8 +50,7 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
     0
   );
   const subtotal = Number(Number(totalCartProp ?? computedSubtotal).toFixed(2));
-  const promoDiscount = Number(promoApplied?.discount || 0);
-  const totalCart = Number(Math.max(0, subtotal - promoDiscount).toFixed(2));
+  const totalCart = subtotal;
   const closeCheckout = onClose || (() => navigate('/client-products'));
 
   const loadPaymentConfig = useCallback(async () => {
@@ -92,59 +81,11 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
   useEffect(() => {
     loadPaymentConfig();
     getWallet().then((w) => setWalletBalance(w?.balance ?? 0)).catch(() => setWalletBalance(0));
-    try {
-      const prefill = sessionStorage.getItem('petfood_checkout_promo');
-      if (prefill) {
-        sessionStorage.removeItem('petfood_checkout_promo');
-        setPromoInput(prefill);
-      }
-    } catch { /* ignore */ }
   }, [loadPaymentConfig]);
 
   useEffect(() => {
     refreshStripeIntent();
   }, [refreshStripeIntent]);
-
-  useEffect(() => {
-    if (!promoApplied?.code) return;
-    const revalidate = async () => {
-      try {
-        const { data } = await api.post('/promotions/validate', {
-          code: promoApplied.code,
-          subtotal,
-        });
-        setPromoApplied(data);
-        setPromoError('');
-      } catch {
-        setPromoApplied(null);
-        setPromoError('Le code promo n\'est plus valide pour ce panier');
-      }
-    };
-    revalidate();
-  }, [subtotal]);
-
-  const applyPromoCode = async () => {
-    const code = promoInput.trim();
-    if (!code) return;
-    setPromoLoading(true);
-    setPromoError('');
-    try {
-      const { data } = await api.post('/promotions/validate', { code, subtotal });
-      setPromoApplied(data);
-      setPromoInput(data.code);
-    } catch (error) {
-      setPromoApplied(null);
-      setPromoError(error.response?.data?.error || 'Code promo invalide');
-    } finally {
-      setPromoLoading(false);
-    }
-  };
-
-  const clearPromo = () => {
-    setPromoApplied(null);
-    setPromoInput('');
-    setPromoError('');
-  };
 
   const runOnlinePayment = async () => {
     if (isStripeCardMethod(paymentMethod)) {
@@ -213,7 +154,6 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
         paymentNote: paymentNote || undefined,
         address,
         phone,
-        promoCode: promoApplied?.code || undefined,
         items: cart.map((item) => ({
           productId: item.productId || item._id || item.id,
           quantity: Math.max(1, Number(item.quantity || 1)),
@@ -395,57 +335,6 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
             </span>
           </div>
         ))}
-        <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px dashed #e5e7eb' }}>
-          <h4 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Tag size={16} color="#e67e22" /> Code promo
-          </h4>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <input
-              type="text"
-              value={promoInput}
-              onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
-              placeholder="Ex. CHAT10"
-              style={{ ...inputFieldStyle, flex: 1, minWidth: 140, marginBottom: 0 }}
-              disabled={!!promoApplied}
-            />
-            {promoApplied ? (
-              <button type="button" onClick={clearPromo} style={cancelBtnStyle}>
-                Retirer
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={applyPromoCode}
-                disabled={promoLoading || !promoInput.trim()}
-                style={{
-                  ...confirmBtnStyle,
-                  padding: '12px 20px',
-                  opacity: promoLoading || !promoInput.trim() ? 0.6 : 1,
-                }}
-              >
-                {promoLoading ? '…' : 'Appliquer'}
-              </button>
-            )}
-          </div>
-          {promoError && (
-            <p style={{ margin: '8px 0 0', color: '#dc2626', fontSize: 13 }}>{promoError}</p>
-          )}
-          {promoApplied && (
-            <p style={{ margin: '8px 0 0', color: '#15803d', fontSize: 13, fontWeight: 600 }}>
-              ✓ {promoApplied.label || promoApplied.code} — −{promoDiscount.toFixed(2)} DT
-            </p>
-          )}
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, color: '#6b7280', fontSize: 14 }}>
-          <span>Sous-total</span>
-          <span>{subtotal.toFixed(2)} DT</span>
-        </div>
-        {promoDiscount > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, color: '#15803d', fontSize: 14 }}>
-            <span>Réduction promo</span>
-            <span>−{promoDiscount.toFixed(2)} DT</span>
-          </div>
-        )}
         <div
           style={{
             display: 'flex',
