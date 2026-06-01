@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Calendar, Send, Trash2 } from 'lucide-react';
+import { Calendar, Send, Trash2, CreditCard } from 'lucide-react';
 import PaymentMethodPicker from '../components/PaymentMethodPicker';
 import PaymentMethodDetails from '../components/PaymentMethodDetails';
 import { isWalletPayment } from '../constants/paymentMethods';

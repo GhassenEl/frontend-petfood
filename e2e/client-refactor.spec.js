@@ -1,0 +1,104 @@
+// @ts-check
+const { test, expect } = require('@playwright/test');
+const { loginAsClient } = require('./helpers/auth');
+const { loginClientApi, ensureWalletBalance, localDateStr } = require('./helpers/api');
+
+test.describe('Refonte portefeuille & rappels vaccins', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsClient(page);
+  });
+
+  test('redirige /client-wallet vers /checkout', async ({ page }) => {
+    await page.goto('/client-wallet');
+    await expect(page).toHaveURL(/\/checkout$/);
+  });
+
+  test('redirige /client-vaccines vers /medical-dossier', async ({ page }) => {
+    await page.goto('/client-vaccines');
+    await expect(page).toHaveURL(/\/medical-dossier$/);
+  });
+
+  test('affiche le portefeuille dans les moyens de paiement (checkout)', async ({ page }) => {
+    await page.goto('/checkout');
+    await expect(page.getByRole('heading', { name: /méthode de paiement/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /portefeuille/i }).first()).toBeVisible();
+    await page.getByRole('button', { name: /portefeuille/i }).first().click();
+    await expect(page.getByText(/portefeuille électronique/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: /\+20 DT/i })).toBeVisible();
+  });
+
+  test('recharge le portefeuille depuis le checkout', async ({ page }) => {
+    await page.goto('/checkout');
+    await page.getByRole('button', { name: /portefeuille/i }).first().click();
+    const balanceBefore = page.locator('text=/\\d+\\.\\d{2} DT/').first();
+    await expect(balanceBefore).toBeVisible();
+    await page.getByRole('button', { name: /\+50 DT/i }).click();
+    await page.waitForTimeout(1500);
+    await expect(page.getByText(/portefeuille électronique/i)).toBeVisible();
+  });
+
+  test('affiche les rappels vaccins dans le dossier médical', async ({ page }) => {
+    await page.goto('/medical-dossier');
+    await expect(page.getByRole('heading', { name: /rappels vaccins/i })).toBeVisible();
+    await expect(page.locator('body')).toContainText(/vaccin/i);
+  });
+
+  test('sidebar sans entrées portefeuille ni rappels vaccins', async ({ page }) => {
+    await page.goto('/client-products');
+    const sidebar = page.locator('aside.admin-sidebar');
+    await expect(sidebar).toBeVisible();
+    await expect(sidebar.getByRole('link', { name: /^portefeuille$/i })).toHaveCount(0);
+    await expect(sidebar.getByRole('link', { name: /rappels vaccins/i })).toHaveCount(0);
+    await expect(sidebar.getByRole('link', { name: /dossier médical/i })).toBeVisible();
+  });
+});
+
+test.describe('Réservation services avec portefeuille', () => {
+  test.beforeEach(async ({ page, request }) => {
+    await loginAsClient(page);
+    const { token } = await loginClientApi(request);
+    await ensureWalletBalance(request, token, 250);
+  });
+
+  test('catalogue services et réservation pension avec paiement portefeuille', async ({ page }) => {
+    await page.goto('/client-services');
+    await expect(page.locator('.cc-service-card').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('.cc-service-card').filter({ hasText: 'Toilettage' })).toBeVisible();
+    await expect(page.locator('.cc-service-card').filter({ hasText: 'Pension' })).toBeVisible();
+    await expect(page.locator('.cc-service-card').filter({ hasText: 'Dressage' })).toBeVisible();
+
+    await page.locator('.cc-service-card').filter({ hasText: 'Pension' }).click();
+    await expect(page.getByText(/date de fin|départ/i)).toBeVisible();
+
+    const petName = `E2E-${Date.now()}`;
+    await page.fill('input[placeholder="Ex. Max"]', petName);
+    await page.locator('input[type="date"]').first().fill(localDateStr(3));
+    await page.locator('input[type="date"]').nth(1).fill(localDateStr(6));
+
+    const bookingResponse = page.waitForResponse(
+      (r) => r.url().includes('/service-bookings') && r.request().method() === 'POST'
+    );
+    await page.getByRole('button', { name: /réserver et payer/i }).click();
+    const response = await bookingResponse;
+    expect(response.ok()).toBeTruthy();
+
+    const modal = page.locator('.cc-modal-overlay');
+    await expect(modal).toBeVisible({ timeout: 10_000 });
+    await modal.getByRole('button', { name: /portefeuille/i }).first().click();
+    await modal.getByRole('button', { name: /confirmer le paiement/i }).click();
+
+    await expect(modal).toBeHidden({ timeout: 15_000 });
+    await expect(page.locator('body')).toContainText(/confirmée|validée|payée/i, { timeout: 10_000 });
+    await expect(page.locator('body')).toContainText(petName);
+  });
+
+  test('créneaux toilettage disponibles', async ({ page }) => {
+    await page.goto('/client-services');
+    await expect(page.locator('.cc-service-card').filter({ hasText: 'Toilettage' })).toBeVisible({ timeout: 15_000 });
+    await page.locator('.cc-service-card').filter({ hasText: 'Toilettage' }).click();
+    await expect(page.getByText(/créneau horaire/i)).toBeVisible();
+    const slots = page.locator('.cc-slot-btn:not([disabled])');
+    await expect(slots.first()).toBeVisible({ timeout: 15_000 });
+    expect(await slots.count()).toBeGreaterThan(0);
+  });
+});
