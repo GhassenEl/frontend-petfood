@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Package, Truck, CheckCircle, XCircle, ChevronDown, ChevronUp, Phone, MapPin, Calendar, CreditCard } from 'lucide-react';
+import { Search, Package, Truck, CheckCircle, XCircle, ChevronDown, ChevronUp, Phone, MapPin, Calendar, CreditCard, AlertTriangle } from 'lucide-react';
 import api from '../utils/api';
+import { getPaymentLabel } from '../constants/paymentMethods';
+import DeliveryProofModal from '../components/DeliveryProofModal';
+import useLivreurGps from '../hooks/useLivreurGps';
+
+const oid = (o) => o?.id || o?._id;
 
 const statusConfig = {
   pending: { label: 'En attente', color: '#f39c12', bg: 'rgba(243,156,18,0.1)', icon: Package },
@@ -19,6 +24,11 @@ const LivreurOrdersPage = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [sortBy, setSortBy] = useState('date-desc');
+  const [proofOrder, setProofOrder] = useState(null);
+  const [claiming, setClaiming] = useState(null);
+
+  const hasActive = orders.some((o) => o.status === 'shipped');
+  useLivreurGps(hasActive);
 
   useEffect(() => {
     fetchOrders();
@@ -66,20 +76,41 @@ const LivreurOrdersPage = () => {
     }
   };
 
-  const updateStatus = async (orderId, status) => {
+  const claimOrder = async (orderId) => {
+    setClaiming(orderId);
     try {
-      await api.put(`/orders/${orderId}`, { status });
+      await api.post(`/livreur/orders/${orderId}/claim`);
       fetchOrders();
     } catch (error) {
-      window.alert('Erreur mise à jour statut');
+      window.alert(error.response?.data?.error || 'Impossible de prendre cette course');
+    } finally {
+      setClaiming(null);
+    }
+  };
+
+  const completeDelivery = async (payload) => {
+    const id = oid(proofOrder);
+    await api.post(`/livreur/orders/${id}/complete`, payload);
+    setProofOrder(null);
+    fetchOrders();
+  };
+
+  const reportIssue = async (orderId) => {
+    const message = window.prompt('Décrivez le problème (client absent, adresse incorrecte…)');
+    if (!message?.trim()) return;
+    try {
+      await api.post(`/livreur/orders/${orderId}/issue`, { message: message.trim() });
+      window.alert('Signalement envoyé à l\'équipe');
+    } catch (error) {
+      window.alert(error.response?.data?.error || 'Échec du signalement');
     }
   };
 
   const getNextAction = (status) => {
     if (status === 'pending')
-      return { label: 'Prendre', next: 'shipped', color: '#f39c12' };
+      return { label: 'Prendre', action: 'claim', color: '#f39c12' };
     if (status === 'shipped')
-      return { label: 'Marquer livrée', next: 'delivered', color: '#27ae60' };
+      return { label: 'Clôturer', action: 'deliver', color: '#27ae60' };
     return null;
   };
 
@@ -208,11 +239,12 @@ const LivreurOrdersPage = () => {
               const config = statusConfig[order.status] || statusConfig.pending;
               const StatusIcon = config.icon;
               const action = getNextAction(order.status);
-              const isExpanded = expandedOrder === order._id;
+              const orderId = oid(order);
+              const isExpanded = expandedOrder === orderId;
 
               return (
                 <motion.div
-                  key={order._id}
+                  key={orderId}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -228,7 +260,7 @@ const LivreurOrdersPage = () => {
                       gap: '16px',
                       cursor: 'pointer',
                     }}
-                    onClick={() => setExpandedOrder(isExpanded ? null : order._id)}
+                    onClick={() => setExpandedOrder(isExpanded ? null : orderId)}
                   >
                     <div style={{
                       width: '44px',
@@ -243,7 +275,7 @@ const LivreurOrdersPage = () => {
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                        <p style={{ margin: 0, fontWeight: 700 }}>Commande #{order._id?.slice(-6)}</p>
+                        <p style={{ margin: 0, fontWeight: 700 }}>Commande #{String(orderId).slice(-6)}</p>
                         <span style={{
                           padding: '3px 10px',
                           borderRadius: '8px',
@@ -256,6 +288,11 @@ const LivreurOrdersPage = () => {
                         </span>
                       </div>
                       <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#888' }}>
+                        {order.region && (
+                          <span style={{ marginRight: 8, padding: '2px 8px', borderRadius: 8, background: '#ecfdf5', color: '#047857', fontSize: '0.75rem', fontWeight: 700 }}>
+                            {order.region}
+                          </span>
+                        )}
                         {order.address || 'Adresse non spécifiée'} — {order.total} DT
                       </p>
                     </div>
@@ -264,8 +301,10 @@ const LivreurOrdersPage = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            updateStatus(order._id, action.next);
+                            if (action.action === 'deliver') setProofOrder(order);
+                            else if (action.action === 'claim') claimOrder(orderId);
                           }}
+                          disabled={action.action === 'claim' && claiming === orderId}
                           style={{
                             padding: '8px 16px',
                             background: action.color,
@@ -274,10 +313,11 @@ const LivreurOrdersPage = () => {
                             borderRadius: '10px',
                             fontWeight: 600,
                             fontSize: '0.85rem',
-                            cursor: 'pointer',
+                            cursor: claiming === orderId ? 'wait' : 'pointer',
+                            opacity: claiming === orderId ? 0.7 : 1,
                           }}
                         >
-                          {action.label}
+                          {claiming === orderId ? '…' : action.label}
                         </button>
                       )}
                       {isExpanded ? <ChevronUp size={18} color="#888" /> : <ChevronDown size={18} color="#888" />}
@@ -321,7 +361,7 @@ const LivreurOrdersPage = () => {
                               <CreditCard size={16} color="#888" />
                               <div>
                                 <p style={{ margin: 0, fontSize: '0.75rem', color: '#888' }}>Paiement</p>
-                                <p style={{ margin: '2px 0 0', fontSize: '0.9rem', fontWeight: 600 }}>{order.paymentMethod || 'Espèces'}</p>
+                                <p style={{ margin: '2px 0 0', fontSize: '0.9rem', fontWeight: 600 }}>{getPaymentLabel(order.paymentMethod)}</p>
                               </div>
                             </div>
                           </div>
@@ -344,30 +384,43 @@ const LivreurOrdersPage = () => {
                             </div>
                           )}
 
-                          {order.deliveryLocation && (
-                            <div style={{ marginTop: '16px' }}>
+                          {order.deliveryNote && (
+                            <div style={{ marginTop: 16, padding: 12, background: '#ecfdf5', borderRadius: 10, fontSize: 14 }}>
+                              <strong>Note livraison :</strong> {order.deliveryNote}
+                            </div>
+                          )}
+
+                          <div style={{ marginTop: 16, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                            {order.deliveryLocation && (
                               <a
                                 href={`https://www.google.com/maps/dir/?api=1&destination=${order.deliveryLocation.lat},${order.deliveryLocation.lng}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  padding: '10px 16px',
-                                  background: '#27ae60',
-                                  color: 'white',
-                                  borderRadius: '10px',
-                                  textDecoration: 'none',
-                                  fontWeight: 600,
-                                  fontSize: '0.9rem',
+                                  display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 16px',
+                                  background: '#27ae60', color: 'white', borderRadius: 10, textDecoration: 'none',
+                                  fontWeight: 600, fontSize: '0.9rem',
                                 }}
                               >
                                 <MapPin size={16} />
-                                Ouvrir dans Google Maps
+                                Google Maps
                               </a>
-                            </div>
-                          )}
+                            )}
+                            {['pending', 'shipped'].includes(order.status) && (
+                              <button
+                                type="button"
+                                onClick={() => reportIssue(orderId)}
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 16px',
+                                  background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca',
+                                  borderRadius: 10, fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer',
+                                }}
+                              >
+                                <AlertTriangle size={16} />
+                                Signaler un problème
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </motion.div>
                     )}
@@ -378,6 +431,14 @@ const LivreurOrdersPage = () => {
           )}
         </AnimatePresence>
       </div>
+
+      {proofOrder && (
+        <DeliveryProofModal
+          orderId={oid(proofOrder)}
+          onClose={() => setProofOrder(null)}
+          onComplete={completeDelivery}
+        />
+      )}
     </div>
   );
 };

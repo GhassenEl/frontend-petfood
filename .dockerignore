@@ -1,0 +1,15 @@
+node_modules
+dist
+.git
+.env
+.env.*
+!.env.docker.example
+backend/node_modules
+backend/.env
+backend/prisma/dev.db
+backend/prisma/dev.db-journal
+mobile_app
+.cursor
+*.md
+playwright-report
+test-results

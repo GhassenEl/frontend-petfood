@@ -31,7 +31,19 @@ const StoreLocatorPage = () => {
       }
     };
 
-    const getUserLocation = () => {
+    const getUserLocation = async () => {
+      try {
+        if (navigator.permissions) {
+          const perm = await navigator.permissions.query({ name: 'geolocation' });
+          if (perm.state === 'denied') {
+            fetchNearbyStores(36.8065, 10.1815);
+            return;
+          }
+        }
+      } catch {
+        /* permissions API indisponible */
+      }
+
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (pos) => {
@@ -40,9 +52,9 @@ const StoreLocatorPage = () => {
             fetchNearbyStores(loc.lat, loc.lng);
           },
           () => {
-            // Default to Tunis center
             fetchNearbyStores(36.8065, 10.1815);
-          }
+          },
+          { timeout: 10000, maximumAge: 120000 }
         );
       } else {
         fetchNearbyStores(36.8065, 10.1815);

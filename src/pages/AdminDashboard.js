@@ -7,6 +7,8 @@ import {
 } from 'recharts';
 import { Package, Users, Star, AlertTriangle, TrendingUp, Clock, ArrowRight } from 'lucide-react';
 import api from '../utils/api';
+import AdminTopProductsAI from '../components/AdminTopProductsAI';
+import AdminSalesForecast from '../components/AdminSalesForecast';
 
 const COLORS = ['#e67e22', '#27ae60', '#3498db', '#9b59b6', '#e74c3c', '#f39c12'];
 
@@ -128,6 +130,7 @@ const AdminDashboard = () => {
 
   const quickActions = [
     { label: 'Nouveau Produit', icon: <Package size={18} />, color: '#e67e22', link: '/admin/products' },
+    { label: 'Promotions produits', icon: <Package size={18} />, color: '#8e44ad', link: '/admin/promotions' },
     { label: 'Utilisateurs', icon: <Users size={18} />, color: '#3498db', link: '/admin/users' },
     { label: 'Avis', icon: <Star size={18} />, color: '#f39c12', link: '/admin/reviews' },
     { label: 'Réclamations', icon: <AlertTriangle size={18} />, color: '#e74c3c', link: '/admin/complaints' },
@@ -241,6 +244,10 @@ const AdminDashboard = () => {
           </motion.div>
         ))}
       </div>
+
+      <AdminTopProductsAI />
+
+      <AdminSalesForecast />
 
       {/* Charts Row */}
       <div style={{

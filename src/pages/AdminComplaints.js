@@ -1,250 +1,405 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { AlertCircle, Plus, Trash2, Edit3, Search, Send, MessageSquare, Clock } from 'lucide-react';
 import api from '../utils/api';
+import {
+  getAllComplaints,
+  createAdminComplaint,
+  updateComplaint,
+  deleteComplaint,
+} from '../services/complaintService';
+import './ClientComplaintsPage.css';
 
-const emptyForm = {
-  userId: '',
-  subject: '',
-  message: '',
-  orderId: '',
+const STATUS_LABELS = {
+  pending: 'En attente',
+  in_progress: 'En cours',
+  resolved: 'Résolue',
+  rejected: 'Refusée',
 };
+
+const emptyForm = { userId: '', subject: '', message: '', orderId: '' };
+
+const complaintId = (c) => c?.id || c?._id;
+const userOf = (c) => c?.user || c?.userId;
 
 const AdminComplaints = () => {
   const [complaints, setComplaints] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [showForm, setShowForm] = useState(false);
   const [editingComplaint, setEditingComplaint] = useState(null);
-  const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState(emptyForm);
   const [resolveModal, setResolveModal] = useState(null);
   const [responseText, setResponseText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [toast, setToast] = useState(null);
 
-  useEffect(() => {
-    fetchComplaints();
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    try {
-      const res = await api.get('/users');
-      setUsers(res.data || []);
-    } catch (error) {
-      console.error('Users load error', error);
-    }
+  const showToast = (text, type = 'success') => {
+    setToast({ text, type });
+    setTimeout(() => setToast(null), 4000);
   };
 
-  const fetchComplaints = async () => {
+  const load = async () => {
+    setLoading(true);
     try {
-      const res = await api.get('/complaints/all');
-      setComplaints(res.data || []);
-    } catch (error) {
-      console.error('Erreur chargement réclamations', error);
+      const [list, usersRes] = await Promise.all([
+        getAllComplaints(),
+        api.get('/users').catch(() => ({ data: [] })),
+      ]);
+      setComplaints(list);
+      setUsers(usersRes.data || []);
+    } catch {
       setComplaints([]);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    load();
+  }, []);
+
+  const stats = useMemo(() => ({
+    total: complaints.length,
+    pending: complaints.filter((c) => (c.status || 'pending') === 'pending').length,
+    inProgress: complaints.filter((c) => c.status === 'in_progress').length,
+    resolved: complaints.filter((c) => c.status === 'resolved').length,
+  }), [complaints]);
+
+  const filtered = useMemo(() => {
+    let list = complaints;
+    if (filter !== 'all') {
+      list = list.filter((c) => (c.status || 'pending') === filter);
+    }
+    const q = search.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((c) => {
+      const u = userOf(c);
+      return `${u?.name || ''} ${u?.email || ''} ${c.subject || ''} ${c.message || ''}`.toLowerCase().includes(q);
+    });
+  }, [complaints, filter, search]);
+
   const openCreate = () => {
     setEditingComplaint(null);
-    setFormData(emptyForm);
-    setShowModal(true);
-  };
-
-  const openEdit = (complaint) => {
-    setEditingComplaint(complaint);
     setFormData({
-      userId: complaint.userId?._id || complaint.userId || '',
-      subject: complaint.subject || '',
-      message: complaint.message || '',
-      orderId: complaint.orderId || '',
+      ...emptyForm,
+      userId: users.find((u) => u.role === 'client')?.id || users[0]?.id || users[0]?._id || '',
     });
-    setShowModal(true);
+    setShowForm(true);
   };
 
-  const closeModal = () => {
-    setShowModal(false);
-    setEditingComplaint(null);
-    setFormData(emptyForm);
+  const openEdit = (c) => {
+    const u = userOf(c);
+    setEditingComplaint(c);
+    setFormData({
+      userId: u?.id || u?._id || c.userId || '',
+      subject: c.subject || '',
+      message: c.message || '',
+      orderId: c.orderId || '',
+    });
+    setShowForm(true);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
     try {
       if (editingComplaint) {
-        await api.put(`/complaints/${editingComplaint._id}`, formData);
+        await updateComplaint(complaintId(editingComplaint), formData);
+        showToast('Réclamation mise à jour.');
       } else {
-        await api.post('/complaints/admin', formData);
+        await createAdminComplaint(formData);
+        showToast('Réclamation créée.');
       }
-      closeModal();
-      fetchComplaints();
-    } catch (error) {
-      window.alert(error.response?.data?.error || 'Erreur enregistrement réclamation');
+      setShowForm(false);
+      setEditingComplaint(null);
+      await load();
+    } catch (err) {
+      showToast(err?.response?.data?.error || 'Erreur enregistrement', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleStatus = async (c, status, response) => {
+    try {
+      await updateComplaint(complaintId(c), { status, response: response ?? c.response });
+      await load();
+      showToast(status === 'resolved' ? 'Réclamation résolue.' : status === 'in_progress' ? 'Marquée en cours.' : 'Statut mis à jour.');
+    } catch {
+      showToast('Erreur lors de la mise à jour.', 'error');
+    }
+  };
+
+  const handleResolve = async () => {
+    if (!resolveModal || !responseText.trim()) return;
+    setSubmitting(true);
+    try {
+      await updateComplaint(complaintId(resolveModal), {
+        response: responseText.trim(),
+        status: 'resolved',
+      });
+      setResolveModal(null);
+      setResponseText('');
+      await load();
+      showToast('Réponse envoyée — réclamation résolue.');
+    } catch {
+      showToast('Erreur lors de la résolution.', 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Supprimer cette réclamation ?')) return;
     try {
-      await api.delete(`/complaints/${id}`);
-      fetchComplaints();
-    } catch (error) {
-      window.alert(error.response?.data?.error || 'Erreur suppression réclamation');
+      await deleteComplaint(id);
+      await load();
+      showToast('Réclamation supprimée.');
+    } catch {
+      showToast('Suppression impossible.', 'error');
     }
   };
-
-  const handleResolve = async () => {
-    if (!resolveModal || !responseText.trim()) return;
-    try {
-      await api.put(`/complaints/${resolveModal._id}`, { response: responseText, status: 'resolved' });
-      setResolveModal(null);
-      setResponseText('');
-      fetchComplaints();
-    } catch (error) {
-      window.alert('Erreur lors de la résolution');
-    }
-  };
-
-  const statusBadge = (status) => {
-    const config = {
-      resolved: { bg: '#dcfce7', color: '#166534', label: '✅ Résolue' },
-      pending: { bg: '#fef3c7', color: '#92400e', label: '⏳ En attente' },
-    };
-    const s = config[status] || config.pending;
-    return <span style={{ ...styles.badge, background: s.bg, color: s.color }}>{s.label}</span>;
-  };
-
-  const filteredComplaints = complaints.filter((c) =>
-    `${c.userId?.name || ''} ${c.userId?.email || ''} ${c.subject || ''} ${c.message || ''}`.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  if (loading) {
-    return (
-      <div style={styles.loader}>
-        <div style={styles.spinner}></div>
-        <p>Chargement...</p>
-      </div>
-    );
-  }
 
   return (
-    <div style={styles.page}>
-      {/* Header */}
-      <div style={styles.header}>
-        <div>
-          <h1 style={styles.title}>⚠️ Gestion des réclamations</h1>
-          <p style={styles.subtitle}>{complaints.length} réclamation(s)</p>
+    <div className="cc-page cc-page--admin">
+      {toast && <div className={`cc-toast ${toast.type}`}>{toast.text}</div>}
+
+      <header className="cc-hero cc-hero--admin-complaints">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <h1>⚠️ Modération des réclamations</h1>
+            <p>
+              Traitez les demandes clients, répondez sous 48 h et suivez l’historique des litiges
+              commandes et livraisons.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="cc-submit"
+            style={{ width: 'auto', padding: '12px 20px' }}
+            onClick={() => (showForm ? setShowForm(false) : openCreate())}
+          >
+            <Plus size={18} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            {showForm ? 'Fermer' : 'Ajouter'}
+          </button>
         </div>
-        <button style={styles.addBtn} onClick={openCreate}>➕ Ajouter une réclamation</button>
+      </header>
+
+      <div className="cc-stats">
+        <div className="cc-stat">
+          <strong style={{ color: '#881337' }}>{stats.total}</strong>
+          <span>Total</span>
+        </div>
+        <div className="cc-stat">
+          <strong style={{ color: '#d97706' }}>{stats.pending}</strong>
+          <span>En attente</span>
+        </div>
+        <div className="cc-stat">
+          <strong style={{ color: '#2563eb' }}>{stats.inProgress}</strong>
+          <span>En cours</span>
+        </div>
+        <div className="cc-stat">
+          <strong style={{ color: '#16a34a' }}>{stats.resolved}</strong>
+          <span>Résolues</span>
+        </div>
       </div>
 
-      {/* Search */}
-      <div style={styles.searchBar}>
-        <span style={{ fontSize: '16px' }}>🔍</span>
-        <input
-          type="text"
-          placeholder="Rechercher une réclamation..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={styles.searchInput}
-        />
-        <span style={styles.searchCount}>{filteredComplaints.length} résultat(s)</span>
-      </div>
-
-      {/* Table */}
-      <div style={styles.tableWrapper}>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.th}>Client</th>
-              <th style={styles.th}>Email</th>
-              <th style={styles.th}>Sujet</th>
-              <th style={styles.th}>Message</th>
-              <th style={styles.th}>Statut</th>
-              <th style={styles.th}>Date</th>
-              <th style={styles.th}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredComplaints.map((c) => (
-              <tr key={c._id} style={styles.tr}>
-                <td style={styles.td}><strong>{c.userId?.name || 'Inconnu'}</strong></td>
-                <td style={styles.td}>{c.userId?.email || 'N/A'}</td>
-                <td style={styles.td}>{c.subject}</td>
-                <td style={styles.td}>
-                  <div style={{ maxWidth: '250px', fontSize: '13px', color: '#4b5563' }}>
-{c.message?.length > 120 ? c.message.substring(0, 120) + '...' : c.message}
-                  </div>
-                </td>
-                <td style={styles.td}>{statusBadge(c.status)}</td>
-                <td style={styles.td}>{new Date(c.createdAt).toLocaleDateString('fr-TN')}</td>
-                <td style={styles.td}>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    {c.status !== 'resolved' && (
-                      <button style={{ ...styles.editBtn, fontSize: '13px', padding: '6px 10px' }} onClick={() => { setResolveModal(c); setResponseText(''); }} title="Traiter">📝 Traiter</button>
-                    )}
-                    <button style={styles.editBtn} onClick={() => openEdit(c)} title="Modifier">✏️</button>
-                    <button style={styles.deleteBtn} onClick={() => handleDelete(c._id)} title="Supprimer">🗑️</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {filteredComplaints.length === 0 && (
-          <p style={styles.empty}>Aucune réclamation trouvée</p>
-        )}
-      </div>
-
-      {/* Create/Edit Modal */}
-      {showModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <h2 style={styles.modalTitle}>{editingComplaint ? '✏️ Modifier la réclamation' : '➕ Nouvelle réclamation'}</h2>
-            <form onSubmit={handleSubmit} style={styles.form}>
+      {showForm && (
+        <section className="cc-form-card">
+          <h2>{editingComplaint ? '✏️ Modifier la réclamation' : '➕ Nouvelle réclamation (admin)'}</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="cc-field">
+              <label>Client</label>
               <select
                 required
                 value={formData.userId}
                 onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
-                style={styles.input}
               >
                 <option value="">Choisir un client</option>
                 {users.map((u) => (
-                  <option key={u._id} value={u._id}>{u.name} ({u.email})</option>
+                  <option key={u.id || u._id} value={u.id || u._id}>
+                    {u.name} ({u.email})
+                  </option>
                 ))}
               </select>
-              <input required placeholder="Sujet" value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} style={styles.input} />
-              <textarea required placeholder="Message" rows="4" value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} style={styles.input} />
-              <input placeholder="ID Commande (optionnel)" value={formData.orderId} onChange={(e) => setFormData({ ...formData, orderId: e.target.value })} style={styles.input} />
-              <div style={styles.modalActions}>
-                <button type="button" style={styles.cancelBtn} onClick={closeModal}>Annuler</button>
-                <button type="submit" style={styles.saveBtn}>{editingComplaint ? '💾 Enregistrer' : '✅ Créer'}</button>
-              </div>
-            </form>
-          </div>
+            </div>
+            <div className="cc-field">
+              <label>Sujet</label>
+              <input
+                required
+                value={formData.subject}
+                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                maxLength={120}
+              />
+            </div>
+            <div className="cc-field">
+              <label>Message</label>
+              <textarea
+                required
+                rows={4}
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+              />
+            </div>
+            <div className="cc-field">
+              <label>ID commande (optionnel)</label>
+              <input
+                value={formData.orderId}
+                onChange={(e) => setFormData({ ...formData, orderId: e.target.value })}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button type="button" className="cc-btn-ghost" style={{ flex: 1 }} onClick={() => setShowForm(false)}>
+                Annuler
+              </button>
+              <button type="submit" className="cc-submit" style={{ flex: 2 }} disabled={submitting}>
+                <Send size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                {submitting ? 'Enregistrement…' : editingComplaint ? 'Enregistrer' : 'Créer'}
+              </button>
+            </div>
+          </form>
+        </section>
+      )}
+
+      <div className="cc-search">
+        <Search size={18} color="#94a3b8" />
+        <input
+          type="text"
+          placeholder="Rechercher par client, sujet, message…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <span className="cc-search-count">{filtered.length} résultat(s)</span>
+      </div>
+
+      <div className="cc-toolbar">
+        <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800 }}>File d’attente</h2>
+        <div className="cc-filters">
+          {[
+            { id: 'all', label: 'Toutes' },
+            { id: 'pending', label: 'En attente' },
+            { id: 'in_progress', label: 'En cours' },
+            { id: 'resolved', label: 'Résolues' },
+            { id: 'rejected', label: 'Refusées' },
+          ].map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              className={`cc-filter-btn ${filter === f.id ? 'active' : ''}`}
+              onClick={() => setFilter(f.id)}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading ? (
+        <p style={{ textAlign: 'center', color: '#94a3b8' }}>Chargement…</p>
+      ) : filtered.length === 0 ? (
+        <div className="cc-empty">
+          <AlertCircle size={48} style={{ opacity: 0.35, marginBottom: 12 }} />
+          <p>Aucune réclamation{search ? ' pour cette recherche' : ''}.</p>
+        </div>
+      ) : (
+        <div className="cc-list">
+          {filtered.map((c) => {
+            const status = c.status || 'pending';
+            const u = userOf(c);
+            return (
+              <article key={complaintId(c)} className={`cc-card ${status}`}>
+                <div className="cc-card-head">
+                  <h3>{c.subject}</h3>
+                </div>
+                <div className="cc-meta">
+                  <span className={`cc-badge ${status}`}>{STATUS_LABELS[status] || status}</span>
+                  <span className="cc-client-chip">{u?.name || c.name || 'Client'} · {u?.email || c.email || '—'}</span>
+                  {c.orderId && (
+                    <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                      Commande #{String(c.orderId).slice(-6)}
+                    </span>
+                  )}
+                  <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                    {new Date(c.createdAt).toLocaleString('fr-FR', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                </div>
+                <p className="cc-message">{c.message}</p>
+                {c.response && (
+                  <div className="cc-response">
+                    <strong>Votre réponse</strong>
+                    <p>{c.response}</p>
+                  </div>
+                )}
+                <div className="cc-actions">
+                  {status !== 'resolved' && status !== 'rejected' && (
+                    <>
+                      <button
+                        type="button"
+                        className="cc-btn-ghost"
+                        onClick={() => { setResolveModal(c); setResponseText(c.response || ''); }}
+                      >
+                        <MessageSquare size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                        Répondre
+                      </button>
+                      {status === 'pending' && (
+                        <button type="button" className="cc-btn-ghost" onClick={() => handleStatus(c, 'in_progress')}>
+                          <Clock size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                          En cours
+                        </button>
+                      )}
+                    </>
+                  )}
+                  <button type="button" className="cc-btn-ghost" onClick={() => openEdit(c)}>
+                    <Edit3 size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                    Modifier
+                  </button>
+                  <button type="button" className="cc-btn-danger" onClick={() => handleDelete(complaintId(c))}>
+                    <Trash2 size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                    Supprimer
+                  </button>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
 
-      {/* Resolve Modal */}
       {resolveModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <h2 style={styles.modalTitle}>📝 Traiter la réclamation</h2>
-            <div style={{ marginBottom: '16px' }}>
-              <p><strong>Client:</strong> {resolveModal.userId?.name}</p>
-              <p><strong>Sujet:</strong> {resolveModal.subject}</p>
-              <p><strong>Message:</strong> {resolveModal.message}</p>
+        <div className="cc-modal-overlay" onClick={() => setResolveModal(null)}>
+          <div className="cc-modal" onClick={(e) => e.stopPropagation()}>
+            <h2>📝 Répondre au client</h2>
+            <div style={{ marginBottom: 16, fontSize: '0.9rem', color: '#4b5563' }}>
+              <p style={{ margin: '0 0 8px' }}><strong>Client :</strong> {userOf(resolveModal)?.name || resolveModal.name}</p>
+              <p style={{ margin: '0 0 8px' }}><strong>Sujet :</strong> {resolveModal.subject}</p>
+              <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}><strong>Message :</strong> {resolveModal.message}</p>
             </div>
-            <textarea
-              rows="4"
-              placeholder="Saisir votre réponse..."
-              value={responseText}
-              onChange={(e) => setResponseText(e.target.value)}
-              style={styles.input}
-            />
-            <div style={styles.modalActions}>
-              <button style={styles.cancelBtn} onClick={() => setResolveModal(null)}>Annuler</button>
-              <button style={{ ...styles.saveBtn, background: 'linear-gradient(135deg, #16a34a, #15803d)' }} onClick={handleResolve} disabled={!responseText.trim()}>✅ Résoudre</button>
+            <div className="cc-field">
+              <label>Réponse (visible par le client)</label>
+              <textarea
+                rows={4}
+                placeholder="Expliquez la résolution ou les prochaines étapes…"
+                value={responseText}
+                onChange={(e) => setResponseText(e.target.value)}
+              />
+            </div>
+            <div className="cc-modal-actions">
+              <button type="button" className="cc-btn-ghost" onClick={() => setResolveModal(null)}>Annuler</button>
+              <button
+                type="button"
+                className="cc-btn-primary cc-btn-resolve"
+                onClick={handleResolve}
+                disabled={!responseText.trim() || submitting}
+              >
+                ✅ Résoudre et notifier
+              </button>
             </div>
           </div>
         </div>
@@ -253,36 +408,4 @@ const AdminComplaints = () => {
   );
 };
 
-const styles = {
-  page: { padding: '24px', maxWidth: '1200px', margin: '0 auto' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' },
-  title: { fontSize: '24px', fontWeight: '800', color: '#065f46', margin: 0 },
-  subtitle: { fontSize: '14px', color: '#6b7280', margin: '4px 0 0 0' },
-  addBtn: { padding: '12px 20px', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '700', fontSize: '14px', cursor: 'pointer', boxShadow: '0 4px 14px rgba(16,185,129,0.3)', transition: 'transform 0.2s' },
-  searchBar: { display: 'flex', alignItems: 'center', gap: '12px', background: 'white', padding: '12px 18px', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', marginBottom: '20px', border: '1px solid #e5e7eb' },
-  searchInput: { flex: 1, border: 'none', outline: 'none', fontSize: '14px', background: 'transparent' },
-  searchCount: { fontSize: '12px', color: '#9ca3af', whiteSpace: 'nowrap' },
-  tableWrapper: { background: 'white', borderRadius: '18px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', overflow: 'hidden' },
-  table: { width: '100%', borderCollapse: 'collapse' },
-  th: { textAlign: 'left', padding: '14px 16px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#6b7280', borderBottom: '2px solid #f3f4f6', fontWeight: '700', background: '#f9fafb' },
-  tr: { borderBottom: '1px solid #f3f4f6', transition: 'background 0.2s' },
-  td: { padding: '12px 16px', fontSize: '14px', color: '#374151', verticalAlign: 'middle' },
-  badge: { display: 'inline-block', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: '700' },
-  editBtn: { padding: '6px 10px', background: '#eff6ff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', transition: 'background 0.2s' },
-  deleteBtn: { padding: '6px 10px', background: '#fef2f2', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', transition: 'background 0.2s' },
-  empty: { textAlign: 'center', padding: '40px', color: '#9ca3af', fontSize: '14px' },
-  loader: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '12px' },
-  spinner: { width: '32px', height: '32px', border: '3px solid #d1fae5', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin 1s linear infinite' },
-  modalOverlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', zIndex: 1000, backdropFilter: 'blur(4px)' },
-  modal: { background: 'white', borderRadius: '20px', padding: '28px', width: '520px', maxWidth: '100%', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' },
-  modalTitle: { margin: '0 0 20px 0', fontSize: '18px', fontWeight: '800', color: '#111827' },
-  form: { display: 'flex', flexDirection: 'column', gap: '12px' },
-  input: { width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.2s' },
-  row2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' },
-  modalActions: { display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' },
-  cancelBtn: { padding: '10px 18px', background: '#f3f4f6', border: 'none', borderRadius: '10px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', color: '#4b5563' },
-  saveBtn: { padding: '10px 18px', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', fontSize: '14px', boxShadow: '0 4px 14px rgba(16,185,129,0.3)' },
-};
-
 export default AdminComplaints;
-

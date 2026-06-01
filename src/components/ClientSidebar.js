@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import NotificationBell from './NotificationBell';
-import { useTheme } from '../contexts/ThemeContext';
+import ThemeToggles from './ThemeToggles';
 
 const petEmojis = {
   dog: '🐶',
@@ -21,7 +21,6 @@ const petLabels = {
 };
 
 const ClientSidebar = ({ onLogout, onNavigate }) => {
-  const { isDark, toggleDark } = useTheme();
   const [sidebarImageError, setSidebarImageError] = useState(false);
   const navigate = useNavigate();
   const [profile, setProfile] = useState({
@@ -53,9 +52,12 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
       title: '🛒 Boutique',
       items: [
         { id: 'client-products', label: 'Produits', icon: '🏷️' },
+        { id: 'client-favorites', label: 'Favoris', icon: '❤️' },
         { id: 'client-orders', label: 'Mes Commandes', icon: '📦' },
         { id: 'client-invoices', label: 'Factures', icon: '🧾' },
         { id: 'client-history', label: 'Historique', icon: '📜' },
+        { id: 'client-loyalty', label: 'Fidélité & promos', icon: '🎁' },
+        { id: 'client-wallet', label: 'Portefeuille', icon: '👛' },
       ]
     },
     {
@@ -69,9 +71,15 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
       title: '🐾 Services',
       items: [
         { id: '__open-chat__', label: 'Assistant en ligne', icon: '💬', action: 'open-chat' },
+        { id: 'pet-feeder', label: 'Distributeur IoT', icon: '🍽️' },
         { id: 'smart-food-agent', label: 'NutriPro', icon: '🥗' },
         { id: 'nutripro-history', label: 'Historique NutriPro', icon: '📚' },
-        { id: 'pet-advice', label: 'Conseils', icon: '💡' },        { id: 'client-events', label: 'Événements', icon: '📅' },        { id: 'veterinary', label: 'Vétérinaire', icon: '🩺' },
+        { id: 'pet-advice', label: 'Conseils', icon: '💡' },
+        { id: 'client-vaccines', label: 'Rappels vaccins', icon: '💉' },
+        { id: 'client-services', label: 'Toilettage & Pension', icon: '✂️' },
+        { id: 'client-events', label: 'Événements', icon: '📅' },
+        { id: 'veterinary', label: 'Santé & Vétérinaire', icon: '🩺' },
+        { id: 'medical-dossier', label: 'Dossier médical', icon: '📁' },
         { id: 'store-locator', label: 'Magasins', icon: '📍' },
         { id: 'contact', label: 'Contact', icon: '📧' },
       ]
@@ -251,15 +259,7 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         flexDirection: 'column',
         gap: '8px',
       }}>
-        <button
-          type="button"
-          onClick={toggleDark}
-          className="btn btn-outline"
-          style={{ width: '100%', justifyContent: 'flex-start', padding: '10px 14px' }}
-        >
-          <span>{isDark ? '☀️' : '🌙'}</span>
-          <span>{isDark ? 'Mode clair' : 'Mode sombre'}</span>
-        </button>
+        <ThemeToggles />
         <button
           type="button"
           onClick={onLogout}

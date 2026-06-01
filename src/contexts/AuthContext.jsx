@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../utils/api';
 import { jwtDecode } from 'jwt-decode';
+import {
+  clearAuthToken,
+  getStoredToken,
+  persistAuthToken,
+} from '../utils/authStorage';
+import { mapAuthError } from '../utils/authErrors';
 
 const safeJsonError = (err) => {
   if (!err) return null;
@@ -26,50 +32,38 @@ export const AuthProvider = ({ children }) => {
 
   // Initialize auth state safely
   useEffect(() => {
-    console.log('🔐 AuthContext: Initializing auth...');
     const initializeAuth = async () => {
       try {
-        const storedToken = localStorage.getItem('token');
-        console.log('🔐 Found stored token:', storedToken ? 'YES' : 'NO');
+        const storedToken = getStoredToken();
         
-        // If backend is offline we should not block UI forever.
-        // Auth initialization here only validates token; backend health will be handled on API calls.
         if (storedToken) {
           // Validate token before setting
           try {
             const decoded = jwtDecode(storedToken);
-            console.log('🔐 Token decoded:', decoded);
             
-            // Check if token is expired
             if (decoded.exp && decoded.exp * 1000 < Date.now()) {
-              console.log('❌ Token expired, clearing');
-              localStorage.removeItem('token');
+              clearAuthToken();
               setToken(null);
               setUser(null);
             } else {
-              console.log('✅ Valid token, setting user:', decoded);
               setToken(storedToken);
               setUser(decoded);
               api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
             }
           } catch (decodeError) {
             console.error('❌ Invalid token, clearing:', decodeError.message);
-            localStorage.removeItem('token');
+            clearAuthToken();
             setToken(null);
             setUser(null);
           }
-        } else {
-          console.log('ℹ️ No token found, anonymous mode');
         }
       } catch (error) {
         console.error('💥 Auth initialization error:', error);
         setAuthError(error.message);
-        localStorage.removeItem('token');
+        clearAuthToken();
         setToken(null);
         setUser(null);
       } finally {
-        console.log('🏁 AuthContext loading complete');
-        // Always set loading to false after initialization
         setLoading(false);
       }
     };
@@ -77,11 +71,11 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email, password, rememberMe = false) => {
     try {
       const res = await api.post('/auth/login', { email, password });
       const { token, user } = res.data;
-      localStorage.setItem('token', token);
+      persistAuthToken(token, rememberMe);
       setToken(token);
       setUser(user);
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -96,15 +90,21 @@ export const AuthProvider = ({ children }) => {
             'Le serveur API ne répond pas (502). Lancez le backend sur le port indiqué dans backend/.env et vérifiez VITE_API_PROXY_TARGET dans le frontend.',
         };
       }
-      return { success: false, error: error.response?.data?.error || error.response?.data?.message || error.message || 'Erreur login' };
+      return {
+        success: false,
+        error: mapAuthError(
+          error.response?.data?.error || error.response?.data?.message,
+          'Erreur de connexion. Réessayez.'
+        ),
+      };
     }
   };
 
-  const register = async (data) => {
+  const register = async (data, rememberMe = false) => {
     try {
       const res = await api.post('/auth/register', data);
       const { token, user } = res.data;
-      localStorage.setItem('token', token);
+      persistAuthToken(token, rememberMe);
       setToken(token);
       setUser(user);
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -119,12 +119,18 @@ export const AuthProvider = ({ children }) => {
             'Le serveur API ne répond pas. Vérifiez que le backend tourne et que le proxy Vite (VITE_API_PROXY_TARGET) correspond au PORT du backend.',
         };
       }
-      return { success: false, error: error.response?.data?.error || error.response?.data?.message || error.message || 'Erreur register' };
+      return {
+        success: false,
+        error: mapAuthError(
+          error.response?.data?.error || error.response?.data?.message,
+          'Erreur lors de l\'inscription.'
+        ),
+      };
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    clearAuthToken();
     setToken(null);
     setUser(null);
     delete api.defaults.headers.common['Authorization'];

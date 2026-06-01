@@ -189,7 +189,7 @@ const AdminVeterinary = () => {
                 <td style={styles.td}>{record.ownerId?.name || record.ownerName || 'Inconnu'}</td>
                 <td style={styles.td}>
                   <div style={{ maxWidth: '180px', fontSize: '13px', color: '#4b5563' }}>
-{record.diagnosis?.length > 100 ? record.diagnosis.substring(0, 100) + '...' : record.diagnosis}
+                    {record.diagnosis?.length > 100 ? record.diagnosis.substring(0, 100) + '...' : record.diagnosis}
                   </div>
                 </td>
                 <td style={styles.td}>{record.weight ? `${record.weight} kg` : '-'}</td>

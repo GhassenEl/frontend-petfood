@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Navigation } from 'lucide-react';
 import api from '../utils/api';
+import LivreurDeliveryMap, { getOrderCoords } from '../components/LivreurDeliveryMap';
 
 const LivreurMapPage = () => {
   const [orders, setOrders] = useState([]);
@@ -14,7 +15,9 @@ const LivreurMapPage = () => {
   const fetchOrders = async () => {
     try {
       const res = await api.get('/orders');
-      setOrders((res.data || []).filter(o => o.status === 'shipped'));
+      setOrders(
+        (res.data || []).filter((o) => ['pending', 'shipped'].includes(o.status))
+      );
     } catch (error) {
       console.error('Map orders error:', error);
     } finally {
@@ -22,10 +25,13 @@ const LivreurMapPage = () => {
     }
   };
 
+  const withGps = orders.filter((o) => getOrderCoords(o));
+  const withoutGps = orders.filter((o) => !getOrderCoords(o));
+
   if (loading) {
     return (
       <div style={{ padding: '40px', textAlign: 'center' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '16px', animation: 'float 2s ease-in-out infinite' }}>🗺️</div>
+        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🗺️</div>
         <p style={{ color: '#888' }}>Chargement de la carte...</p>
       </div>
     );
@@ -33,67 +39,78 @@ const LivreurMapPage = () => {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        style={{ marginBottom: '24px' }}
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: '24px' }}>
         <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 800 }}>🗺️ Carte des livraisons</h1>
         <p style={{ color: '#888', marginTop: '8px' }}>
-          {orders.length} commande(s) en cours de livraison
+          {orders.length} livraison(s) · {withGps.length} avec GPS
         </p>
       </motion.div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: '20px',
-      }}>
-        {orders.map((order, i) => (
-          <motion.div
-            key={order._id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="card-animal"
-            style={{ padding: '20px' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '10px',
-                background: 'rgba(39,174,96,0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <MapPin size={20} color="#27ae60" />
+      <LivreurDeliveryMap orders={orders} height={440} />
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '20px',
+          marginTop: 24,
+        }}
+      >
+        {[...withGps, ...withoutGps].map((order, i) => {
+          const coords = getOrderCoords(order);
+          const mapsQuery = encodeURIComponent(order.address || 'Tunis');
+          return (
+            <motion.div
+              key={order._id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="card-animal"
+              style={{ padding: '20px' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 10,
+                    background: 'rgba(39,174,96,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <MapPin size={20} color="#27ae60" />
+                </div>
+                <div>
+                  <p style={{ margin: 0, fontWeight: 700 }}>#{order._id?.slice(-6)}</p>
+                  <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#888' }}>
+                    {order.region && `${order.region} · `}{order.total} DT · {order.status}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p style={{ margin: 0, fontWeight: 700 }}>Commande #{order._id?.slice(-6)}</p>
-                <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#888' }}>{order.total} DT</p>
-              </div>
-            </div>
-            <p style={{ margin: '0 0 12px', fontSize: '0.9rem', color: '#555' }}>
-              <strong>Adresse:</strong> {order.address || 'Non spécifiée'}
-            </p>
-            <p style={{ margin: '0 0 12px', fontSize: '0.9rem', color: '#555' }}>
-              <strong>Téléphone:</strong> {order.phone || 'Non spécifié'}
-            </p>
-            {order.location && (
+              <p style={{ margin: '0 0 12px', fontSize: '0.9rem', color: '#555' }}>
+                <strong>Adresse:</strong> {order.address || 'Non spécifiée'}
+              </p>
+              <p style={{ margin: '0 0 12px', fontSize: '0.9rem', color: '#555' }}>
+                <strong>Téléphone:</strong> {order.phone || 'Non spécifié'}
+              </p>
               <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${order.location.lat},${order.location.lng}`}
+                href={
+                  coords
+                    ? `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`
+                    : `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: 6,
                   padding: '10px 16px',
                   background: '#27ae60',
                   color: 'white',
-                  borderRadius: '10px',
+                  borderRadius: 10,
                   textDecoration: 'none',
                   fontWeight: 600,
                   fontSize: '0.9rem',
@@ -102,9 +119,9 @@ const LivreurMapPage = () => {
                 <Navigation size={16} />
                 Itinéraire
               </a>
-            )}
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
 
       {orders.length === 0 && (
@@ -118,4 +135,3 @@ const LivreurMapPage = () => {
 };
 
 export default LivreurMapPage;
-

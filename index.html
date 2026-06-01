@@ -2,7 +2,11 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#e67e22">
   <title>PetfoodTN - Plateforme Premium pour Animaux</title>
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,15 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- FontAwesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Maps API - Replace DUMMY_KEY_HERE with your actual API key -->
-  <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDUMMY_KEY_HERE&libraries=places&callback=initMap"></script>
-  <script>
-    function initMap() {
-      window.googleMapsLoaded = true;
-      console.log('Google Maps API loaded');
-    }
-  </script>
+  <!-- Google Maps : chargé à la demande via src/utils/googleMapsLoader.js (VITE_GOOGLE_MAPS_KEY) -->
 </head>
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>

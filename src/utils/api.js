@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { clearAuthToken, getStoredToken } from './authStorage';
 
 const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
@@ -28,13 +29,13 @@ const isValidToken = (token) => {
 };
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = getStoredToken();
   // Validate token before attaching
   if (token && isValidToken(token)) {
     config.headers.Authorization = `Bearer ${token}`;
   } else if (token) {
     // Clear invalid token
-    localStorage.removeItem('token');
+    clearAuthToken();
     console.warn('Cleared invalid token');
   }
   return config;
@@ -57,23 +58,30 @@ api.interceptors.response.use(
     } else if (error.response?.status === 404) {
       console.error(`API 404: ${error.config?.url} not found.`);
       error.isNotFound = true;
+    } else if (error.response?.status === 403 && error.response?.data?.error === 'Account disabled') {
+      console.warn('Account disabled — redirecting to login');
+      clearAuthToken();
+      delete api.defaults.headers.common['Authorization'];
+      if (!window.location.pathname.includes('/login')) {
+        window.location.assign('/login');
+      }
     } else if (error.response?.status === 401) {
       const requestUrl = error.config?.url || '';
       // Avoid redirect loop on login/register calls
       if (!requestUrl.includes('/auth/login') && !requestUrl.includes('/auth/register')) {
         if (!window.location.pathname.includes('/login')) {
           console.warn('Unauthorized (401). Redirecting to login');
-          localStorage.removeItem('token');
+          clearAuthToken();
           delete api.defaults.headers.common['Authorization'];
           window.location.assign('/login');
         } else {
           // Already on login page: just clear token
-          localStorage.removeItem('token');
+          clearAuthToken();
           delete api.defaults.headers.common['Authorization'];
         }
       } else {
         // login/register failed -> clear stale token if any
-        localStorage.removeItem('token');
+        clearAuthToken();
         delete api.defaults.headers.common['Authorization'];
       }
     }

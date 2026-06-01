@@ -1,0 +1,359 @@
+.hmi-root {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 88px);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  box-sizing: border-box;
+}
+
+.hmi-header {
+  margin-bottom: 16px;
+}
+
+.hmi-header h1 {
+  margin: 0 0 4px;
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+.hmi-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
+.hmi-layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 16px;
+  background: white;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.hmi-layout--single {
+  grid-template-columns: 1fr;
+}
+
+.hmi-sidebar {
+  border-right: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: #fafafa;
+}
+
+.hmi-sidebar-tools {
+  padding: 14px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hmi-search,
+.hmi-filter {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.88rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.hmi-search:focus,
+.hmi-filter:focus {
+  border-color: #10b981;
+}
+
+.hmi-conv-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.hmi-conv-item {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  transition: background 0.15s ease;
+}
+
+.hmi-conv-item:hover {
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.hmi-conv-item.active {
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.hmi-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  font-weight: 700;
+  color: white;
+}
+
+.hmi-avatar--client { background: linear-gradient(135deg, #e67e22, #d35400); }
+.hmi-avatar--livreur { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+.hmi-avatar--admin { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+
+.hmi-conv-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.hmi-conv-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.hmi-conv-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hmi-conv-time {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.hmi-conv-preview {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hmi-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.hmi-role-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.hmi-thread {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.hmi-thread-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hmi-thread-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.hmi-status {
+  font-size: 0.75rem;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hmi-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+.hmi-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 40%);
+}
+
+.hmi-date-sep {
+  text-align: center;
+  font-size: 0.72rem;
+  color: #9ca3af;
+  margin: 8px 0;
+}
+
+.hmi-bubble {
+  max-width: 78%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.hmi-bubble--mine {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.hmi-bubble--theirs {
+  align-self: flex-start;
+  background: white;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  border-bottom-left-radius: 4px;
+}
+
+.hmi-bubble-meta {
+  margin-top: 4px;
+  font-size: 0.68rem;
+  opacity: 0.75;
+}
+
+.hmi-compose {
+  border-top: 1px solid #f1f5f9;
+  padding: 14px 16px;
+  background: white;
+}
+
+.hmi-quick-replies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.hmi-quick-btn {
+  border: 1px solid #d1fae5;
+  background: #ecfdf5;
+  color: #047857;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.hmi-quick-btn:hover {
+  background: #d1fae5;
+}
+
+.hmi-compose-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.hmi-textarea {
+  flex: 1;
+  min-height: 44px;
+  max-height: 120px;
+  resize: vertical;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  font-size: 0.92rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.hmi-textarea:focus {
+  border-color: #10b981;
+}
+
+.hmi-send-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  background: #10b981;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hmi-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hmi-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  padding: 40px;
+  text-align: center;
+}
+
+.hmi-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 860px) {
+  .hmi-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .hmi-sidebar {
+    max-height: 220px;
+    border-right: none;
+    border-bottom: 1px solid #f1f5f9;
+  }
+}

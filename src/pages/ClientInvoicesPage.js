@@ -1,28 +1,35 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
-import { jsPDF } from 'jspdf';
-
-const PAYMENT_OPTIONS = [
-  { value: 'cash', label: 'Especes' },
-  { value: 'check', label: 'Cheque' },
-  { value: 'card', label: 'Carte bancaire' },
-  { value: 'transfer', label: 'Virement' },
-];
+import InvoicePayModal from '../components/InvoicePayModal';
+import { getPaymentLabel } from '../constants/paymentMethods';
+import { downloadInvoicePdf } from '../utils/invoicePdf';
 
 const ClientInvoicesPage = () => {
+  const [searchParams] = useSearchParams();
+  const orderIdFromUrl = searchParams.get('orderId');
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('cash');
 
   useEffect(() => {
     fetchInvoices();
-  }, []);
+  }, [orderIdFromUrl]);
 
   const fetchInvoices = async () => {
     try {
       const res = await api.get('/invoices');
-      setInvoices(res.data);
+      const list = res.data || [];
+      setInvoices(list);
+      if (orderIdFromUrl) {
+        const match = list.find(
+          (inv) =>
+            inv.orderId?._id === orderIdFromUrl ||
+            inv.orderId === orderIdFromUrl ||
+            inv.orderId?.id === orderIdFromUrl
+        );
+        if (match && match.status !== 'paid') setSelectedInvoice(match);
+      }
     } catch (error) {
       console.error('Error fetching invoices', error);
       setInvoices([]);
@@ -31,45 +38,7 @@ const ClientInvoicesPage = () => {
     }
   };
 
-  const handlePay = async () => {
-    if (!selectedInvoice) return;
-    try {
-      await api.post(`/invoices/${selectedInvoice._id}/pay`, { paymentMethod });
-      setSelectedInvoice(null);
-      fetchInvoices();
-      window.alert('Facture payee avec succes');
-    } catch (error) {
-      window.alert(error.response?.data?.error || 'Erreur lors du paiement');
-    }
-  };
-
-  const downloadPDF = (invoice) => {
-    const doc = new jsPDF();
-    doc.setFontSize(22);
-    doc.text('PetfoodTN - Facture', 105, 20, { align: 'center' });
-    doc.setFontSize(12);
-    doc.text(`Facture #${invoice._id.slice(-6)}`, 20, 40);
-    doc.text(`Date: ${new Date(invoice.issuedAt).toLocaleDateString('fr-FR')}`, 20, 50);
-    doc.text(`Statut: ${invoice.status === 'paid' ? 'Payee' : 'Non payee'}`, 20, 60);
-    doc.text(`Methode: ${invoice.paymentMethod || 'A definir'}`, 20, 70);
-    doc.line(20, 80, 190, 80);
-    doc.setFontSize(14);
-    doc.text('Articles:', 20, 95);
-    let y = 105;
-    (invoice.orderId?.items || []).forEach((item, index) => {
-      doc.setFontSize(11);
-      doc.text(`${index + 1}. ${item.productId?.name || 'Produit'} x ${item.quantity} - ${(item.price * item.quantity).toFixed(2)} DT`, 25, y);
-      y += 10;
-    });
-    doc.line(20, y + 5, 190, y + 5);
-    doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
-    doc.text(`TOTAL: ${invoice.amount} DT`, 20, y + 20);
-    doc.setFont(undefined, 'normal');
-    doc.setFontSize(10);
-    doc.text('Merci pour votre confiance! - PetfoodTN', 105, 280, { align: 'center' });
-    doc.save(`facture_${invoice._id.slice(-6)}.pdf`);
-  };
+  const downloadPDF = (invoice) => downloadInvoicePdf(invoice);
 
   if (loading) return <div className="container p-8 text-center">Chargement...</div>;
 
@@ -96,14 +65,14 @@ const ClientInvoicesPage = () => {
                   <h3 style={{ margin: '6px 0' }}>{invoice.orderId?.items?.length || 0} article(s)</h3>
                 </div>
                 <span style={{ ...statusBadgeStyle, backgroundColor: invoice.status === 'paid' ? '#dcfce7' : '#fef3c7', color: invoice.status === 'paid' ? '#166534' : '#92400e' }}>
-                  {invoice.status === 'paid' ? 'Payee' : 'Non payee'}
+                  {invoice.status === 'paid' ? 'Payée' : invoice.status === 'pending' ? 'En attente' : 'Non payée'}
                 </span>
               </div>
 
               <div style={infoGridStyle}>
                 <div><strong>Montant</strong><p>{invoice.amount} DT</p></div>
                 <div><strong>Emission</strong><p>{new Date(invoice.issuedAt).toLocaleDateString('fr-FR')}</p></div>
-                <div><strong>Methode</strong><p>{invoice.paymentMethod || 'A definir'}</p></div>
+                <div><strong>Methode</strong><p>{getPaymentLabel(invoice.paymentMethod)}</p></div>
                 <div><strong>Commande</strong><p>{invoice.orderId?._id?.slice(-6) || 'N/A'}</p></div>
               </div>
 
@@ -119,11 +88,11 @@ const ClientInvoicesPage = () => {
               <div style={footerStyle}>
                 <strong style={{ fontSize: '22px' }}>{invoice.amount} DT</strong>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  <button style={pdfButtonStyle} onClick={() => downloadPDF(invoice)}>
-                    📄 PDF
+                  <button style={pdfButtonStyle} onClick={() => downloadPDF(invoice)} title="Télécharger PDF">
+                    📄 Exporter PDF
                   </button>
                   {invoice.status !== 'paid' ? (
-                    <button style={payButtonStyle} onClick={() => { setSelectedInvoice(invoice); setPaymentMethod(invoice.paymentMethod || 'cash'); }}>
+                    <button style={payButtonStyle} onClick={() => setSelectedInvoice(invoice)}>
                       Payer la facture
                     </button>
                   ) : (
@@ -137,28 +106,15 @@ const ClientInvoicesPage = () => {
       )}
 
       {selectedInvoice && (
-        <div style={modalOverlayStyle}>
-          <div style={modalContentStyle}>
-            <h3 style={{ marginTop: 0 }}>Choisir la methode de paiement</h3>
-            <div style={{ display: 'grid', gap: '12px', marginBottom: '20px' }}>
-              {PAYMENT_OPTIONS.map((option) => (
-                <label key={option.value} style={paymentOptionStyle}>
-                  <input
-                    type="radio"
-                    value={option.value}
-                    checked={paymentMethod === option.value}
-                    onChange={(event) => setPaymentMethod(event.target.value)}
-                  />
-                  <span>{option.label}</span>
-                </label>
-              ))}
-            </div>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button style={secondaryButtonStyle} onClick={() => setSelectedInvoice(null)}>Annuler</button>
-              <button style={payButtonStyle} onClick={handlePay}>Confirmer le paiement</button>
-            </div>
-          </div>
-        </div>
+        <InvoicePayModal
+          invoice={selectedInvoice}
+          onCancel={() => setSelectedInvoice(null)}
+          onSuccess={() => {
+            setSelectedInvoice(null);
+            fetchInvoices();
+            window.alert('Facture payée avec succès');
+          }}
+        />
       )}
     </div>
   );
@@ -245,47 +201,9 @@ const pdfButtonStyle = {
   cursor: 'pointer',
 };
 
-const secondaryButtonStyle = {
-  padding: '12px 18px',
-  background: '#e5e7eb',
-  color: '#111827',
-  border: 'none',
-  borderRadius: '10px',
-  fontWeight: 'bold',
-  cursor: 'pointer',
-};
-
 const paidLabelStyle = {
   color: '#166534',
   fontWeight: 'bold',
-};
-
-const modalOverlayStyle = {
-  position: 'fixed',
-  inset: 0,
-  background: 'rgba(0,0,0,0.45)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '16px',
-  zIndex: 1000,
-};
-
-const modalContentStyle = {
-  background: 'white',
-  borderRadius: '18px',
-  padding: '24px',
-  width: '420px',
-  maxWidth: '100%',
-};
-
-const paymentOptionStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px',
-  padding: '12px',
-  border: '1px solid #e5e7eb',
-  borderRadius: '12px',
 };
 
 export default ClientInvoicesPage;

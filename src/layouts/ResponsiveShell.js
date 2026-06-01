@@ -5,7 +5,7 @@ import { Menu, X } from 'lucide-react';
 /**
  * En-tête mobile + panneau latéral coulissant pour les trois plateformes (client / admin / livreur).
  */
-const ResponsiveShell = ({ children, sidebar, roleBadge, className = '' }) => {
+const ResponsiveShell = ({ children, sidebar, roleBadge, className = '', bottomNav = null }) => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const location = useLocation();
 
@@ -13,12 +13,18 @@ const ResponsiveShell = ({ children, sidebar, roleBadge, className = '' }) => {
     setMobileNavOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    const openMenu = () => setMobileNavOpen(true);
+    window.addEventListener('petfood:open-mobile-nav', openMenu);
+    return () => window.removeEventListener('petfood:open-mobile-nav', openMenu);
+  }, []);
+
   const closeNav = () => setMobileNavOpen(false);
   const toggleNav = () => setMobileNavOpen((o) => !o);
 
   return (
     <div
-      className={`workspace flex platform-workspace ${mobileNavOpen ? 'platform-workspace--nav-open' : ''} ${className}`.trim()}
+      className={`workspace flex platform-workspace ${bottomNav ? 'platform-workspace--with-bottom-nav' : ''} ${mobileNavOpen ? 'platform-workspace--nav-open' : ''} ${className}`.trim()}
     >
       <a href="#contenu-principal" className="skip-to-content">
         Aller au contenu
@@ -56,8 +62,9 @@ const ResponsiveShell = ({ children, sidebar, roleBadge, className = '' }) => {
       </div>
 
       <main id="contenu-principal" className="main-area main-area--platform" tabIndex={-1}>
-        {children}
+        <div className="page-content-shell">{children}</div>
       </main>
+      {bottomNav}
     </div>
   );
 };

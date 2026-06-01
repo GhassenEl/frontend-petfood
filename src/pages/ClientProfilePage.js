@@ -20,7 +20,8 @@ const TabPanel = ({ children, value, index, ...other }) => {
 const ClientProfilePage = () => {
   useAuth();
   const [value, setValue] = useState(0);
-  const [profile, setProfile] = useState({ name: '', email: '', phone: '', address: '' });
+  const [profile, setProfile] = useState({ name: '', email: '', phone: '', address: '', region: '' });
+  const [regions, setRegions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -35,13 +36,18 @@ const ClientProfilePage = () => {
 
   const fetchData = async () => {
     try {
-      const profileRes = await api.get('/users/profile');
+      const [profileRes, regionsRes] = await Promise.all([
+        api.get('/users/profile'),
+        api.get('/users/regions').catch(() => ({ data: [] })),
+      ]);
       setProfile({
         name: profileRes.data.name || '',
         email: profileRes.data.email || '',
         phone: profileRes.data.phone || '',
-        address: profileRes.data.address || ''
+        address: profileRes.data.address || '',
+        region: profileRes.data.region || '',
       });
+      setRegions(regionsRes.data || []);
     } catch (error) {
       console.error('Data fetch error', error);
     } finally {
@@ -119,7 +125,7 @@ const ClientProfilePage = () => {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-                    <TextField fullWidth value={profile.email} disabled variant="outlined" InputProps={{ className: 'bg-gray-50' }} />
+                    <TextField fullWidth value={profile.email} disabled variant="outlined" slotProps={{ input: { className: 'bg-gray-50' } }} />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Nom complet</label>
@@ -128,6 +134,20 @@ const ClientProfilePage = () => {
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Téléphone</label>
                     <TextField fullWidth value={profile.phone} onChange={(e) => setProfile({...profile, phone: e.target.value})} variant="outlined" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Région / zone de livraison</label>
+                    <select
+                      className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800"
+                      value={profile.region}
+                      onChange={(e) => setProfile({ ...profile, region: e.target.value })}
+                    >
+                      <option value="">— Détectée depuis l&apos;adresse —</option>
+                      {regions.map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">Utilisée pour trouver le vétérinaire le plus proche de chez vous.</p>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Adresse</label>

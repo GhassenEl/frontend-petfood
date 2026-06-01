@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
-import { useTheme } from '../contexts/ThemeContext';
+import ThemeToggles from './ThemeToggles';
 
 const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
-  const { isDark, toggleDark } = useTheme();
   const [sidebarImageError, setSidebarImageError] = useState(false);
   const sections = [
     {
@@ -12,6 +11,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
       items: [
         { id: 'dashboard', label: 'Tableau de bord', icon: '📊' },
         { id: 'orders', label: 'Commandes', icon: '📦' },
+        { id: 'route', label: 'Tournée', icon: '🛣️' },
         { id: 'map', label: 'Carte', icon: '🗺️' },
         { id: 'availability', label: 'Disponibilité', icon: '🟢' },
       ]
@@ -34,6 +34,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
       title: '📋 Historique & Profil',
       items: [
         { id: 'history', label: 'Historique', icon: '📜' },
+        { id: 'leave-requests', label: 'Congés / maladie', icon: '🏖️' },
         { id: 'profile', label: 'Profil', icon: '👤' },
       ]
     }
@@ -69,7 +70,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
         )}
           <div>
             <p>{user?.name || 'Livreur'}</p>
-            <p>Livreur</p>
+            <p>{user?.region ? `Zone ${user.region}` : 'Livreur'}</p>
           </div>
         </div>
         <NotificationBell />
@@ -125,15 +126,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
 
       {/* Bottom Actions */}
       <div className="sidebar-footer">
-        <button
-          type="button"
-          onClick={toggleDark}
-          className="btn btn-outline"
-          style={{ width: '100%', justifyContent: 'flex-start', padding: '12px 14px', marginBottom: '8px' }}
-        >
-          <span>{isDark ? '☀️' : '🌙'}</span>
-          <span>{isDark ? 'Mode clair' : 'Mode sombre'}</span>
-        </button>
+        <ThemeToggles />
         <button
           type="button"
           onClick={onLogout}

@@ -1,18 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Flame, Sparkles, ShoppingCart } from 'lucide-react';
-import api from '../utils/api';
+import { MapPin, Flame, Sparkles, ShoppingCart, Search, Eye } from 'lucide-react';
+import {
+  getProducts,
+  getProductRecommendations,
+  getNearbyProducts,
+} from '../services/productService';
+import { getProfile } from '../services/userService';
+import { getFavoriteIds, addFavorite, removeFavorite, getFrequentProducts } from '../services/favoriteService';
+import ProductDetailModal from '../components/ProductDetailModal';
+import {
+  matchProductSearch,
+  CATEGORY_FILTERS,
+  matchCategoryFilter,
+} from '../utils/productCatalog';
+import { getEffectiveDiscount, getPromoPrice, isOnPromotion } from '../utils/productDetails';
+import { productId, dedupeProducts, withProductIds } from '../utils/productId';
 
-
+const PET_LABELS = { dog: 'chien', cat: 'chat', bird: 'oiseau', fish: 'poisson', other: 'animal' };
 
 const ClientProductsPage = () => {
   const [recommendations, setRecommendations] = useState([]);
   const [nearby, setNearby] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [animalFilter, setAnimalFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [promoOnly, setPromoOnly] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [products, setProducts] = useState([]);
   const [soldes, setSoldes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
+  const [frequent, setFrequent] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -23,26 +44,43 @@ const ClientProductsPage = () => {
     setError('');
 
     try {
-      const productsRes = await api.get('/products');
-      setProducts(productsRes.data || []);
-      setSoldes((productsRes.data || []).filter(p => (p.discount || 0) > 0));
+      const list = dedupeProducts((await getProducts()).map(normalizeProduct));
+      setProducts(list);
+      setSoldes(list.filter(isOnPromotion));
     } catch (err) {
       console.error('Products error:', err);
       setError('Erreur chargement produits principaux');
     }
 
     try {
-      const recsRes = await api.get('/products/recommendations');
-      setRecommendations(recsRes.data || []);
+      setProfile(await getProfile());
+    } catch (err) {
+      console.error('Profile error:', err);
+    }
+
+    try {
+      setRecommendations(dedupeProducts(((await getProductRecommendations()) || []).map(normalizeProduct)));
     } catch (err) {
       console.error('Recommendations error:', err);
     }
 
     try {
-      const nearbyRes = await api.get('/products/nearby');
-      setNearby(nearbyRes.data || []);
+      setNearby(dedupeProducts(((await getNearbyProducts()) || []).map(normalizeProduct)));
     } catch (err) {
       console.error('Nearby error:', err);
+    }
+
+    try {
+      const ids = await getFavoriteIds();
+      setFavoriteIds(new Set(ids));
+    } catch {
+      setFavoriteIds(new Set());
+    }
+
+    try {
+      setFrequent(dedupeProducts(((await getFrequentProducts(6)) || []).map(normalizeProduct)));
+    } catch {
+      setFrequent([]);
     }
 
     setLoading(false);
@@ -52,64 +90,33 @@ const ClientProductsPage = () => {
     if (!p) return p;
 
     const stockRaw = p.stock ?? p.quantity ?? p.availableStock ?? p.available ?? 0;
-    const discountRaw = p.discount ?? p.promoPercent ?? p.promo ?? 0;
     const priceRaw = p.price ?? p.unitPrice ?? p.unit_price ?? 0;
-
-    return {
+    const base = {
       ...p,
       stock: Number(stockRaw || 0),
-      discount: Number(discountRaw || 0),
       price: Number(priceRaw || 0),
       imageUrl: p.imageUrl ?? p.image ?? undefined,
     };
+    return withProductIds({ ...base, discount: getEffectiveDiscount(base) });
   };
 
-  const normalizeRecommendationsPayload = (raw) => {
-    if (!raw) return [];
+  const filteredProducts = products.filter((p) => {
+    const matchSearch = matchProductSearch(p, searchTerm);
+    const matchAnimal = animalFilter === 'all' || p.animalType === animalFilter;
+    const matchCategory = matchCategoryFilter(p, categoryFilter);
+    const matchPromo = !promoOnly || isOnPromotion(p);
+    return matchSearch && matchAnimal && matchCategory && matchPromo;
+  });
 
-    // Possible shapes:
-    // - [{ product: {...}, reason: '...', score: ... }]
-    // - [{ ...product, reason: '...', score: ... }]
-    // - [{ product: {...} }, ...]
-    // - { recommendations: [...] }
-    const list = Array.isArray(raw) ? raw : (raw.recommendations || []);
+  const profilePetType = profile?.petType;
 
-    return (list || []).map((d) => {
-      const product = d?.product ?? d;
-      return normalizeProduct({
-        ...product,
-        recommendedReason: d?.reason ?? d?.recommendedReason ?? d?.reasonText ?? undefined,
-        score: d?.score ?? d?.similarity ?? undefined,
-      });
-    });
-  };
-
-  const fetchFastAPIRecommendations = async () => {
-    try {
-      const userRes = await api.get('/users/profile');
-      const user = userRes.data;
-
-      const res = await fetch('/fastapi/recommendations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user._id || 'demo_user',
-          limit: 8,
-        }),
-      });
-
-      if (!res.ok) return;
-
-      const data = await res.json();
-      setRecommendations(normalizeRecommendationsPayload(data));
-    } catch (err) {
-      console.error('FastAPI error:', err);
-    }
-  };
-
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const ANIMAL_FILTERS = [
+    { id: 'all', label: 'Tous' },
+    { id: 'dog', label: '🐶 Chien' },
+    { id: 'cat', label: '🐱 Chat' },
+    { id: 'bird', label: '🐦 Oiseau' },
+    { id: 'fish', label: '🐠 Poisson' },
+  ];
 
   const inStock = (p) => Number(p?.stock || 0) > 0;
   const inStockFilteredProducts = filteredProducts.filter(inStock);
@@ -117,12 +124,16 @@ const ClientProductsPage = () => {
   const inStockRecommendations = recommendations.filter(inStock);
   const inStockNearby = nearby.filter(inStock);
 
+  const sortedAllProducts = [...inStockFilteredProducts].sort((a, b) => {
+    const aPromo = isOnPromotion(a) ? 1 : 0;
+    const bPromo = isOnPromotion(b) ? 1 : 0;
+    if (bPromo !== aPromo) return bPromo - aPromo;
+    const aMatch = profilePetType && a.animalType === profilePetType ? 1 : 0;
+    const bMatch = profilePetType && b.animalType === profilePetType ? 1 : 0;
+    return bMatch - aMatch;
+  });
 
-  const getDiscountedPriceValue = (product) => {
-    const price = Number(product.price || 0);
-    const discount = Number(product.discount || 0);
-    return Number((price * (1 - discount / 100)).toFixed(2));
-  };
+  const getDiscountedPriceValue = (product) => getPromoPrice(product);
 
   const getCartProduct = (product) => ({
     ...product,
@@ -140,12 +151,23 @@ const ClientProductsPage = () => {
     }
   };
 
-  const likeProduct = (product) => {
-    const liked = JSON.parse(localStorage.getItem('likedProducts') || '[]');
-    if (!liked.includes(product._id)) {
-      liked.push(product._id);
-      localStorage.setItem('likedProducts', JSON.stringify(liked.slice(-50)));
-      window.alert('Produit ajouté à vos favoris !');
+  const likeProduct = async (product) => {
+    const id = productId(product);
+    const isLiked = favoriteIds.has(id);
+    try {
+      if (isLiked) {
+        await removeFavorite(id);
+        setFavoriteIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      } else {
+        await addFavorite(id);
+        setFavoriteIds((prev) => new Set(prev).add(id));
+      }
+    } catch {
+      window.alert('Impossible de mettre à jour les favoris');
     }
   };
 
@@ -193,28 +215,73 @@ const ClientProductsPage = () => {
           <h1 style={{ fontSize: '36px', fontWeight: 800, color: '#065f46', margin: '0 0 8px' }}>
             🛒 Nos Produits
           </h1>
-          <p style={{ fontSize: '16px', color: '#6b7280', margin: '0 0 20px' }}>
+          <p style={{ fontSize: '16px', color: '#6b7280', margin: 0 }}>
             Découvrez notre sélection premium pour vos animaux
           </p>
-          <button
-            onClick={fetchFastAPIRecommendations}
-            style={{
-              padding: '10px 20px',
-              background: 'linear-gradient(135deg, #e67e22, #d35400)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontSize: '14px',
-              boxShadow: '0 4px 14px rgba(230,126,34,0.3)',
-            }}
-          >
-            <Sparkles size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
-            Recommandations IA (FastAPI)
-          </button>
         </div>
       </motion.div>
+
+      {profile?.petType && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            marginBottom: 24,
+            padding: '16px 20px',
+            background: 'linear-gradient(135deg, #fff7ed, #ffedd5)',
+            borderRadius: 16,
+            border: '1px solid #fed7aa',
+          }}
+        >
+          <p style={{ margin: 0, fontWeight: 800, color: '#9a3412', fontSize: 15 }}>
+            🐾 Sélection adaptée à votre {PET_LABELS[profile.petType] || profile.petType}
+            {profile.petAge != null ? ` (${profile.petAge} an(s))` : ''}
+          </p>
+          <p style={{ margin: '4px 0 0', fontSize: 13, color: '#c2410c' }}>
+            {inStockSoldes.length} promotion{inStockSoldes.length > 1 ? 's' : ''} en cours · produits triés selon votre profil
+          </p>
+        </motion.div>
+      )}
+
+      {frequent.length > 0 && !promoOnly && (
+        <Section title="🔄 Vos achats fréquents" titleColor="#0369a1" icon={<Sparkles size={20} />}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+            {frequent.map((product) => (
+              <ProductCard
+                key={`freq-${productId(product)}`}
+                product={product}
+                onAdd={addToCart}
+                onLike={likeProduct}
+                isLiked={favoriteIds.has(productId(product))}
+                getPrice={getPrice}
+                profilePetType={profilePetType}
+                onView={setSelectedProduct}
+              />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* Promotions en premier */}
+      {inStockSoldes.length > 0 && !promoOnly && (
+        <Section title={`🔥 Promotions (${inStockSoldes.length})`} titleColor="#dc2626" icon={<Flame size={20} />}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+            {inStockSoldes.map((product) => (
+              <ProductCard
+                key={`promo-${productId(product)}`}
+                product={product}
+                onAdd={addToCart}
+                onLike={likeProduct}
+                isLiked={favoriteIds.has(productId(product))}
+                getPrice={getPrice}
+                isPromo
+                profilePetType={profilePetType}
+                onView={setSelectedProduct}
+              />
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* Search */}
       <div style={{
@@ -225,53 +292,85 @@ const ClientProductsPage = () => {
         padding: '14px 20px',
         borderRadius: '16px',
         boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
-        marginBottom: '32px',
+        marginBottom: '16px',
         border: '2px solid #e5e7eb',
       }}>
-        <span style={{ fontSize: '18px' }}>🔍</span>
+        <Search size={20} color="#9ca3af" />
         <input
-          type="text"
-          placeholder="Rechercher un produit..."
+          type="search"
+          placeholder="Rechercher croquettes, pâtée, marque, animal…"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ flex: 1, border: 'none', outline: 'none', fontSize: '15px', background: 'transparent' }}
         />
-        {searchTerm && (
-          <span style={{ fontSize: '13px', color: '#9ca3af' }}>{filteredProducts.length} résultat(s)</span>
-        )}
+        <span style={{ fontSize: '13px', color: '#9ca3af', whiteSpace: 'nowrap' }}>{filteredProducts.length} résultat(s)</span>
       </div>
 
-      {/* Produits sans remise */}
-      {inStockFilteredProducts.filter((p) => (p.discount || 0) === 0).length > 0 && (
-        <Section title="🛍️ Produits sans remise" titleColor="#374151" icon={<ShoppingCart size={20} />}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
-            {inStockFilteredProducts
-              .filter((p) => (p.discount || 0) === 0)
-              .map((product) => (
-                <ProductCard key={product._id} product={product} onAdd={addToCart} onLike={likeProduct} getPrice={getPrice} />
-              ))}
-          </div>
-        </Section>
-      )}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+        {CATEGORY_FILTERS.map((f) => (
+          <button
+            key={f.id}
+            type="button"
+            onClick={() => setCategoryFilter(f.id)}
+            style={{
+              padding: '8px 14px',
+              borderRadius: 20,
+              border: categoryFilter === f.id ? '2px solid #e67e22' : '1px solid #e5e7eb',
+              background: categoryFilter === f.id ? 'rgba(230,126,34,0.1)' : 'white',
+              fontWeight: 700,
+              cursor: 'pointer',
+              fontSize: 13,
+            }}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
 
-      {/* Promotions */}
-      {inStockSoldes.length > 0 && (
-        <Section title="🔥 Promotions" titleColor="#dc2626" icon={<Flame size={20} />}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
-            {inStockSoldes.map(product => (
-              <ProductCard key={product._id} product={product} onAdd={addToCart} onLike={likeProduct} getPrice={getPrice} isPromo />
-            ))}
-          </div>
-        </Section>
-      )}
-
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24, alignItems: 'center' }}>
+        {ANIMAL_FILTERS.map((f) => (
+          <button
+            key={f.id}
+            type="button"
+            onClick={() => setAnimalFilter(f.id)}
+            style={{
+              padding: '8px 14px',
+              borderRadius: 20,
+              border: animalFilter === f.id ? '2px solid #10b981' : '1px solid #e5e7eb',
+              background: animalFilter === f.id ? 'rgba(16,185,129,0.1)' : 'white',
+              fontWeight: 700,
+              cursor: 'pointer',
+              fontSize: 13,
+            }}
+          >
+            {f.label}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => setPromoOnly((v) => !v)}
+          style={{
+            padding: '8px 14px',
+            borderRadius: 20,
+            border: promoOnly ? '2px solid #ef4444' : '1px solid #e5e7eb',
+            background: promoOnly ? 'rgba(239,68,68,0.1)' : 'white',
+            fontWeight: 700,
+            cursor: 'pointer',
+            fontSize: 13,
+            marginLeft: 'auto',
+          }}
+        >
+          <Flame size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+          {promoOnly ? 'Tous les produits' : 'Promotions uniquement'}
+        </button>
+      </div>
 
       {/* Recommendations */}
       {inStockRecommendations.length > 0 && (
         <Section title="✨ Recommandés pour vous" titleColor="#059669" icon={<Sparkles size={20} />}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
             {inStockRecommendations.map(product => (
-              <ProductCard key={product._id} product={product} onAdd={addToCart} onLike={likeProduct} getPrice={getPrice} isRec />
+              <ProductCard key={`rec-${productId(product)}`} product={product} onAdd={addToCart} onLike={likeProduct} isLiked={favoriteIds.has(productId(product))} getPrice={getPrice} isRec onView={setSelectedProduct} />
             ))}
           </div>
         </Section>
@@ -282,24 +381,45 @@ const ClientProductsPage = () => {
         <Section title="📍 Près de chez vous" titleColor="#8b5cf6" icon={<MapPin size={20} />}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
             {inStockNearby.map(product => (
-              <ProductCard key={product._id} product={product} onAdd={addToCart} onLike={likeProduct} getPrice={getPrice} isNearby />
+              <ProductCard key={`near-${productId(product)}`} product={product} onAdd={addToCart} onLike={likeProduct} isLiked={favoriteIds.has(productId(product))} getPrice={getPrice} isNearby onView={setSelectedProduct} />
             ))}
           </div>
         </Section>
       )}
 
       {/* All Products */}
-      <Section title={`Tous les produits (${inStockFilteredProducts.length})`} titleColor="#374151">
-        {inStockFilteredProducts.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#9ca3af', padding: '40px', fontSize: '15px' }}>Aucun produit disponible pour l’instant (stock insuffisant).</p>
+      <Section title={`Tous les produits (${sortedAllProducts.length})`} titleColor="#374151">
+        {sortedAllProducts.length === 0 ? (
+          <p style={{ textAlign: 'center', color: '#9ca3af', padding: '40px', fontSize: '15px' }}>
+            {promoOnly ? 'Aucune promotion ne correspond à vos filtres.' : 'Aucun produit disponible pour l’instant (stock insuffisant).'}
+          </p>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
-            {inStockFilteredProducts.map(product => (
-              <ProductCard key={product._id} product={product} onAdd={addToCart} onLike={likeProduct} getPrice={getPrice} />
+            {sortedAllProducts.map((product) => (
+              <ProductCard
+                key={`all-${productId(product)}`}
+                product={product}
+                onAdd={addToCart}
+                onLike={likeProduct}
+                isLiked={favoriteIds.has(productId(product))}
+                getPrice={getPrice}
+                isPromo={isOnPromotion(product)}
+                profilePetType={profilePetType}
+                onView={setSelectedProduct}
+              />
             ))}
           </div>
         )}
       </Section>
+
+      <ProductDetailModal
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        onAddToCart={(p) => { addToCart(p); setSelectedProduct(null); }}
+        getPrice={getPrice}
+        getImage={getProductImage}
+        profilePetType={profilePetType}
+      />
 
     </div>
   );
@@ -350,9 +470,10 @@ const productFallbackImage = (product) => {
 
 const getProductImage = (product) => product.imageUrl || product.image || productFallbackImage(product);
 
-const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearby }) => {
-  const discount = product.discount || 0;
+const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearby, onView, profilePetType, isLiked }) => {
+  const discount = getEffectiveDiscount(product);
   const finalPrice = getPrice(product);
+  const profileMatch = profilePetType && product.animalType === profilePetType;
 
   return (
     <motion.div
@@ -365,7 +486,9 @@ const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearb
         border: `2px solid ${isPromo ? '#fca5a5' : isRec ? '#6ee7b7' : isNearby ? '#c4b5fd' : '#e5e7eb'}`,
         boxShadow: isPromo ? '0 8px 24px rgba(220,38,38,0.12)' : isRec ? '0 8px 24px rgba(5,150,105,0.12)' : isNearby ? '0 8px 24px rgba(139,92,246,0.12)' : '0 4px 12px rgba(0,0,0,0.06)',
         transition: 'box-shadow 0.3s',
+        cursor: 'pointer',
       }}
+      onClick={() => onView?.(product)}
     >
       <div style={{ position: 'relative', overflow: 'hidden' }}>
         <motion.img
@@ -395,6 +518,21 @@ const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearb
             -{discount}%
           </span>
         )}
+        {profileMatch && (
+          <span style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            background: '#059669',
+            color: 'white',
+            padding: '4px 10px',
+            borderRadius: '20px',
+            fontSize: '11px',
+            fontWeight: 700,
+          }}>
+            ✨ Pour vous
+          </span>
+        )}
         {isNearby && product.distance && (
           <span style={{
             position: 'absolute',
@@ -412,7 +550,7 @@ const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearb
           </span>
         )}
         <button
-          onClick={() => onLike(product)}
+          onClick={(e) => { e.stopPropagation(); onLike(product); }}
           style={{
             position: 'absolute',
             bottom: '10px',
@@ -429,8 +567,9 @@ const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearb
             justifyContent: 'center',
             fontSize: '16px',
           }}
+          title={isLiked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
         >
-          🤍
+          {isLiked ? '❤️' : '🤍'}
         </button>
       </div>
 
@@ -448,43 +587,72 @@ const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearb
         </div>
 
         {product.recommendedReason && (
-          <p style={{
-            fontSize: '12px',
-            color: '#6b7280',
-            fontStyle: 'italic',
-            margin: '0 0 12px',
-            padding: '4px 10px',
-            background: isRec ? 'rgba(5,150,105,0.08)' : 'rgba(139,92,246,0.08)',
-            borderRadius: '8px',
-            display: 'inline-block',
-          }}>
-            {product.recommendedReason}
-          </p>
+          <div style={{ margin: '0 0 12px' }}>
+            <p style={{
+              fontSize: '12px',
+              color: '#6b7280',
+              fontStyle: 'italic',
+              margin: '0 0 4px',
+              padding: '4px 10px',
+              background: isRec ? 'rgba(5,150,105,0.08)' : 'rgba(139,92,246,0.08)',
+              borderRadius: '8px',
+              display: 'inline-block',
+            }}>
+              {product.recommendedReason}
+            </p>
+            {Array.isArray(product.reasons) && product.reasons.length > 1 && (
+              <p style={{ fontSize: '11px', color: '#9ca3af', margin: 0 }}>
+                {product.reasons.slice(1, 3).join(' · ')}
+              </p>
+            )}
+          </div>
         )}
 
-        <button
-          onClick={() => onAdd(product)}
-          disabled={!product.stock}
-          style={{
-            width: '100%',
-            padding: '12px',
-            border: 'none',
-            borderRadius: '12px',
-            color: 'white',
-            fontWeight: 700,
-            fontSize: '14px',
-            cursor: product.stock ? 'pointer' : 'not-allowed',
-            background: product.stock ? (isPromo ? '#dc2626' : '#10b981') : '#9ca3af',
-            transition: 'all 0.2s',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-          }}
-        >
-          <ShoppingCart size={16} />
-          {product.stock ? '🛒 Ajouter' : '❌ Rupture'}
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onView?.(product); }}
+            style={{
+              flex: 1,
+              padding: '10px',
+              border: '2px solid #e5e7eb',
+              borderRadius: '12px',
+              background: 'white',
+              color: '#374151',
+              fontWeight: 700,
+              fontSize: '13px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+            }}
+          >
+            <Eye size={14} /> Détails
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onAdd(product); }}
+            disabled={!product.stock}
+            style={{
+              flex: 1.2,
+              padding: '10px',
+              border: 'none',
+              borderRadius: '12px',
+              color: 'white',
+              fontWeight: 700,
+              fontSize: '13px',
+              cursor: product.stock ? 'pointer' : 'not-allowed',
+              background: product.stock ? (isPromo ? '#dc2626' : '#10b981') : '#9ca3af',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+            }}
+          >
+            <ShoppingCart size={14} />
+            {product.stock ? 'Panier' : 'Rupture'}
+          </button>
+        </div>
       </div>
     </motion.div>
   );

@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
-import { useTheme } from '../contexts/ThemeContext';
+import ThemeToggles from './ThemeToggles';
 
 const Sidebar = ({ onNavigate, onLogout, user }) => {
   const [sidebarImageError, setSidebarImageError] = useState(false);
   const navigate = useNavigate();
-  const { isDark, toggleDark } = useTheme();
 
   const sections = [
     {
@@ -26,8 +25,14 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'orders', label: 'Commandes', icon: '📦' },
         { id: 'invoices', label: 'Factures', icon: '🧾' },
         { id: 'products', label: 'Produits', icon: '🏷️' },
+        { id: 'promotions', label: 'Promotions produits', icon: '🏷️' },
         { id: 'users', label: 'Utilisateurs', icon: '👥' },
-        { id: 'veterinary', label: 'Suivi Vétérinaire', icon: '🩺' },        { id: 'events', label: 'Événements', icon: '📅' },      ]
+        { id: 'livreurs', label: 'Livreurs', icon: '🚚' },
+        { id: 'leave-requests', label: 'Congés / maladie', icon: '🏖️' },
+        { id: 'messages', label: 'Messages', icon: '💬' },
+        { id: 'veterinary', label: 'Suivi Vétérinaire', icon: '🩺' },
+        { id: 'events', label: 'Événements', icon: '📅' },
+      ]
     },
     {
       title: '💬 Feedback',
@@ -178,15 +183,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         flexDirection: 'column',
         gap: '8px',
       }}>
-        <button
-          type="button"
-          onClick={toggleDark}
-          className="btn btn-outline"
-          style={{ width: '100%', justifyContent: 'flex-start', padding: '10px 14px' }}
-        >
-          <span>{isDark ? '☀️' : '🌙'}</span>
-          <span>{isDark ? 'Mode clair' : 'Mode sombre'}</span>
-        </button>
+        <ThemeToggles />
 
         <button
           onClick={onLogout}

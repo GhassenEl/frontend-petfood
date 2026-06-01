@@ -16,6 +16,8 @@ export { default as AdminReviews } from './AdminReviews';
 export { default as AdminComplaints } from './AdminComplaints';
 export { default as AdminProducts } from './AdminProducts';
 export { default as AdminUsers } from './AdminUsers';
+export { default as AdminLivreurs } from './AdminLivreurs';
+export { default as AdminMessages } from './AdminMessages';
 export { default as AdminInvoices } from './AdminInvoices';
 export { default as AdminHistory } from './AdminHistory';
 export { default as AdminVeterinary } from './AdminVeterinary';
@@ -32,7 +34,7 @@ export { default as LivreurHistoryPage } from './LivreurHistoryPage';
 export { default as LivreurProfilePage } from './LivreurProfilePage';
 
 // Auth pages
-export { default as LoginPage } from './LoginPage.jsx';
+export { default as LoginPage } from './LoginPage.js';
 
 // Shared pages
 export { default as ContactPage } from './ContactPage';

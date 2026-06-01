@@ -20,23 +20,21 @@ const EventsPage = () => {
     description: '',
     date: '',
     time: '',
-
-    // type d’événement (anniversaire, compétition, …)
-    eventType: 'autre',
-
-    // type d’animal (dog/cat/other) attendu par le backend
+    eventType: 'anniversaire',
     animalType: 'other',
-
     petName: '',
     ownerId: '',
+    meetingLink: '',
+    isPublic: true,
   });
+  const [clients, setClients] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState('');
   const [editingAppointment, setEditingAppointment] = useState(null); // For update operation
 
-  // View mode for clients: 'mine' = my events, 'platform' = all public/platform events
-  const [viewMode, setViewMode] = useState('mine');
+  // Client: 'platform' = catalogue PetfoodTN, 'mine' = mes inscriptions
+  const [viewMode, setViewMode] = useState('platform');
 
 
   // Review specific states
@@ -50,8 +48,8 @@ const EventsPage = () => {
     { value: 'anniversaire', label: 'Anniversaire' },
     { value: 'competitions', label: 'Compétition' },
     { value: 'salle de sport', label: 'Salle de sport' },
-    { value: 'coiffure', label: 'Coiffure' },
-    // Add more types as needed
+    { value: 'coiffure', label: 'Coiffure / toilettage' },
+    { value: 'cadeau', label: 'Cadeau / promo' },
   ];
 
   const animalTypes = [
@@ -81,39 +79,23 @@ const EventsPage = () => {
     // Backend/middleware will still handle demo data generation.
     if (!user) return;
     fetchAppointments();
-  }, [user, isAdmin]);
+    if (isAdmin) {
+      api.get('/users')
+        .then((res) => {
+          const list = Array.isArray(res.data) ? res.data : [];
+          setClients(list.filter((u) => u.role === 'client'));
+        })
+        .catch(() => setClients([]));
+    }
+  }, [user, isAdmin, viewMode]);
 
 
   const fetchAppointments = async () => {
     setLoading(true);
     setError('');
     try {
-      // Backend may expose /veterinary/appointments for both clients and admins.
-      // For admin we try the dedicated all endpoint first, then fall back to the standard route.
-      // For clients, respect `viewMode`: 'mine' -> their appointments, 'platform' -> attempt to fetch all public events.
-      let primaryEndpoint;
-      const fallbackEndpoint = '/veterinary/appointments';
-      if (isAdmin) {
-        primaryEndpoint = '/veterinary/appointments/all';
-      } else if (viewMode === 'platform') {
-        primaryEndpoint = '/veterinary/appointments/all';
-      } else {
-        primaryEndpoint = '/veterinary/appointments';
-      }
-
-      let res;
-      try {
-        res = await api.get(primaryEndpoint);
-      } catch (err) {
-        const status = err?.response?.status;
-        if (status === 404 && primaryEndpoint !== fallbackEndpoint) {
-          res = await api.get(fallbackEndpoint);
-        } else {
-          throw err;
-        }
-      }
-
-      console.log("Données reçues de l'API Events:", res.data);
+      const scope = isAdmin ? 'all' : viewMode;
+      const res = await api.get('/events', { params: { scope } });
 
 
       const data = Array.isArray(res.data)
@@ -158,8 +140,6 @@ const EventsPage = () => {
   const switchViewMode = (mode) => {
     if (mode === viewMode) return;
     setViewMode(mode);
-    // small delay to ensure state applied before fetch (not strictly necessary)
-    setTimeout(() => fetchAppointments(), 50);
   };
 
   const handleInputChange = (e) => {
@@ -177,6 +157,8 @@ const EventsPage = () => {
       animalType: 'other',
       petName: '',
       ownerId: '',
+      meetingLink: '',
+      isPublic: true,
     });
     setEditingAppointment(null);
     setSubmitError('');
@@ -189,8 +171,6 @@ const EventsPage = () => {
       setSubmitError('Action réservée à l\'administrateur.');
       return;
     }
-
-
     setIsSubmitting(true);
     setSubmitError('');
     setSubmitSuccess('');
@@ -198,40 +178,30 @@ const EventsPage = () => {
     try {
       const payload = {
         date: `${formData.date}T${formData.time}:00.000Z`,
+        title: formData.title?.trim() || formData.petName?.trim(),
         animalType: formData.animalType || 'other',
-        petName: formData.petName || 'N/A',
+        petName: formData.petName || formData.title || 'Événement',
         notes: formData.description || null,
         type: formData.eventType || 'autre',
+        isPublic: Boolean(formData.isPublic),
+        ownerId: formData.ownerId || undefined,
       };
-      if (isAdmin) {
-        if (formData.ownerId) {
-          payload.ownerId = formData.ownerId;
-        } else if (editingAppointment?.ownerId) {
-          payload.ownerId = editingAppointment.ownerId;
-        } else if (editingAppointment?.owner?.id) {
-          payload.ownerId = editingAppointment.owner.id;
-        } else if (editingAppointment?.owner?._id) {
-          payload.ownerId = editingAppointment.owner._id;
-        }
+      if (formData.meetingLink) {
+        payload.meetingLink = formData.meetingLink.trim();
       }
-
 
       const appointmentId = editingAppointment?._id || editingAppointment?.id;
-      if (!appointmentId && editingAppointment) {
-        throw new Error('Identifiant d\'événement manquant (update)');
-      }
 
       if (editingAppointment) {
-        // Update existing appointment
-        await api.put(`/veterinary/appointments/${appointmentId}`, payload);
+        if (!appointmentId) throw new Error('Identifiant d\'événement manquant');
+        await api.put(`/events/${appointmentId}`, payload);
         setSubmitSuccess('Événement mis à jour avec succès !');
       } else {
-        // Create new appointment
-        await api.post('/veterinary/appointments', payload);
+        await api.post('/events', payload);
         setSubmitSuccess('Événement ajouté avec succès !');
       }
 
-      
+
       resetForm();
       setShowCreateForm(false);
       fetchAppointments(); // Refresh list
@@ -251,8 +221,8 @@ const EventsPage = () => {
     const dateString = eventDate.toISOString().split('T')[0];
     const timeString = eventDate.toTimeString().split(' ')[0].substring(0, 5);
 
-      setFormData({
-      title: appointment.title || '',
+    setFormData({
+      title: appointment.title || appointment.petName || '',
       description: appointment.notes || appointment.description || '',
       date: dateString,
       time: timeString,
@@ -260,6 +230,8 @@ const EventsPage = () => {
       animalType: appointment.animalType || 'other',
       petName: appointment.petName || '',
       ownerId: appointment.ownerId || appointment.owner?.id || appointment.owner?._id || '',
+      meetingLink: appointment.meetingLink || '',
+      isPublic: appointment.isPublic !== false,
     });
     setShowCreateForm(true);
   };
@@ -269,7 +241,7 @@ const EventsPage = () => {
     if (!id) return;
 
     try {
-      await api.delete(`/veterinary/appointments/${id}`);
+      await api.delete(`/events/${id}`);
       setSubmitSuccess('Événement supprimé avec succès !');
       fetchAppointments(); // Refresh list
 
@@ -301,7 +273,7 @@ const EventsPage = () => {
         return;
       }
 
-      await api.post('/api/reviews', {
+      await api.post('/reviews', {
         productId: safeEventId,
         rating: Number(reviewData.rating),
         comment: reviewData.comment,
@@ -354,10 +326,12 @@ const EventsPage = () => {
         }}
       >
         <h1 style={{ fontSize: '36px', fontWeight: 800, color: '#065f46', margin: '0 0 8px' }}>
-          📅 Mes Événements
+          {isAdmin ? '📅 Gestion des événements' : '📅 Événements PetfoodTN'}
         </h1>
-      <p style={{ fontSize: '16px', color: '#6b7280', margin: '0 0 20px' }}>
-          Gérez vos anniversaires, cadeaux, compétitions et autres événements
+        <p style={{ fontSize: '16px', color: '#6b7280', margin: '0 0 20px' }}>
+          {isAdmin
+            ? 'Créez et gérez anniversaires, salle de sport, compétitions, promos…'
+            : 'Découvrez les activités près de chez vous : anniversaires, sport, toilettage, promos'}
         </p>
 
         {isAdmin && (
@@ -455,7 +429,7 @@ const EventsPage = () => {
               <label>Commentaire</label>
               <textarea
                 value={reviewData.comment}
-                onChange={(e) => setReviewData({...reviewData, comment: e.target.value})}
+                onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
                 placeholder="Partagez votre expérience..."
                 rows="3"
                 required
@@ -511,6 +485,18 @@ const EventsPage = () => {
           </h2>
           <form onSubmit={handleCreateOrUpdateAppointment}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                <label htmlFor="title">Titre de l&apos;événement</label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  placeholder="Ex: Anniversaire Mimi, Séance agility…"
+                  required
+                />
+              </div>
               <div className="form-group">
                 <label htmlFor="petName">Nom de l'animal</label>
                 <input
@@ -563,14 +549,44 @@ const EventsPage = () => {
               </div>
               {isAdmin && (
                 <div className="form-group">
-                  <label htmlFor="ownerId">ID du propriétaire (Client)</label>
-                  <input
-                    type="text"
+                  <label htmlFor="ownerId">Client associé</label>
+                  <select
                     id="ownerId"
                     name="ownerId"
                     value={formData.ownerId}
                     onChange={handleInputChange}
-                    placeholder="Laisser vide pour votre ID si client"
+                  >
+                    <option value="">— Premier client disponible —</option>
+                    {clients.map((c) => (
+                      <option key={c.id || c._id} value={c.id || c._id}>
+                        {c.name} ({c.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {isAdmin && (
+                <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <input
+                    type="checkbox"
+                    id="isPublic"
+                    name="isPublic"
+                    checked={formData.isPublic}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, isPublic: e.target.checked }))}
+                  />
+                  <label htmlFor="isPublic">Visible pour tous les clients</label>
+                </div>
+              )}
+              {isAdmin && (
+                <div className="form-group">
+                  <label htmlFor="meetingLink">Lien de réunion</label>
+                  <input
+                    type="text"
+                    id="meetingLink"
+                    name="meetingLink"
+                    value={formData.meetingLink}
+                    onChange={handleInputChange}
+                    placeholder="https://meet.google.com/..."
                   />
                 </div>
               )}
@@ -639,7 +655,7 @@ const EventsPage = () => {
                   fontWeight: 700,
                 }}
               >
-                Tous les événements
+                Tous les événements PetfoodTN
               </button>
             </div>
           )}
@@ -653,9 +669,9 @@ const EventsPage = () => {
       </div>
 
       {isAdmin && appointments.length > 0 && (
-         <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '16px', fontStyle: 'italic' }}>
-            Note: Si la liste semble incomplète, vérifiez que les `ownerId` correspondent en base de données.
-         </p>
+        <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '16px', fontStyle: 'italic' }}>
+          Note: Si la liste semble incomplète, vérifiez que les `ownerId` correspondent en base de données.
+        </p>
       )}
 
       {appointments.length === 0 ? (
@@ -685,8 +701,18 @@ const EventsPage = () => {
                 {getEventTitle(event)}
               </h3>
               <p style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 12px' }}>
-                <strong>Animal: {event.petName}</strong> - {event.notes || event.description || 'Pas de description.'}
+                {event.notes || event.description || 'Pas de description.'}
               </p>
+              {event.petName && (
+                <p style={{ fontSize: '13px', color: '#059669', margin: '0 0 8px', fontWeight: 600 }}>
+                  Animal : {event.petName} ({getAnimalTypeLabel(event.animalType)})
+                </p>
+              )}
+              {!isAdmin && event.isPublic && (
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#1d4ed8', background: '#dbeafe', padding: '4px 8px', borderRadius: 8 }}>
+                  Événement plateforme
+                </span>
+              )}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '14px', color: '#4b5563' }}>
                 <Calendar size={16} />
                 <span>
@@ -758,20 +784,16 @@ const EventsPage = () => {
                 </div>
               )}
 
-              {!isAdmin && (
-                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f3f4f6' }}>
+              {event.meetingLink ? (
+                <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center' }}>
                   <button
-                    onClick={() => {
-                      setSelectedEventId(event._id || event.id);
-                      setShowReviewForm(true);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
+                    onClick={() => window.open(event.meetingLink, '_blank', 'noopener,noreferrer')}
                     style={{
                       width: '100%',
                       padding: '10px',
-                      background: 'rgba(230, 126, 34, 0.1)',
-                      color: '#d35400',
-                      border: '1px dashed #e67e22',
+                      background: 'rgba(16, 185, 129, 0.1)',
+                      color: '#047857',
+                      border: '1px dashed #10b981',
                       borderRadius: '10px',
                       fontWeight: 600,
                       fontSize: '13px',
@@ -782,9 +804,38 @@ const EventsPage = () => {
                       gap: '8px',
                     }}
                   >
-                    <MessageSquare size={14} /> Laisser un avis
+                    <MessageSquare size={14} /> Rejoindre réunion
                   </button>
                 </div>
+              ) : (
+                !isAdmin && (
+                  <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f3f4f6' }}>
+                    <button
+                      onClick={() => {
+                        setSelectedEventId(event._id || event.id);
+                        setShowReviewForm(true);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        background: 'rgba(230, 126, 34, 0.1)',
+                        color: '#d35400',
+                        border: '1px dashed #e67e22',
+                        borderRadius: '10px',
+                        fontWeight: 600,
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                      }}
+                    >
+                      <MessageSquare size={14} /> Laisser un avis
+                    </button>
+                  </div>
+                )
               )}
             </motion.div>
           ))}

@@ -1,12 +1,49 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Stethoscope, Calendar, Weight, Thermometer, Pill, ChevronDown, ChevronUp, Printer } from 'lucide-react';
-import api from '../utils/api';
+import { getProfile } from '../services/userService';
+import {
+  getVeterinaryRecords,
+  getUpcomingVisits,
+  getAppointments,
+  createAppointment,
+  getPrescriptions,
+  getConsultations,
+  getContactRequests,
+  submitContactRequest,
+  respondToContactRequest,
+  getAvailability,
+} from '../services/vetService';
+import { sendMessage } from '../services/chatService';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import Toast from '../components/Toast';
+import ClientVetHealthHub from '../components/ClientVetHealthHub';
+import ClientVetAiPanel from '../components/ClientVetAiPanel';
+import MedicationSchedule from '../components/MedicationSchedule';
+import { VISIT_MODES, visitModeLabel, isHomeVisit, isOnlineVisit, visitModeBadge } from '../constants/visitModes';
+import TeleconsultMeetPanel from '../components/TeleconsultMeetPanel';
 
 const animalEmojis = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐟', rabbit: '🐰', other: '🐾' };
 const animalNames = { dog: 'Chien', cat: 'Chat', bird: 'Oiseau', fish: 'Poisson', rabbit: 'Lapin', other: 'Autre' };
+const sexLabels = { male: 'Male', female: 'Femelle', unknown: 'Non precise' };
+const activityLabels = { low: 'Calme', normal: 'Normale', high: 'Active', sport: 'Sportive' };
+
+const getPetAge = (birthDate) => {
+  if (!birthDate) return '';
+  const date = new Date(birthDate);
+  if (Number.isNaN(date.getTime())) return '';
+  const today = new Date();
+  let years = today.getFullYear() - date.getFullYear();
+  const monthDiff = today.getMonth() - date.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < date.getDate())) {
+    years -= 1;
+  }
+  if (years > 0) return `${years} an${years > 1 ? 's' : ''}`;
+  const months = Math.max(0, monthDiff + 12 * (today.getFullYear() - date.getFullYear()));
+  return `${months} mois`;
+};
+
 const statusConfig = {
   active: { bg: '#dcfce7', color: '#166534', label: 'Actif' },
   completed: { bg: '#dbeafe', color: '#1e40af', label: 'Terminé' },
@@ -32,6 +69,8 @@ const VeterinaryPage = () => {
     subject: '',
     message: '',
     preferredDate: '',
+    visitMode: 'cabinet',
+    homeAddress: '',
   });
 
   // RDV (agenda)
@@ -41,6 +80,8 @@ const VeterinaryPage = () => {
   const [appointmentsError, setAppointmentsError] = useState('');
   const [appointmentsSuccess, setAppointmentsSuccess] = useState('');
   const [appointments, setAppointments] = useState([]);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [consultations, setConsultations] = useState([]);
 
   const [availabilityDate, setAvailabilityDate] = useState(() => {
     const d = new Date();
@@ -60,23 +101,50 @@ const VeterinaryPage = () => {
     animalType: 'dog',
     notes: '',
     type: 'veterinary_consultation',
+    visitMode: 'cabinet',
+    homeAddress: '',
   });
   const { user } = useAuth();
   const isVet = user?.role === 'vet' || user?.role === 'admin';
   const [toast, setToast] = useState({ message: '', type: 'info' });
+  const [selectedPet, setSelectedPet] = useState(null);
+  const [clientTab, setClientTab] = useState('sante');
+
+  const CLIENT_TABS = [
+    { id: 'sante', label: 'Mes animaux & demandes' },
+    { id: 'assistant', label: 'Assistant santé' },
+    { id: 'rdv', label: 'Rendez-vous' },
+    { id: 'suivi', label: 'Ordonnances & suivi' },
+    { id: 'historique', label: 'Historique' },
+  ];
 
 
   useEffect(() => {
     fetchData();
-    // best-effort load requests if backend supports it
     loadContactRequests();
+    (async () => {
+      try {
+        const profile = await getProfile();
+        const addr = profile?.address || '';
+        if (addr) {
+          setAppointmentForm((p) => (p.homeAddress ? p : { ...p, homeAddress: addr }));
+          setContactForm((p) => (p.homeAddress ? p : { ...p, homeAddress: addr }));
+        }
+      } catch { /* ignore */ }
+    })();
 
-    // Load appointments
+    // Load appointments, prescriptions, consultations
     (async () => {
       try {
         setAppointmentsLoading(true);
-        const res = await api.get('/veterinary/appointments');
-        setAppointments(Array.isArray(res.data) ? res.data : []);
+        const [apptData, rxData, consultData] = await Promise.all([
+          getAppointments(),
+          getPrescriptions().catch(() => []),
+          getConsultations().catch(() => []),
+        ]);
+        setAppointments(Array.isArray(apptData) ? apptData : []);
+        setPrescriptions(Array.isArray(rxData) ? rxData : []);
+        setConsultations(Array.isArray(consultData) ? consultData : []);
       } catch (e) {
         setAppointmentsError(e?.response?.data?.error || "Impossible de charger vos rendez-vous.");
       } finally {
@@ -87,7 +155,17 @@ const VeterinaryPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Prefill contact form when coming from Nutri flow (legacy 'nutri' or new 'nutripro' keys)
+  useEffect(() => {
+    if (!selectedPet) return;
+    const type = selectedPet.type || selectedPet.animalType || 'dog';
+    setAppointmentForm((p) => ({
+      ...p,
+      petName: selectedPet.name || p.petName,
+      animalType: type,
+    }));
+  }, [selectedPet]);
+
+  // Prefill contact form when coming from Nutri flow
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
@@ -112,12 +190,12 @@ const VeterinaryPage = () => {
 
   const fetchData = async () => {
     try {
-      const [recordsRes, upcomingRes] = await Promise.all([
-        api.get('/veterinary'),
-        api.get('/veterinary/upcoming/all'),
+      const [recordsData, upcomingData] = await Promise.all([
+        getVeterinaryRecords(),
+        getUpcomingVisits(),
       ]);
-      setRecords(recordsRes.data || []);
-      setUpcoming(upcomingRes.data || []);
+      setRecords(recordsData || []);
+      setUpcoming(upcomingData || []);
     } catch (error) {
       console.error('Veterinary data error', error);
     } finally {
@@ -128,8 +206,8 @@ const VeterinaryPage = () => {
   const loadContactRequests = async () => {
     try {
       // endpoint candidat (si existe)
-      const res = await api.get('/veterinary/contact/requests');
-      setContactRequests(Array.isArray(res.data) ? res.data : []);
+      const data = await getContactRequests();
+      setContactRequests(Array.isArray(data) ? data : []);
     } catch {
       // fallback: rien à afficher si endpoint non dispo
       setContactRequests([]);
@@ -156,6 +234,33 @@ const VeterinaryPage = () => {
     window.print();
   };
 
+  const isContactAnswered = (req) => {
+    const status = req?.status;
+    return status && status !== 'pending';
+  };
+
+  const contactStatusLabel = (req) => {
+    if (req?.status === 'confirmed') return '✅ Confirmé par le vétérinaire';
+    if (req?.status === 'rejected') return '❌ Demande refusée';
+    if (isContactAnswered(req)) return '✅ Traité';
+    return '⏳ En attente de retour';
+  };
+
+  const parseMedications = (raw) => {
+    if (!raw) return [];
+    try {
+      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      return Array.isArray(parsed) ? parsed : [parsed];
+    } catch {
+      return [{ name: String(raw), dosage: '', frequency: '' }];
+    }
+  };
+
+  const openMeetingLink = (url) => {
+    if (!url) return;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   const submitContactRequest = async (e) => {
     e.preventDefault();
     setContactError('');
@@ -170,14 +275,30 @@ const VeterinaryPage = () => {
         subject: contactForm.subject,
         message: contactForm.message,
         preferredDate: contactForm.preferredDate || undefined,
+        visitMode: contactForm.visitMode,
+        homeAddress: contactForm.visitMode === 'home' ? contactForm.homeAddress : undefined,
       };
 
-      await api.post('/veterinary/contact', payload);
+      if (contactForm.visitMode === 'home' && !contactForm.homeAddress?.trim()) {
+        setContactError('Indiquez votre adresse pour une consultation à domicile.');
+        setContactLoading(false);
+        return;
+      }
+
+      await submitContactRequest(payload);
       setContactSuccess('Demande de consultation envoyée. Le vétérinaire pourra répondre et proposer un rendez-vous si nécessaire.');
 
       // best-effort refresh list
       await loadContactRequests();
-      setContactForm({ animalType: contactForm.animalType, petName: '', subject: '', message: '', preferredDate: '' });
+      setContactForm({
+        animalType: contactForm.animalType,
+        petName: '',
+        subject: '',
+        message: '',
+        preferredDate: '',
+        visitMode: contactForm.visitMode,
+        homeAddress: contactForm.homeAddress,
+      });
     } catch (error) {
       // UI fallback si endpoint non implémenté côté backend
       setContactError(
@@ -195,28 +316,26 @@ const VeterinaryPage = () => {
       // Optimistic UI update
       setContactRequests((prev) => prev.map((r) => (r._id === req._id || r.id === req.id ? { ...r, response: true, respondedAt: new Date().toISOString() } : r)));
 
-      // Try backend reply endpoint (common patterns)
-      const endpoints = ['/veterinary/contact/respond', '/veterinary/contact/response', '/veterinary/contact/reply'];
+      // Call the dedicated backend endpoint for veterinarian responses.
       let replied = false;
-      for (const ep of endpoints) {
-        try {
-          await api.post(ep, { id: req._id || req.id, response: 'confirmed', note: 'Régime nutritionnel confirmé par le vétérinaire.' });
-          replied = true;
-          break;
-        } catch (e) {
-          // try next
-        }
+      try {
+        await respondToContactRequest(req._id || req.id, {
+          status: 'confirmed',
+          responseMessage: 'Régime nutritionnel confirmé par le vétérinaire.',
+        });
+        replied = true;
+      } catch (e) {
+        console.warn('Veterinary response endpoint unavailable:', e?.response?.status || e?.message);
       }
 
       // Notify owner via chat if possible
       try {
         const owner = req.ownerId || req.userId || req.from || req.clientId;
-        const chatPayload = {
-          message: `Le vétérinaire a confirmé le plan nutritionnel pour ${req.petName || 'votre animal'}. Vous pouvez consulter les détails dans l'espace consultations.`,
-          context: { type: 'vet_confirmation', requestId: req._id || req.id, pet: { name: req.petName, animalType: req.animalType } },
-          toUserId: owner,
-        };
-        await api.post('/chat/message', chatPayload);
+        await sendMessage(
+          `Le vétérinaire a confirmé le plan nutritionnel pour ${req.petName || 'votre animal'}. Vous pouvez consulter les détails dans l'espace consultations.`,
+          { type: 'vet_confirmation', requestId: req._id || req.id, pet: { name: req.petName, animalType: req.animalType } },
+          owner,
+        );
       } catch (e) {
         // ignore chat failures
       }
@@ -238,7 +357,7 @@ const VeterinaryPage = () => {
     try {
       window.dispatchEvent(new CustomEvent('petfood:open-chat'));
       const initial = `Demande de téléconsultation pour ${req.petName || 'votre animal'} (${req.animalType || 'type inconnu'}). Contexte: ${req.message || ''}`;
-      await api.post('/chat/message', { message: initial, context: { type: 'teleconsult_request', requestId: req._id || req.id } });
+      await sendMessage(initial, { type: 'teleconsult_request', requestId: req._id || req.id });
     } catch (e) {
       console.error('Start teleconsult error', e);
     }
@@ -249,7 +368,7 @@ const VeterinaryPage = () => {
     try {
       window.dispatchEvent(new CustomEvent('petfood:open-chat'));
       const prompt = `Peux-tu proposer un plan et des recommandations nutritionnelles personnalisées pour un ${req.animalType || 'animal'} nommé ${req.petName || ''}? Contexte: ${req.message || ''}`;
-      await api.post('/chat/message', { message: prompt, context: { type: 'nutrition_recommendation', requestId: req._id || req.id, pet: { name: req.petName, type: req.animalType } } });
+      await sendMessage(prompt, { type: 'nutrition_recommendation', requestId: req._id || req.id, pet: { name: req.petName, type: req.animalType } });
     } catch (e) {
       console.error('AI recommendations error', e);
     }
@@ -273,46 +392,94 @@ const VeterinaryPage = () => {
         style={styles.hero}
       >
         <Stethoscope size={48} style={{ color: '#e67e22', marginBottom: '12px' }} />
-        <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 800 }}>Consultations & rendez-vous vétérinaires</h1>
+        <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 800 }}>Santé & vétérinaire</h1>
         <p style={{ margin: '8px 0 0', color: '#777' }}>
-          Envoyez une demande au vétérinaire, réservez un créneau et suivez l'historique santé de vos animaux.
+          Demande de consultation pour vos animaux, vétérinaire le plus proche, assistant santé et suivi médical.
         </p>
+        {!isVet && (
+          <Link
+            to="/client-reviews?tab=services"
+            style={{
+              display: 'inline-block',
+              marginTop: 14,
+              padding: '10px 16px',
+              borderRadius: 12,
+              background: 'linear-gradient(135deg, #e67e22, #d35400)',
+              color: 'white',
+              fontWeight: 800,
+              fontSize: 14,
+              textDecoration: 'none',
+            }}
+          >
+            ⭐ Noter le service vétérinaire
+          </Link>
+        )}
       </motion.div>
 
-      {/* Search + Print */}
-      <div style={styles.searchBar}>
-        <span style={{ fontSize: '16px' }}>🔍</span>
-        <input
-          type="text"
-          placeholder="Rechercher par animal, diagnostic..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={styles.searchInput}
-        />
-        <button style={styles.printBtn} onClick={handlePrint} title="Imprimer">
-          <Printer size={16} /> Imprimer
-        </button>
-      </div>
+      {!isVet && (
+        <>
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 8,
+            marginBottom: 20,
+            padding: 6,
+            background: 'white',
+            borderRadius: 14,
+            border: '1px solid #e5e7eb',
+          }}>
+            {CLIENT_TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setClientTab(tab.id)}
+                style={{
+                  padding: '10px 16px',
+                  borderRadius: 10,
+                  border: 'none',
+                  background: clientTab === tab.id ? '#e67e22' : 'transparent',
+                  color: clientTab === tab.id ? 'white' : '#374151',
+                  fontWeight: 800,
+                  fontSize: 13,
+                  cursor: 'pointer',
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-      {/* Veterinary contact section */}
+          {clientTab === 'sante' && (
+            <ClientVetHealthHub
+              selectedPet={selectedPet}
+              onSelectPet={setSelectedPet}
+              contactForm={contactForm}
+              setContactForm={setContactForm}
+              onSubmitContact={submitContactRequest}
+              contactLoading={contactLoading}
+              contactError={contactError}
+              contactSuccess={contactSuccess}
+              contactRequests={contactRequests}
+              contactStatusLabel={contactStatusLabel}
+            />
+          )}
+
+          {clientTab === 'assistant' && (
+            <ClientVetAiPanel
+              selectedPet={selectedPet}
+              prescriptions={prescriptions}
+              consultations={consultations}
+            />
+          )}
+        </>
+      )}
+
+      {(isVet || clientTab === 'rdv') && (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={styles.section}>
-        <h2 style={styles.sectionTitle}>💬 Consultation vétérinaire</h2>
-        <div style={styles.flowGrid}>
-          <div style={styles.flowCard}>
-            <strong>1. Décrire le besoin</strong>
-            <span>Symptômes, alimentation, suivi ou question urgente.</span>
-          </div>
-          <div style={styles.flowCard}>
-            <strong>2. Réserver un créneau</strong>
-            <span>Choisissez une date disponible et l'animal concerné.</span>
-          </div>
-          <div style={styles.flowCard}>
-            <strong>3. Suivre la réponse</strong>
-            <span>Retrouvez demandes, confirmations et historique santé.</span>
-          </div>
-        </div>
-
-        {/* RDV (agenda) */}
+        <h2 style={styles.sectionTitle}>🗓️ Rendez-vous</h2>
+        <p style={{ margin: '0 0 14px', color: '#6b7280', fontSize: 14 }}>
+          Réservez un créneau cabinet, à domicile ou en téléconsultation.
+        </p>
         <div style={{ marginTop: 18, background: 'white', borderRadius: 18, padding: 18, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
           <h3 style={{ fontWeight: 900, margin: '0 0 12px', fontSize: 16 }}>🗓️ Réserver un rendez-vous</h3>
           <p style={{ margin: '0 0 14px', color: '#6b7280', fontSize: 13 }}>
@@ -337,8 +504,8 @@ const VeterinaryPage = () => {
                 setAvailabilityLoading(true);
                 setAvailabilityError('');
                 try {
-                  const res = await api.get('/veterinary/availability', { params: { date: availabilityDate } });
-                  setSlots(Array.isArray(res.data?.slots) ? res.data.slots : []);
+                  const data = await getAvailability(availabilityDate);
+                  setSlots(Array.isArray(data?.slots) ? data.slots : []);
                 } catch (err) {
                   setAvailabilityError(err?.response?.data?.error || "Impossible de charger la disponibilité.");
                   setSlots([]);
@@ -397,6 +564,44 @@ const VeterinaryPage = () => {
             </label>
 
             <div style={{ marginTop: 18, borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: 18 }}>
+              <h4 style={{ fontWeight: 900, margin: '0 0 10px', fontSize: 14 }}>Mode de consultation</h4>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
+                {VISIT_MODES.map((mode) => {
+                  const selected = appointmentForm.visitMode === mode.value;
+                  return (
+                    <button
+                      key={mode.value}
+                      type="button"
+                      onClick={() => setAppointmentForm((p) => ({ ...p, visitMode: mode.value }))}
+                      style={{
+                        flex: '1 1 180px',
+                        padding: '14px 16px',
+                        borderRadius: 14,
+                        border: `2px solid ${selected ? '#e67e22' : 'rgba(0,0,0,0.08)'}`,
+                        background: selected ? 'rgba(230,126,34,0.08)' : 'white',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <div style={{ fontWeight: 900, fontSize: 14 }}>{mode.icon} {mode.label}</div>
+                      <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>{mode.description}</div>
+                    </button>
+                  );
+                })}
+              </div>
+              {appointmentForm.visitMode === 'home' && (
+                <label style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
+                  <span style={styles.label}>Adresse de visite *</span>
+                  <input
+                    value={appointmentForm.homeAddress}
+                    onChange={(e) => setAppointmentForm((p) => ({ ...p, homeAddress: e.target.value }))}
+                    placeholder="Ex: 12 Rue de la République, Tunis"
+                    style={styles.input}
+                  />
+                  <span style={{ fontSize: 12, color: '#6b7280' }}>Le vétérinaire interviendra à cette adresse au créneau choisi.</span>
+                </label>
+              )}
+
               <h4 style={{ fontWeight: 900, margin: '0 0 10px', fontSize: 14 }}>Confirmations</h4>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -443,14 +648,14 @@ const VeterinaryPage = () => {
                   style={styles.secondaryBtn}
                   onClick={() => {
                     setSelectedSlotStart('');
-                    setAppointmentForm({ petName: '', animalType: 'dog', notes: '', type: 'veterinary_consultation' });
+                    setAppointmentForm({ petName: '', animalType: 'dog', notes: '', type: 'veterinary_consultation', visitMode: 'cabinet', homeAddress: appointmentForm.homeAddress });
                   }}
                 >
                   Effacer
                 </button>
                 <button
                   type="button"
-                  disabled={!selectedSlotStart || !appointmentForm.petName}
+                  disabled={!selectedSlotStart || !appointmentForm.petName || (appointmentForm.visitMode === 'home' && !appointmentForm.homeAddress?.trim())}
                   onClick={async () => {
                     setAppointmentsLoading(true);
                     setAppointmentsError('');
@@ -461,15 +666,28 @@ const VeterinaryPage = () => {
                         animalType: appointmentForm.animalType,
                         date: selectedSlotStart,
                         notes: appointmentForm.notes || undefined,
-                        type: appointmentForm.type,
+                        visitMode: appointmentForm.visitMode,
+                        homeAddress: appointmentForm.visitMode === 'home' ? appointmentForm.homeAddress : undefined,
                       };
-                      await api.post('/veterinary/appointments', payload);
-                      // refresh list
-                      const res = await api.get('/veterinary/appointments');
-                      setAppointments(Array.isArray(res.data) ? res.data : []);
-                      setAppointmentsSuccess('Rendez-vous enregistré. Il apparaîtra en attente jusqu’à confirmation.');
+                      await createAppointment(payload);
+                      const apptData = await getAppointments();
+                      setAppointments(Array.isArray(apptData) ? apptData : []);
+                      setAppointmentsSuccess(
+                        appointmentForm.visitMode === 'home'
+                          ? 'RDV à domicile enregistré. Le vétérinaire confirmera l’intervention.'
+                          : appointmentForm.visitMode === 'online'
+                            ? 'Téléconsultation enregistrée. Le lien Google Meet (caméra + voix) est prêt — rejoignez à l’heure du RDV.'
+                            : 'Rendez-vous enregistré. Il apparaîtra en attente jusqu’à confirmation.'
+                      );
                       setSelectedSlotStart('');
-                      setAppointmentForm({ petName: '', animalType: appointmentForm.animalType, notes: '', type: 'veterinary_consultation' });
+                      setAppointmentForm({
+                        petName: '',
+                        animalType: appointmentForm.animalType,
+                        notes: '',
+                        type: 'veterinary_consultation',
+                        visitMode: appointmentForm.visitMode,
+                        homeAddress: appointmentForm.homeAddress,
+                      });
                     } catch (err) {
                       setAppointmentsError(err?.response?.data?.error || "Impossible de créer le rendez-vous.");
                     } finally {
@@ -478,8 +696,8 @@ const VeterinaryPage = () => {
                   }}
                   style={{
                     ...styles.primaryBtn,
-                    opacity: !selectedSlotStart || !appointmentForm.petName || appointmentsLoading ? 0.7 : 1,
-                    cursor: !selectedSlotStart || !appointmentForm.petName || appointmentsLoading ? 'not-allowed' : 'pointer',
+                    opacity: !selectedSlotStart || !appointmentForm.petName || appointmentsLoading || (appointmentForm.visitMode === 'home' && !appointmentForm.homeAddress?.trim()) ? 0.7 : 1,
+                    cursor: !selectedSlotStart || !appointmentForm.petName || appointmentsLoading || (appointmentForm.visitMode === 'home' && !appointmentForm.homeAddress?.trim()) ? 'not-allowed' : 'pointer',
                   }}
                 >
                   {appointmentsLoading ? 'Enregistrement...' : 'Confirmer mon RDV'}
@@ -510,15 +728,52 @@ const VeterinaryPage = () => {
                 .sort((a, b) => new Date(a.date) - new Date(b.date))
                 .map((a) => {
                   const statusLabel = a.status === 'confirmed' ? '✅ Confirmé' : a.status === 'scheduled' ? '⏳ En attente' : a.status;
+                  const badge = visitModeBadge(a);
                   return (
                     <div key={a.id} style={{ background: '#fafafa', border: '1px solid #f3f4f6', borderRadius: 14, padding: 14 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' }}>
                         <div>
-                          <div style={{ fontWeight: 900, color: '#111827', marginBottom: 4, fontSize: 14 }}>{a.petName}</div>
+                          <div style={{ fontWeight: 900, color: '#111827', marginBottom: 4, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                            {a.petName}
+                            <span style={{
+                              fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 999,
+                              background: badge.bg,
+                              color: badge.color,
+                            }}>
+                              {badge.label}
+                            </span>
+                          </div>
                           <div style={{ color: '#6b7280', fontSize: 13 }}>
                             {a.animalType || ''} • {a.date ? new Date(a.date).toLocaleString('fr-FR') : 'Date inconnue'}
                           </div>
+                          {isHomeVisit(a) && a.homeAddress ? (
+                            <div style={{ marginTop: 6, fontSize: 13, color: '#92400e' }}>📍 {a.homeAddress}</div>
+                          ) : null}
                           {a.notes ? <div style={{ marginTop: 6, color: '#374151', fontSize: 13, whiteSpace: 'pre-wrap' }}>{a.notes}</div> : null}
+                          {isOnlineVisit(a) ? (
+                            <TeleconsultMeetPanel appointment={a} compact />
+                          ) : a.meetingLink ? (
+                            <button
+                              onClick={() => openMeetingLink(a.meetingLink)}
+                              style={{
+                                marginTop: 12,
+                                padding: '10px 12px',
+                                background: '#ecfdf5',
+                                color: '#166534',
+                                border: '1px solid #34d399',
+                                borderRadius: 12,
+                                fontSize: 13,
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              Ouvrir la réunion vétérinaire
+                            </button>
+                          ) : a.status === 'confirmed' ? (
+                            <div style={{ marginTop: 12, color: '#6b7280', fontSize: 13 }}>
+                              Lien de réunion en cours de préparation par le vétérinaire.
+                            </div>
+                          ) : null}
                         </div>
                         <div style={{ ...styles.consultationStatusLabel, background: a.status === 'confirmed' ? '#dcfce7' : '#dbeafe', color: a.status === 'confirmed' ? '#166534' : '#1d4ed8' }}>
                           {statusLabel}
@@ -530,201 +785,105 @@ const VeterinaryPage = () => {
             </div>
           )}
         </div>
+      </motion.div>
+      )}
 
-        {/* Veterinary contact section */}
-        <div style={{ background: 'white', borderRadius: 18, padding: 18, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
-          <h3 style={{ fontWeight: 900, margin: '0 0 12px', fontSize: 16 }}>🩺 Envoyer une demande de consultation</h3>
-          <p style={{ margin: '0 0 14px', color: '#6b7280', fontSize: 13 }}>
-            Utilisez ce formulaire pour préparer la discussion avec le vétérinaire : contexte, symptômes, alimentation, médicaments ou besoin de validation.
-          </p>
-          <form onSubmit={submitContactRequest} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {(isVet || clientTab === 'suivi') && (
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={styles.section}>
+        <h2 style={styles.sectionTitle}>💊 Ordonnances & suivi médical</h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span style={styles.label}>Type d’animal</span>
-                <select
-                  value={contactForm.animalType}
-                  onChange={(e) => setContactForm((p) => ({ ...p, animalType: e.target.value }))}
-                  style={styles.input}
-                >
-                  <option value="dog">Chien</option>
-                  <option value="cat">Chat</option>
-                  <option value="bird">Oiseau</option>
-                  <option value="fish">Poisson</option>
-                  <option value="rabbit">Lapin</option>
-                  <option value="other">Autre</option>
-                </select>
-              </label>
-
-              <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span style={styles.label}>Nom animal (optionnel)</span>
-                <input
-                  value={contactForm.petName}
-                  onChange={(e) => setContactForm((p) => ({ ...p, petName: e.target.value }))}
-                  placeholder="Ex: Rex / Mimi"
-                  style={styles.input}
-                />
-              </label>
-            </div>
-
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span style={styles.label}>Sujet</span>
-              <input
-                required
-                value={contactForm.subject}
-                onChange={(e) => setContactForm((p) => ({ ...p, subject: e.target.value }))}
-                placeholder="Ex: Validation plan nutritionnel / Symptômes / Contrôle"
-                style={styles.input}
-              />
-            </label>
-
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span style={styles.label}>Message</span>
-              <textarea
-                required
-                value={contactForm.message}
-                onChange={(e) => setContactForm((p) => ({ ...p, message: e.target.value }))}
-                placeholder="Décrivez la situation (symptômes, évolution, contraintes, etc.)"
-                style={{ ...styles.input, resize: 'vertical', minHeight: 110 }}
-              />
-            </label>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span style={styles.label}>Date souhaitée (optionnel)</span>
-                <input
-                  type="date"
-                  value={contactForm.preferredDate}
-                  onChange={(e) => setContactForm((p) => ({ ...p, preferredDate: e.target.value }))}
-                  style={styles.input}
-                />
-              </label>
-
-              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', gap: 10 }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setContactForm({ animalType: contactForm.animalType, petName: '', subject: '', message: '', preferredDate: '' });
-                    setContactError('');
-                    setContactSuccess('');
-                  }}
-                  style={styles.secondaryBtn}
-                >
-                  Effacer
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={contactLoading}
-                  style={{
-                    ...styles.primaryBtn,
-                    opacity: contactLoading ? 0.7 : 1,
-                    cursor: contactLoading ? 'not-allowed' : 'pointer',
-                  }}
-                >
-                  {contactLoading ? 'Envoi...' : 'Envoyer au vétérinaire'}
-                </button>
-              </div>
-            </div>
-
-            {contactError ? <div style={styles.errorBox}>{contactError}</div> : null}
-            {contactSuccess ? <div style={styles.successBox}>{contactSuccess}</div> : null}
-          </form>
-        </div>
-
-        <div style={{ marginTop: 12 }}>
-          <h3 style={{ fontWeight: 900, margin: '0 0 12px', fontSize: 16 }}>Suivi des demandes de consultation</h3>
-          {contactRequests.length === 0 ? (
-            <div style={styles.infoBox}>
-              Aucune demande trouvée. Envoyez une demande pour démarrer la conversation.
-            </div>
+        {/* Mes ordonnances */}
+        <div style={{ marginTop: 18, background: 'white', borderRadius: 18, padding: 18, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
+          <h4 style={{ fontWeight: 900, margin: '0 0 12px', fontSize: 14 }}>💊 Mes ordonnances</h4>
+          {prescriptions.length === 0 ? (
+            <div style={styles.infoBox}>Aucune ordonnance disponible pour le moment. Elles apparaîtront ici après une consultation validée par le vétérinaire.</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {contactRequests.slice(0, 6).map((r) => (
-                <div key={r._id || r.id} style={{ background: '#fafafa', border: '1px solid #f3f4f6', borderRadius: 14, padding: 14 }}>
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 12, background: 'rgba(230,126,34,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
-                      🩺
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 900, color: '#111827', marginBottom: 4, fontSize: 14 }}>{r.subject || 'Demande'}</div>
-                      <div style={{ color: '#6b7280', fontSize: 13, marginBottom: 6, lineHeight: 1.4 }}>
-                        <strong>Animal :</strong>{' '}
-                        {r.petName ? `${r.animalType || ''} • ${r.petName}` : (r.animalType || '')}
-                      </div>
-                      <div style={{ color: '#374151', fontSize: 13, whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{r.message || ''}</div>
-                      <div style={{ marginTop: 8, color: '#9ca3af', fontSize: 12 }}>
-                        {r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR') : ''}
-                      </div>
-                    </div>
+              {prescriptions.map((rx) => (
+                <div key={rx.id || rx._id} style={{ background: '#fafafa', border: '1px solid #f3f4f6', borderRadius: 14, padding: 14 }}>
+                  <div style={{ fontWeight: 900, color: '#111827', marginBottom: 4, fontSize: 14 }}>
+                    {rx.petName} — {new Date(rx.createdAt).toLocaleDateString('fr-FR')}
                   </div>
+                  {rx.vet?.name ? (
+                    <div style={{ color: '#6b7280', fontSize: 13, marginBottom: 8 }}>Prescrit par Dr. {rx.vet.name}</div>
+                  ) : null}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {parseMedications(rx.medications).map((med, idx) => (
+                      <div key={idx} style={{ fontSize: 13, color: '#374151' }}>
+                        <Pill size={12} style={{ display: 'inline', marginRight: 6 }} />
+                        <strong>{med.name || 'Médicament'}</strong>
+                        {med.dosage ? ` — ${med.dosage}` : ''}
+                        {med.frequency ? ` (${med.frequency})` : ''}
+                      </div>
+                    ))}
+                  </div>
+                  {rx.instructions ? (
+                    <div style={{ marginTop: 8, fontSize: 13, color: '#4b5563', whiteSpace: 'pre-wrap' }}>{rx.instructions}</div>
+                  ) : null}
+                  <MedicationSchedule medications={parseMedications(rx.medications)} />
+                  {rx.validUntil ? (
+                    <div style={{ marginTop: 8, fontSize: 12, color: '#9ca3af' }}>
+                      Valide jusqu'au {new Date(rx.validUntil).toLocaleDateString('fr-FR')}
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>
           )}
         </div>
-        <div style={{ marginTop: 24 }}>
-          <h3 style={{ fontWeight: 900, margin: '0 0 12px', fontSize: 16 }}>Consultations & confirmations</h3>
-          {contactRequests.length === 0 ? (
-            <div style={styles.infoBox}>
-              Aucune consultation enregistrée. Envoyez une demande pour que le vétérinaire confirme l’état de votre animal.
-            </div>
+
+        {/* Mes analyses / consultations */}
+        <div style={{ marginTop: 18, background: 'white', borderRadius: 18, padding: 18, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
+          <h4 style={{ fontWeight: 900, margin: '0 0 12px', fontSize: 14 }}>🔬 Mes analyses & consultations</h4>
+          {consultations.length === 0 ? (
+            <div style={styles.infoBox}>Aucune analyse publiée. Après votre rendez-vous, le vétérinaire partagera ici le compte-rendu.</div>
           ) : (
-            <div style={styles.consultationGrid}>
-              {contactRequests.slice(0, 6).map((req) => (
-                <div key={req._id || req.id} style={styles.consultationCard}>
-                  <div style={styles.consultationHeader}>
-                    <div style={styles.consultationBadge}>Vétérinaire</div>
-                    <span style={styles.consultationDate}>{req.createdAt ? new Date(req.createdAt).toLocaleDateString('fr-FR') : 'Date inconnue'}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {consultations.map((c) => (
+                <div key={c.id || c._id} style={{ background: '#fafafa', border: '1px solid #f3f4f6', borderRadius: 14, padding: 14 }}>
+                  <div style={{ fontWeight: 900, color: '#111827', marginBottom: 4, fontSize: 14 }}>
+                    {c.petName} ({c.animalType}) — {new Date(c.updatedAt || c.createdAt).toLocaleDateString('fr-FR')}
                   </div>
-                  <div style={styles.consultationLine}>
-                    <strong>Pet :</strong> {req.petName || 'Votre animal'} • {req.animalType || 'Type inconnu'}
-                  </div>
-                  <div style={styles.consultationSubject}>{req.subject}</div>
-                  <div style={styles.consultationMessage}>{req.message}</div>
-                  <div style={styles.consultationStatus}>
-                    <span style={styles.consultationStatusLabel}>{req.response ? '✅ Confirmé' : '⏳ En attente de retour'}</span>
-                    {req.preferredDate ? <span style={styles.consultationStatusMeta}>Date souhaitée: {new Date(req.preferredDate).toLocaleDateString('fr-FR')}</span> : null}
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                    {!req.response && isVet && (
-                      <button
-                        type="button"
-                        onClick={() => handleConfirmPlan(req)}
-                        style={{ padding: '8px 12px', borderRadius: 10, border: 'none', background: '#059669', color: 'white', fontWeight: 800, cursor: 'pointer' }}
-                      >
-                        Confirmer le régime
-                      </button>
-                    )}
-
+                  {c.vet?.name ? <div style={{ color: '#6b7280', fontSize: 13, marginBottom: 8 }}>Dr. {c.vet.name}</div> : null}
+                  {c.diagnosis ? <div style={{ fontSize: 13, marginBottom: 6 }}><strong>Diagnostic :</strong> {c.diagnosis}</div> : null}
+                  {c.analysis ? <div style={{ fontSize: 13, marginBottom: 6 }}><strong>Analyse :</strong> {c.analysis}</div> : null}
+                  {c.recommendations ? <div style={{ fontSize: 13, color: '#374151' }}><strong>Recommandations :</strong> {c.recommendations}</div> : null}
+                  {c.appointment && isOnlineVisit(c.appointment) ? (
+                    <TeleconsultMeetPanel appointment={c.appointment} compact />
+                  ) : c.appointment?.meetingLink ? (
                     <button
                       type="button"
-                      onClick={() => startTeleconsult(req)}
-                      style={{ padding: '8px 12px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)', background: 'white', color: '#111827', fontWeight: 800, cursor: 'pointer' }}
+                      onClick={() => openMeetingLink(c.appointment.meetingLink)}
+                      style={{ marginTop: 10, padding: '8px 12px', background: '#ecfdf5', color: '#166534', border: '1px solid #34d399', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
                     >
-                      Démarrer téléconsultation
+                      Revoir la réunion
                     </button>
-
-                    <button
-                      type="button"
-                      onClick={() => openAiRecommendations(req)}
-                      style={{ padding: '8px 12px', borderRadius: 10, border: '1px dashed #e67e22', background: 'white', color: '#e67e22', fontWeight: 800, cursor: 'pointer' }}
-                    >
-                      Assistant IA — Reco
-                    </button>
-                  </div>
+                  ) : null}
                 </div>
               ))}
             </div>
           )}
         </div>
       </motion.div>
+      )}
 
-      {toast.message ? (
-        <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: '', type: 'info' })} />
-      ) : null}
+      {(isVet || clientTab === 'historique') && (
+      <>
+      <div style={styles.searchBar}>
+        <span style={{ fontSize: '16px' }}>🔍</span>
+        <input
+          type="text"
+          placeholder="Rechercher par animal, diagnostic..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={styles.searchInput}
+        />
+        <button style={styles.printBtn} onClick={handlePrint} title="Imprimer">
+          <Printer size={16} /> Imprimer
+        </button>
+      </div>
 
-      {/* Section ajoutée : Vétérinaire (Préparer, Après, Urgence) */}
+      {/* Conseils avant / après / urgence */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={styles.section}>
         <h2 style={styles.sectionTitle}>🩺 Vétérinaire : avant, après & urgence</h2>
 
@@ -912,6 +1071,22 @@ const VeterinaryPage = () => {
                           style={{ overflow: 'hidden' }}
                         >
                           <div style={styles.expandedContent}>
+                            {(record.breed || record.sex || record.birthDate || record.identificationNumber || record.allergies || record.diet || record.activityLevel || record.chronicDiseases) && (
+                              <div style={styles.detailBlock}>
+                                <div style={styles.detailLabel}>Profil animal</div>
+                                <div style={styles.petProfileGrid}>
+                                  {record.breed ? <span><strong>Race:</strong> {record.breed}</span> : null}
+                                  {record.sex ? <span><strong>Sexe:</strong> {sexLabels[record.sex] || record.sex}</span> : null}
+                                  {record.birthDate ? <span><strong>Age:</strong> {getPetAge(record.birthDate)}</span> : null}
+                                  {record.identificationNumber ? <span><strong>ID:</strong> {record.identificationNumber}</span> : null}
+                                  {record.sterilized !== undefined && record.sterilized !== null ? <span><strong>Sterilise:</strong> {record.sterilized ? 'Oui' : 'Non'}</span> : null}
+                                  {record.activityLevel ? <span><strong>Activite:</strong> {activityLabels[record.activityLevel] || record.activityLevel}</span> : null}
+                                  {record.allergies ? <span><strong>Allergies:</strong> {record.allergies}</span> : null}
+                                  {record.diet ? <span><strong>Alimentation:</strong> {record.diet}</span> : null}
+                                  {record.chronicDiseases ? <span><strong>Antecedents:</strong> {record.chronicDiseases}</span> : null}
+                                </div>
+                              </div>
+                            )}
                             {record.treatment && (
                               <div style={styles.detailBlock}>
                                 <div style={styles.detailLabel}>💊 Traitement</div>
@@ -952,6 +1127,12 @@ const VeterinaryPage = () => {
           </div>
         )}
       </motion.div>
+      </>
+      )}
+
+      {toast.message ? (
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: '', type: 'info' })} />
+      ) : null}
     </div>
   );
 };
@@ -1003,6 +1184,7 @@ const styles = {
   detailBlock: { marginBottom: '12px' },
   detailLabel: { fontSize: '12px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' },
   detailText: { fontSize: '14px', color: '#374151', lineHeight: 1.5 },
+  petProfileGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px', fontSize: '13px', color: '#374151', lineHeight: 1.5 },
   medicationItem: { display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 0', fontSize: '13px', color: '#4b5563' },
 
   // Contact form styles

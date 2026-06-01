@@ -6,6 +6,7 @@ import ChatAssistant from '../components/ChatAssistant';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
 import ResponsiveShell from './ResponsiveShell';
+import MobileBottomNav, { CLIENT_MOBILE_NAV } from '../components/MobileBottomNav';
 
 const CART_STORAGE_KEY = 'petfood_cart';
 
@@ -90,11 +91,13 @@ const ClientLayout = ({ children }) => {
   return (
     <ResponsiveShell
       roleBadge="Espace client"
+      bottomNav={<MobileBottomNav items={CLIENT_MOBILE_NAV} />}
       sidebar={(onClose) => <ClientSidebar onLogout={logout} onNavigate={onClose} />}
     >
       {children}
       <button
         type="button"
+        className="platform-cart-fab"
         onClick={() => setShowCart(true)}
         style={styles.cartButton}
         aria-label="Ouvrir le panier"

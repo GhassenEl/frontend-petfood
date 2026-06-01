@@ -57,7 +57,8 @@ export default defineConfig(({ mode }) => {
     },
   },
   server: {
-    port: 3000,
+    port: Number(env.PORT) || 3001,
+    strictPort: true,
     host: true,
     proxy: {
       '/api': {
@@ -74,6 +75,7 @@ export default defineConfig(({ mode }) => {
         target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => path.replace(/^\/fastapi/, ''),
       },
     },
   },

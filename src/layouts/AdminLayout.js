@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import ChatAssistant from '../components/ChatAssistant';
 import { useAuth } from '../contexts/AuthContext';
 import ResponsiveShell from './ResponsiveShell';
+import MobileBottomNav, { ADMIN_MOBILE_NAV } from '../components/MobileBottomNav';
 
 const AdminLayout = ({ children }) => {
   const { user, logout } = useAuth();
@@ -11,6 +12,7 @@ const AdminLayout = ({ children }) => {
   return (
     <ResponsiveShell
       roleBadge="Administration"
+      bottomNav={<MobileBottomNav items={ADMIN_MOBILE_NAV} />}
       sidebar={(onClose) => <Sidebar user={user} onLogout={logout} onNavigate={onClose} />}
     >
       {children}

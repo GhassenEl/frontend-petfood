@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
+import { PAYMENT_METHODS, getPaymentLabel } from '../constants/paymentMethods';
+import { downloadInvoicePdf, downloadInvoicesPdfBatch } from '../utils/invoicePdf';
 
 const emptyForm = {
   userId: '',
@@ -138,7 +140,19 @@ const AdminInvoices = () => {
           <h1 style={styles.title}>🧾 Gestion des factures</h1>
           <p style={styles.subtitle}>{invoices.length} facture(s)</p>
         </div>
-        <button style={styles.addBtn} onClick={openCreate}>➕ Ajouter une facture</button>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {filteredInvoices.length > 0 && (
+            <button
+              type="button"
+              style={styles.pdfBatchBtn}
+              onClick={() => downloadInvoicesPdfBatch(filteredInvoices)}
+              title="Télécharger toutes les factures filtrées"
+            >
+              📄 Exporter tout (PDF)
+            </button>
+          )}
+          <button style={styles.addBtn} onClick={openCreate}>➕ Ajouter une facture</button>
+        </div>
       </div>
 
       {/* Search */}
@@ -189,10 +203,17 @@ const AdminInvoices = () => {
                     <option value="pending">⏳ En attente</option>
                   </select>
                 </td>
-                <td style={styles.td}>{inv.paymentMethod || 'cash'}</td>
+                <td style={styles.td}>{getPaymentLabel(inv.paymentMethod)}</td>
                 <td style={styles.td}>{new Date(inv.issuedAt || inv.createdAt).toLocaleDateString('fr-TN')}</td>
                 <td style={styles.td}>
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                      style={styles.pdfBtn}
+                      onClick={() => downloadInvoicePdf(inv)}
+                      title="Exporter PDF"
+                    >
+                      📄
+                    </button>
                     <button style={styles.editBtn} onClick={() => openEdit(inv)} title="Modifier">✏️</button>
                     <button style={styles.deleteBtn} onClick={() => handleDelete(inv._id)} title="Supprimer">🗑️</button>
                   </div>
@@ -237,10 +258,9 @@ const AdminInvoices = () => {
               <div style={styles.row2}>
                 <input required type="number" step="0.01" placeholder="Montant (TND)" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} style={styles.input} />
                 <select value={formData.paymentMethod} onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })} style={styles.input}>
-                  <option value="cash">💵 Espèces</option>
-                  <option value="card">💳 Carte</option>
-                  <option value="check">📄 Chèque</option>
-                  <option value="transfer">🏦 Virement</option>
+                  {PAYMENT_METHODS.map((m) => (
+                    <option key={m.id} value={m.id}>{m.emoji} {m.label}</option>
+                  ))}
                 </select>
               </div>
               <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} style={styles.input}>
@@ -277,6 +297,8 @@ const styles = {
   badge: { display: 'inline-block', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: '700' },
   select: { padding: '6px 10px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '13px', background: 'white', cursor: 'pointer' },
   editBtn: { padding: '6px 10px', background: '#eff6ff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', transition: 'background 0.2s' },
+  pdfBtn: { padding: '6px 10px', background: '#dbeafe', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' },
+  pdfBatchBtn: { padding: '12px 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '700', fontSize: '14px', cursor: 'pointer' },
   deleteBtn: { padding: '6px 10px', background: '#fef2f2', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', transition: 'background 0.2s' },
   empty: { textAlign: 'center', padding: '40px', color: '#9ca3af', fontSize: '14px' },
   loader: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '12px' },

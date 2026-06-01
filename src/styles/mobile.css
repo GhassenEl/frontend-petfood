@@ -1,0 +1,179 @@
+/* ========== MOBILE — PetfoodTN ========== */
+
+@media (max-width: 768px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .page-content-shell {
+    padding: 12px 14px 16px;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
+  .platform-workspace--with-bottom-nav .main-area--platform {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .platform-workspace--with-bottom-nav .page-content-shell {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* FAB flottants au-dessus de la barre du bas */
+  .platform-workspace--with-bottom-nav .platform-chat-fab {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 16px !important;
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  .platform-workspace--with-bottom-nav .platform-cart-fab {
+    bottom: calc(136px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 16px !important;
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .platform-chat-panel {
+    bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 12px !important;
+    left: 12px !important;
+    width: auto !important;
+    max-width: none !important;
+    height: min(520px, calc(100vh - 100px - env(safe-area-inset-bottom, 0px))) !important;
+  }
+
+  /* Sidebar dans le tiroir mobile */
+  .platform-sidebar-panel .admin-sidebar,
+  .platform-sidebar-panel .livreur-sidebar {
+    width: 100% !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
+    position: relative !important;
+    top: 0 !important;
+    border-radius: 0 !important;
+    border-right: none !important;
+  }
+
+  /* Pages avec grilles inline courantes */
+  .page-content-shell [style*='grid-template-columns: 1fr 1fr'],
+  .page-content-shell [style*='gridTemplateColumns'] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .page-content-shell [style*='grid-template-columns: repeat(auto-fit, minmax(400px'],
+  .page-content-shell [style*='grid-template-columns: repeat(auto-fit, minmax(320px'] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Tableaux scrollables */
+  .table-container,
+  .page-content-shell table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  /* Cartes stats */
+  .stat-card {
+    padding: 14px !important;
+  }
+
+  .card-animal:hover {
+    transform: none;
+  }
+
+  /* Login / auth */
+  .login-page-card {
+    padding: 28px 20px !important;
+    border-radius: 20px !important;
+    margin: 8px;
+  }
+
+  /* Cartes Recharts */
+  .recharts-wrapper {
+    max-width: 100% !important;
+  }
+}
+
+/* Barre de navigation basse (app mobile) */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 120;
+    min-height: 56px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--line, rgba(0, 0, 0, 0.08));
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.06);
+  }
+
+  body.dark .mobile-bottom-nav {
+    background: rgba(30, 30, 30, 0.96);
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .mobile-bottom-nav__item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 8px 4px 10px;
+    min-height: 56px;
+    border: none;
+    background: transparent;
+    color: var(--muted, #62574b);
+    text-decoration: none;
+    font: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.15s ease;
+  }
+
+  .mobile-bottom-nav__item--active {
+    color: var(--primary, #e67e22);
+  }
+
+  .mobile-bottom-nav__icon {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  .mobile-bottom-nav__label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .livreur-layout .mobile-bottom-nav__item--active {
+    color: #059669;
+  }
+
+  .vet-layout .mobile-bottom-nav__item--active {
+    color: #0ea5e9;
+  }
+}

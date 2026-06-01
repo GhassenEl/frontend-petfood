@@ -1,0 +1,63 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: petfood-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-petfood}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-petfood}
+      POSTGRES_DB: ${POSTGRES_DB:-petfood}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-petfood} -d ${POSTGRES_DB:-petfood}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: petfood-backend
+    restart: unless-stopped
+    environment:
+      PORT: 5002
+      DATABASE_URL: postgresql://${POSTGRES_USER:-petfood}:${POSTGRES_PASSWORD:-petfood}@db:5432/${POSTGRES_DB:-petfood}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-change-me-docker-jwt-secret-min-32-chars!!}
+      DEMO_MODE: ${DEMO_MODE:-false}
+      RUN_SEED: ${RUN_SEED:-true}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_MOCK: ${STRIPE_MOCK:-1}
+      MCP_ENABLE: ${MCP_ENABLE:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - '${BACKEND_PORT:-5002}:5002'
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:5002/health']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_BASE: /api
+        VITE_SOCKET_URL: ''
+    container_name: petfood-frontend
+    restart: unless-stopped
+    ports:
+      - '${FRONTEND_PORT:-8080}:80'
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  pgdata:

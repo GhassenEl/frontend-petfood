@@ -46,18 +46,18 @@ const ChangePasswordPage = () => {
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
+
     if (field === 'newPassword') {
       const error = validateNewPassword(value);
       setPasswordStrength(getPasswordStrength(value));
       setErrors(prev => ({ ...prev, newPassword: error }));
-      
+
       if (formData.confirmNewPassword) {
         const confirmError = value !== formData.confirmNewPassword ? 'Ne correspondent pas' : '';
         setErrors(prev => ({ ...prev, confirmNewPassword: confirmError }));
       }
     }
-    
+
     if (field === 'confirmNewPassword') {
       const confirmError = value !== formData.newPassword ? 'Ne correspondent pas' : '';
       setErrors(prev => ({ ...prev, confirmNewPassword: confirmError }));
@@ -68,13 +68,13 @@ const ChangePasswordPage = () => {
     e.preventDefault();
     const newPassError = validateNewPassword(formData.newPassword);
     const confirmError = formData.newPassword !== formData.confirmNewPassword ? 'Ne correspondent pas' : '';
-    
+
     if (newPassError || confirmError) {
       setErrors({ newPassword: newPassError, confirmNewPassword: confirmError });
       return;
     }
 
-setLoading(true);
+    setLoading(true);
     try {
       // Backend API call to change password - use relative URL to go through proxy
       await fetch('/api/auth/change-password', {
@@ -85,7 +85,7 @@ setLoading(true);
         },
         body: JSON.stringify(formData)
       });
-      
+
       setMessage('✅ Mot de passe modifié avec succès! Reconnectez-vous.');
       setTimeout(() => {
         setMessage('');
@@ -112,9 +112,8 @@ setLoading(true);
 
         <div className="card glass-panel p-6">
           {message && (
-            <div className={`p-4 mb-6 rounded-xl text-white font-medium text-center ${
-              message.includes('succès') ? 'bg-green-500' : 'bg-red-500'
-            }`}>
+            <div className={`p-4 mb-6 rounded-xl text-white font-medium text-center ${message.includes('succès') ? 'bg-green-500' : 'bg-red-500'
+              }`}>
               {message}
             </div>
           )}
@@ -123,15 +122,15 @@ setLoading(true);
             <div>
               <label className="form-label block mb-2 font-medium">Mot de passe actuel</label>
               <div className="relative">
-                <input 
-                  type={showCurrent ? 'text' : 'password'} 
+                <input
+                  type={showCurrent ? 'text' : 'password'}
                   value={formData.currentPassword}
                   onChange={(e) => handleChange('currentPassword', e.target.value)}
                   className="form-control w-full p-3 pr-12 border rounded-xl focus:border-primary transition-all"
                   placeholder="Mot de passe actuel"
                   required
                 />
-                <button 
+                <button
                   type="button"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   onClick={() => setShowCurrent(!showCurrent)}
@@ -144,17 +143,16 @@ setLoading(true);
             <div>
               <label className="form-label block mb-2 font-medium">Nouveau mot de passe</label>
               <div className="relative">
-                <input 
-                  type={showNew ? 'text' : 'password'} 
+                <input
+                  type={showNew ? 'text' : 'password'}
                   value={formData.newPassword}
                   onChange={(e) => handleChange('newPassword', e.target.value)}
-                  className={`form-control w-full p-3 pr-12 border-2 rounded-xl transition-all ${
-                    errors.newPassword ? 'border-red-400 bg-red-50' : 'border-green-400 bg-green-50'
-                  }`}
+                  className={`form-control w-full p-3 pr-12 border-2 rounded-xl transition-all ${errors.newPassword ? 'border-red-400 bg-red-50' : 'border-green-400 bg-green-50'
+                    }`}
                   placeholder="Nouveau mot de passe sécurisé"
                   required
                 />
-                <button 
+                <button
                   type="button"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   onClick={() => setShowNew(!showNew)}
@@ -163,42 +161,39 @@ setLoading(true);
                 </button>
               </div>
               {errors.newPassword && <p className="text-red-500 text-sm mt-1">{errors.newPassword}</p>}
-              
+
               {/* Strength Meter */}
               <div className="flex gap-1 mt-2 h-2">
                 <div className={`flex-1 rounded-full ${getStrengthColor()}`}></div>
                 <div className={`flex-1 rounded-full bg-gray-200`}></div>
                 <div className={`flex-1 rounded-full bg-gray-200`}></div>
               </div>
-              <small className={`block mt-1 capitalize font-medium ${
-                passwordStrength === 'strong' ? 'text-green-600' : 
-                passwordStrength === 'medium' ? 'text-yellow-600' : 'text-red-600'
-              }`}>
+              <small className={`block mt-1 capitalize font-medium ${passwordStrength === 'strong' ? 'text-green-600' :
+                  passwordStrength === 'medium' ? 'text-yellow-600' : 'text-red-600'
+                }`}>
                 Force: {passwordStrength.toUpperCase()}
               </small>
             </div>
 
             <div>
               <label className="form-label block mb-2 font-medium">Confirmer nouveau mot de passe</label>
-              <input 
-                type={showNew ? 'text' : 'password'} 
+              <input
+                type={showNew ? 'text' : 'password'}
                 value={formData.confirmNewPassword}
                 onChange={(e) => handleChange('confirmNewPassword', e.target.value)}
-                className={`form-control w-full p-3 border-2 rounded-xl transition-all ${
-                  errors.confirmNewPassword ? 'border-red-400 bg-red-50' : 'border-green-400 bg-green-50'
-                }`}
+                className={`form-control w-full p-3 border-2 rounded-xl transition-all ${errors.confirmNewPassword ? 'border-red-400 bg-red-50' : 'border-green-400 bg-green-50'
+                  }`}
                 placeholder="Répétez le nouveau mot de passe"
                 required
               />
               {errors.confirmNewPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmNewPassword}</p>}
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading}
-              className={`btn w-full py-3 text-lg font-semibold rounded-xl transition-all ${
-                loading ? 'btn-disabled cursor-not-allowed' : 'btn-primary hover:shadow-xl hover:-translate-y-1'
-              }`}
+              className={`btn w-full py-3 text-lg font-semibold rounded-xl transition-all ${loading ? 'btn-disabled cursor-not-allowed' : 'btn-primary hover:shadow-xl hover:-translate-y-1'
+                }`}
             >
               {loading ? (
                 <>

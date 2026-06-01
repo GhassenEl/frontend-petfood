@@ -5,15 +5,59 @@ import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import useSocket from '../hooks/useSocket';
 import { useNavigate } from 'react-router-dom';
+import { getEffectiveDiscount, isOnPromotion } from '../utils/productDetails';
+
+const PET_GREETING_LABELS = { dog: 'chien', cat: 'chat', bird: 'oiseau', fish: 'poisson', other: 'animal' };
+
+async function buildClientPersonalizedGreeting() {
+  try {
+    const [profileRes, productsRes] = await Promise.all([
+      api.get('/users/profile'),
+      api.get('/products'),
+    ]);
+    const profile = profileRes.data;
+    const promos = (productsRes.data || []).filter(isOnPromotion);
+    const petLabel = PET_GREETING_LABELS[profile?.petType] || null;
+    const prefs = Array.isArray(profile?.preferences)
+      ? profile.preferences
+      : typeof profile?.preferences === 'string'
+        ? (() => { try { return JSON.parse(profile.preferences); } catch { return []; } })()
+        : [];
+
+    const firstName = profile?.name?.split(' ')[0];
+    let content = firstName ? `Bonjour ${firstName} ! ` : 'Bonjour ! ';
+    content += 'Je suis l\'assistant PetfoodTN. ';
+
+    if (petLabel && profile?.petAge != null && prefs.length) {
+      content += `Votre profil est enregistré (${petLabel}, ${profile.petAge} an(s)). `;
+      content += 'Je peux vous conseiller sur les produits, les promotions, vos commandes et le paiement.';
+    } else {
+      content += 'Je peux vous aider sur les produits, les codes promo, le suivi de commande et le paiement.';
+    }
+
+    if (promos.length) {
+      content += ` ${promos.length} promotion${promos.length > 1 ? 's' : ''} est disponible${promos.length > 1 ? 's' : ''} en ce moment.`;
+    }
+
+    return {
+      role: 'assistant',
+      content,
+      quickReplies: ['Recommandations', 'Voir les promotions', 'Codes promo', 'Mes commandes', 'Guide paiement'],
+      products: [],
+    };
+  } catch {
+    return null;
+  }
+}
 
 const VARIANT_CONFIG = {
   client: {
-    title: 'Assistant PetFoodTN',
+    title: 'Assistant PetfoodTN',
     makeGreeting: () => ({
       role: 'assistant',
       content:
-        'Bonjour ! Je suis votre assistant PetFoodTN. Je peux vous recommander des produits pour votre compagnon, répondre sur les promotions ou vous orienter vers votre profil. De quoi avez-vous besoin ?',
-      quickReplies: ['Recommandations', 'Promotions', 'Mon profil'],
+        'Bonjour ! Je suis l\'assistant PetfoodTN. Je peux vous orienter sur les produits, les codes promo, vos commandes et le paiement. Comment puis-je vous aider ?',
+      quickReplies: ['Recommandations', 'Codes promo', 'Mes commandes', 'Guide paiement'],
       products: [],
     }),
   },
@@ -22,7 +66,7 @@ const VARIANT_CONFIG = {
     makeGreeting: () => ({
       role: 'assistant',
       content:
-        "Bonjour. Je suis l'assistant PetFoodTN pour l'administration. Je peux vous orienter vers les commandes, produits, avis, réclamations, factures ou utilisateurs. Que cherchez-vous ?",
+        'Bonjour. Assistant administration PetfoodTN : commandes, produits, avis, réclamations, factures ou utilisateurs. Que recherchez-vous ?',
       quickReplies: ['Commandes', 'Produits', 'Avis', 'Réclamations', 'Dashboard'],
       products: [],
     }),
@@ -32,16 +76,51 @@ const VARIANT_CONFIG = {
     makeGreeting: () => ({
       role: 'assistant',
       content:
-        'Bonjour. Assistant livreur PetFoodTN : je peux vous rappeler où voir vos commandes, la carte, les messages et vos gains. Comment puis-je vous aider ?',
+        'Bonjour. Assistant livreur PetfoodTN : commandes, carte, messages et gains. Que souhaitez-vous consulter ?',
       quickReplies: ['Commandes', 'Carte', 'Messages', 'Gains', 'Tableau de bord'],
+      products: [],
+    }),
+  },
+  vet: {
+    title: 'Assistant Clinique',
+    makeGreeting: () => ({
+      role: 'assistant',
+      content:
+        'Bonjour Docteur. Assistant clinique PetfoodTN : analyse, pistes diagnostiques et recommandations. Mes suggestions ne remplacent pas votre jugement clinique. Comment puis-je vous aider ?',
+      quickReplies: ['Analyse symptômes', 'Protocole vaccin', 'Posologie', 'Urgence'],
       products: [],
     }),
   },
 };
 
-const getAssistantAvatarUrl = (variant) => {
-  const seed = variant === 'admin' ? 'veterinary-specialist' : variant === 'livreur' ? 'delivery-helper' : 'petfood-advisor';
-  return `https://api.dicebear.com/6.x/adventurer/svg?seed=${encodeURIComponent(seed)}&backgroundType=gradientLinear&gradientRotation=45&radius=20`;
+const AVATAR_CONFIG = {
+  client: { emoji: '🤖', gradient: 'linear-gradient(135deg, #10b981, #059669)' },
+  admin: { emoji: '⚙️', gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)' },
+  livreur: { emoji: '🚚', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)' },
+  vet: { emoji: '🩺', gradient: 'linear-gradient(135deg, #0ea5e9, #0284c7)' },
+};
+
+const AssistantAvatar = ({ variant = 'client', size = 40 }) => {
+  const cfg = AVATAR_CONFIG[variant] || AVATAR_CONFIG.client;
+  return (
+    <div
+      aria-hidden
+      style={{
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        background: cfg.gradient,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: Math.round(size * 0.45),
+        flexShrink: 0,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+      }}
+    >
+      {cfg.emoji}
+    </div>
+  );
 };
 
 const mapHistoryRow = (m) => ({
@@ -53,12 +132,12 @@ const mapHistoryRow = (m) => ({
 });
 
 /**
- * @param {{ variant?: 'client' | 'admin' | 'livreur', title?: string }} props
+ * @param {{ variant?: 'client' | 'admin' | 'livreur' | 'vet', title?: string }} props
  */
 const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
   const cfg = VARIANT_CONFIG[variant] || VARIANT_CONFIG.client;
   const displayTitle = titleOverride || cfg.title;
-  const assistantAvatarUrl = useMemo(() => getAssistantAvatarUrl(variant), [variant]);
+  const { user } = useAuth();
 
   const makeGreetingMessage = useMemo(() => {
     const g = cfg.makeGreeting();
@@ -77,7 +156,6 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
-  const { user } = useAuth();
   const socket = useSocket(user ? `user-${user.id || user._id}` : 'global');
   const navigate = useNavigate();
 
@@ -122,6 +200,13 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
       }
 
       if (!cancelled) {
+        if (variant === 'client') {
+          const personalized = await buildClientPersonalizedGreeting();
+          if (!cancelled && personalized) {
+            setMessages([personalized]);
+            return;
+          }
+        }
         setMessages([makeGreetingMessage]);
       }
     })();
@@ -129,7 +214,7 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
     return () => {
       cancelled = true;
     };
-  }, [isOpen, messages.length, makeGreetingMessage]);
+  }, [isOpen, messages.length, makeGreetingMessage, variant]);
 
   useEffect(() => {
     const open = () => setIsOpen(true);
@@ -192,7 +277,8 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
     setLoading(true);
 
     try {
-      const res = await api.post('/chat/message', {
+      const chatEndpoint = variant === 'vet' ? '/vet/ai/chat' : '/chat/message';
+      const res = await api.post(chatEndpoint, {
         message: text.trim(),
         context: context || undefined,
       });
@@ -209,6 +295,11 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
         products: data.products || [],
         quickReplies: data.quickReplies || [],
       };
+      if (data.promoCode) {
+        try {
+          sessionStorage.setItem('petfood_promo_hint', data.promoCode);
+        } catch { /* ignore */ }
+      }
       setMessages((prev) => [...prev, assistantMsg]);
       setIsBackendOnline(true);
       // Socket emit removed: backend HTTP endpoint already returns the assistant reply,
@@ -255,6 +346,59 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
       return;
     }
 
+    if (cleanReply === 'Agent IA complet') {
+      setIsOpen(false);
+      navigate('/client-ai');
+      return;
+    }
+
+    if (cleanReply === 'Mes commandes') {
+      setIsOpen(false);
+      navigate('/client-orders');
+      return;
+    }
+
+    const livreurNav = {
+      Commandes: '/livreur/orders',
+      Carte: '/livreur/map',
+      Messages: '/livreur/messages',
+      Gains: '/livreur/earnings',
+      'Tableau de bord': '/livreur/dashboard',
+    };
+    if (variant === 'livreur' && livreurNav[cleanReply]) {
+      setIsOpen(false);
+      navigate(livreurNav[cleanReply]);
+      return;
+    }
+
+    const adminNav = {
+      Commandes: '/admin/orders',
+      Produits: '/admin/products',
+      Avis: '/admin/reviews',
+      Réclamations: '/admin/complaints',
+      Dashboard: '/admin/dashboard',
+    };
+    if (variant === 'admin' && adminNav[cleanReply]) {
+      setIsOpen(false);
+      navigate(adminNav[cleanReply]);
+      return;
+    }
+
+    if (cleanReply === 'Guide paiement') {
+      sendMessage('Guide paiement');
+      return;
+    }
+
+    if (cleanReply === 'Codes promo disponibles' || cleanReply === 'Codes promo') {
+      sendMessage('Codes promo disponibles');
+      return;
+    }
+
+    if (cleanReply === 'Recommandations' || cleanReply === 'Voir les promotions') {
+      sendMessage(cleanReply === 'Voir les promotions' ? 'Voir les promotions' : 'Recommandations pour mon animal');
+      return;
+    }
+
     // Auto-workflow triggers
     if (cleanReply === 'Lancer automatiquement') {
 
@@ -264,7 +408,7 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
       (async () => {
         try {
           const res = await api.get('/products');
-          const discounted = (res.data || []).filter(p => (p.discount || 0) > 0);
+          const discounted = (res.data || []).filter((p) => getEffectiveDiscount(p) > 0 || p.isOnSale);
           discounted.slice(0, 4).forEach(addToCart);
           navigate('/checkout');
         } catch (e) {
@@ -278,6 +422,11 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
     }
 
     if (cleanReply === 'Passer commande') {
+      try {
+        const hint = sessionStorage.getItem('petfood_promo_hint');
+        if (hint) sessionStorage.setItem('petfood_checkout_promo', hint);
+      } catch { /* ignore */ }
+      setIsOpen(false);
       navigate('/checkout');
       return;
     }
@@ -368,6 +517,7 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
     <>
       <motion.button
         type="button"
+        className="platform-chat-fab"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
@@ -383,6 +533,7 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
         {isOpen && (
           <motion.div
             id="petfood-chat-panel"
+            className="platform-chat-panel"
             role="dialog"
             aria-modal="true"
             aria-label={displayTitle}
@@ -395,7 +546,7 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
             <div style={styles.header}>
               <div style={styles.headerLeft}>
                 <div style={styles.headerIcon}>
-                    <img src={assistantAvatarUrl} alt={`${displayTitle} avatar`} style={styles.assistantAvatar} />
+                  <AssistantAvatar variant={variant} size={40} />
                 </div>
                 <div>
                   <div style={styles.headerTitle}>{displayTitle}</div>

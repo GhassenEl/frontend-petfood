@@ -149,6 +149,29 @@ const NutriProPage = () => {
     setAvatarPreviewUrl(url);
   };
 
+  const persistPlanToBackend = async (planText, extra = {}) => {
+    try {
+      await api.post('/nutrition/plans', {
+        planText: planText,
+        petName: petName || extra.petName,
+        petType: petType || extra.petType,
+        goal,
+        metadata: {
+          activityLevel,
+          bodyCondition,
+          mealCount,
+          foodPreference,
+          allergies: allergies || undefined,
+        },
+        source: 'nutripro',
+      });
+      return true;
+    } catch (e) {
+      console.error('persistPlanToBackend:', e);
+      return false;
+    }
+  };
+
   const handleGenerate = async () => {
     setError('');
     setResult(null);
@@ -163,7 +186,7 @@ const NutriProPage = () => {
         "Utilise le contexte fourni et complète avec prudence. Ne donne pas de diagnostic médical. " +
         "Si vaccins, médicaments, allergies, poids inhabituel ou symptômes sont mentionnés, recommande une consultation vétérinaire et liste les points à valider.";
 
-      const res = await api.post('/chat/message', {
+      const res = await api.post('/chat/pet', {
         message: msg,
         context,
       });
@@ -176,6 +199,9 @@ const NutriProPage = () => {
         localPlan: localNutritionPlan,
         shouldShowVetCTA: !!res.data?.shouldShowVetCTA,
       });
+      const savedText = backendMessage || localNutritionPlan;
+      const saved = await persistPlanToBackend(savedText);
+      if (saved) setToast({ message: 'Plan généré et sauvegardé dans votre historique', type: 'success' });
       try {
         const ctx = buildContextPayload();
         if (ctx?.nutritionPreferences) {
@@ -190,6 +216,7 @@ const NutriProPage = () => {
     } catch (e) {
       setResult({ message: localNutritionPlan, localPlan: localNutritionPlan, quickReplies: [], products: [] });
       setError("Le backend IA est indisponible. J'ai généré un plan local à partir du profil renseigné.");
+      await persistPlanToBackend(localNutritionPlan);
     } finally {
       setLoading(false);
     }
@@ -208,14 +235,19 @@ const NutriProPage = () => {
     navigate(`/veterinary?${qs}`);
   };
 
-  const savePlan = () => {
+  const savePlan = async () => {
     try {
       const planText = result?.localPlan || result?.message || localNutritionPlan;
+      const ok = await persistPlanToBackend(planText);
+      if (ok) {
+        setToast({ message: 'Plan sauvegardé dans votre historique', type: 'success' });
+        return;
+      }
       const plans = JSON.parse(localStorage.getItem('nutripro:plans') || '[]');
-      const entry = { id: Date.now(), date: new Date().toISOString(), petName, petType, plan: planText };
+      const entry = { id: Date.now(), date: new Date().toISOString(), petName, petType, goal, plan: planText };
       plans.unshift(entry);
       localStorage.setItem('nutripro:plans', JSON.stringify(plans));
-      setToast({ message: 'Plan sauvegardé', type: 'success' });
+      setToast({ message: 'Plan sauvegardé localement', type: 'success' });
     } catch (e) {
       setToast({ message: 'Impossible de sauvegarder le plan', type: 'error' });
     }
