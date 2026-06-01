@@ -14,7 +14,7 @@ const VetSidebar = ({ onLogout, user, onNavigate }) => {
         { id: 'bi', label: 'Dashboard BI', icon: '📈' },
         { id: 'calendar', label: 'Calendrier', icon: '📅' },
         { id: 'prescriptions', label: 'Ordonnances', icon: '💊' },
-        { id: 'pharmacy', label: 'Pharmacie', icon: '💉' },
+        { id: 'pharmacy', label: 'Pharmacie', icon: '🏪' },
         { id: 'clinic', label: 'Ma clinique', icon: '🏥' },
         { id: 'medical-dossiers', label: 'Dossiers médicaux', icon: '📁' },
         { id: 'vaccinations', label: 'Vaccinations', icon: '💉' },

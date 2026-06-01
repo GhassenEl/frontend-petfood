@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 
 const animalEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', other: '🐾' };
 
 const VetMedicalDossiersPage = () => {
+  const [searchParams] = useSearchParams();
   const [dossiers, setDossiers] = useState([]);
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => searchParams.get('q') || '');
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({ ownerId: '', petId: '', petName: '' });
 

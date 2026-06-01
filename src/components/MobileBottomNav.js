@@ -65,6 +65,7 @@ export const LIVREUR_MOBILE_NAV = [
 export const VET_MOBILE_NAV = [
   { id: 'dash', to: '/vet/dashboard', icon: '🩺', label: 'Accueil' },
   { id: 'calendar', to: '/vet/calendar', icon: '📅', label: 'Agenda' },
+  { id: 'dossiers', to: '/vet/medical-dossiers', icon: '📁', label: 'Dossiers' },
   { id: 'clients', to: '/vet/clients', icon: '👥', label: 'Clients' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];

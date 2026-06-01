@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { isHomeVisit, isOnlineVisit } from '../constants/visitModes';
+import api from '../utils/api';
 
 const statusLabel = {
   scheduled: 'Planifié',
@@ -38,6 +39,14 @@ const VetCalendarPage = () => {
   const [loading, setLoading] = useState(true);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [filter, setFilter] = useState('all');
+  const [toast, setToast] = useState(null);
+
+  const apptId = (a) => a?.id || a?._id;
+
+  const showToast = (text, type = 'success') => {
+    setToast({ text, type });
+    setTimeout(() => setToast(null), 3500);
+  };
 
   useEffect(() => {
     fetchAppointments();
@@ -53,26 +62,31 @@ const VetCalendarPage = () => {
       setUnassigned(Array.isArray(unassignedRes.data) ? unassignedRes.data : []);
     } catch (error) {
       console.error('Calendar error:', error);
+      showToast('Impossible de charger le calendrier.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const claimAppt = async (id) => {
+    if (!id) return;
     try {
       await api.put(`/vet/appointments/${id}/claim`);
+      showToast('RDV pris en charge.');
       fetchAppointments();
     } catch {
-      window.alert('Erreur prise en charge');
+      showToast('Erreur lors de la prise en charge.', 'error');
     }
   };
 
   const confirmAppt = async (id) => {
+    if (!id) return;
     try {
       await api.put(`/vet/appointments/${id}/confirm`);
+      showToast('Rendez-vous confirmé.');
       fetchAppointments();
     } catch {
-      window.alert('Erreur lors de la confirmation');
+      showToast('Erreur lors de la confirmation.', 'error');
     }
   };
 
@@ -115,6 +129,24 @@ const VetCalendarPage = () => {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
+      {toast && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 16,
+            right: 16,
+            zIndex: 9999,
+            padding: '12px 18px',
+            borderRadius: 12,
+            background: toast.type === 'error' ? '#fef2f2' : '#ecfdf5',
+            color: toast.type === 'error' ? '#b91c1c' : '#065f46',
+            fontWeight: 700,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+          }}
+        >
+          {toast.text}
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
         <div>
           <h1 style={{ marginBottom: 8 }}>📅 Calendrier hebdomadaire</h1>
@@ -133,6 +165,9 @@ const VetCalendarPage = () => {
           <button type="button" className="btn btn-outline" onClick={() => setWeekStart(addDays(weekStart, 7))}>
             Semaine suiv. →
           </button>
+          <button type="button" className="btn btn-outline" onClick={() => { setLoading(true); fetchAppointments(); }}>
+            ↻ Actualiser
+          </button>
         </div>
       </div>
 
@@ -141,11 +176,13 @@ const VetCalendarPage = () => {
           <strong>📋 Pool RDV non assignés ({unassigned.length})</strong>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
             {unassigned.map((a) => (
-              <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+              <div key={apptId(a)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                 <span>
                   {a.petName} — {new Date(a.date).toLocaleString('fr-FR')} — {a.owner?.name}
+                  {isHomeVisit(a) && ' · 🏠'}
+                  {isOnlineVisit(a) && ' · 📹'}
                 </span>
-                <button type="button" className="btn btn-primary" style={{ fontSize: 13 }} onClick={() => claimAppt(a.id)}>
+                <button type="button" className="btn btn-primary" style={{ fontSize: 13 }} onClick={() => claimAppt(apptId(a))}>
                   Prendre en charge
                 </button>
               </div>

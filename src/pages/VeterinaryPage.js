@@ -397,22 +397,69 @@ const VeterinaryPage = () => {
           Demande de consultation pour vos animaux, vétérinaire le plus proche, assistant santé et suivi médical.
         </p>
         {!isVet && (
-          <Link
-            to="/client-reviews?tab=services"
-            style={{
-              display: 'inline-block',
-              marginTop: 14,
-              padding: '10px 16px',
-              borderRadius: 12,
-              background: 'linear-gradient(135deg, #e67e22, #d35400)',
-              color: 'white',
-              fontWeight: 800,
-              fontSize: 14,
-              textDecoration: 'none',
-            }}
-          >
-            ⭐ Noter le service vétérinaire
-          </Link>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 18, justifyContent: 'center' }}>
+            <Link
+              to="/medical-dossier"
+              style={{
+                padding: '10px 16px',
+                borderRadius: 12,
+                background: 'white',
+                border: '2px solid #0ea5e9',
+                color: '#0369a1',
+                fontWeight: 800,
+                fontSize: 14,
+                textDecoration: 'none',
+              }}
+            >
+              📁 Mon dossier médical
+            </Link>
+            <button
+              type="button"
+              onClick={() => setClientTab('rdv')}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
+                border: 'none',
+                color: 'white',
+                fontWeight: 800,
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              🗓️ Prendre rendez-vous
+            </button>
+            <button
+              type="button"
+              onClick={() => setClientTab('assistant')}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 12,
+                background: 'white',
+                border: '2px solid #e67e22',
+                color: '#c2410c',
+                fontWeight: 800,
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              🤖 Assistant santé
+            </button>
+            <Link
+              to="/client-reviews?tab=services"
+              style={{
+                padding: '10px 16px',
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, #e67e22, #d35400)',
+                color: 'white',
+                fontWeight: 800,
+                fontSize: 14,
+                textDecoration: 'none',
+              }}
+            >
+              ⭐ Noter le service
+            </Link>
+          </div>
         )}
       </motion.div>
 
