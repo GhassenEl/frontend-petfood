@@ -77,6 +77,7 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         { id: 'pet-advice', label: 'Conseils', icon: '💡' },
         { id: 'client-services', label: 'Toilettage & Pension', icon: '✂️' },
         { id: 'client-events', label: 'Événements', icon: '📅' },
+        { id: 'found-me', label: 'Retrouvé Moi', icon: '🔍' },
         { id: 'veterinary', label: 'Santé & Vétérinaire', icon: '🩺' },
         { id: 'medical-dossier', label: 'Dossier médical', icon: '📁' },
         { id: 'store-locator', label: 'Magasins', icon: '📍' },

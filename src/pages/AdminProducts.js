@@ -260,7 +260,7 @@ const AdminProducts = () => {
                   </td>
                   <td style={styles.td}>
                     <span style={styles.typeBadge(product.animalType)}>
-                      {product.animalType === 'dog' ? '🐕' : product.animalType === 'cat' ? '🐈' : product.animalType === 'bird' ? '🐦' : product.animalType === 'fish' ? '🐟' : '🐾'} {product.animalType || 'general'}
+                      {product.animalType === 'dog' ? '🐕' : product.animalType === 'cat' ? '🐈' : product.animalType === 'bird' ? '🐦' : product.animalType === 'fish' ? '🐟' : product.animalType === 'rabbit' ? '🐰' : product.animalType === 'hamster' ? '🐹' : product.animalType === 'reptile' ? '🦎' : '🐾'} {product.animalType || 'general'}
                     </span>
                   </td>
                   <td style={styles.td}>
