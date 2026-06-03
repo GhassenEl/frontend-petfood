@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { FileDown } from 'lucide-react';
 import api from '../utils/api';
+import { exportMedicalDossierPdf } from '../utils/medicalDossierPdf';
 
 const animalEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', other: '🐾' };
 
@@ -11,7 +13,22 @@ const VetMedicalDossiersPage = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(() => searchParams.get('q') || '');
   const [creating, setCreating] = useState(false);
+  const [exportingId, setExportingId] = useState(null);
   const [form, setForm] = useState({ ownerId: '', petId: '', petName: '' });
+
+  const handleExportPdf = async (dossierId, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setExportingId(dossierId);
+    try {
+      const { data } = await api.get(`/vet/medical-dossiers/${dossierId}`);
+      exportMedicalDossierPdf(data);
+    } catch {
+      window.alert('Export PDF impossible.');
+    } finally {
+      setExportingId(null);
+    }
+  };
 
   useEffect(() => {
     Promise.all([api.get('/vet/medical-dossiers'), api.get('/vet/clients')])
@@ -176,6 +193,27 @@ const VetMedicalDossiersPage = () => {
             <p style={{ margin: '10px 0 0', fontSize: '0.8rem', color: '#0ea5e9' }}>
               {d.entryCount || 0} entrée(s) · {d.signedCount || 0} signée(s)
             </p>
+            <button
+              type="button"
+              onClick={(e) => handleExportPdf(d.id || d._id, e)}
+              disabled={exportingId === (d.id || d._id)}
+              style={{
+                marginTop: 12,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '8px 12px',
+                borderRadius: 10,
+                border: '1px solid #e5e7eb',
+                background: '#f8fafc',
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: 'pointer',
+              }}
+            >
+              <FileDown size={14} />
+              {exportingId === (d.id || d._id) ? 'PDF…' : 'Exporter PDF'}
+            </button>
           </Link>
         ))}
       </div>

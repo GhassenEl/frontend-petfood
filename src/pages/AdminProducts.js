@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
+import { PRODUCT_CATEGORIES } from '../constants/productCategories';
 
 const emptyForm = {
   name: '',
@@ -8,6 +9,7 @@ const emptyForm = {
   description: '',
   stock: '',
   animalType: 'dog',
+  category: 'nourriture',
   imageUrl: '',
 };
 
@@ -58,6 +60,7 @@ const AdminProducts = () => {
       description: product.description || '',
       stock: product.stock || '',
       animalType: product.animalType || 'dog',
+      category: product.category || 'nourriture',
       imageUrl: product.imageUrl || product.image || '',
     });
     setShowModal(true);
@@ -211,7 +214,8 @@ const AdminProducts = () => {
               <th style={styles.th}>Sélection</th>
               <th style={styles.th}>Image</th>
               <th style={styles.th}>Nom</th>
-              <th style={styles.th}>Type</th>
+              <th style={styles.th}>Catégorie</th>
+              <th style={styles.th}>Animal</th>
               <th style={styles.th}>Prix</th>
               <th style={styles.th}>Remise</th>
               <th style={styles.th}>Stock</th>
@@ -248,6 +252,11 @@ const AdminProducts = () => {
                   <td style={styles.td}>
                     <strong>{product.name}</strong>
 <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>{product.description?.length > 100 ? product.description.substring(0, 100) + '...' : product.description}</div>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: '#4b5563' }}>
+                      {PRODUCT_CATEGORIES.find((c) => c.value === product.category)?.label || product.category || '—'}
+                    </span>
                   </td>
                   <td style={styles.td}>
                     <span style={styles.typeBadge(product.animalType)}>
@@ -351,7 +360,11 @@ const AdminProducts = () => {
                 <input type="number" step="1" placeholder="Remise %" value={formData.discount} onChange={(e) => setFormData({ ...formData, discount: e.target.value })} style={styles.input} />
               </div>
               <div style={styles.row2}>
-                <input type="number" step="1" placeholder="Stock" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} style={styles.input} />
+                <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} style={styles.input}>
+                  {PRODUCT_CATEGORIES.map((c) => (
+                    <option key={c.value} value={c.value}>{c.label}</option>
+                  ))}
+                </select>
                 <select value={formData.animalType} onChange={(e) => setFormData({ ...formData, animalType: e.target.value })} style={styles.input}>
                   <option value="dog">🐕 Chien</option>
                   <option value="cat">🐈 Chat</option>
@@ -360,6 +373,7 @@ const AdminProducts = () => {
                   <option value="other">🐾 Autre</option>
                 </select>
               </div>
+              <input type="number" step="1" placeholder="Stock" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} style={styles.input} />
               <input placeholder="URL de l'image" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} style={styles.input} />
               <textarea placeholder="Description" rows="3" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} style={styles.input} />
               <div style={styles.modalActions}>

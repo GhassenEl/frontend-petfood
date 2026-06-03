@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Clock, ChevronDown, ChevronUp, Utensils, Leaf, Scale, AlertCircle } from 'lucide-react';
+import { getPublishedBlogArticles } from '../services/blogArticleService';
 import '../pages/ClientComplaintsPage.css';
 
 const PET_TYPES = [
@@ -169,21 +170,53 @@ const tagStyle = (tag) => {
   return map[tag] || map.default;
 };
 
+const mapArticle = (row) => ({
+  id: row.id || row._id,
+  title: row.title,
+  category: row.category,
+  readMin: row.readMin ?? 5,
+  date: row.publishedAt || row.date || row.createdAt,
+  excerpt: row.excerpt,
+  body: row.body,
+});
+
 /** Conseils nutrition + blog — intégré à la page Mes avis */
 const ClientNutritionBlogPanel = () => {
   const [subTab, setSubTab] = useState('tips');
   const [petType, setPetType] = useState('dog');
   const [expandedBlog, setExpandedBlog] = useState(null);
   const [blogFilter, setBlogFilter] = useState('all');
+  const [blogPosts, setBlogPosts] = useState(BLOG_POSTS.map(mapArticle));
+  const [blogLoading, setBlogLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setBlogLoading(true);
+      try {
+        const rows = await getPublishedBlogArticles();
+        if (!cancelled && Array.isArray(rows) && rows.length > 0) {
+          setBlogPosts(rows.map(mapArticle));
+        }
+      } catch {
+        if (!cancelled) setBlogPosts(BLOG_POSTS.map(mapArticle));
+      } finally {
+        if (!cancelled) setBlogLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const tips = NUTRITION_TIPS[petType] || NUTRITION_TIPS.dog;
 
   const filteredPosts = useMemo(() => {
-    if (blogFilter === 'all') return BLOG_POSTS;
-    return BLOG_POSTS.filter((p) => p.category.toLowerCase() === blogFilter.toLowerCase() || p.category === blogFilter);
-  }, [blogFilter]);
+    if (blogFilter === 'all') return blogPosts;
+    return blogPosts.filter(
+      (p) => p.category.toLowerCase() === blogFilter.toLowerCase() || p.category === blogFilter
+    );
+  }, [blogFilter, blogPosts]);
 
-  const categories = useMemo(() => ['all', ...new Set(BLOG_POSTS.map((p) => p.category))], []);
+  const categories = useMemo(() => ['all', ...new Set(blogPosts.map((p) => p.category))], [blogPosts]);
 
   return (
     <div>
@@ -213,6 +246,8 @@ const ClientNutritionBlogPanel = () => {
             <p style={{ margin: 0, fontSize: '0.9rem', color: '#047857' }}>
               Recommandations générales validées par notre équipe. Pour un plan personnalisé, consultez{' '}
               <Link to="/smart-food-agent" style={{ color: '#065f46', fontWeight: 700 }}>NutriPro</Link>
+              {' '}ou le{' '}
+              <Link to="/pet-calories" style={{ color: '#065f46', fontWeight: 700 }}>calculateur calories</Link>
               {' '}ou votre vétérinaire.
             </p>
           </div>
@@ -272,9 +307,14 @@ const ClientNutritionBlogPanel = () => {
               Blog nutrition animale
             </h2>
             <p style={{ margin: 0, fontSize: '0.9rem', color: '#64748b' }}>
-              Articles rédigés par l’équipe PetfoodTN pour mieux nourrir vos compagnons.
+              Articles publiés par l’équipe PetfoodTN. Retrouvez aussi jouets et accessoires dans le{' '}
+              <Link to="/client-products?category=jouets" style={{ color: '#2563eb', fontWeight: 700 }}>catalogue</Link>.
             </p>
           </div>
+
+          {blogLoading && (
+            <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: 12 }}>Chargement des articles…</p>
+          )}
 
           <div className="cc-filters" style={{ marginBottom: 16, flexWrap: 'wrap' }}>
             {categories.map((cat) => (
@@ -290,8 +330,16 @@ const ClientNutritionBlogPanel = () => {
           </div>
 
           <div className="cc-list">
+            {!blogLoading && filteredPosts.length === 0 && (
+              <p style={{ color: '#94a3b8', textAlign: 'center', padding: 24 }}>
+                Aucun article publié pour le moment.
+              </p>
+            )}
             {filteredPosts.map((post) => {
               const open = expandedBlog === post.id;
+              const dateStr = post.date
+                ? new Date(post.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+                : '';
               return (
                 <article key={post.id} className="cc-card review">
                   <div className="cc-card-head">
@@ -305,9 +353,9 @@ const ClientNutritionBlogPanel = () => {
                       <Clock size={12} />
                       {post.readMin} min
                     </span>
-                    <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                      {new Date(post.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                    </span>
+                    {dateStr && (
+                      <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{dateStr}</span>
+                    )}
                   </div>
                   <p className="cc-message">{post.excerpt}</p>
                   {open && (
@@ -344,9 +392,15 @@ const ClientNutritionBlogPanel = () => {
                         </>
                       )}
                     </button>
-                    <Link to="/client-products" className="cc-btn-ghost" style={{ textDecoration: 'none' }}>
+                    <Link to="/client-products?category=croquettes" className="cc-btn-ghost" style={{ textDecoration: 'none' }}>
                       <Scale size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                      Voir les produits
+                      Nourriture
+                    </Link>
+                    <Link to="/client-products?category=jouets" className="cc-btn-ghost" style={{ textDecoration: 'none' }}>
+                      🎾 Jouets
+                    </Link>
+                    <Link to="/client-products?category=accessoires" className="cc-btn-ghost" style={{ textDecoration: 'none' }}>
+                      🎒 Accessoires
                     </Link>
                   </div>
                 </article>

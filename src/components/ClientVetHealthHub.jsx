@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getPets } from '../services/userService';
 import NearestVetCard from './NearestVetCard';
 import { getPetPhoto, PET_EMOJI, PET_LABEL } from '../utils/petAvatars';
+import { calculatePetCalories } from '../utils/petCalorieCalculator';
 import { VISIT_MODES, isHomeVisit, isOnlineVisit } from '../constants/visitModes';
 
 const card = {
@@ -63,7 +64,8 @@ const ClientVetHealthHub = ({
       <div style={card}>
         <h2 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 800 }}>🐾 Mes animaux</h2>
         <p style={{ margin: '0 0 16px', color: '#6b7280', fontSize: 14 }}>
-          Sélectionnez un compagnon pour pré-remplir votre demande de consultation santé.
+          Sélectionnez un compagnon pour pré-remplir votre demande de consultation santé.{' '}
+          <Link to="/pet-calories" style={{ color: '#ea580c', fontWeight: 700 }}>Calcul calories</Link>
         </p>
 
         {petsLoading ? (
@@ -111,6 +113,24 @@ const ClientVetHealthHub = ({
                   <div style={{ fontSize: 12, color: '#6b7280' }}>
                     {PET_EMOJI[type]} {PET_LABEL[type] || type}
                   </div>
+                  {(() => {
+                    const cal = calculatePetCalories(pet, { mealCount: 2 });
+                    if (cal.supported) {
+                      return (
+                        <div style={{ marginTop: 6, fontSize: 11, fontWeight: 800, color: '#ea580c' }}>
+                          🔥 ~{cal.dailyKcal} kcal/j
+                        </div>
+                      );
+                    }
+                    if (cal.needsWeight) {
+                      return (
+                        <div style={{ marginTop: 6, fontSize: 10, color: '#94a3b8' }}>
+                          Poids à renseigner
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </button>
               );
             })}

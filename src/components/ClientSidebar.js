@@ -72,6 +72,7 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         { id: '__open-chat__', label: 'Assistant en ligne', icon: '💬', action: 'open-chat' },
         { id: 'pet-feeder', label: 'Distributeur IoT', icon: '🍽️' },
         { id: 'smart-food-agent', label: 'NutriPro', icon: '🥗' },
+        { id: 'pet-calories', label: 'Calories / animal', icon: '🔥' },
         { id: 'nutripro-history', label: 'Historique NutriPro', icon: '📚' },
         { id: 'pet-advice', label: 'Conseils', icon: '💡' },
         { id: 'client-services', label: 'Toilettage & Pension', icon: '✂️' },

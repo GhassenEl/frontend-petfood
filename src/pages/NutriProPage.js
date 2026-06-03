@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import Toast from '../components/Toast';
+import { calculatePetCalories } from '../utils/petCalorieCalculator';
 
 const NutriProPage = () => {
   const { user } = useAuth();
@@ -50,14 +51,32 @@ const NutriProPage = () => {
     return 'adulte';
   }, [petAge]);
 
+  const calorieCalc = useMemo(
+    () =>
+      calculatePetCalories(
+        {
+          type: petType,
+          weight: petWeight,
+          name: petName,
+        },
+        {
+          goal,
+          activityLevel,
+          mealCount: Number(mealCount) || 2,
+          ageYears: petAge ? Number(petAge) : null,
+          isNeutered: true,
+        }
+      ),
+    [petType, petWeight, petName, goal, activityLevel, mealCount, petAge]
+  );
+
   const portionNote = useMemo(() => {
-    const weight = Number(petWeight || 0);
-    if (!weight) return 'Renseignez le poids pour obtenir une portion plus précise.';
-    const multiplier = goal === 'perte' ? 18 : goal === 'prise' ? 30 : 24;
-    const daily = Math.max(10, Math.round(weight * multiplier));
-    const meals = Math.max(1, Number(mealCount || 2));
-    return `Repère de départ : environ ${daily} g/jour, soit ${Math.round(daily / meals)} g par repas sur ${meals} repas. À ajuster selon l'état corporel et l'avis vétérinaire.`;
-  }, [goal, mealCount, petWeight]);
+    if (calorieCalc.supported) {
+      return `Besoins estimés : ${calorieCalc.dailyKcal} kcal/jour (~${calorieCalc.dryFoodGramsPerDay} g croquettes), soit ${calorieCalc.gramsPerMeal} g par repas sur ${calorieCalc.mealCount} repas.`;
+    }
+    if (calorieCalc.needsWeight) return 'Renseignez le poids pour obtenir un calcul calorique précis.';
+    return calorieCalc.message || 'Consultez la page Calories par animal pour une estimation.';
+  }, [calorieCalc]);
 
   const localNutritionPlan = useMemo(() => {
     const petLabel = petName || 'votre animal';

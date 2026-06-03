@@ -28,29 +28,49 @@ export const CATEGORY_FILTERS = [
   { id: 'croquettes', label: '🥣 Croquettes' },
   { id: 'patee', label: '🍖 Pâtée' },
   { id: 'friandises', label: '🦴 Friandises' },
-  { id: 'accessoires', label: '🎾 Accessoires' },
+  { id: 'jouets', label: '🎾 Jouets' },
+  { id: 'accessoires', label: '🎒 Accessoires' },
+  { id: 'vetements', label: '👕 Vêtements' },
   { id: 'nourriture', label: '🍽️ Nourriture' },
 ];
 
+const haystack = (product) => {
+  const tags = Array.isArray(product.tags)
+    ? product.tags.join(' ')
+    : String(product.tags || '');
+  return [
+    product.category,
+    product.name,
+    product.description,
+    tags,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+};
+
 export const matchCategoryFilter = (product, categoryFilter) => {
   if (!categoryFilter || categoryFilter === 'all') return true;
+  const text = haystack(product);
   const cat = String(product.category || '').toLowerCase();
-  const name = String(product.name || '').toLowerCase();
-  const tags = String(product.tags || '').toLowerCase();
 
-  if (categoryFilter === 'croquettes') {
-    return cat.includes('croquette') || name.includes('croquette') || tags.includes('croquette');
+  const rules = {
+    croquettes: ['croquette', 'kibble'],
+    patee: ['patee', 'pâtée', 'pate', 'boîte', 'boite'],
+    friandises: ['friandise', 'snack', 'récompense', 'recompense', 'bouchée'],
+    jouets: ['jouet', 'jouets', 'balle', 'peluche', 'interactif'],
+    accessoires: ['accessoire', 'laisse', 'collier', 'litière', 'litere', 'griffoir', 'arbre'],
+    vetements: ['vetement', 'vêtement', 'manteau', 'pull', 'harnais'],
+    nourriture: ['nourriture', 'aliment', 'croquette', 'patee', 'pâtée', 'granule', 'melange'],
+  };
+
+  const keys = rules[categoryFilter];
+  if (keys) {
+    if (cat === categoryFilter) return true;
+    return keys.some((k) => text.includes(k));
   }
-  if (categoryFilter === 'patee') {
-    return cat.includes('patee') || cat.includes('pâtée') || name.includes('pâtée') || name.includes('patee');
-  }
-  if (categoryFilter === 'friandises') {
-    return cat.includes('friandise') || name.includes('friandise') || tags.includes('friandise');
-  }
-  if (categoryFilter === 'accessoires') {
-    return cat.includes('accessoire') || name.includes('accessoire');
-  }
-  return cat.includes(categoryFilter) || name.includes(categoryFilter);
+
+  return cat.includes(categoryFilter) || text.includes(categoryFilter);
 };
 
 export const buildProductAiContext = (product, catalog = []) => ({

@@ -22,6 +22,7 @@ import AdminVeterinary from './pages/AdminVeterinary';
 import AdminProfilePage from './pages/AdminProfilePage';
 import AdminLeaveRequestsPage from './pages/AdminLeaveRequestsPage';
 import AdminPromotions from './pages/AdminPromotions';
+import AdminBlogArticles from './pages/AdminBlogArticles';
 import StaffLeavePage from './pages/StaffLeavePage';
 import ClientProductsPage from './pages/ClientProductsPage';
 import ClientOrdersPage from './pages/ClientOrdersPage';
@@ -72,6 +73,7 @@ import VetVaccinationsPage from './pages/VetVaccinationsPage';
 import ClientMedicalDossierPage from './pages/ClientMedicalDossierPage';
 import ClientFavoritesPage from './pages/ClientFavoritesPage';
 import ClientLoyaltyPage from './pages/ClientLoyaltyPage';
+import ClientPetCaloriesPage from './pages/ClientPetCaloriesPage';
 
 const homeByRole = {
   admin: '/admin/dashboard',
@@ -133,6 +135,7 @@ const App = () => {
       <Route path="/admin/events" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><EventsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/leave-requests" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminLeaveRequestsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/promotions" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPromotions /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/blog-articles" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminBlogArticles /></AdminLayout></RoleRoute>} />
       <Route path="/admin/profile" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminProfilePage /></AdminLayout></RoleRoute>} />
 
       <Route path="/client-products" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientProductsPage /></ClientLayout></RoleRoute>} />
@@ -149,6 +152,7 @@ const App = () => {
       <Route path="/client-wallet" element={<Navigate to="/checkout" replace />} />
       <Route path="/client-vaccines" element={<Navigate to="/medical-dossier" replace />} />
       <Route path="/pet-advice" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetAdvicePage /></ClientLayout></RoleRoute>} />
+      <Route path="/pet-calories" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetCaloriesPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAIAgentPage /></ClientLayout></RoleRoute>} />
       <Route
         path="/smart-food-agent"

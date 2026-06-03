@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, Flame, Sparkles, ShoppingCart, Search, Eye } from 'lucide-react';
 import {
@@ -20,6 +21,7 @@ import { productId, dedupeProducts, withProductIds } from '../utils/productId';
 const PET_LABELS = { dog: 'chien', cat: 'chat', bird: 'oiseau', fish: 'poisson', other: 'animal' };
 
 const ClientProductsPage = () => {
+  const [searchParams] = useSearchParams();
   const [recommendations, setRecommendations] = useState([]);
   const [nearby, setNearby] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,6 +40,13 @@ const ClientProductsPage = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const cat = searchParams.get('category');
+    if (cat && CATEGORY_FILTERS.some((f) => f.id === cat)) {
+      setCategoryFilter(cat);
+    }
+  }, [searchParams]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -298,7 +307,7 @@ const ClientProductsPage = () => {
         <Search size={20} color="#9ca3af" />
         <input
           type="search"
-          placeholder="Rechercher croquettes, pâtée, marque, animal…"
+          placeholder="Rechercher croquettes, jouets, accessoires, marque…"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ flex: 1, border: 'none', outline: 'none', fontSize: '15px', background: 'transparent' }}

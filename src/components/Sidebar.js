@@ -26,6 +26,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'invoices', label: 'Factures', icon: '🧾' },
         { id: 'products', label: 'Produits', icon: '🏷️' },
         { id: 'promotions', label: 'Promotions produits', icon: '🏷️' },
+        { id: 'blog-articles', label: 'Articles blog', icon: '📰' },
         { id: 'users', label: 'Utilisateurs', icon: '👥' },
         { id: 'livreurs', label: 'Livreurs', icon: '🚚' },
         { id: 'leave-requests', label: 'Congés / maladie', icon: '🏖️' },

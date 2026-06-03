@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Lightbulb, Heart, Utensils, Activity, Droplets, Shield, ChevronDown, ChevronUp, Camera, Video, Bell, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import PetProductRecommendations from '../components/PetProductRecommendations';
+import PetCalorieCalculator from '../components/PetCalorieCalculator';
 import api from '../utils/api';
 
 const ADVICE_DATA = {
@@ -338,6 +339,10 @@ const ClientPetAdvicePage = () => {
           Des conseils d'experts pour prendre soin de votre compagnon
         </p>
       </motion.div>
+
+      <div style={{ marginBottom: '32px' }}>
+        <PetCalorieCalculator compact />
+      </div>
 
       <div style={{ marginBottom: '32px' }}>
         <PetProductRecommendations
