@@ -4,7 +4,7 @@ React + Vite frontend for the PetfoodTN platform: a pet-food e-commerce with thr
 
 Backend repo: https://github.com/GhassenEl/backend-petfood
 
-Architecture (MVC + microservices) : voir [ARCHITECTURE.md](./ARCHITECTURE.md).
+Architecture (MVC monolithe) : voir [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Stack
 

@@ -1,6 +1,6 @@
 # Architecture PetfoodTN
 
-Ce document décrit l’architecture du projet **PetfoodTN** : organisation **MVC en couches** côté backend, application **React** côté frontend, et stratégie **microservices** (partielle aujourd’hui, cible pour demain).
+Ce document décrit l’architecture du projet **PetfoodTN** : organisation **MVC en couches** côté backend, application **React** côté frontend, et API **monolithe** (un seul serveur Node.js).
 
 ---
 
@@ -13,12 +13,9 @@ flowchart TB
     Mobile[Flutter :8080]
   end
 
-  subgraph gateway [API Gateway — Express]
+  subgraph api [API monolithe — Express]
     GW[server.js :5002]
     SIO[Socket.IO]
-  end
-
-  subgraph backend_layers [Backend — MVC en couches]
     R[routes/]
     C[controllers/]
     S[services/]
@@ -26,11 +23,7 @@ flowchart TB
     M[(Prisma / SQLite)]
   end
 
-  subgraph optional_ms [Microservice optionnel]
-    VET[veterinary-service :5101]
-  end
-
-  subgraph external [Services externes]
+  subgraph external [Services externes optionnels]
     GROQ[Groq / IA]
     STRIPE[Stripe]
     FAST[FastAPI recommandations :8000]
@@ -46,8 +39,6 @@ flowchart TB
   REP --> M
   C --> M
   GW --> SIO
-  GW -.->|npm run dev:microservices| VET
-  VET --> M
   GW --> GROQ
   GW --> STRIPE
   Web --> FAST
@@ -59,7 +50,6 @@ flowchart TB
 | API principale | Node.js, Express | 5002 |
 | Base de données | SQLite via Prisma | `backend/prisma/dev.db` |
 | App mobile | Flutter | 8080 (web) |
-| Microservice vet (optionnel) | Express dédié | 5101 |
 | Recommandations IA (optionnel) | FastAPI | 8000 |
 
 ---
@@ -104,13 +94,13 @@ React n’est pas du MVC classique. On peut le lire ainsi :
 | **Accès API** | `src/utils/api.js` (Axios + JWT) |
 | **Routage** | `src/App.js` (`RoleRoute`, layouts Admin / Client / Livreur / Vet) |
 
-### 2.3 Microservices
+### 2.3 Monolithe (choix retenu)
 
-**Aujourd’hui :** mode **monolithe modulaire** sur le port 5002 — toutes les routes sont montées dans `backend/server.js`.
+**Un seul processus** `backend/server.js` (port 5002) expose toutes les routes `/api/*` via `gateway/registerRoutes.js`.
 
-**Amorcé :** `backend/microservices/veterinary-service/` + script `npm run dev:microservices` qui lance la gateway et le service vet en parallèle.
+Pas de proxy vers des services séparés : les variables `*_SERVICE_URL` dans `.env` sont **ignorées** (avertissement au démarrage si présentes).
 
-**Cible :** découper par **domaine métier**, chaque service gardant la même structure MVC interne, avec une **API Gateway** unique pour le frontend.
+Le dossier `backend/microservices/` est **legacy** (non utilisé en dev ni en prod).
 
 ---
 
@@ -134,7 +124,7 @@ frontend Lido/
 
 ```
 backend/
-├── server.js                 # Point d’entrée — API Gateway (monolithe)
+├── server.js                 # Point d’entrée — API monolithe
 ├── prisma/
 │   └── schema.prisma         # Modèles de données
 ├── prismaClient.js           # Client Prisma + mode démo
@@ -145,11 +135,8 @@ backend/
 ├── middleware/               # auth.js, feederDeviceAuth.js
 ├── utils/                    # regions, demoStore, platformEvents, geo…
 ├── mcp/                      # Pont MCP (outils chat)
-├── microservices/
-│   └── veterinary-service/
-│       └── server.js         # Service vet isolé
+├── microservices/            # Legacy (non utilisé — voir README)
 └── scripts/
-    ├── start-microservices.js
     └── seed-missing.js
 ```
 
@@ -232,9 +219,7 @@ Mode démo : variable `DEMO_MODE` — données en mémoire (`utils/demoStore.js`
 
 ---
 
-## 7. Microservices
-
-### 7.1 Mode monolithe (défaut)
+## 7. Déploiement API (monolithe)
 
 ```bash
 cd backend
@@ -242,42 +227,15 @@ npm start          # ou npm run dev
 # → http://localhost:5002
 ```
 
-Le frontend (Vite) proxyfie `/api` vers ce port (`vite.config.js`).
-
-### 7.2 Mode microservices (partiel)
+Depuis la racine du frontend :
 
 ```bash
-cd backend
-npm run dev:microservices
+npm run dev        # Vite :3001 + backend :5002 (concurrently)
 ```
 
-Lance :
+Le proxy Vite envoie `/api` vers le même port backend (`vite.config.js`).
 
-1. **veterinary-service** — port `5101` (`VETERINARY_SERVICE_PORT`)
-2. **api-gateway** — `server.js` sur port `5002`
-
-Scripts associés :
-
-- `npm run dev:veterinary` — service vet seul
-- `npm run dev:gateway` — gateway seule
-
-Utilitaire : `utils/proxyRequest.js` (proxy HTTP vers un service distant).
-
-> **Note :** la gateway charge encore les routes vet en local. Le proxy complet vers `VETERINARY_SERVICE_URL` est la prochaine étape d’évolution.
-
-### 7.3 Découpage cible (recommandé)
-
-| Service | Port suggéré | Responsabilité |
-|---------|--------------|----------------|
-| api-gateway | 5002 | Auth, routage, Socket.IO, proxy |
-| veterinary-service | 5101 | Vet, RDV, consultations, contact |
-| event-service | 5104 | `/api/events` |
-| order-service | 5103 | Commandes, livraison, régions |
-| product-service | 5102 | Produits, stock |
-| user-service | 5105 | Users, pets, notifications |
-| feeder-service | 5106 | IoT distributeur |
-
-En production : une base par service. En développement : SQLite partagée acceptable.
+**À ne pas faire :** définir `PRODUCT_SERVICE_URL`, `ORDER_SERVICE_URL`, `USER_SERVICE_URL` ou `VETERINARY_SERVICE_URL` dans `backend/.env` — elles ne sont plus prises en charge.
 
 ---
 
@@ -322,11 +280,10 @@ Architecture **Flutter** : écrans + services (proche MVC). Pas de microservices
 2. Route dans `src/App.js` + entrée sidebar du layout concerné.
 3. Appels via `api.get/post/put/delete` depuis `utils/api.js`.
 
-### Microservice (quand le domaine est extrait)
+### Nouveau module API (monolithe)
 
-1. Copier la structure `routes` + `controllers` + `services` dans `microservices/<nom>-service/`.
-2. Exposer un `server.js` dédié avec `/health`.
-3. Dans la gateway : proxy `app.use('/api/xxx', proxyTo(SERVICE_URL))` au lieu du require local.
+1. Ajouter la route dans `gateway/registerRoutes.js` : `app.use('/api/xxx', require('../routes/xxx.routes'))`.
+2. Pas de service séparé ni de variable `*_SERVICE_URL`.
 
 ---
 
@@ -366,4 +323,4 @@ Comptes démo : voir `README.md` ou `PetfoodTN-Comptes-Acces.pdf`.
 
 ---
 
-*Dernière mise à jour : architecture MVC en couches + microservice veterinary amorcé, API events et régions livreur.*
+*Dernière mise à jour : API monolithe unique (port 5002), MVC en couches, sans microservices.*
