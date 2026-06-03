@@ -10,6 +10,7 @@ import ClientLayout from './layouts/ClientLayout';
 import LivreurLayout from './layouts/LivreurLayout';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminMlAgentPage from './pages/AdminMlAgentPage';
+import AdminIncidentsMlPage from './pages/AdminIncidentsMlPage';
 import VetMlAgentPage from './pages/VetMlAgentPage';
 import AdminOrders from './pages/AdminOrders';
 import AdminReviews from './pages/AdminReviews';
@@ -132,6 +133,7 @@ const App = () => {
       <Route path="/admin/orders" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminOrders /></AdminLayout></RoleRoute>} />
       <Route path="/admin/reviews" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminReviews /></AdminLayout></RoleRoute>} />
       <Route path="/admin/complaints" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminComplaints /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/incidents-ml" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminIncidentsMlPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/products" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminProducts /></AdminLayout></RoleRoute>} />
       <Route path="/admin/users" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminUsers /></AdminLayout></RoleRoute>} />
       <Route path="/admin/livreurs" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminLivreurs /></AdminLayout></RoleRoute>} />

@@ -11,6 +11,7 @@ import AdminTopProductsAI from '../components/AdminTopProductsAI';
 import AdminSalesForecast from '../components/AdminSalesForecast';
 import AdminMLInsights from '../components/AdminMLInsights';
 import AdminMlPanel from '../components/AdminMlPanel';
+import AdminIncidentsMlPanel from '../components/AdminIncidentsMlPanel';
 
 const COLORS = ['#e67e22', '#27ae60', '#3498db', '#9b59b6', '#e74c3c', '#f39c12'];
 
@@ -251,6 +252,7 @@ const AdminDashboard = () => {
 
       <AdminSalesForecast />
       <AdminMlPanel compact />
+      <AdminIncidentsMlPanel compact />
       <AdminMLInsights />
 
       {/* Charts Row */}

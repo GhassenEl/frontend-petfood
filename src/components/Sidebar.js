@@ -41,6 +41,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       items: [
         { id: 'reviews', label: 'Avis', icon: '⭐' },
         { id: 'complaints', label: 'Réclamations', icon: '⚠️' },
+        { id: 'incidents-ml', label: 'Agent IA incidents', icon: '🛡️' },
       ]
     },
     {
