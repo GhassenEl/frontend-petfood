@@ -138,6 +138,7 @@ const VetDashboard = () => {
 
   const quickActions = [
     { to: '/vet/calendar', icon: Calendar, label: 'Calendrier', desc: 'Planning RDV' },
+    { to: '/vet/availability', icon: Clock, label: 'Disponibilité', desc: 'Horaires & créneaux' },
     { to: '/vet/medical-dossiers', icon: FolderOpen, label: 'Dossiers', desc: 'DMP patients' },
     { to: '/vet/vaccinations', icon: Syringe, label: 'Vaccinations', desc: 'Rappels & suivi' },
     { to: '/vet/prescriptions', icon: Pill, label: 'Ordonnances', desc: 'Prescriptions' },

@@ -553,6 +553,9 @@ const VeterinaryPage = () => {
                 try {
                   const data = await getAvailability(availabilityDate);
                   setSlots(Array.isArray(data?.slots) ? data.slots : []);
+                  if (data?.message && !(data.slots || []).length) {
+                    setAvailabilityError(data.message);
+                  }
                 } catch (err) {
                   setAvailabilityError(err?.response?.data?.error || "Impossible de charger la disponibilité.");
                   setSlots([]);

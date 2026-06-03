@@ -78,6 +78,7 @@ import VetPharmacyPage from './pages/VetPharmacyPage';
 import VetMedicalDossierDetailPage from './pages/VetMedicalDossierDetailPage';
 import VetClinicPage from './pages/VetClinicPage';
 import VetVaccinationsPage from './pages/VetVaccinationsPage';
+import VetAvailabilityPage from './pages/VetAvailabilityPage';
 import ClientMedicalDossierPage from './pages/ClientMedicalDossierPage';
 import ClientFavoritesPage from './pages/ClientFavoritesPage';
 import ClientLoyaltyPage from './pages/ClientLoyaltyPage';
@@ -204,6 +205,7 @@ const App = () => {
       <Route path="/vet/ml-agent" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetMlAgentPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/bi" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetBiDashboard /></VetLayout></RoleRoute>} />
       <Route path="/vet/calendar" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetCalendarPage /></VetLayout></RoleRoute>} />
+      <Route path="/vet/availability" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetAvailabilityPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/appointments/:id" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetAppointmentDetailPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/prescriptions" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetPrescriptionsPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/pharmacy" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetPharmacyPage /></VetLayout></RoleRoute>} />
