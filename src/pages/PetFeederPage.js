@@ -10,6 +10,11 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
 import api from '../utils/api';
+import {
+  fetchFeederFirebaseLatest,
+  fetchFeederFirebaseStatus,
+  mergeFeederWithFirebaseGrandeurs,
+} from '../services/feederFirebaseService';
 
 const statusColor = (s) => (s === 'online' ? '#059669' : '#9ca3af');
 
@@ -39,6 +44,8 @@ const PetFeederPage = () => {
   const [editingName, setEditingName] = useState(false);
   const [feederName, setFeederName] = useState('');
   const [scheduleForm, setScheduleForm] = useState({ time: '08:00', portionGrams: 30, label: 'Repas' });
+  const [firebaseEnabled, setFirebaseEnabled] = useState(false);
+  const [firebaseRecordedAt, setFirebaseRecordedAt] = useState(null);
   const pollRef = useRef(null);
 
   const loadFeeders = useCallback(async () => {
@@ -56,7 +63,7 @@ const PetFeederPage = () => {
     if (!id) return;
     if (!silent) setLoading(true);
     try {
-      const [detailRes, planRes, statsRes, alertsRes, insightsRes, historyRes, petsRes] = await Promise.all([
+      const [detailRes, planRes, statsRes, alertsRes, insightsRes, historyRes, petsRes, fbLatestRes] = await Promise.all([
         api.get(`/feeder/${id}`),
         api.get(`/feeder/${id}/nutrition-plan`),
         api.get(`/feeder/${id}/stats?days=7`),
@@ -64,8 +71,12 @@ const PetFeederPage = () => {
         api.get(`/feeder/${id}/insights`),
         api.get(`/feeder/${id}/history?limit=40`),
         api.get('/pets').catch(() => ({ data: [] })),
+        fetchFeederFirebaseLatest(id).catch(() => ({ firebaseEnabled: false, grandeurs: null })),
       ]);
-      setFeeder(detailRes.data);
+      const mergedFeeder = mergeFeederWithFirebaseGrandeurs(detailRes.data, fbLatestRes);
+      setFeeder(mergedFeeder);
+      setFirebaseEnabled(Boolean(fbLatestRes?.firebaseEnabled));
+      setFirebaseRecordedAt(fbLatestRes?.recordedAt || mergedFeeder?.firebaseRecordedAt || null);
       setFeederName(detailRes.data.name || '');
       setPlan(planRes.data);
       setStats(statsRes.data);
@@ -90,6 +101,12 @@ const PetFeederPage = () => {
     (async () => {
       setLoading(true);
       await loadFeeders();
+      try {
+        const status = await fetchFeederFirebaseStatus();
+        setFirebaseEnabled(Boolean(status?.enabled));
+      } catch {
+        setFirebaseEnabled(false);
+      }
       setLoading(false);
     })();
   }, [loadFeeders]);
@@ -255,6 +272,14 @@ const PetFeederPage = () => {
         <p style={{ margin: 0, color: '#64748b' }}>
           Nutrition automatique, capteurs en temps réel et insights intelligents (ESP32)
         </p>
+        {firebaseEnabled && (
+          <p style={{ margin: '10px 0 0', fontSize: 13, fontWeight: 600, color: '#ea580c' }}>
+            🔥 Grandeurs synchronisées dans Firebase Firestore
+            {firebaseRecordedAt
+              ? ` · dernier relevé ${new Date(firebaseRecordedAt).toLocaleString('fr-FR')}`
+              : ''}
+          </p>
+        )}
       </motion.div>
 
       {feeders.length === 0 ? (

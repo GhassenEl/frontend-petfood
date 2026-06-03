@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Grandeurs IoT distributeur — écriture réservée au backend (Admin SDK)
+    match /feeder_readings/{feederId} {
+      allow read: if false;
+      allow write: if false;
+
+      match /history/{readingId} {
+        allow read: if false;
+        allow write: if false;
+      }
+    }
+  }
+}
