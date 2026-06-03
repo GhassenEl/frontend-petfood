@@ -32,6 +32,8 @@
   },
   "scripts": {
     "dev": "concurrently \"vite --host --port 3001\" \"npm --prefix backend run dev\"",
+    "dev:ml": "cd fastapi_service && .venv\\Scripts\\python.exe -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+    "dev:full": "concurrently -n web,api,ml -c blue,green,magenta \"vite --host --port 3001\" \"npm --prefix backend run dev\" \"npm run dev:ml\"",
     "build": "vite build",
     "preview": "vite preview --port 3000 --host",
     "start": "npm run dev",
@@ -43,6 +45,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:api": "node backend/scripts/test-wallet-api.js",
+    "test:ml": "npm run test:ml --prefix backend",
+    "ml:benchmark": "npm run ml:benchmark --prefix backend",
     "test:wait": "node scripts/wait-for-servers.js",
     "test": "node scripts/wait-for-servers.js && npm run test:api && npm run test:e2e",
     "test:legacy": "node scripts/test-services-flow.js"

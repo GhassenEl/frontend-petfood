@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
+import { fetchAdminOrdersRisk } from '../services/mlService';
 
 const emptyForm = {
   userId: '',
@@ -29,11 +30,15 @@ const AdminOrders = () => {
   const [editingOrder, setEditingOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState(emptyForm);
+  const [orderRisks, setOrderRisks] = useState({});
 
   useEffect(() => {
     fetchOrders();
     fetchUsers();
     fetchProducts();
+    fetchAdminOrdersRisk()
+      .then((data) => setOrderRisks(data?.risks || {}))
+      .catch(() => setOrderRisks({}));
   }, []);
 
   const fetchUsers = async () => {
@@ -205,14 +210,17 @@ const AdminOrders = () => {
               <th style={styles.th}>Client</th>
               <th style={styles.th}>Articles</th>
               <th style={styles.th}>Total</th>
-              <th style={styles.th}>Statut</th>
+              <th style={styles.th}>Statut / IA</th>
               <th style={styles.th}>Date</th>
               <th style={styles.th}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredOrders.map((order) => (
-              <tr key={order._id} style={styles.tr}>
+            {filteredOrders.map((order) => {
+              const oid = order.id || order._id;
+              const risk = orderRisks[oid];
+              return (
+              <tr key={oid} style={styles.tr}>
                 <td style={styles.td}>
                   <strong>{order.userId?.email || 'N/A'}</strong>
                 </td>
@@ -223,23 +231,29 @@ const AdminOrders = () => {
                 <td style={styles.td}>
                   <select
                     value={order.status}
-                    onChange={(e) => updateStatus(order._id, e.target.value)}
+                    onChange={(e) => updateStatus(oid, e.target.value)}
                     style={styles.select}
                   >
                     {statusOptions.map((s) => (
                       <option key={s} value={s}>{statusLabels[s]}</option>
                     ))}
                   </select>
+                  {risk?.highRisk && (
+                    <div style={{ marginTop: 6, fontSize: 11, color: '#b91c1c', fontWeight: 700 }}>
+                      ⚠ Risque annulation {(risk.cancelRisk * 100).toFixed(0)}% (XGBoost)
+                    </div>
+                  )}
                 </td>
                 <td style={styles.td}>{new Date(order.createdAt).toLocaleDateString('fr-TN')}</td>
                 <td style={styles.td}>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button style={styles.editBtn} onClick={() => openEdit(order)} title="Modifier">✏️</button>
-                    <button style={styles.deleteBtn} onClick={() => handleDelete(order._id)} title="Supprimer">🗑️</button>
+                    <button style={styles.deleteBtn} onClick={() => handleDelete(oid)} title="Supprimer">🗑️</button>
                   </div>
                 </td>
               </tr>
-            ))}
+            );
+            })}
           </tbody>
         </table>
         {filteredOrders.length === 0 && (

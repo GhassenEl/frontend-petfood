@@ -84,6 +84,11 @@ const AdminSalesForecast = () => {
         <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, flex: '1 1 200px' }}>
           Modèle de prédiction des ventes
         </h3>
+        {data?.pythonPowered && (
+          <span style={{ ...badgeStyle, color: '#0f766e', background: '#ccfbf1' }}>
+            XGBoost Python
+          </span>
+        )}
         {data?.aiPowered && (
           <span style={badgeStyle}>
             <Sparkles size={12} /> Analyse IA
@@ -153,7 +158,11 @@ const AdminSalesForecast = () => {
               sub={data.metrics?.slopePerMonth != null ? `${data.metrics.slopePerMonth > 0 ? '+' : ''}${data.metrics.slopePerMonth} DT/mois` : ''}
             />
             {data.metrics?.r2 != null && (
-              <Kpi label="R² modèle" value={data.metrics.r2} sub={data.model === 'linear_regression' ? 'Régression linéaire' : 'Moyenne'} />
+              <Kpi
+                label="R² modèle"
+                value={data.metrics.r2}
+                sub={data.modelLabel || (data.model === 'linear_regression' ? 'Régression linéaire' : data.model)}
+              />
             )}
             {data.metrics?.mape != null && (
               <Kpi label="Erreur MAPE" value={`${data.metrics.mape}%`} sub="Précision historique" />
@@ -217,8 +226,43 @@ const AdminSalesForecast = () => {
             </ComposedChart>
           </ResponsiveContainer>
 
+          {data.modelBenchmark?.length > 0 && (
+            <div style={{ marginTop: 16, overflowX: 'auto' }}>
+              <p style={{ margin: '0 0 8px', fontSize: '0.8rem', fontWeight: 700, color: '#475569' }}>
+                Comparaison automatique des architectures (validation)
+              </p>
+              <table style={{ width: '100%', fontSize: '0.75rem', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ textAlign: 'left', color: '#64748b' }}>
+                    <th style={{ padding: '6px 8px' }}>#</th>
+                    <th style={{ padding: '6px 8px' }}>Modèle</th>
+                    <th style={{ padding: '6px 8px' }}>MAPE</th>
+                    <th style={{ padding: '6px 8px' }}>R²</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.modelBenchmark.map((row) => (
+                    <tr
+                      key={row.id}
+                      style={{
+                        background: row.selected ? '#eff6ff' : 'transparent',
+                        fontWeight: row.selected ? 700 : 400,
+                      }}
+                    >
+                      <td style={{ padding: '6px 8px' }}>{row.rank}</td>
+                      <td style={{ padding: '6px 8px' }}>{row.label}{row.selected ? ' ✓' : ''}</td>
+                      <td style={{ padding: '6px 8px' }}>{row.mape != null ? `${row.mape}%` : '—'}</td>
+                      <td style={{ padding: '6px 8px' }}>{row.r2 ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
           <p style={{ margin: '12px 0 0', fontSize: '0.75rem', color: '#94a3b8' }}>
-            Modèle : {data.model === 'linear_regression' ? 'régression linéaire sur le CA mensuel' : 'moyenne mobile (données limitées)'}.
+            Modèle retenu : {data.modelLabel || data.model}
+            {data.modelSelection?.holdout ? ` (sélection auto, hold-out ${data.modelSelection.holdout} périodes)` : ''}.
             Zone bleue = intervalle de confiance approximatif.
           </p>
         </>

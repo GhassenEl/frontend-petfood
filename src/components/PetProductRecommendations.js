@@ -53,6 +53,7 @@ const PetProductRecommendations = ({
   const [catalog, setCatalog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [mlPowered, setMlPowered] = useState(false);
 
   useEffect(() => {
     api.get('/products')
@@ -79,6 +80,8 @@ const PetProductRecommendations = ({
     try {
       const params = petId ? `?petId=${encodeURIComponent(petId)}&limit=${limit}` : `?limit=${limit}`;
       const { data } = await api.get(`/products/recommendations/pets${params}`);
+
+      setMlPowered(Boolean(data?.mlPowered || data?.recommendations?.some((r) => r.mlBoosted)));
 
       let petList = Array.isArray(data?.pets) ? data.pets : [];
       if (filterPetType) {
@@ -139,8 +142,13 @@ const PetProductRecommendations = ({
       }}
     >
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '16px' }}>
-        <h2 style={{ fontSize: compact ? '17px' : '20px', fontWeight: 700, margin: 0, color: '#9a3412', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <h2 style={{ fontSize: compact ? '17px' : '20px', fontWeight: 700, margin: 0, color: '#9a3412', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <PawPrint size={compact ? 18 : 20} /> {sectionTitle}
+          {mlPowered && (
+            <span style={{ fontSize: 10, fontWeight: 800, background: '#f3e8ff', color: '#7c3aed', padding: '3px 8px', borderRadius: 999 }}>
+              IA XGBoost
+            </span>
+          )}
         </h2>
         {linkToShop && (
           <Link to="/client-products" style={{ fontSize: '13px', fontWeight: 700, color: '#c2410c', textDecoration: 'none' }}>

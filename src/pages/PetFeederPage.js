@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Wifi, WifiOff, Droplets, Thermometer, Scale, PawPrint,
@@ -26,6 +27,8 @@ const PetFeederPage = () => {
   const [stats, setStats] = useState(null);
   const [alerts, setAlerts] = useState([]);
   const [insights, setInsights] = useState([]);
+  const [speciesGuide, setSpeciesGuide] = useState(null);
+  const [feederMlPowered, setFeederMlPowered] = useState(false);
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -68,6 +71,11 @@ const PetFeederPage = () => {
       setStats(statsRes.data);
       setAlerts(alertsRes.data || []);
       setInsights(insightsRes.data?.insights || []);
+      setSpeciesGuide(insightsRes.data?.speciesGuide || null);
+      setFeederMlPowered(Boolean(insightsRes.data?.mlPowered));
+      if (insightsRes.data?.speciesGuide?.suggestedPortionGrams) {
+        setGrams(insightsRes.data.speciesGuide.suggestedPortionGrams);
+      }
       setHistory(historyRes.data || []);
       setPets(petsRes.data || []);
       if (planRes.data?.portionGrams) setGrams(planRes.data.portionGrams);
@@ -304,6 +312,38 @@ const PetFeederPage = () => {
                       </div>
                     );
                   })}
+                </div>
+              )}
+
+              {speciesGuide && (
+                <div style={{
+                  marginBottom: 16, padding: '14px 18px', borderRadius: 14,
+                  background: 'linear-gradient(135deg, #ecfdf5, #d1fae5)', border: '1px solid #a7f3d0',
+                  display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between',
+                }}>
+                  <div>
+                    <strong style={{ color: '#065f46' }}>
+                      Espèce : {speciesGuide.label} — {speciesGuide.suggestedPortionGrams} g / repas
+                    </strong>
+                    <p style={{ margin: '4px 0 0', fontSize: 12, color: '#047857' }}>
+                      Objectif {speciesGuide.dailyGrams} g/jour · {feederMlPowered ? 'IA XGBoost active' : 'Calcul nutritionnel'}
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {[speciesGuide.suggestedPortionGrams - 5, speciesGuide.suggestedPortionGrams, speciesGuide.suggestedPortionGrams + 5]
+                      .filter((g) => g >= 3 && g <= 120)
+                      .map((g) => (
+                        <button key={g} type="button" onClick={() => setGrams(g)} style={{
+                          padding: '6px 12px', borderRadius: 8, border: grams === g ? '2px solid #059669' : '1px solid #86efac',
+                          background: grams === g ? '#d1fae5' : 'white', cursor: 'pointer', fontWeight: 700, fontSize: 12,
+                        }}>
+                          {g} g
+                        </button>
+                      ))}
+                    <Link to="/client-products?category=animaux" style={{ fontSize: 12, color: '#0369a1', fontWeight: 700 }}>
+                      🐾 Adopter un compagnon
+                    </Link>
+                  </div>
                 </div>
               )}
 

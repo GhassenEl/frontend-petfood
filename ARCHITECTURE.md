@@ -190,6 +190,26 @@ Toutes les routes sont préfixées par `/api` (proxy Vite en dev).
 
 Services : `clientInsights.service.js`, `topProductsAgent.service.js`, `aiRecommendationAgent.service.js` (s’appuie sur `petRecommendation.service.js` + Groq).
 
+### ML prévision ventes (`backend/ml/`)
+
+| Route | Rôle |
+|-------|------|
+| `GET /admin/sales-forecast` | CA prévisionnel + sélection auto du modèle |
+| `GET /admin/ml-benchmark` | Comparaison des architectures (MAPE / R²) |
+
+Architectures Node : régression, Holt, etc. **XGBoost (Python)** via `fastapi_service/` si `ML_USE_XGBOOST=true`. Voir `backend/docs/ML_ARCHITECTURE.md` et `fastapi_service/README.md`.
+
+**IA appliquée sur la plateforme :**
+
+| Zone | Modèles |
+|------|---------|
+| Admin dashboard | CA XGBoost, insights ML, risque annulation commandes |
+| Admin commandes | Badge risque annulation (classifier) |
+| Client agent IA | Groq + pack ML (`/api/ml/client/pack`) |
+| Recommandations produits | XGBoost ranking (chien senior) + règles + Groq |
+| Chat | Groq (`/api/chat/message`) |
+| Avis | Sentiment FastAPI |
+
 ### Séparation événements / vétérinaire
 
 Les **événements** (anniversaire, salle de sport, compétition, etc.) sont stockés dans `PetAppointment` avec un `type` dédié et exposés via `/api/events`. Les **RDV vétérinaires** utilisent les mêmes tables mais des types différents (`veterinary_consultation`, etc.) et des routes `/api/veterinary` ou `/api/vet`.

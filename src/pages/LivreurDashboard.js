@@ -6,6 +6,7 @@ import LivreurMissionPanel from '../components/LivreurMissionPanel';
 import LivreurDashboardCharts from '../components/LivreurDashboardCharts';
 import DeliveryProofModal from '../components/DeliveryProofModal';
 import useLivreurGps from '../hooks/useLivreurGps';
+import RoleMlPanel from '../components/RoleMlPanel';
 
 const oid = (o) => o?.id || o?._id;
 
@@ -107,6 +108,7 @@ const LivreurDashboard = () => {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
+      <RoleMlPanel role="livreur" compact />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

@@ -370,6 +370,9 @@ const AdminProducts = () => {
                   <option value="cat">🐈 Chat</option>
                   <option value="bird">🐦 Oiseau</option>
                   <option value="fish">🐟 Poisson</option>
+                  <option value="rabbit">🐰 Lapin</option>
+                  <option value="hamster">🐹 Hamster</option>
+                  <option value="reptile">🦎 Reptile</option>
                   <option value="other">🐾 Autre</option>
                 </select>
               </div>

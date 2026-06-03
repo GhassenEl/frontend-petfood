@@ -7,6 +7,7 @@ export const PRODUCT_CATEGORIES = [
   { value: 'jouets', label: '🎾 Jouets' },
   { value: 'accessoires', label: '🎒 Accessoires' },
   { value: 'vetements', label: '👕 Vêtements' },
+  { value: 'animaux', label: '🐾 Animaux à adopter' },
 ];
 
 export const BLOG_CATEGORIES = ['Guide', 'Chien', 'Chat', 'Comparatif', 'Santé', 'Conseils'];

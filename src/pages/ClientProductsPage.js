@@ -13,12 +13,22 @@ import ProductDetailModal from '../components/ProductDetailModal';
 import {
   matchProductSearch,
   CATEGORY_FILTERS,
+  ANIMAL_TYPE_FILTERS,
   matchCategoryFilter,
 } from '../utils/productCatalog';
 import { getEffectiveDiscount, getPromoPrice, isOnPromotion } from '../utils/productDetails';
 import { productId, dedupeProducts, withProductIds } from '../utils/productId';
 
-const PET_LABELS = { dog: 'chien', cat: 'chat', bird: 'oiseau', fish: 'poisson', other: 'animal' };
+const PET_LABELS = {
+  dog: 'chien',
+  cat: 'chat',
+  bird: 'oiseau',
+  fish: 'poisson',
+  rabbit: 'lapin',
+  hamster: 'hamster',
+  reptile: 'reptile',
+  other: 'animal',
+};
 
 const ClientProductsPage = () => {
   const [searchParams] = useSearchParams();
@@ -119,13 +129,7 @@ const ClientProductsPage = () => {
 
   const profilePetType = profile?.petType;
 
-  const ANIMAL_FILTERS = [
-    { id: 'all', label: 'Tous' },
-    { id: 'dog', label: '🐶 Chien' },
-    { id: 'cat', label: '🐱 Chat' },
-    { id: 'bird', label: '🐦 Oiseau' },
-    { id: 'fish', label: '🐠 Poisson' },
-  ];
+  const ANIMAL_FILTERS = ANIMAL_TYPE_FILTERS;
 
   const inStock = (p) => Number(p?.stock || 0) > 0;
   const inStockFilteredProducts = filteredProducts.filter(inStock);
@@ -314,6 +318,24 @@ const ClientProductsPage = () => {
         />
         <span style={{ fontSize: '13px', color: '#9ca3af', whiteSpace: 'nowrap' }}>{filteredProducts.length} résultat(s)</span>
       </div>
+
+      {categoryFilter === 'animaux' && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          style={{
+            marginBottom: 16,
+            padding: '16px 20px',
+            borderRadius: 16,
+            background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+            border: '1px solid #fcd34d',
+          }}
+        >
+          <p style={{ margin: 0, fontSize: 14, color: '#92400e', fontWeight: 600 }}>
+            🐾 Animaux à adopter — oiseaux, lapins, poissons, hamsters et plus. Vente responsable avec suivi vétérinaire PetfoodTN.
+          </p>
+        </motion.div>
+      )}
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
         {CATEGORY_FILTERS.map((f) => (

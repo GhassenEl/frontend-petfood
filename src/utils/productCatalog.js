@@ -32,6 +32,19 @@ export const CATEGORY_FILTERS = [
   { id: 'accessoires', label: '🎒 Accessoires' },
   { id: 'vetements', label: '👕 Vêtements' },
   { id: 'nourriture', label: '🍽️ Nourriture' },
+  { id: 'animaux', label: '🐾 Animaux à adopter' },
+];
+
+export const ANIMAL_TYPE_FILTERS = [
+  { id: 'all', label: 'Tous' },
+  { id: 'dog', label: '🐕 Chien' },
+  { id: 'cat', label: '🐈 Chat' },
+  { id: 'bird', label: '🐦 Oiseau' },
+  { id: 'fish', label: '🐟 Poisson' },
+  { id: 'rabbit', label: '🐰 Lapin' },
+  { id: 'hamster', label: '🐹 Hamster' },
+  { id: 'reptile', label: '🦎 Reptile' },
+  { id: 'other', label: '🐾 Autre' },
 ];
 
 const haystack = (product) => {
@@ -62,6 +75,7 @@ export const matchCategoryFilter = (product, categoryFilter) => {
     accessoires: ['accessoire', 'laisse', 'collier', 'litière', 'litere', 'griffoir', 'arbre'],
     vetements: ['vetement', 'vêtement', 'manteau', 'pull', 'harnais'],
     nourriture: ['nourriture', 'aliment', 'croquette', 'patee', 'pâtée', 'granule', 'melange'],
+    animaux: ['animaux', 'adoption', 'élevage', 'elevage', 'compagnon', 'nac', 'perruche', 'lapin', 'hamster'],
   };
 
   const keys = rules[categoryFilter];

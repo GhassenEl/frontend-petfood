@@ -27,8 +27,11 @@ Thumbs.db
 # Backend lives in its own repo: https://github.com/GhassenEl/backend-petfood
 backend/
 
-# Optional FastAPI sentiment / recommendations service (separate stack)
-fastapi_service/
+# Python venv (FastAPI ML)
+fastapi_service/.venv/
+fastapi_service/__pycache__/
+fastapi_service/**/__pycache__/
+fastapi_service/models/*.pkl
 
 # AI agent local config & memory (already used in previous .gitignore)
 AGENT.md

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Sparkles, TrendingUp, TrendingDown, Minus, Star, ShoppingCart, Brain, Send, MessageCircle } from 'lucide-react';
 import api from '../utils/api';
 import PetProductRecommendations from '../components/PetProductRecommendations';
+import ClientMlPanel from '../components/ClientMlPanel';
 import { buildProductAiContext } from '../utils/productCatalog';
 
 const QUICK_PROMPTS = [
@@ -230,6 +231,8 @@ const ClientAIAgentPage = () => {
       </motion.div>
 
       <CatalogChatPanel catalog={catalog} />
+
+      <ClientMlPanel />
 
       <motion.div
         initial={{ opacity: 0, y: 16 }}
