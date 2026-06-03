@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Brain, TrendingUp, AlertTriangle, Package, Users, Stethoscope, Truck } from 'lucide-react';
 import {
   fetchAdminMlPack,
+  fetchAdminMlAgentPack,
   fetchClientMlPack,
   fetchClientMlAgentPack,
   fetchLivreurMlPack,
@@ -20,7 +21,7 @@ const badge = {
 
 const loaders = {
   client: fetchClientMlAgentPack,
-  admin: fetchAdminMlPack,
+  admin: fetchAdminMlAgentPack,
   livreur: fetchLivreurMlPack,
   vet: fetchVetMlPack,
 };
@@ -111,7 +112,22 @@ const RoleMlPanel = ({ role = 'client', compact = false }) => {
       {role === 'admin' && pack.nextMonthRevenue && (
         <p style={{ margin: '0 0 12px', fontSize: 14, color: '#4c1d95' }}>
           <TrendingUp size={14} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-          CA prévu mois prochain : <strong>{Number(pack.nextMonthRevenue.predicted || 0).toLocaleString('fr-FR')} DT</strong>
+          CA prévu mois prochain :{' '}
+          <strong>
+            {Number(pack.nextMonthRevenue.forecastRevenue ?? pack.nextMonthRevenue.predicted ?? 0).toLocaleString('fr-FR')} DT
+          </strong>
+        </p>
+      )}
+
+      {role === 'admin' && pack.summary && (
+        <p style={{ margin: '0 0 12px', fontSize: 13, color: '#5b21b6', lineHeight: 1.5 }}>
+          {pack.summary.length > 280 ? `${pack.summary.slice(0, 280)}…` : pack.summary}
+        </p>
+      )}
+
+      {role === 'admin' && pack.platformKpis && (
+        <p style={{ margin: '0 0 8px', fontSize: 12, color: '#6b21a8' }}>
+          {pack.platformKpis.pendingOrders} commande(s) en attente · {pack.platformKpis.clients} clients
         </p>
       )}
 

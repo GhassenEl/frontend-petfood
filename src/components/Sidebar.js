@@ -16,6 +16,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       title: '📊 Analytics',
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: '📈' },
+        { id: 'ml-agent', label: 'Agent IA', icon: '🧠' },
         { id: 'history', label: 'Historique', icon: '📜' },
       ]
     },

@@ -10,6 +10,8 @@ export const fetchAdminMlInsights = () => api.get('/ml/admin/insights').then((r)
 
 export const fetchAdminMlPack = () => api.get('/ml/admin/pack').then((r) => r.data);
 
+export const fetchAdminMlAgentPack = () => api.get('/ml/admin/agent').then((r) => r.data);
+
 export const fetchLivreurMlPack = () => api.get('/ml/livreur/pack').then((r) => r.data);
 
 export const fetchLivreurOrdersRisk = () => api.get('/ml/livreur/orders-risk').then((r) => r.data);

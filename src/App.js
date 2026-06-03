@@ -9,6 +9,7 @@ import AdminLayout from './layouts/AdminLayout';
 import ClientLayout from './layouts/ClientLayout';
 import LivreurLayout from './layouts/LivreurLayout';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminMlAgentPage from './pages/AdminMlAgentPage';
 import AdminOrders from './pages/AdminOrders';
 import AdminReviews from './pages/AdminReviews';
 import AdminComplaints from './pages/AdminComplaints';
@@ -125,6 +126,7 @@ const App = () => {
       <Route path="/register" element={<Navigate to={userHome} replace />} />
 
       <Route path="/admin/dashboard" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDashboard /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/ml-agent" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminMlAgentPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/orders" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminOrders /></AdminLayout></RoleRoute>} />
       <Route path="/admin/reviews" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminReviews /></AdminLayout></RoleRoute>} />
       <Route path="/admin/complaints" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminComplaints /></AdminLayout></RoleRoute>} />
