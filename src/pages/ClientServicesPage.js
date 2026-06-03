@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Calendar, Send, Trash2, CreditCard } from 'lucide-react';
+import ClientOwnerEmotionPanel from '../components/ClientOwnerEmotionPanel';
 import PaymentMethodPicker from '../components/PaymentMethodPicker';
 import PaymentMethodDetails from '../components/PaymentMethodDetails';
 import { isWalletPayment } from '../constants/paymentMethods';
@@ -211,6 +213,16 @@ const ClientServicesPage = () => {
           </p>
         )}
       </header>
+
+      <ClientOwnerEmotionPanel compact />
+
+      <p style={{ marginBottom: 16, fontSize: 14 }}>
+        Après votre prestation, partagez votre{' '}
+        <Link to="/client-emotions" style={{ color: '#be185d', fontWeight: 700 }}>
+          ressenti émotionnel
+        </Link>{' '}
+        (toilettage, dressage, pension, livraison, vétérinaire).
+      </p>
 
       <div className="cc-service-grid">
         {(catalog.length ? catalog : [

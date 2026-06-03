@@ -29,6 +29,7 @@ import StaffLeavePage from './pages/StaffLeavePage';
 import ClientProductsPage from './pages/ClientProductsPage';
 import ClientOrdersPage from './pages/ClientOrdersPage';
 import ClientReviewsPage from './pages/ClientReviewsPage';
+import ClientOwnerEmotionsPage from './pages/ClientOwnerEmotionsPage';
 import ClientComplaintsPage from './pages/ClientComplaintsPage';
 import ClientProfilePage from './pages/ClientProfilePage';
 import ClientInvoicesPage from './pages/ClientInvoicesPage';
@@ -149,6 +150,7 @@ const App = () => {
       <Route path="/client-loyalty" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientLoyaltyPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-orders" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientOrdersPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-reviews" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientReviewsPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-emotions" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientOwnerEmotionsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-complaints" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientComplaintsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-profile" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientProfilePage /></ClientLayout></RoleRoute>} />
       <Route path="/client-invoices" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientInvoicesPage /></ClientLayout></RoleRoute>} />

@@ -63,6 +63,7 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
       title: '💬 Feedback',
       items: [
         { id: 'client-reviews', label: 'Mes Avis', icon: '⭐' },
+        { id: 'client-emotions', label: 'Ressenti & émotions', icon: '💗' },
         { id: 'client-complaints', label: 'Réclamations', icon: '⚠️' },
       ]
     },

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Star, Trash2, Truck, Stethoscope, MapPin, Send } from 'lucide-react';
+import { Star, Trash2, Truck, Stethoscope, MapPin, Send, Sparkles } from 'lucide-react';
 import StarRatingPicker from './StarRatingPicker';
+import ClientEmotionPicker from './ClientEmotionPicker';
 import {
   getServiceRatings,
   getEligibleServiceRatings,
@@ -8,12 +9,20 @@ import {
   deleteServiceRating,
   getServiceRatingStats,
 } from '../services/serviceRatingService';
+import { analyzeOwnerEmotion } from '../services/ownerEmotionService';
+import { PLATFORM_SERVICE_TABS, emotionMeta, EMOTION_STYLE } from '../constants/ownerEmotions';
 import '../pages/ClientComplaintsPage.css';
 
 const ClientServiceRatingsPanel = ({ showToast: parentToast }) => {
-  const [tab, setTab] = useState('delivery');
+  const [tab, setTab] = useState('grooming');
   const [ratings, setRatings] = useState([]);
-  const [eligible, setEligible] = useState({ delivery: [], veterinary: [] });
+  const [eligible, setEligible] = useState({
+    delivery: [],
+    veterinary: [],
+    grooming: [],
+    boarding: [],
+    training: [],
+  });
   const [regionStats, setRegionStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -22,9 +31,13 @@ const ClientServiceRatingsPanel = ({ showToast: parentToast }) => {
   const [form, setForm] = useState({
     rating: 5,
     comment: '',
+    emotion: 'satisfied',
     orderId: '',
     appointmentId: '',
+    bookingId: '',
   });
+  const [aiSuggestion, setAiSuggestion] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
 
   const toast = (text, type = 'success') => {
     if (parentToast) parentToast(text, type);
@@ -43,14 +56,18 @@ const ClientServiceRatingsPanel = ({ showToast: parentToast }) => {
         getServiceRatingStats('delivery'),
       ]);
       setRatings(Array.isArray(list) ? list : []);
-      setEligible(targets || { delivery: [], veterinary: [] });
+      setEligible(targets || { delivery: [], veterinary: [], grooming: [], boarding: [], training: [] });
       setRegionStats(Array.isArray(stats) ? stats : []);
       const firstDelivery = targets?.delivery?.[0];
       const firstVet = targets?.veterinary?.[0];
+      const firstGroom = targets?.grooming?.[0];
+      const firstBoard = targets?.boarding?.[0];
+      const firstTrain = targets?.training?.[0];
       setForm((f) => ({
         ...f,
         orderId: firstDelivery?.orderId || '',
         appointmentId: firstVet?.appointmentId || '',
+        bookingId: firstGroom?.bookingId || firstBoard?.bookingId || firstTrain?.bookingId || '',
       }));
     } catch (err) {
       console.error('Service ratings load error', err);
@@ -77,6 +94,28 @@ const ClientServiceRatingsPanel = ({ showToast: parentToast }) => {
     return { total: list.length, average: (sum / list.length).toFixed(1) };
   }, [ratings, tab]);
 
+  const runEmotionAnalysis = async () => {
+    if (!form.comment.trim()) {
+      toast('Écrivez un commentaire pour l’analyse IA.', 'error');
+      return;
+    }
+    setAnalyzing(true);
+    try {
+      const suggestion = await analyzeOwnerEmotion({
+        text: form.comment,
+        serviceType: tab,
+        rating: form.rating,
+      });
+      setAiSuggestion(suggestion);
+      setForm((prev) => ({ ...prev, emotion: suggestion.emotion || prev.emotion }));
+      toast(`IA : ${emotionMeta(suggestion.emotion).label}`);
+    } catch {
+      toast('Analyse IA indisponible.', 'error');
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -85,6 +124,8 @@ const ClientServiceRatingsPanel = ({ showToast: parentToast }) => {
         type: tab,
         rating: form.rating,
         comment: form.comment.trim() || undefined,
+        emotion: form.emotion,
+        aiSuggested: Boolean(aiSuggestion && form.emotion === aiSuggestion.emotion),
       };
       if (tab === 'delivery') {
         if (!form.orderId) {
@@ -94,17 +135,24 @@ const ClientServiceRatingsPanel = ({ showToast: parentToast }) => {
         payload.orderId = form.orderId;
         const target = eligible.delivery.find((o) => o.orderId === form.orderId);
         payload.region = target?.region || undefined;
-      } else {
+      } else if (tab === 'veterinary') {
         if (!form.appointmentId) {
           toast('Sélectionnez une consultation vétérinaire.', 'error');
           return;
         }
         payload.appointmentId = form.appointmentId;
+      } else {
+        if (!form.bookingId) {
+          toast('Sélectionnez une réservation terminée.', 'error');
+          return;
+        }
+        payload.bookingId = form.bookingId;
       }
       await createServiceRating(payload);
-      setForm((f) => ({ ...f, comment: '', rating: 5 }));
+      setForm((f) => ({ ...f, comment: '', rating: 5, emotion: 'satisfied' }));
+      setAiSuggestion(null);
       await load();
-      toast('Merci pour votre note de service !');
+      toast('Merci pour votre note et votre ressenti !');
     } catch (err) {
       toast(err?.response?.data?.error || 'Erreur lors de l’envoi', 'error');
     } finally {
@@ -123,9 +171,39 @@ const ClientServiceRatingsPanel = ({ showToast: parentToast }) => {
     }
   };
 
-  const typeLabel = tab === 'delivery' ? 'Livraison' : 'Vétérinaire';
-  const TypeIcon = tab === 'delivery' ? Truck : Stethoscope;
-  const canSubmit = tab === 'delivery' ? eligible.delivery.length > 0 : eligible.veterinary.length > 0;
+  const tabMeta = PLATFORM_SERVICE_TABS.find((t) => t.id === tab) || { label: tab };
+  const typeLabel = tabMeta.label?.replace(/^[^\s]+\s/, '') || tab;
+  const TypeIcon =
+    tab === 'delivery' ? Truck : tab === 'veterinary' ? Stethoscope : tab === 'grooming' ? MapPin : Stethoscope;
+  const eligibleList =
+    tab === 'delivery'
+      ? eligible.delivery
+      : tab === 'veterinary'
+        ? eligible.veterinary
+        : tab === 'boarding'
+          ? eligible.boarding
+          : tab === 'training'
+            ? eligible.training
+            : eligible.grooming;
+  const canSubmit = eligibleList.length > 0;
+
+  const emotionFields = (
+    <>
+      <div className="cc-field">
+        <label>Votre ressenti émotionnel</label>
+        <ClientEmotionPicker value={form.emotion} onChange={(emotion) => setForm({ ...form, emotion })} />
+      </div>
+      <button type="button" className="cc-filter-btn reviews" onClick={runEmotionAnalysis} disabled={analyzing}>
+        <Sparkles size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+        {analyzing ? 'Analyse…' : 'Analyser mon ressenti (IA)'}
+      </button>
+      {aiSuggestion && (
+        <p style={{ fontSize: 13, color: '#6b21a8', marginTop: 8 }}>
+          Suggestion IA : {emotionMeta(aiSuggestion.emotion).emoji} {emotionMeta(aiSuggestion.emotion).label}
+        </p>
+      )}
+    </>
+  );
 
   if (loading) {
     return <p style={{ color: '#6b7280', textAlign: 'center', padding: 24 }}>Chargement des notes services…</p>;
@@ -138,15 +216,16 @@ const ClientServiceRatingsPanel = ({ showToast: parentToast }) => {
       )}
 
       <div className="cc-categories" style={{ marginBottom: 20 }}>
-        {[
-          { id: 'delivery', label: '🚚 Livraison par région', icon: Truck },
-          { id: 'veterinary', label: '🩺 Service vétérinaire', icon: Stethoscope },
-        ].map(({ id, label }) => (
+        {PLATFORM_SERVICE_TABS.map(({ id, label }) => (
           <button
             key={id}
             type="button"
             className={`cc-cat-btn ${tab === id ? 'active' : ''}`}
-            onClick={() => { setTab(id); setFilter('all'); }}
+            onClick={() => {
+              setTab(id);
+              setFilter('all');
+              setAiSuggestion(null);
+            }}
           >
             {label}
           </button>
@@ -236,6 +315,7 @@ const ClientServiceRatingsPanel = ({ showToast: parentToast }) => {
                     />
                     <div className="cc-char-count">{form.comment.length} / 800</div>
                   </div>
+                  {emotionFields}
                   <button type="submit" className="cc-submit reviews" disabled={submitting}>
                     <Send size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
                     {submitting ? 'Envoi…' : 'Publier ma note livraison'}
@@ -244,24 +324,63 @@ const ClientServiceRatingsPanel = ({ showToast: parentToast }) => {
               )}
             </form>
           )
-        ) : eligible.veterinary.length === 0 ? (
-          <div className="cc-empty" style={{ padding: 24 }}>
-            <p>Aucune consultation terminée à noter.</p>
-            <p style={{ fontSize: '0.85rem' }}>Prenez rendez-vous dans Santé & Vétérinaire.</p>
-          </div>
-        ) : (
+        ) : tab === 'veterinary' ? (
+          eligible.veterinary.length === 0 ? (
+            <div className="cc-empty" style={{ padding: 24 }}>
+              <p>Aucune consultation terminée à noter.</p>
+              <p style={{ fontSize: '0.85rem' }}>Prenez rendez-vous dans Santé & Vétérinaire.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <div className="cc-field">
+                <label>Consultation</label>
+                <select
+                  value={form.appointmentId}
+                  onChange={(e) => setForm({ ...form, appointmentId: e.target.value })}
+                  required
+                >
+                  {eligible.veterinary.map((a) => (
+                    <option key={a.appointmentId} value={a.appointmentId}>
+                      {a.petName} ({a.animalType}) — {a.vetName || 'Vétérinaire'} —{' '}
+                      {new Date(a.date).toLocaleDateString('fr-FR')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="cc-field">
+                <label>Votre note</label>
+                <StarRatingPicker value={form.rating} onChange={(rating) => setForm({ ...form, rating })} />
+              </div>
+              <div className="cc-field">
+                <label>Commentaire (optionnel)</label>
+                <textarea
+                  value={form.comment}
+                  onChange={(e) => setForm({ ...form, comment: e.target.value })}
+                  placeholder="Qualité de l'accueil, diagnostic, suivi…"
+                  rows={4}
+                  maxLength={800}
+                />
+                <div className="cc-char-count">{form.comment.length} / 800</div>
+              </div>
+              {emotionFields}
+              <button type="submit" className="cc-submit reviews" disabled={submitting}>
+                <Send size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                {submitting ? 'Envoi…' : 'Publier ma note vétérinaire'}
+              </button>
+            </form>
+          )
+        ) : canSubmit ? (
           <form onSubmit={handleSubmit}>
             <div className="cc-field">
-              <label>Consultation</label>
+              <label>Réservation {typeLabel.toLowerCase()}</label>
               <select
-                value={form.appointmentId}
-                onChange={(e) => setForm({ ...form, appointmentId: e.target.value })}
+                value={form.bookingId}
+                onChange={(e) => setForm({ ...form, bookingId: e.target.value })}
                 required
               >
-                {eligible.veterinary.map((a) => (
-                  <option key={a.appointmentId} value={a.appointmentId}>
-                    {a.petName} ({a.animalType}) — {a.vetName || 'Vétérinaire'} —{' '}
-                    {new Date(a.date).toLocaleDateString('fr-FR')}
+                {eligibleList.map((b) => (
+                  <option key={b.bookingId} value={b.bookingId}>
+                    {b.petName} — {new Date(b.date).toLocaleDateString('fr-FR')} — {b.price ?? '—'} DT
                   </option>
                 ))}
               </select>
@@ -271,21 +390,29 @@ const ClientServiceRatingsPanel = ({ showToast: parentToast }) => {
               <StarRatingPicker value={form.rating} onChange={(rating) => setForm({ ...form, rating })} />
             </div>
             <div className="cc-field">
-              <label>Commentaire (optionnel)</label>
+              <label>Commentaire (toilettage, dressage, pension…)</label>
               <textarea
                 value={form.comment}
                 onChange={(e) => setForm({ ...form, comment: e.target.value })}
-                placeholder="Qualité de l'accueil, diagnostic, suivi…"
+                placeholder="Décrivez votre expérience et ce que vous avez ressenti…"
                 rows={4}
                 maxLength={800}
               />
               <div className="cc-char-count">{form.comment.length} / 800</div>
             </div>
+            {emotionFields}
             <button type="submit" className="cc-submit reviews" disabled={submitting}>
               <Send size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-              {submitting ? 'Envoi…' : 'Publier ma note vétérinaire'}
+              {submitting ? 'Envoi…' : `Publier ma note ${typeLabel.toLowerCase()}`}
             </button>
           </form>
+        ) : (
+          <div className="cc-empty" style={{ padding: 24 }}>
+            <p>Aucune réservation {typeLabel.toLowerCase()} terminée à noter.</p>
+            <p style={{ fontSize: '0.85rem' }}>
+              <a href="/client-services">Réserver un service</a>
+            </p>
+          </div>
         )}
       </section>
 
@@ -345,6 +472,19 @@ const ClientServiceRatingsPanel = ({ showToast: parentToast }) => {
               )}
               {r.appointmentId && (
                 <p style={{ margin: '8px 0 0', fontSize: '0.85rem', color: '#64748b' }}>Consultation vétérinaire</p>
+              )}
+              {r.emotion && (
+                <span
+                  className="cc-badge"
+                  style={{
+                    ...(EMOTION_STYLE[r.emotion] || EMOTION_STYLE.neutral),
+                    textTransform: 'none',
+                    marginTop: 8,
+                    display: 'inline-block',
+                  }}
+                >
+                  {emotionMeta(r.emotion).emoji} {emotionMeta(r.emotion).label}
+                </span>
               )}
               {r.comment && <p className="cc-message">{r.comment}</p>}
               <div className="cc-actions">
