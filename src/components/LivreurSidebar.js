@@ -19,6 +19,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
     {
       title: '📊 Statistiques',
       items: [
+        { id: 'ml', label: 'IA Livraison', icon: '🧠' },
         { id: 'stats', label: 'Statistiques', icon: '📈' },
         { id: 'earnings', label: 'Gains', icon: '💰' },
       ]

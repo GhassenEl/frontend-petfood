@@ -105,11 +105,23 @@ const RoleMlPanel = ({ role = 'client', compact = false }) => {
           <p style={{ margin: '0 0 8px', fontSize: 13, color: '#5b21b6' }}>
             Secteur : <strong>{pack.region}</strong> · Heures chargées : {pack.busyHoursHint}
           </p>
+          {pack.todayDeliveriesForecast != null && (
+            <p style={{ margin: '0 0 8px', fontSize: 13, color: '#4c1d95' }}>
+              <TrendingUp size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+              Prévision : <strong>{pack.todayDeliveriesForecast}</strong> livraison(s)
+              {pack.commissionForecastDt != null && ` · ~${pack.commissionForecastDt} DT`}
+            </p>
+          )}
+          {pack.poolPriority?.length > 0 && (
+            <p style={{ margin: '0 0 8px', fontSize: 12, color: '#6b21a8' }}>
+              Top course IA : #{String(pack.poolPriority[0].orderId).slice(-6)} (score {pack.poolPriority[0].priorityScore})
+            </p>
+          )}
           {pack.highCancelRiskDeliveries?.length > 0 && (
             <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: '#7c2d12' }}>
               {pack.highCancelRiskDeliveries.slice(0, 4).map((r) => (
                 <li key={r.orderId}>
-                  <AlertTriangle size={12} style={{ verticalAlign: 'middle' }} /> Commande {r.orderId?.slice?.(0, 8) || r.orderId} — risque {(r.cancelProbability * 100).toFixed(0)}%
+                  <AlertTriangle size={12} style={{ verticalAlign: 'middle' }} /> Commande #{String(r.orderId).slice(-6)} — risque {((r.cancelRisk ?? r.cancelProbability ?? 0) * 100).toFixed(0)}%
                 </li>
               ))}
             </ul>

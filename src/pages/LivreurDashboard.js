@@ -7,6 +7,8 @@ import LivreurDashboardCharts from '../components/LivreurDashboardCharts';
 import DeliveryProofModal from '../components/DeliveryProofModal';
 import useLivreurGps from '../hooks/useLivreurGps';
 import RoleMlPanel from '../components/RoleMlPanel';
+import LivreurOrderMlBadge from '../components/LivreurOrderMlBadge';
+import useLivreurMlRisk from '../hooks/useLivreurMlRisk';
 
 const oid = (o) => o?.id || o?._id;
 
@@ -18,6 +20,7 @@ const LivreurDashboard = () => {
   const [proofOrder, setProofOrder] = useState(null);
   const [claiming, setClaiming] = useState(null);
 
+  const { getRisk, getPriority, pythonPowered } = useLivreurMlRisk();
   const isAvailable = data?.livreur?.isAvailable !== false;
   useLivreurGps(isAvailable && (data?.stats?.activeDeliveries > 0 || data?.pool?.length > 0));
 
@@ -97,7 +100,10 @@ const LivreurDashboard = () => {
         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem',
       }}>📦</div>
       <div style={{ flex: 1 }}>
-        <p style={{ margin: 0, fontWeight: 700 }}>#{String(oid(order)).slice(-6)} · {order.total} DT</p>
+        <p style={{ margin: 0, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          #{String(oid(order)).slice(-6)} · {order.total} DT
+          <LivreurOrderMlBadge risk={getRisk(order)} priority={getPriority(order)} compact />
+        </p>
         <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#888' }}>
           {order.address || 'Adresse non spécifiée'}
         </p>
@@ -127,6 +133,12 @@ const LivreurDashboard = () => {
               {livreur?.isAvailable === false && ' · ⏸ En pause'}
             </p>
           </div>
+          <Link to="/livreur/ml" style={{
+            padding: '10px 16px', background: '#7c3aed', color: 'white', borderRadius: 12,
+            fontWeight: 700, textDecoration: 'none', fontSize: 13,
+          }}>
+            🧠 IA{pythonPowered ? ' XGBoost' : ''}
+          </Link>
           <Link to="/livreur/route" style={{
             padding: '12px 20px', background: '#059669', color: 'white', borderRadius: 12,
             fontWeight: 700, textDecoration: 'none', fontSize: 14,

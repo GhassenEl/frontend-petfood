@@ -46,6 +46,7 @@ import PetFeederPage from './pages/PetFeederPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 import LivreurDashboard from './pages/LivreurDashboard';
+import LivreurMlPage from './pages/LivreurMlPage';
 import LivreurOrdersPage from './pages/LivreurOrdersPage';
 import LivreurMapPage from './pages/LivreurMapPage';
 import LivreurRoutePage from './pages/LivreurRoutePage';
@@ -181,6 +182,7 @@ const App = () => {
       <Route path="/livreur/map" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMapPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/availability" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurAvailabilityPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/leave-requests" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><StaffLeavePage roleLabel="Livreur" /></LivreurLayout></RoleRoute>} />
+      <Route path="/livreur/ml" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMlPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/stats" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurStatsPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/messages" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMessagesPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/earnings" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurEarningsPage /></LivreurLayout></RoleRoute>} />

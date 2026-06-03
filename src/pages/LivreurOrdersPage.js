@@ -5,6 +5,8 @@ import api from '../utils/api';
 import { getPaymentLabel } from '../constants/paymentMethods';
 import DeliveryProofModal from '../components/DeliveryProofModal';
 import useLivreurGps from '../hooks/useLivreurGps';
+import useLivreurMlRisk from '../hooks/useLivreurMlRisk';
+import LivreurOrderMlBadge from '../components/LivreurOrderMlBadge';
 
 const oid = (o) => o?.id || o?._id;
 
@@ -24,6 +26,7 @@ const LivreurOrdersPage = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [sortBy, setSortBy] = useState('date-desc');
+  const { getRisk, getPriority, poolPriority } = useLivreurMlRisk();
   const [proofOrder, setProofOrder] = useState(null);
   const [claiming, setClaiming] = useState(null);
 
@@ -58,10 +61,13 @@ const LivreurOrdersPage = () => {
       result.sort((a, b) => (b.total || 0) - (a.total || 0));
     } else if (sortBy === 'total-asc') {
       result.sort((a, b) => (a.total || 0) - (b.total || 0));
+    } else if (sortBy === 'ml-priority') {
+      const scoreMap = Object.fromEntries(poolPriority.map((p) => [p.orderId, p.priorityScore]));
+      result.sort((a, b) => (scoreMap[oid(b)] || 0) - (scoreMap[oid(a)] || 0));
     }
 
     setFilteredOrders(result);
-  }, [orders, searchTerm, statusFilter, sortBy]);
+  }, [orders, searchTerm, statusFilter, sortBy, poolPriority]);
 
   const fetchOrders = async () => {
     try {
@@ -219,6 +225,7 @@ const LivreurOrdersPage = () => {
           <option value="date-asc">Plus ancien</option>
           <option value="total-desc">Montant ↓</option>
           <option value="total-asc">Montant ↑</option>
+          <option value="ml-priority">Priorité IA</option>
         </select>
       </div>
 
@@ -286,6 +293,7 @@ const LivreurOrdersPage = () => {
                         }}>
                           {config.label}
                         </span>
+                        <LivreurOrderMlBadge risk={getRisk(order)} priority={getPriority(order)} compact />
                       </div>
                       <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#888' }}>
                         {order.region && (
