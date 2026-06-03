@@ -34,6 +34,7 @@ import ClientHistoryPage from './pages/ClientHistoryPage';
 import ClientPetAdvicePage from './pages/ClientPetAdvicePage';
 import ClientServicesPage from './pages/ClientServicesPage';
 import ClientAIAgentPage from './pages/ClientAIAgentPage';
+import ClientMlAgentPage from './pages/ClientMlAgentPage';
 import EventsPage from './pages/EventsPage';
 import FoundMePage from './pages/FoundMePage';
 import NutriProPage from './pages/NutriProPage.js';
@@ -157,6 +158,7 @@ const App = () => {
       <Route path="/pet-advice" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetAdvicePage /></ClientLayout></RoleRoute>} />
       <Route path="/pet-calories" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetCaloriesPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAIAgentPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-ml-agent" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientMlAgentPage /></ClientLayout></RoleRoute>} />
       <Route
         path="/smart-food-agent"
         element={

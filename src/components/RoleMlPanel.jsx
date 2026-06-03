@@ -4,6 +4,7 @@ import { Brain, TrendingUp, AlertTriangle, Package, Users, Stethoscope, Truck } 
 import {
   fetchAdminMlPack,
   fetchClientMlPack,
+  fetchClientMlAgentPack,
   fetchLivreurMlPack,
   fetchVetMlPack,
 } from '../services/mlService';
@@ -18,7 +19,7 @@ const badge = {
 };
 
 const loaders = {
-  client: fetchClientMlPack,
+  client: fetchClientMlAgentPack,
   admin: fetchAdminMlPack,
   livreur: fetchLivreurMlPack,
   vet: fetchVetMlPack,
@@ -83,7 +84,21 @@ const RoleMlPanel = ({ role = 'client', compact = false }) => {
       )}
 
       {pack.summary && role === 'client' && (
-        <p style={{ margin: '0 0 12px', fontSize: 14, color: '#5b21b6' }}>{pack.summary}</p>
+        <p style={{ margin: '0 0 12px', fontSize: 14, color: '#5b21b6', lineHeight: 1.5 }}>
+          {pack.summary.length > 320 ? `${pack.summary.slice(0, 320)}…` : pack.summary}
+        </p>
+      )}
+
+      {role === 'client' && pack.topRecommendations?.length > 0 && (
+        <p style={{ margin: '0 0 8px', fontSize: 13, color: '#6b21a8' }}>
+          {pack.topRecommendations.length} produit(s) recommandé(s) — dont « {pack.topRecommendations[0].name} »
+        </p>
+      )}
+
+      {role === 'client' && pack.petRankings?.length > 1 && (
+        <p style={{ margin: '0 0 8px', fontSize: 12, color: '#6b21a8' }}>
+          Classement XGBoost pour {pack.petRankings.length} animal(aux)
+        </p>
       )}
 
       {role === 'client' && pack.rebuyScore && (
