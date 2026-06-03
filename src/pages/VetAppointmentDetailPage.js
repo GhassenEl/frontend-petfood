@@ -113,7 +113,7 @@ const VetAppointmentDetailPage = () => {
     }
     setAiLoading(true);
     try {
-      const { data } = await api.post('/vet/ai/analyze-pet', {
+      const { data } = await api.post('/ml/vet/clinical/analyze', {
         ownerId,
         petName: appointment.petName,
         animalType: appointment.animalType,

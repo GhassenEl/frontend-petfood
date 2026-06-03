@@ -23,3 +23,17 @@ export const fetchVetMlAgentPack = () => api.get('/ml/vet/agent').then((r) => r.
 export const fetchClinicMlAgentPack = () => api.get('/ml/vet/clinic/agent').then((r) => r.data);
 
 export const fetchPharmacyMlAgentPack = () => api.get('/ml/vet/pharmacy/agent').then((r) => r.data);
+
+export const fetchVetClinicalMlAgentPack = () => api.get('/ml/vet/clinical/agent').then((r) => r.data);
+
+export const postVetClinicalAnalyze = (body) =>
+  api.post('/ml/vet/clinical/analyze', body).then((r) => r.data);
+
+export const fetchVetClinicalPatientContext = (params) =>
+  api.get('/ml/vet/clinical/patient-context', { params }).then((r) => r.data);
+
+export const postVetClinicalApplyDossier = (analysisId) =>
+  api.post(`/ml/vet/clinical/analyses/${analysisId}/apply-dossier`).then((r) => r.data);
+
+export const postVetClinicalApplyPrescription = (analysisId) =>
+  api.post(`/ml/vet/clinical/analyses/${analysisId}/apply-prescription`).then((r) => r.data);

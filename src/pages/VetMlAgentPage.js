@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Brain, Stethoscope, Building2, Pill, AlertTriangle, Calendar, Package, Syringe,
+  Brain, Stethoscope, Building2, Pill, AlertTriangle, Calendar, Package, Syringe, Activity,
 } from 'lucide-react';
 import useVetMlAgents from '../hooks/useVetMlAgents';
+import useVetClinicalMlAgent from '../hooks/useVetClinicalMlAgent';
 
 const TABS = [
+  { id: 'clinical', label: 'Anomalies & maladie', icon: Activity },
   { id: 'vet', label: 'Vétérinaire', icon: Stethoscope },
   { id: 'clinic', label: 'Clinique', icon: Building2 },
   { id: 'pharmacy', label: 'Pharmacie', icon: Pill },
@@ -15,7 +17,10 @@ const TABS = [
 const VetMlAgentPage = () => {
   const [tab, setTab] = useState('vet');
   const { vet, clinic, pharmacy, loading, pythonPowered, groqPowered, reload } = useVetMlAgents();
-  const pack = tab === 'clinic' ? clinic : tab === 'pharmacy' ? pharmacy : vet;
+  const { pack: clinicalPack, loading: clinicalLoading } = useVetClinicalMlAgent();
+  const pack =
+    tab === 'clinical' ? clinicalPack : tab === 'clinic' ? clinic : tab === 'pharmacy' ? pharmacy : vet;
+  const isLoading = tab === 'clinical' ? clinicalLoading : loading;
 
   return (
     <div style={{ padding: 24, maxWidth: 1100, margin: '0 auto' }}>
@@ -35,7 +40,7 @@ const VetMlAgentPage = () => {
           Hub Agents IA — Santé animale
         </h1>
         <p style={{ margin: 0, opacity: 0.9, maxWidth: 640 }}>
-          Trois modèles dédiés : patients & nutrition (vétérinaire), opérations cabinet (clinique), stocks & ordonnances (pharmacie).
+          Quatre agents : anomalies & maladie (urgent/non urgent), patients & nutrition, clinique, pharmacie.
         </p>
         <div style={{ marginTop: 14, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {pythonPowered && <Badge label="XGBoost" />}
@@ -64,7 +69,7 @@ const VetMlAgentPage = () => {
         ))}
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <p style={{ color: '#94a3b8' }}>Analyse en cours…</p>
       ) : !pack ? (
         <p style={{ color: '#dc2626' }}>Agent indisponible. Vérifiez le backend et le service ML (port 8000).</p>
@@ -89,6 +94,48 @@ const VetMlAgentPage = () => {
                 ))}
               </div>
             </div>
+          )}
+
+          {tab === 'clinical' && (
+            <>
+              {pack.stats && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 12, marginBottom: 16 }}>
+                  <Kpi label="Analyses récentes" value={pack.stats.recentAnalyses ?? 0} />
+                  <Kpi label="Urgents (7 j)" value={pack.stats.urgentLast7Days ?? 0} />
+                  <Kpi label="Suspicion maladie (30 j)" value={pack.stats.diseaseSuspectedLast30Days ?? 0} />
+                </div>
+              )}
+              {pack.recentAnalyses?.length > 0 && (
+                <div style={card}>
+                  <h3 style={h3}>Dernières analyses patients</h3>
+                  <ul style={ul}>
+                    {pack.recentAnalyses.map((a) => (
+                      <li key={a.id}>
+                        <strong>{a.petName}</strong>
+                        <span
+                          style={{
+                            marginLeft: 8,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            color: a.urgencyClass === 'urgent' ? '#dc2626' : '#0369a1',
+                          }}
+                        >
+                          {a.urgencyClass === 'urgent' ? 'URGENT' : 'NON URGENT'}
+                        </span>
+                        {a.diseaseSuspected && <span style={{ marginLeft: 6, fontSize: 11 }}>🦠</span>}
+                        <span style={{ color: '#64748b', fontSize: 12 }}>
+                          {' '}
+                          — {new Date(a.createdAt).toLocaleDateString('fr-FR')}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <Link to="/vet/diagnostics" style={{ ...chipLink, display: 'inline-block' }}>
+                Lancer une nouvelle analyse symptômes →
+              </Link>
+            </>
           )}
 
           {tab === 'vet' && (
