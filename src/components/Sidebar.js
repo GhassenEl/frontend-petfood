@@ -17,6 +17,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: '📈' },
         { id: 'ml-agent', label: 'Agent IA', icon: '🧠' },
+        { id: 'powerbi', label: 'Power BI', icon: '📊' },
         { id: 'history', label: 'Historique', icon: '📜' },
       ]
     },
