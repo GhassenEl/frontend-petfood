@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import api from '../utils/api';
 import RoleMlPanel from '../components/RoleMlPanel';
+import VetMlPanel from '../components/VetMlPanel';
 import { visitModeBadge } from '../constants/visitModes';
 
 const STATUS_LABELS = {
@@ -146,6 +147,7 @@ const VetDashboard = () => {
 
   return (
     <div style={{ padding: '24px', maxWidth: 1280, margin: '0 auto' }}>
+      <VetMlPanel compact />
       <RoleMlPanel role="vet" compact />
       {/* Hero */}
       <motion.header

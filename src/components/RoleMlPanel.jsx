@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Brain, TrendingUp, AlertTriangle, Package, Users, Stethoscope, Truck } from 'lucide-react';
 import {
@@ -7,7 +8,7 @@ import {
   fetchClientMlPack,
   fetchClientMlAgentPack,
   fetchLivreurMlPack,
-  fetchVetMlPack,
+  fetchVetMlAgentPack,
 } from '../services/mlService';
 
 const badge = {
@@ -23,7 +24,7 @@ const loaders = {
   client: fetchClientMlAgentPack,
   admin: fetchAdminMlAgentPack,
   livreur: fetchLivreurMlPack,
-  vet: fetchVetMlPack,
+  vet: fetchVetMlAgentPack,
 };
 
 const titles = {
@@ -193,6 +194,14 @@ const RoleMlPanel = ({ role = 'client', compact = false }) => {
       {role === 'vet' && pack.adoptionCatalog?.length > 0 && (
         <p style={{ margin: 0, fontSize: 12, color: '#6b21a8' }}>
           {pack.adoptionCatalog.length} animal(aux) en vente sur la plateforme — orientez les clients vers l&apos;adoption responsable.
+        </p>
+      )}
+
+      {role === 'vet' && (
+        <p style={{ margin: '8px 0 0', fontSize: 12 }}>
+          <Link to="/vet/ml-agent" style={{ color: '#0e7490', fontWeight: 700 }}>
+            Hub agents IA (vétérinaire · clinique · pharmacie) →
+          </Link>
         </p>
       )}
 

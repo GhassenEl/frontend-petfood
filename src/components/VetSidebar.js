@@ -19,6 +19,7 @@ const VetSidebar = ({ onLogout, user, onNavigate }) => {
         { id: 'medical-dossiers', label: 'Dossiers médicaux', icon: '📁' },
         { id: 'vaccinations', label: 'Vaccinations', icon: '💉' },
         { id: 'diagnostics', label: 'Diagnostic IA', icon: '🔬' },
+        { id: 'ml-agent', label: 'Agents IA', icon: '🧠' },
       ],
     },
     {

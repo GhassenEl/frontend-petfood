@@ -17,3 +17,9 @@ export const fetchLivreurMlPack = () => api.get('/ml/livreur/pack').then((r) => 
 export const fetchLivreurOrdersRisk = () => api.get('/ml/livreur/orders-risk').then((r) => r.data);
 
 export const fetchVetMlPack = () => api.get('/ml/vet/pack').then((r) => r.data);
+
+export const fetchVetMlAgentPack = () => api.get('/ml/vet/agent').then((r) => r.data);
+
+export const fetchClinicMlAgentPack = () => api.get('/ml/vet/clinic/agent').then((r) => r.data);
+
+export const fetchPharmacyMlAgentPack = () => api.get('/ml/vet/pharmacy/agent').then((r) => r.data);

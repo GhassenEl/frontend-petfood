@@ -10,6 +10,7 @@ import ClientLayout from './layouts/ClientLayout';
 import LivreurLayout from './layouts/LivreurLayout';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminMlAgentPage from './pages/AdminMlAgentPage';
+import VetMlAgentPage from './pages/VetMlAgentPage';
 import AdminOrders from './pages/AdminOrders';
 import AdminReviews from './pages/AdminReviews';
 import AdminComplaints from './pages/AdminComplaints';
@@ -194,6 +195,7 @@ const App = () => {
       <Route path="/livreur/profile" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurProfilePage /></LivreurLayout></RoleRoute>} />
 
       <Route path="/vet/dashboard" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetDashboard /></VetLayout></RoleRoute>} />
+      <Route path="/vet/ml-agent" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetMlAgentPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/bi" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetBiDashboard /></VetLayout></RoleRoute>} />
       <Route path="/vet/calendar" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetCalendarPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/appointments/:id" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetAppointmentDetailPage /></VetLayout></RoleRoute>} />
