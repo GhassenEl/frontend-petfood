@@ -1,0 +1,31 @@
+# Overlay VPN WireGuard — usage :
+#   docker compose -f docker-compose.yml -f docker-compose.vpn.yml --env-file .env.docker up -d
+#
+# Configs clients générées dans ./vpn/config/peer1/, peer2/, …
+
+services:
+  wireguard:
+    image: lscr.io/linuxserver/wireguard:latest
+    container_name: petfood-wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      PUID: ${VPN_PUID:-1000}
+      PGID: ${VPN_PGID:-1000}
+      TZ: ${TZ:-Africa/Tunis}
+      SERVERURL: ${VPN_SERVER_URL:-auto}
+      SERVERPORT: ${VPN_SERVER_PORT:-51820}
+      PEERS: ${VPN_PEERS:-3}
+      PEERDNS: auto
+      INTERNAL_SUBNET: ${VPN_INTERNAL_SUBNET:-10.13.13.0}
+      ALLOWEDIPS: ${VPN_ALLOWED_IPS:-0.0.0.0/0}
+      LOG_CONFS: 'true'
+    volumes:
+      - ./vpn/config:/config
+      - /lib/modules:/lib/modules:ro
+    ports:
+      - '${VPN_SERVER_PORT:-51820}:51820/udp'
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: unless-stopped
