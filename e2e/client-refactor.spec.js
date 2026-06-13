@@ -56,6 +56,10 @@ test.describe('Refonte portefeuille & rappels vaccins', () => {
 });
 
 test.describe('Réservation services avec portefeuille', () => {
+  const groomingCard = (page) => page.getByRole('button', { name: /✂️\s*Toilettage/i });
+  const pensionCard = (page) => page.getByRole('button', { name: /🏠\s*Pension/i });
+  const trainingCard = (page) => page.getByRole('button', { name: /🎓\s*Dressage/i });
+
   test.beforeEach(async ({ page, request }) => {
     await loginAsClient(page);
     const { token } = await loginClientApi(request);
@@ -65,11 +69,11 @@ test.describe('Réservation services avec portefeuille', () => {
   test('catalogue services et réservation pension avec paiement portefeuille', async ({ page }) => {
     await page.goto('/client-services');
     await expect(page.locator('.cc-service-card').first()).toBeVisible({ timeout: 15_000 });
-    await expect(page.locator('.cc-service-card').filter({ hasText: 'Toilettage' })).toBeVisible();
-    await expect(page.locator('.cc-service-card').filter({ hasText: 'Pension' })).toBeVisible();
-    await expect(page.locator('.cc-service-card').filter({ hasText: 'Dressage' })).toBeVisible();
+    await expect(groomingCard(page)).toBeVisible();
+    await expect(pensionCard(page)).toBeVisible();
+    await expect(trainingCard(page)).toBeVisible();
 
-    await page.locator('.cc-service-card').filter({ hasText: 'Pension' }).click();
+    await pensionCard(page).click();
     await expect(page.getByText(/date de fin|départ/i)).toBeVisible();
 
     const petName = `E2E-${Date.now()}`;
@@ -98,8 +102,8 @@ test.describe('Réservation services avec portefeuille', () => {
 
   test('créneaux toilettage disponibles', async ({ page }) => {
     await page.goto('/client-services');
-    await expect(page.locator('.cc-service-card').filter({ hasText: 'Toilettage' })).toBeVisible({ timeout: 15_000 });
-    await page.locator('.cc-service-card').filter({ hasText: 'Toilettage' }).click();
+    await expect(groomingCard(page)).toBeVisible({ timeout: 15_000 });
+    await groomingCard(page).click();
     await expect(page.getByText(/créneau horaire/i)).toBeVisible();
     const slots = page.locator('.cc-slot-btn:not([disabled])');
     await expect(slots.first()).toBeVisible({ timeout: 15_000 });
