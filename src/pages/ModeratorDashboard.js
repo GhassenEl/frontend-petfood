@@ -37,12 +37,11 @@ const ModeratorDashboard = () => {
   }
 
   const kpiCards = [
-    { label: 'Utilisateurs suspendus', value: stats.suspendedUsers, icon: '👤', to: '/moderator/users' },
-    { label: 'Vendeurs en attente', value: stats.pendingVendors, icon: '🏬', to: '/moderator/vendors' },
     { label: 'Produits à valider', value: stats.pendingProducts, icon: '🏷️', to: '/moderator/content' },
     { label: 'Avis en attente', value: stats.pendingReviews, icon: '⭐', to: '/moderator/reviews' },
     { label: 'Réclamations ouvertes', value: stats.pendingComplaints, icon: '⚠️', to: '/moderator/complaints' },
     { label: 'Litiges ouverts', value: stats.openDisputes, icon: '⚖️', to: '/moderator/reports' },
+    { label: 'Remboursements litige', value: stats.pendingRefunds ?? 2, icon: '💸', to: '/moderator/refunds' },
     { label: 'Faux avis détectés', value: stats.fakeReviewsFlagged, icon: '🤖', to: '/moderator/reports' },
     { label: 'Cas résolus aujourd\'hui', value: stats.resolvedToday, icon: '✅', to: '/moderator/analytics' },
   ];
@@ -51,7 +50,7 @@ const ModeratorDashboard = () => {
     <div className="mod-page">
       <header className="mod-hero">
         <h1>🛡️ Tableau de bord modération {demo && <span className="mod-demo-pill">Mode démo</span>}</h1>
-        <p>Contrôle qualité — utilisateurs, vendeurs, contenu, signalements et rapports.</p>
+        <p>Contrôle qualité — contenu, avis, signalements et rapports. La gestion des acteurs (visiteur, vendeur, modérateur) est réservée à l&apos;admin.</p>
       </header>
 
       <div className="mod-kpi-grid">
@@ -90,9 +89,8 @@ const ModeratorDashboard = () => {
           <p style={{ margin: '0 0 8px', color: '#64748b', fontSize: '0.85rem' }}>Délai moyen de réponse</p>
           <strong style={{ fontSize: '2rem', color: '#d97706' }}>{stats.avgResponseHours} h</strong>
           <div className="mod-quick-links">
-            <Link to="/moderator/users">Utilisateurs</Link>
-            <Link to="/moderator/vendors">Vendeurs</Link>
             <Link to="/moderator/content">Contenu</Link>
+            <Link to="/moderator/refunds">Remboursements</Link>
             <Link to="/moderator/reports">Signalements</Link>
             <Link to="/moderator/analytics">Rapports</Link>
             <Link to="/moderator/reviews">Avis</Link>

@@ -79,9 +79,11 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
     {
       title: '🐾 Services PetfoodTN',
       items: [
+        { id: 'client-pets', label: 'Mes animaux', icon: '🐾' },
         { id: 'client-events', label: 'Compétitions & cadeaux', icon: '🏆' },
         { id: 'platform-services', label: 'Catalogue services', icon: '📋' },
         { id: 'client-services', label: 'Mes services', icon: '✂️' },
+        { id: 'client-pet-passport', label: 'Passeport numérique', icon: '🛂' },
         { id: 'pet-calories', label: 'Nutrition par animal', icon: '🥗' },
         { id: 'pet-advice', label: 'Conseils pour pets', icon: '💡' },
         { id: 'found-me', label: 'Retrouvé Moi', icon: '🔍' },

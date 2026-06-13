@@ -75,7 +75,7 @@ const ClientPetPassportPage = () => {
     return (
       <div style={{ padding: 40, textAlign: 'center' }}>
         <p>Aucun animal enregistré.</p>
-        <Link to="/client-profile">Ajouter un animal dans mon profil →</Link>
+        <Link to="/client-pets">Ajouter un animal dans Mes animaux →</Link>
       </div>
     );
   }

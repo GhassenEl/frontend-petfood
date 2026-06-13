@@ -25,6 +25,14 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       ]
     },
     {
+      title: '👥 Acteurs plateforme',
+      items: [
+        { id: 'visitors', label: 'Espace visiteur', icon: '👀' },
+        { id: 'vendors', label: 'Vendeurs', icon: '🏬' },
+        { id: 'moderators', label: 'Modérateurs', icon: '🛡️' },
+      ],
+    },
+    {
       title: '🛒 Gestion',
       items: [
         { id: 'orders', label: 'Commandes', icon: '📦' },
@@ -35,8 +43,6 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'promotions', label: 'Promotions & coupons', icon: '🎟️' },
         { id: 'users', label: 'Utilisateurs', icon: '👥' },
         { id: 'livreurs', label: 'Livreurs', icon: '🚚' },
-        { id: 'vendors', label: 'Fournisseurs', icon: '🏬' },
-        { id: 'moderators', label: 'Modérateurs', icon: '🛡️' },
         { id: 'leave-requests', label: 'Congés / maladie', icon: '🏖️' },
         { id: 'messages', label: 'Messages', icon: '💬' },
         { id: 'veterinary', label: 'Suivi Vétérinaire', icon: '🩺' },
@@ -48,12 +54,13 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       items: [
         { id: 'reviews', label: 'Avis', icon: '⭐' },
         { id: 'complaints', label: 'Réclamations', icon: '⚠️' },
+        { id: 'refunds', label: 'Remboursements', icon: '💸' },
       ]
     },
     {
       title: '⚙️ Paramètres',
       items: [
-        { id: 'system', label: 'Configuration système', icon: '🔧' },
+        { id: 'system', label: 'Configuration globale', icon: '🔧' },
         { id: 'activity-logs', label: 'Journaux d\'activité', icon: '📋' },
         { id: 'profile', label: 'Mon Profil', icon: '👤' },
       ]

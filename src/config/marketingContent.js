@@ -253,7 +253,6 @@ export const MODERATOR_QUICK_LINKS = [
   { id: 'events', icon: '🎪', label: 'Événements', route: '/moderator#evenements' },
   { id: 'nlp', icon: '🤖', label: 'Analyse NLP', route: '/moderator#nlp' },
   { id: 'visitor', icon: '👀', label: 'Espace visiteur', route: '/visitor' },
-  { id: 'vendor', icon: '🏬', label: 'Espace vendeur', route: '/vendor' },
   { id: 'login', icon: '🔑', label: 'Connexion pro', route: '/login' },
   { id: 'access', icon: '📝', label: 'Demande accès', route: '/moderator#devenir-moderateur' },
 ];

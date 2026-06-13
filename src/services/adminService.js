@@ -5,6 +5,8 @@ import {
   DEMO_SYSTEM_CONFIG,
   DEMO_ACTIVITY_LOGS,
   DEMO_ADMIN_USERS,
+  DEMO_VISITOR_ADMIN_CONFIG,
+  DEMO_VISITOR_STATS,
 } from '../utils/adminDemoData';
 import {
   fetchActivityLogs,
@@ -15,6 +17,7 @@ import {
 } from './activityLogService';
 
 const CONFIG_KEY = 'petfood_system_config';
+const VISITOR_CONFIG_KEY = 'petfood_visitor_admin_config';
 
 const loadConfig = () => {
   try {
@@ -142,4 +145,55 @@ export const fetchAdminActivityLogs = async (filters = {}) => {
   }
 };
 
+const loadVisitorConfig = () => {
+  try {
+    const raw = localStorage.getItem(VISITOR_CONFIG_KEY);
+    if (raw) return { ...DEMO_VISITOR_ADMIN_CONFIG, ...JSON.parse(raw) };
+  } catch {
+    /* ignore */
+  }
+  return { ...DEMO_VISITOR_ADMIN_CONFIG };
+};
+
+const saveVisitorConfig = (cfg) => {
+  localStorage.setItem(VISITOR_CONFIG_KEY, JSON.stringify(cfg));
+};
+
+export const fetchVisitorAdminConfig = async () => {
+  try {
+    const data = await api.get('/admin/visitors/config').then((r) => r.data);
+    return { data, stats: DEMO_VISITOR_STATS, demo: false };
+  } catch {
+    return { data: loadVisitorConfig(), stats: DEMO_VISITOR_STATS, demo: true };
+  }
+};
+
+export const updateVisitorAdminConfig = async (patch) => {
+  try {
+    const data = await api.patch('/admin/visitors/config', patch).then((r) => r.data);
+    logActivity({
+      actorRole: 'admin',
+      actorName: 'Administrateur',
+      action: 'visitor_config_update',
+      target: 'Espace visiteur',
+      module: 'admin',
+    });
+    return { data, demo: false };
+  } catch {
+    const next = { ...loadVisitorConfig(), ...patch, updatedAt: new Date().toISOString() };
+    saveVisitorConfig(next);
+    logActivity({
+      actorRole: 'admin',
+      actorName: 'Administrateur',
+      action: 'visitor_config_update',
+      target: 'Espace visiteur',
+      module: 'admin',
+    });
+    return { data: next, demo: true };
+  }
+};
+
 export { exportLogsJson, exportLogsCsv, logActivity };
+
+/** Lecture synchrone config globale (contexte client, bannières maintenance…). */
+export const getSystemConfigSync = () => loadConfig();

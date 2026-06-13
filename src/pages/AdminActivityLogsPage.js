@@ -11,6 +11,7 @@ import './AdminPages.css';
 
 const ACTION_LABELS = {
   config_update: 'Mise à jour configuration',
+  visitor_config_update: 'Config. espace visiteur',
   vendor_approve: 'Vendeur validé',
   vendor_suspend: 'Vendeur suspendu',
   moderator_create: 'Modérateur créé',

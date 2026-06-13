@@ -30,6 +30,8 @@ import AdminVendorsPage from './pages/AdminVendorsPage';
 import AdminVendorDetailPage from './pages/AdminVendorDetailPage';
 import AdminSystemConfigPage from './pages/AdminSystemConfigPage';
 import AdminModeratorsPage from './pages/AdminModeratorsPage';
+import AdminVisitorsPage from './pages/AdminVisitorsPage';
+import AdminRefundsPage from './pages/AdminRefundsPage';
 import AdminActivityLogsPage from './pages/AdminActivityLogsPage';
 import StaffLeavePage from './pages/StaffLeavePage';
 import ClientProductsPage from './pages/ClientProductsPage';
@@ -86,6 +88,8 @@ import ClientMedicalDossierPage from './pages/ClientMedicalDossierPage';
 import ClientFavoritesPage from './pages/ClientFavoritesPage';
 import ClientLoyaltyPage from './pages/ClientLoyaltyPage';
 import ClientPetCaloriesPage from './pages/ClientPetCaloriesPage';
+import ClientPetsPage from './pages/ClientPetsPage';
+import ClientPetPassportPage from './pages/ClientPetPassportPage';
 import PlatformServicesPage from './pages/PlatformServicesPage';
 import MarketingLandingPage from './pages/MarketingLandingPage';
 import VisitorHubPage from './pages/VisitorHubPage';
@@ -102,10 +106,9 @@ import VendorReturnsPage from './pages/VendorReturnsPage';
 import VendorCommunicationPage from './pages/VendorCommunicationPage';
 import ModeratorLayout from './layouts/ModeratorLayout';
 import ModeratorDashboard from './pages/ModeratorDashboard';
-import ModeratorUsersPage from './pages/ModeratorUsersPage';
-import ModeratorVendorsPage from './pages/ModeratorVendorsPage';
 import ModeratorContentPage from './pages/ModeratorContentPage';
 import ModeratorReportsPage from './pages/ModeratorReportsPage';
+import ModeratorRefundsPage from './pages/ModeratorRefundsPage';
 import ModeratorAnalyticsPage from './pages/ModeratorAnalyticsPage';
 
 const homeByRole = {
@@ -178,6 +181,8 @@ const App = () => {
       <Route path="/admin/livreurs" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminLivreurs /></AdminLayout></RoleRoute>} />
       <Route path="/admin/vendors" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVendorsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/vendors/:id" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVendorDetailPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/visitors" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVisitorsPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/refunds" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRefundsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/system" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminSystemConfigPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/moderators" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminModeratorsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/activity-logs" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminActivityLogsPage /></AdminLayout></RoleRoute>} />
@@ -205,6 +210,9 @@ const App = () => {
       <Route path="/client-reviews" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientReviewsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-complaints" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientComplaintsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-profile" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientProfilePage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-pets" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetsPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-pet-passport" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetPassportPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-pet-passport/:petId" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetPassportPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-invoices" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientInvoicesPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-history" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientHistoryPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-events" element={<RoleRoute user={user} roles={['client']}><ClientLayout><EventsPage /></ClientLayout></RoleRoute>} />
@@ -289,18 +297,19 @@ const App = () => {
       <Route path="/vendor/platform-services" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><PlatformServicesPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/profile" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><AdminProfilePage /></VendorLayout></RoleRoute>} />
 
-      <Route path="/moderator/dashboard" element={<RoleRoute user={user} roles={['moderator', 'admin']}><ModeratorLayout><ModeratorDashboard /></ModeratorLayout></RoleRoute>} />
-      <Route path="/moderator/users" element={<RoleRoute user={user} roles={['moderator', 'admin']}><ModeratorLayout><ModeratorUsersPage /></ModeratorLayout></RoleRoute>} />
-      <Route path="/moderator/vendors" element={<RoleRoute user={user} roles={['moderator', 'admin']}><ModeratorLayout><ModeratorVendorsPage /></ModeratorLayout></RoleRoute>} />
-      <Route path="/moderator/content" element={<RoleRoute user={user} roles={['moderator', 'admin']}><ModeratorLayout><ModeratorContentPage /></ModeratorLayout></RoleRoute>} />
-      <Route path="/moderator/reports" element={<RoleRoute user={user} roles={['moderator', 'admin']}><ModeratorLayout><ModeratorReportsPage /></ModeratorLayout></RoleRoute>} />
-      <Route path="/moderator/analytics" element={<RoleRoute user={user} roles={['moderator', 'admin']}><ModeratorLayout><ModeratorAnalyticsPage /></ModeratorLayout></RoleRoute>} />
-      <Route path="/moderator/reviews" element={<RoleRoute user={user} roles={['moderator', 'admin']}><ModeratorLayout><AdminReviews /></ModeratorLayout></RoleRoute>} />
-      <Route path="/moderator/complaints" element={<RoleRoute user={user} roles={['moderator', 'admin']}><ModeratorLayout><AdminComplaints /></ModeratorLayout></RoleRoute>} />
-      <Route path="/moderator/events" element={<RoleRoute user={user} roles={['moderator', 'admin']}><ModeratorLayout><EventsPage /></ModeratorLayout></RoleRoute>} />
-      <Route path="/moderator/messages" element={<RoleRoute user={user} roles={['moderator', 'admin']}><ModeratorLayout><AdminMessages /></ModeratorLayout></RoleRoute>} />
-      <Route path="/moderator/platform-services" element={<RoleRoute user={user} roles={['moderator', 'admin']}><ModeratorLayout><PlatformServicesPage /></ModeratorLayout></RoleRoute>} />
-      <Route path="/moderator/profile" element={<RoleRoute user={user} roles={['moderator', 'admin']}><ModeratorLayout><AdminProfilePage /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/dashboard" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorDashboard /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/users" element={<Navigate to="/moderator/dashboard" replace />} />
+      <Route path="/moderator/vendors" element={<Navigate to="/moderator/dashboard" replace />} />
+      <Route path="/moderator/content" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorContentPage /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/reports" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorReportsPage /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/refunds" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorRefundsPage /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/analytics" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorAnalyticsPage /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/reviews" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><AdminReviews /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/complaints" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><AdminComplaints /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/events" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><EventsPage /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/messages" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><AdminMessages /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/platform-services" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><PlatformServicesPage /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/profile" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><AdminProfilePage /></ModeratorLayout></RoleRoute>} />
 
       <Route path="*" element={<Navigate to={userHome} replace />} />
     </Routes>

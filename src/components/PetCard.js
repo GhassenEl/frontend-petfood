@@ -34,7 +34,7 @@ const PetCard = ({ pet, petIndex, onEdit, onDelete }) => {
         <div className="flex-1 min-w-0">
           <h3 className="text-xl font-bold text-gray-900 mb-1">{pet.name}</h3>
           <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium mb-1">
-            {animalEmojis[pet.type]} {pet.type.toUpperCase()}
+            {animalEmojis[pet.type] || '🐾'} {(pet.type || 'other').toUpperCase()}
             {pet.breed && <span className="text-gray-500 font-normal">· {pet.breed}</span>}
           </div>
           {pet.birthDate && (
@@ -63,7 +63,7 @@ const PetCard = ({ pet, petIndex, onEdit, onDelete }) => {
         </p>
       )}
       <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500">
-        <span>ID: {petIndex}</span>
+        <span>{pet.id || pet._id ? `ID: ${(pet.id || pet._id).slice(0, 12)}` : `Animal #${petIndex + 1}`}</span>
       </div>
     </motion.div>
   );

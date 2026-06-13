@@ -23,10 +23,9 @@ const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
       title: '🛡️ Modération',
       items: [
         { id: 'dashboard', label: 'Tableau de bord', icon: '📊' },
-        { id: 'users', label: 'Utilisateurs', icon: '👤' },
-        { id: 'vendors', label: 'Vendeurs', icon: '🏬' },
         { id: 'content', label: 'Contenu & produits', icon: '🏷️' },
         { id: 'reports', label: 'Signalements & litiges', icon: '⚖️' },
+        { id: 'refunds', label: 'Remboursements', icon: '💸' },
         { id: 'analytics', label: 'Rapports', icon: '📈' },
       ],
     },

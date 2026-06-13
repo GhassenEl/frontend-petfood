@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
+import ClientPetsManager from '../components/ClientPetsManager';
 import { CardContent, Button, TextField, Tabs, Tab, Box, CircularProgress, Alert } from '@mui/material';
 import { User } from 'lucide-react';
 
@@ -116,6 +117,7 @@ const ClientProfilePage = () => {
         <Box sx={{ borderRadius: '20px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)' }}>
           <Tabs value={value} onChange={handleChange} variant="fullWidth" className="bg-white">
             <Tab label="👤 Profil Personnel" />
+            <Tab label="🐾 Mes animaux" />
           </Tabs>
 
           {/* Profile Tab */}
@@ -158,6 +160,12 @@ const ClientProfilePage = () => {
                   </Button>
                 </div>
               </form>
+            </CardContent>
+          </TabPanel>
+
+          <TabPanel value={value} index={1}>
+            <CardContent className="p-6">
+              <ClientPetsManager compact />
             </CardContent>
           </TabPanel>
 

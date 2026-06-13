@@ -686,17 +686,38 @@ export const buildStockAlerts = (items) => {
 /** Configuration système plateforme (démo admin). */
 export const DEMO_SYSTEM_CONFIG = {
   platformName: 'PetfoodTN',
+  platformTagline: 'Nutrition & soins pour vos compagnons',
+  defaultLanguage: 'fr',
+  timezone: 'Africa/Tunis',
   maintenanceMode: false,
+  maintenanceMessage: '',
   vendorCommissionRate: 12,
   autoModerationNlpThreshold: 0.85,
   maxProductsPerVendor: 200,
+  minVendorRating: 3,
   emailNotificationsEnabled: true,
+  smsNotificationsEnabled: false,
+  pushNotificationsEnabled: true,
   sessionTimeoutMinutes: 60,
+  maxLoginAttempts: 5,
+  requireEmailVerification: true,
   defaultCurrency: 'DT',
   supportEmail: 'support@petfoodtn.tn',
+  supportPhone: '+216 71 000 000',
   allowVendorSelfRegistration: false,
+  allowClientSelfRegistration: true,
+  allowGuestBrowsing: true,
   requireModeratorApproval: true,
+  autoApproveVendors: false,
+  freeShippingThreshold: 150,
+  maxOrderAmount: 5000,
+  defaultDeliveryDays: 3,
   logRetentionDays: 90,
+  backupEnabled: true,
+  apiVersion: 'v1',
+  groqAssistantEnabled: true,
+  nlpModelsEnabled: true,
+  iotFeaturesEnabled: true,
   updatedAt: daysAgo(2),
 };
 
@@ -721,4 +742,33 @@ export const DEMO_ACTIVITY_LOGS = [
   { id: 'log-17', at: daysAgo(5), actorRole: 'admin', actorName: 'Ghassen Admin', action: 'vendor_suspend', target: 'Boutique Nour Pets', module: 'admin' },
   { id: 'log-18', at: daysAgo(6), actorRole: 'vet', actorName: 'Dr. Hichem Sassi', action: 'prescription_issue', target: 'Max — antibiotique', module: 'sante' },
 ];
+
+/** Configuration espace visiteur (admin uniquement). */
+export const DEMO_VISITOR_ADMIN_CONFIG = {
+  hubEnabled: true,
+  productsPublic: true,
+  toolsPublic: true,
+  infoPublic: true,
+  allowGuestCheckout: false,
+  showRegistrationCta: true,
+  showVendorCta: true,
+  showModeratorCta: false,
+  maintenanceMessage: '',
+  maxProductsPreview: 50,
+  updatedAt: daysAgo(1),
+};
+
+export const DEMO_VISITOR_STATS = {
+  dailyVisitors: 1240,
+  weeklyVisitors: 8650,
+  productViews: 34200,
+  toolUses: 1890,
+  registrationConversions: 4.2,
+  topPages: [
+    { path: '/visitor/products', label: 'Catalogue produits', views: 12800 },
+    { path: '/visitor/tools', label: 'Outils nutrition', views: 5200 },
+    { path: '/visitor/info', label: 'Infos & FAQ', views: 4100 },
+    { path: '/visitor', label: 'Hub visiteur', views: 12100 },
+  ],
+};
 
