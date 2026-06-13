@@ -10,6 +10,8 @@ Architecture (MVC monolithe) : voir [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 **CD production** (GHCR, VPS, Render, HTTPS, Sentry) : voir [docs/CD.md](./docs/CD.md).
 
+**Render pas à pas** : voir [docs/RENDER-SETUP.md](./docs/RENDER-SETUP.md) — `npm run devops:render:setup`
+
 ## Stack
 
 - React 18 + React Router 7

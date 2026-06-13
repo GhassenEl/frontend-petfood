@@ -1,9 +1,13 @@
-# PetfoodTN — déploiement Render (Blueprint)
+# PetfoodTN — Blueprint Render (repo frontend-petfood)
 # https://render.com/docs/blueprint-spec
 #
-# 1. Créer une base PostgreSQL sur Render
-# 2. Lier ce repo et appliquer le Blueprint
-# 3. Copier les Deploy Hooks dans les secrets GitHub (RENDER_DEPLOY_HOOK_*)
+# ⚠️ Le backend est dans un repo séparé : GhassenEl/backend-petfood
+#    → voir docs/render-backend.yaml à copier dans ce second repo.
+#
+# Déploiement :
+#   1. Dashboard Render → New → Blueprint → connecter ce repo
+#   2. Créer le service API depuis backend-petfood (manuel ou son render.yaml)
+#   3. Renseigner VITE_API_BASE et CORS_ORIGINS (voir docs/RENDER-SETUP.md)
 
 databases:
   - name: petfoodtn-db
@@ -12,55 +16,39 @@ databases:
     user: petfood
 
 services:
+  # ── Frontend React (site statique Vite) ──
   - type: web
-    name: petfoodtn-backend
-    runtime: docker
-    plan: starter
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
-    healthCheckPath: /health
+    name: petfoodtn-web
+    runtime: static
+    plan: free
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
-      - key: NODE_ENV
-        value: production
-      - key: PORT
-        value: 5002
-      - key: DEMO_MODE
-        value: false
-      - key: RUN_SEED
-        value: false
-      - key: DATABASE_URL
-        fromDatabase:
-          name: petfoodtn-db
-          property: connectionString
-      - key: JWT_SECRET
-        generateValue: true
-      - key: CORS_ORIGINS
+      - key: NODE_VERSION
+        value: '20'
+      # À définir après création du backend Render :
+      # https://petfoodtn-api.onrender.com/api
+      - key: VITE_API_BASE
         sync: false
-      - key: STRIPE_MOCK
-        value: 1
+      - key: VITE_SOCKET_URL
+        sync: false
+      - key: VITE_SENTRY_DSN
+        sync: false
+      - key: VITE_APP_RELEASE
+        value: petfoodtn@render
 
+  # ── Service ML FastAPI ──
   - type: web
     name: petfoodtn-ml
     runtime: docker
-    plan: starter
+    plan: free
     rootDir: fastapi_service
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     envVars:
       - key: TZ
         value: Africa/Tunis
-
-  - type: web
-    name: petfoodtn-frontend
-    runtime: docker
-    plan: starter
-    dockerfilePath: ./Dockerfile.frontend
-    dockerContext: .
-    healthCheckPath: /nginx-health
-    envVars:
-      - key: VITE_API_BASE
-        value: /api
-      - key: VITE_SOCKET_URL
-        value: ''
-    buildCommand: ''
-    # Sur Render, configurer un rewrite /api → backend si nécessaire (Render proxy)

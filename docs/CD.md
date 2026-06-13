@@ -102,31 +102,36 @@ Caddy obtient automatiquement un certificat Let's Encrypt pour `DOMAIN`.
 
 ## 3. Déploiement Render
 
-### Blueprint
+Guide détaillé : **[RENDER-SETUP.md](./RENDER-SETUP.md)** (pas à pas).
 
-Fichier `render.yaml` à la racine — services :
-- `petfoodtn-db` (PostgreSQL)
-- `petfoodtn-backend`
-- `petfoodtn-ml`
-- `petfoodtn-frontend`
+```powershell
+npm run devops:render:setup
+```
 
-1. [Render Dashboard](https://dashboard.render.com) → **New** → **Blueprint**
-2. Connecter le repo `frontend-petfood`
-3. Ajuster `CORS_ORIGINS` et variables Stripe/Firebase
+### Blueprint frontend (ce repo)
+
+1. Render → **New** → **Blueprint** → `GhassenEl/frontend-petfood`
+2. Crée : `petfoodtn-db`, `petfoodtn-web`, `petfoodtn-ml`
+
+### Blueprint backend (repo séparé)
+
+Copier `docs/render-backend.yaml` → `render.yaml` dans **backend-petfood**, puis Blueprint sur ce repo.
+
+### Variables clés
+
+| Service | Variable | Exemple |
+|---------|----------|---------|
+| `petfoodtn-web` | `VITE_API_BASE` | `https://petfoodtn-api.onrender.com/api` |
+| `petfoodtn-api` | `CORS_ORIGINS` | `https://petfoodtn-web.onrender.com` |
+| `petfoodtn-api` | `FASTAPI_URL` | `https://petfoodtn-ml.onrender.com` |
 
 ### Deploy Hooks (CD auto)
 
-Pour chaque service Render : Settings → Deploy Hook → copier l’URL.
-
 | Secret GitHub | Service |
 |---------------|---------|
-| `RENDER_DEPLOY_HOOK_FRONTEND` | petfoodtn-frontend |
-| `RENDER_DEPLOY_HOOK_BACKEND` | petfoodtn-backend |
+| `RENDER_DEPLOY_HOOK_FRONTEND` | petfoodtn-web |
+| `RENDER_DEPLOY_HOOK_BACKEND` | petfoodtn-api |
 | `RENDER_DEPLOY_HOOK_ML` | petfoodtn-ml |
-
-Après chaque publish GHCR, le workflow **Deploy Render** appelle ces hooks.
-
-> **Note** : le backend est dans un repo séparé — sur Render, configurer un second repo ou un monorepo avec `rootDir`.
 
 ---
 

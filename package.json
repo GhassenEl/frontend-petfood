@@ -53,6 +53,7 @@
     "docker:vpn:logs": "docker compose -f docker-compose.yml -f docker-compose.vpn.yml logs -f wireguard",
     "devops:health": "node scripts/devops/health-check.mjs",
     "devops:ci": "powershell -ExecutionPolicy Bypass -File scripts/devops/ci-local.ps1",
+    "devops:render:setup": "powershell -ExecutionPolicy Bypass -File scripts/devops/setup-render.ps1",
     "demo:video": "node scripts/record-demo-video.js",
     "demo:video:5min": "cross-env DEMO_PACE=2.3 DEMO_HEADLESS=0 node scripts/record-demo-video.js",
     "test:e2e": "playwright test",
