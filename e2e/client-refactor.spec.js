@@ -56,9 +56,13 @@ test.describe('Refonte portefeuille & rappels vaccins', () => {
 });
 
 test.describe('Réservation services avec portefeuille', () => {
-  const groomingCard = (page) => page.getByRole('button', { name: '✂️ Toilettage', exact: true });
-  const pensionCard = (page) => page.getByRole('button', { name: /🏠\s*Pension/i });
-  const trainingCard = (page) => page.getByRole('button', { name: /🎓\s*Dressage/i });
+  const bookableCard = (page, heading) =>
+    page.locator('.cc-service-grid .cc-service-card').filter({
+      has: page.getByRole('heading', { name: heading }),
+    });
+  const groomingCard = (page) => bookableCard(page, /^Toilettage/);
+  const pensionCard = (page) => bookableCard(page, 'Pension');
+  const trainingCard = (page) => bookableCard(page, 'Dressage');
 
   test.beforeEach(async ({ page, request }) => {
     await loginAsClient(page);
