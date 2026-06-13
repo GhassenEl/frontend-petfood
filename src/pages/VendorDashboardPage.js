@@ -11,6 +11,7 @@ import {
 import { fetchAdminVendor, fetchVendorDashboard, registerVendor } from '../services/ecosystemService';
 import { formatDT } from '../utils/formatCurrency';
 import { getDemoAdminVendorDetail, getDemoVendorDashboard } from '../utils/vendorDemoData';
+import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
 
 const card = {
   background: '#fff',
@@ -193,6 +194,8 @@ const VendorDashboardPage = ({ vendorId = null, adminPreview = false }) => {
           </button>
         </div>
       </motion.div>
+
+      {!adminPreview && <RealtimeStatsCharts role="vendor" />}
 
       <div style={{
         display: 'grid',

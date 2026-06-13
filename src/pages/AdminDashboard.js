@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import AdminDashboardCharts from '../components/AdminDashboardCharts';
+import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
 import {
   DEMO_ADMIN_ORDERS,
   DEMO_ADMIN_USERS,
@@ -34,6 +35,11 @@ const AdminDashboard = () => {
     fetchStats();
     fetchChartData();
     fetchRecentActivity();
+    const id = window.setInterval(() => {
+      fetchStats();
+      fetchChartData();
+    }, 15000);
+    return () => window.clearInterval(id);
   }, []);
 
   const fetchStats = async () => {
@@ -245,6 +251,8 @@ const AdminDashboard = () => {
           </motion.div>
         ))}
       </div>
+
+      <RealtimeStatsCharts role="admin" />
 
       <AdminDashboardCharts
         revenueData={chartData}

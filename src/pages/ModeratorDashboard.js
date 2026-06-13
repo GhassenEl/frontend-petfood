@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchModeratorDashboard } from '../services/moderatorService';
 import { DEMO_MODERATOR_QUEUE } from '../utils/moderatorDemoData';
+import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
 import './ModeratorPages.css';
 
 const TYPE_ICONS = {
@@ -52,6 +53,8 @@ const ModeratorDashboard = () => {
         <h1>🛡️ Tableau de bord modération {demo && <span className="mod-demo-pill">Mode démo</span>}</h1>
         <p>Contrôle qualité — contenu, avis, signalements et rapports. La gestion des acteurs (visiteur, vendeur, modérateur) est réservée à l&apos;admin.</p>
       </header>
+
+      <RealtimeStatsCharts role="moderator" />
 
       <div className="mod-kpi-grid">
         {kpiCards.map((k) => (

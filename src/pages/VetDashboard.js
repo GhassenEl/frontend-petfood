@@ -18,6 +18,7 @@ import {
 import api from '../utils/api';
 import { visitModeBadge } from '../constants/visitModes';
 import VetDashboardCharts from '../components/VetDashboardCharts';
+import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
 import { DEMO_VET_BI, withDemoDashboard, buildDemoVetWeekChart } from '../utils/vetDemoData';
 
 const STATUS_LABELS = {
@@ -58,6 +59,8 @@ const VetDashboard = () => {
 
   useEffect(() => {
     fetchData();
+    const id = window.setInterval(() => fetchData(true), 12000);
+    return () => window.clearInterval(id);
   }, [fetchData]);
 
   if (loading) {
@@ -262,6 +265,8 @@ const VetDashboard = () => {
           </div>
         ))}
       </div>
+
+      <RealtimeStatsCharts role="vet" />
 
       <VetDashboardCharts
         weekChart={chartWeek}

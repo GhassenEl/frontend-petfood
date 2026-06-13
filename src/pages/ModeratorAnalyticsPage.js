@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { BarChart3, Users, Store, AlertOctagon, History } from 'lucide-react';
 import { fetchModeratorAnalytics, MOD_ACTION_LABELS } from '../services/moderatorService';
+import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
 import './ModeratorPages.css';
 
 const ModeratorAnalyticsPage = () => {
@@ -31,6 +32,8 @@ const ModeratorAnalyticsPage = () => {
         <h1><BarChart3 size={24} /> Rapports & statistiques {demo && <span className="mod-demo-pill">Mode démo</span>}</h1>
         <p>Statistiques utilisateurs, activité vendeurs, produits signalés et historique des modérations.</p>
       </header>
+
+      <RealtimeStatsCharts role="moderator" />
 
       <div className="mod-tabs">
         <button type="button" className={`mod-tab${tab === 'users' ? ' mod-tab--active' : ''}`} onClick={() => setTab('users')}>

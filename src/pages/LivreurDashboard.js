@@ -6,6 +6,7 @@ import { livreurCancelOrder } from '../services/orderService';
 import { withDemoDashboard, withDemoStats } from '../utils/livreurDemoData';
 import LivreurMissionPanel from '../components/LivreurMissionPanel';
 import LivreurDashboardCharts from '../components/LivreurDashboardCharts';
+import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
 import DeliveryProofModal from '../components/DeliveryProofModal';
 import useLivreurGps from '../hooks/useLivreurGps';
 
@@ -25,10 +26,16 @@ const LivreurDashboard = () => {
 
   useEffect(() => {
     fetchData();
-    api.get('/livreur/stats')
+    const loadCharts = () => api.get('/livreur/stats')
       .then(({ data: s }) => setChartStats(withDemoStats(s)))
       .catch(console.error)
       .finally(() => setChartsLoading(false));
+    loadCharts();
+    const poll = window.setInterval(() => {
+      fetchData();
+      loadCharts();
+    }, 12000);
+    return () => window.clearInterval(poll);
   }, []);
 
   const fetchData = async () => {
@@ -159,6 +166,8 @@ const LivreurDashboard = () => {
           </Link>
         </div>
       </motion.div>
+
+      <RealtimeStatsCharts role="livreur" />
 
       <LivreurDashboardCharts stats={chartStats} loading={chartsLoading} />
 
