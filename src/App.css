@@ -901,7 +901,7 @@ body.dark .livreur-sidebar .sidebar-footer {
   min-width: 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .platform-workspace.flex {
     flex-direction: column;
     min-height: 100vh;

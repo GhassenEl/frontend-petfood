@@ -62,7 +62,7 @@ export const CLIENT_MOBILE_NAV = [
 export const LIVREUR_MOBILE_NAV = [
   { id: 'dash', to: '/livreur/dashboard', icon: '📊', label: 'Accueil' },
   { id: 'orders', to: '/livreur/orders', icon: '📦', label: 'Courses' },
-  { id: 'route', to: '/livreur/route', icon: '🛣️', label: 'Tournée' },
+  { id: 'route', to: '/livreur/bi', icon: '📈', label: 'BI' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
@@ -70,14 +70,14 @@ export const VET_MOBILE_NAV = [
   { id: 'dash', to: '/vet/dashboard', icon: '🩺', label: 'Accueil' },
   { id: 'calendar', to: '/vet/calendar', icon: '📅', label: 'Agenda' },
   { id: 'dossiers', to: '/vet/medical-dossiers', icon: '📁', label: 'Dossiers' },
-  { id: 'clients', to: '/vet/clients', icon: '👥', label: 'Clients' },
+  { id: 'clients', to: '/vet/bi', icon: '📈', label: 'BI' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
 export const ADMIN_MOBILE_NAV = [
   { id: 'dash', to: '/admin/dashboard', icon: '📊', label: 'Accueil' },
   { id: 'orders', to: '/admin/orders', icon: '📦', label: 'Commandes' },
-  { id: 'products', to: '/admin/products', icon: '🏷️', label: 'Produits' },
+  { id: 'products', to: '/admin/powerbi', icon: '📈', label: 'BI' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
@@ -85,14 +85,14 @@ export const MODERATOR_MOBILE_NAV = [
   { id: 'dash', to: '/moderator/dashboard', icon: '🛡️', label: 'Accueil' },
   { id: 'users', to: '/moderator/users', icon: '👤', label: 'Users' },
   { id: 'content', to: '/moderator/content', icon: '🏷️', label: 'Contenu' },
-  { id: 'reports', to: '/moderator/reports', icon: '⚖️', label: 'Litiges' },
+  { id: 'reports', to: '/moderator/bi', icon: '📈', label: 'BI' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
 export const VENDOR_MOBILE_NAV = [
   { id: 'dash', to: '/vendor/dashboard', icon: '📊', label: 'Dashboard' },
   { id: 'products', to: '/vendor/products', icon: '🏷️', label: 'Produits' },
-  { id: 'sales', to: '/vendor/sales', icon: '💰', label: 'Ventes' },
+  { id: 'sales', to: '/vendor/bi', icon: '📈', label: 'BI' },
   { id: 'orders', to: '/vendor/orders', icon: '📦', label: 'Commandes' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
@@ -110,6 +110,7 @@ export const MODERATOR_PUBLIC_MOBILE_NAV = [
   { id: 'reviews', to: '/moderator', icon: '⭐', label: 'Avis', match: '/moderator' },
   { id: 'visitor', to: '/visitor', icon: '👀', label: 'Visiteur' },
   { id: 'login', to: '/login', icon: '🔑', label: 'Connexion' },
+  { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
 export const VENDOR_PUBLIC_MOBILE_NAV = [
@@ -117,6 +118,7 @@ export const VENDOR_PUBLIC_MOBILE_NAV = [
   { id: 'commissions', to: '/vendor', icon: '💰', label: 'Commissions', match: '/vendor' },
   { id: 'visitor', to: '/visitor', icon: '👀', label: 'Visiteur' },
   { id: 'login', to: '/login', icon: '🔑', label: 'Connexion' },
+  { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
 export const VISITOR_MOBILE_NAV = [
@@ -124,6 +126,15 @@ export const VISITOR_MOBILE_NAV = [
   { id: 'products', to: '/visitor/products', icon: '🏷️', label: 'Produits' },
   { id: 'tools', to: '/visitor/tools', icon: '🧪', label: 'Outils' },
   { id: 'register', to: '/register', icon: '✨', label: 'Inscription' },
+  { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
+];
+
+export const AUTH_PUBLIC_MOBILE_NAV = [
+  { id: 'home', to: '/', icon: '🏠', label: 'Accueil' },
+  { id: 'visitor', to: '/visitor', icon: '👀', label: 'Visiteur' },
+  { id: 'caps', to: '/capabilities', icon: '📋', label: 'Rôles' },
+  { id: 'login', to: '/login', icon: '🔑', label: 'Connexion' },
+  { id: 'register', to: '/register', icon: '✨', label: 'Inscrire' },
 ];
 
 export default MobileBottomNav;

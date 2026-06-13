@@ -1,0 +1,42 @@
+# Overlay production — usage :
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.docker up -d --build
+#
+# Avec ML :
+#   docker compose -f docker-compose.yml -f docker-compose.ml.yml -f docker-compose.prod.yml --env-file .env.docker up -d --build
+
+services:
+  db:
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  backend:
+    restart: always
+    environment:
+      DEMO_MODE: 'false'
+      RUN_SEED: 'false'
+      NODE_ENV: production
+    logging:
+      driver: json-file
+      options:
+        max-size: '20m'
+        max-file: '5'
+
+  frontend:
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  ml:
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'

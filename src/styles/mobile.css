@@ -97,6 +97,98 @@
     margin: 8px;
   }
 
+  /* Coque auth mobile */
+  .auth-mobile-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #fff7ed 0%, #f8fafc 45%, #ecfdf5 100%);
+  }
+
+  .auth-mobile-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 0 14px;
+    background: rgba(255, 255, 255, 0.92);
+    border-bottom: 1px solid var(--line, rgba(0, 0, 0, 0.08));
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .auth-mobile-brand {
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .auth-mobile-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--muted, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .auth-mobile-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 12px 14px 16px;
+    min-height: 0;
+  }
+
+  .auth-mobile-shell .login-page-root {
+    min-height: auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+    align-items: stretch !important;
+  }
+
+  .auth-mobile-shell .login-page-root > div:first-child {
+    display: none;
+  }
+
+  .auth-mobile-shell .login-page-topbar {
+    display: none !important;
+  }
+
+  .auth-mobile-shell .login-page-card {
+    margin: 0 !important;
+    max-width: 100% !important;
+    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08) !important;
+  }
+
+  /* Matrice capacités — masquer chemins sur petit écran */
+  .cap-route-path {
+    display: none;
+  }
+
+  /* Agenda vétérinaire — colonne unique */
+  .vet-calendar-week {
+    min-width: 0 !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .vet-calendar-scroll {
+    overflow-x: visible !important;
+  }
+
+  /* Landing marketing — espace pour la barre du bas */
+  .mkt-page.platform-workspace--with-bottom-nav {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Pages BI — graphiques empilés */
+  .role-bi-grid,
+  .realtime-stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
   /* Cartes Recharts */
   .recharts-wrapper {
     max-width: 100% !important;

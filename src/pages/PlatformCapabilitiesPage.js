@@ -40,7 +40,7 @@ const PlatformCapabilitiesPage = () => {
                     ) : (
                       <span style={{ color: '#64748b' }}>{f.label}</span>
                     )}
-                    {ok && <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{f.route}</span>}
+                    {ok && <span className="cap-route-path">{f.route}</span>}
                   </li>
                 );
               })}

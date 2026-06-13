@@ -1,6 +1,8 @@
 #Requires -Version 5.1
 param(
-  [switch]$SkipElevate
+  [switch]$SkipElevate,
+  [switch]$WithMl,
+  [switch]$Prod
 )
 
 $ErrorActionPreference = 'Stop'
@@ -118,28 +120,42 @@ function Ensure-DockerDesktop {
 }
 
 function Deploy-Stack {
-  param([string]$DockerExe)
-  Write-Host "Build et demarrage des conteneurs..." -ForegroundColor Cyan
-  & $DockerExe compose --env-file .env.docker down 2>$null
-  & $DockerExe compose --env-file .env.docker up -d --build
+  param(
+    [string]$DockerExe,
+    [string[]]$ComposeFiles = @('docker-compose.yml')
+  )
+  $composeArgs = @()
+  foreach ($f in $ComposeFiles) {
+    $composeArgs += '-f'
+    $composeArgs += $f
+  }
+
+  Write-Host "Build et demarrage des conteneurs ($($ComposeFiles -join ', '))..." -ForegroundColor Cyan
+  & $DockerExe compose @composeArgs --env-file .env.docker down 2>$null
+  & $DockerExe compose @composeArgs --env-file .env.docker up -d --build
   if ($LASTEXITCODE -ne 0) { throw "docker compose up a echoue" }
 
   Write-Host ""
   Write-Host "Deploiement termine !" -ForegroundColor Green
   Write-Host "  Frontend : http://localhost:8080"
   Write-Host "  Backend  : http://localhost:5002/health"
+  Write-Host "  Sante    : npm run devops:health -- --docker"
   Write-Host "  Admin    : admin@petfood.tn / PetfoodTN2024!"
   Write-Host ""
-  Write-Host "  Logs : docker compose --env-file .env.docker logs -f"
+  Write-Host "  Logs : docker compose @composeArgs --env-file .env.docker logs -f"
 }
 
 Write-Host "PetfoodTN - deploiement Docker" -ForegroundColor Yellow
+
+$composeFiles = @('docker-compose.yml')
+if ($WithMl) { $composeFiles += 'docker-compose.ml.yml' }
+if ($Prod) { $composeFiles += 'docker-compose.prod.yml' }
 
 $dockerReady = Test-DockerReady
 if ($dockerReady) {
   Write-Host "Docker OK — deploiement sans droits admin." -ForegroundColor Green
   Ensure-EnvDocker
-  Deploy-Stack -DockerExe $dockerReady
+  Deploy-Stack -DockerExe $dockerReady -ComposeFiles $composeFiles
   exit 0
 }
 
@@ -151,4 +167,4 @@ if (-not (Test-Admin) -and -not $SkipElevate) {
 Ensure-EnvDocker
 Ensure-Wsl
 $dockerExe = Ensure-DockerDesktop
-Deploy-Stack -DockerExe $dockerExe
+Deploy-Stack -DockerExe $dockerExe -ComposeFiles $composeFiles

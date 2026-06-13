@@ -111,7 +111,6 @@ import ModeratorReportsPage from './pages/ModeratorReportsPage';
 import ModeratorRefundsPage from './pages/ModeratorRefundsPage';
 import ModeratorAnalyticsPage from './pages/ModeratorAnalyticsPage';
 import ModeratorUsersPage from './pages/ModeratorUsersPage';
-import PlatformCapabilitiesPage from './pages/PlatformCapabilitiesPage';
 import AdminCategoriesPage from './pages/AdminCategoriesPage';
 import AdminVetsPage from './pages/AdminVetsPage';
 import ClientReturnsPage from './pages/ClientReturnsPage';
@@ -123,6 +122,10 @@ import SupportComplaintsPage from './pages/SupportComplaintsPage';
 import SupportTicketsPage from './pages/SupportTicketsPage';
 import SupportAssistPage from './pages/SupportAssistPage';
 import SupportReturnsPage from './pages/SupportReturnsPage';
+
+import RoleBiDashboardPage from './pages/RoleBiDashboardPage';
+import AuthMobileRoute from './components/AuthMobileRoute';
+import CapabilitiesRoute from './components/CapabilitiesRoute';
 
 const homeByRole = {
   admin: '/admin/dashboard',
@@ -161,17 +164,17 @@ const App = () => {
         <Route path="/" element={<MarketingLandingPage />} />
         <Route path="/marketing" element={<MarketingLandingPage />} />
         <Route path="/services" element={<MarketingLandingPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<AuthMobileRoute title="Inscription"><RegisterPage /></AuthMobileRoute>} />
+        <Route path="/forgot-password" element={<AuthMobileRoute title="Mot de passe"><ForgotPasswordPage /></AuthMobileRoute>} />
+        <Route path="/reset-password" element={<AuthMobileRoute title="Réinitialiser"><ResetPasswordPage /></AuthMobileRoute>} />
+        <Route path="/login" element={<AuthMobileRoute title="Connexion"><LoginPage /></AuthMobileRoute>} />
         <Route path="/visitor" element={<VisitorHubPage />} />
         <Route path="/visitor/products" element={<VisitorProductsPage />} />
         <Route path="/visitor/info" element={<VisitorInfoPage />} />
         <Route path="/visitor/tools" element={<VisitorToolsPage />} />
         <Route path="/vendor" element={<VendorHubPage />} />
         <Route path="/moderator" element={<ModeratorHubPage />} />
-        <Route path="/capabilities" element={<PlatformCapabilitiesPage />} />
+        <Route path="/capabilities" element={<CapabilitiesRoute user={null} />} />
         <Route path="*" element={<MarketingLandingPage />} />
       </Routes>
     );
@@ -185,6 +188,7 @@ const App = () => {
 
       <Route path="/admin/dashboard" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDashboard /></AdminLayout></RoleRoute>} />
       <Route path="/admin/powerbi" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPowerBiPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/bi" element={<Navigate to="/admin/powerbi" replace />} />
       <Route path="/admin/nlp-models" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminNlpModelsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/orders" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminOrders /></AdminLayout></RoleRoute>} />
       <Route path="/admin/reviews" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminReviews /></AdminLayout></RoleRoute>} />
@@ -211,7 +215,7 @@ const App = () => {
       <Route path="/admin/promotions" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPromotions /></AdminLayout></RoleRoute>} />
       <Route path="/admin/categories" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminCategoriesPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/vets" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVetsPage /></AdminLayout></RoleRoute>} />
-      <Route path="/capabilities" element={<PlatformCapabilitiesPage />} />
+      <Route path="/capabilities" element={<CapabilitiesRoute user={user} />} />
       <Route path="/admin/blog-articles" element={<Navigate to="/admin/dashboard" replace />} />
       <Route path="/admin/crm" element={<Navigate to="/admin/dashboard" replace />} />
       <Route path="/admin/rehabilitation" element={<Navigate to="/admin/dashboard" replace />} />
@@ -272,6 +276,7 @@ const App = () => {
       <Route path="/livreur/leave-requests" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><StaffLeavePage roleLabel="Livreur" demoFallback /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/ml" element={<Navigate to="/livreur/stats" replace />} />
       <Route path="/livreur/stats" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurStatsPage /></LivreurLayout></RoleRoute>} />
+      <Route path="/livreur/bi" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><RoleBiDashboardPage role="livreur" /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/messages" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMessagesPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/earnings" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurEarningsPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/history" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurHistoryPage /></LivreurLayout></RoleRoute>} />
@@ -316,6 +321,7 @@ const App = () => {
       <Route path="/vendor/sales" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorSalesPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/returns" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorReturnsPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/communication" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorCommunicationPage /></VendorLayout></RoleRoute>} />
+      <Route path="/vendor/bi" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RoleBiDashboardPage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/platform-services" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><PlatformServicesPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/profile" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><AdminProfilePage /></VendorLayout></RoleRoute>} />
 
@@ -326,6 +332,7 @@ const App = () => {
       <Route path="/moderator/reports" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorReportsPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/refunds" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorRefundsPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/analytics" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorAnalyticsPage /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/bi" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><RoleBiDashboardPage role="moderator" /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/reviews" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><AdminReviews /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/complaints" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><AdminComplaints /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/events" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><EventsPage /></ModeratorLayout></RoleRoute>} />

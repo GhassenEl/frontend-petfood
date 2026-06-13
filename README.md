@@ -6,6 +6,8 @@ Backend repo: https://github.com/GhassenEl/backend-petfood
 
 Architecture (MVC monolithe) : voir [ARCHITECTURE.md](./ARCHITECTURE.md).
 
+**DevOps** (Docker, CI/CD, déploiement) : voir [docs/DEVOPS.md](./docs/DEVOPS.md).
+
 ## Stack
 
 - React 18 + React Router 7

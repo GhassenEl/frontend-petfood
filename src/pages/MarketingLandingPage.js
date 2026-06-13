@@ -15,6 +15,7 @@ import {
 } from '../config/marketingContent';
 import { fetchMarketingLiveData } from '../services/marketingService';
 import { SERVICE_RATE_CARDS } from '../utils/clientDemoData';
+import MobileBottomNav, { AUTH_PUBLIC_MOBILE_NAV } from '../components/MobileBottomNav';
 import './MarketingLandingPage.css';
 
 const renderStars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
@@ -99,7 +100,7 @@ const MarketingLandingPage = () => {
   );
 
   return (
-    <div className="mkt-page">
+    <div className="mkt-page platform-workspace--with-bottom-nav">
       <nav className="mkt-nav" aria-label="Navigation marketing">
         <Link to="/" className="mkt-nav__brand">
           <span>🐾</span>
@@ -499,6 +500,7 @@ const MarketingLandingPage = () => {
           © {new Date().getFullYear()} PetfoodTN — Pro, vétérinaire ou livreur ? Contactez-nous pour un accès dédié.
         </p>
       </footer>
+      <MobileBottomNav items={AUTH_PUBLIC_MOBILE_NAV} />
     </div>
   );
 };

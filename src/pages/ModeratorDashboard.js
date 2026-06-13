@@ -95,6 +95,7 @@ const ModeratorDashboard = () => {
             <Link to="/moderator/content">Contenu</Link>
             <Link to="/moderator/refunds">Remboursements</Link>
             <Link to="/moderator/reports">Signalements</Link>
+            <Link to="/moderator/bi">Dashboard BI</Link>
             <Link to="/moderator/analytics">Rapports</Link>
             <Link to="/moderator/reviews">Avis</Link>
             <Link to="/moderator/complaints">Réclamations</Link>

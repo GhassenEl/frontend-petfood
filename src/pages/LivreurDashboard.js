@@ -158,6 +158,12 @@ const LivreurDashboard = () => {
           }}>
             📊 Statistiques
           </Link>
+          <Link to="/livreur/bi" style={{
+            padding: '10px 16px', background: '#1d4ed8', color: 'white', borderRadius: 12,
+            fontWeight: 700, textDecoration: 'none', fontSize: 13,
+          }}>
+            📈 Dashboard BI
+          </Link>
           <Link to="/livreur/route" style={{
             padding: '12px 20px', background: '#059669', color: 'white', borderRadius: 12,
             fontWeight: 700, textDecoration: 'none', fontSize: 14,

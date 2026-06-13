@@ -222,8 +222,9 @@ const VetCalendarPage = () => {
         ))}
       </div>
 
-      <div style={{ overflowX: 'auto', paddingBottom: 8 }}>
+      <div style={{ overflowX: 'auto', paddingBottom: 8 }} className="vet-calendar-scroll">
       <div
+        className="vet-calendar-week"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(7, minmax(120px, 1fr))',

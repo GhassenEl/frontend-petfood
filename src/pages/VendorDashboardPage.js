@@ -192,6 +192,18 @@ const VendorDashboardPage = ({ vendorId = null, adminPreview = false }) => {
           >
             <RefreshCw size={16} /> Actualiser
           </button>
+          {!adminPreview && (
+            <Link
+              to="/vendor/bi"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.2)',
+                color: '#fff', fontWeight: 600, textDecoration: 'none',
+              }}
+            >
+              <BarChart3 size={16} /> Dashboard BI
+            </Link>
+          )}
         </div>
       </motion.div>
 

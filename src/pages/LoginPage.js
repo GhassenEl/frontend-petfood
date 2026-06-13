@@ -333,10 +333,10 @@ const LoginPage = () => {
     !!fieldErrors.password;
 
   return (
-    <div style={styles.container}>
+    <div className="login-page-root" style={styles.container}>
       <div style={styles.overlay} />
 
-      <header style={styles.topBar} aria-label="Actions de connexion">
+      <header className="login-page-topbar" style={styles.topBar} aria-label="Actions de connexion">
         <div style={styles.topBarLeft}>
           <Link to="/" style={styles.homeLink} aria-label="PetfoodTN — accueil">
             <PetfoodLogo size="sm" variant="light" />

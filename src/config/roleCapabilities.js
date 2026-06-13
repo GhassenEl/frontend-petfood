@@ -42,6 +42,7 @@ export const ROLE_CAPABILITIES = [
       { label: 'Gérer le stock', route: '/vendor/products' },
       { label: 'Gérer les commandes', route: '/vendor/orders' },
       { label: 'Consulter les ventes', route: '/vendor/sales' },
+      { label: 'Dashboard BI', route: '/vendor/bi' },
       { label: 'Répondre aux avis', route: '/vendor/communication' },
       { label: 'Gérer les retours', route: '/vendor/returns' },
     ],
@@ -58,6 +59,7 @@ export const ROLE_CAPABILITIES = [
       { label: 'Prescriptions', route: '/vet/prescriptions' },
       { label: 'Téléconsultations', route: '/vet/teleconsult' },
       { label: 'Conseils nutritionnels', route: '/vet/nutrition' },
+      { label: 'Dashboard BI', route: '/vet/bi' },
     ],
   },
   {
@@ -70,6 +72,7 @@ export const ROLE_CAPABILITIES = [
       { label: 'Consulter les livraisons', route: '/livreur/orders' },
       { label: 'Mettre à jour le statut', route: '/livreur/orders' },
       { label: 'Confirmer la livraison', route: '/livreur/orders' },
+      { label: 'Dashboard BI', route: '/livreur/bi' },
     ],
   },
   {
@@ -84,6 +87,7 @@ export const ROLE_CAPABILITIES = [
       { label: 'Traiter les signalements', route: '/moderator/reports' },
       { label: 'Litiges remboursements', route: '/moderator/refunds' },
       { label: 'Suspendre des comptes clients', route: '/moderator/users' },
+      { label: 'Dashboard BI', route: '/moderator/bi' },
     ],
   },
   {
@@ -100,6 +104,7 @@ export const ROLE_CAPABILITIES = [
       { label: 'Gérer les remboursements', route: '/admin/refunds' },
       { label: 'Gérer les promotions', route: '/admin/promotions' },
       { label: 'Consulter les statistiques', route: '/admin/dashboard' },
+      { label: 'Dashboard BI / Power BI', route: '/admin/powerbi' },
       { label: 'Configurer la plateforme', route: '/admin/system' },
     ],
   },

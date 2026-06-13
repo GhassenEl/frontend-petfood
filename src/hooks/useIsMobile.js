@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 
+import { MOBILE_MAX } from '../constants/breakpoints';
+
 const getMatch = (breakpoint) =>
   typeof window !== 'undefined' && window.matchMedia(`(max-width: ${breakpoint}px)`).matches;
 
-export const useIsMobile = (breakpoint = 768) => {
+export const useIsMobile = (breakpoint = MOBILE_MAX) => {
   const [isMobile, setIsMobile] = useState(() => getMatch(breakpoint));
 
   useEffect(() => {

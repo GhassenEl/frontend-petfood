@@ -20,6 +20,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
       title: '📊 Statistiques',
       items: [
         { id: 'stats', label: 'Statistiques', icon: '📈' },
+        { id: 'bi', label: 'Dashboard BI', icon: '📊' },
         { id: 'earnings', label: 'Gains', icon: '💰' },
       ]
     },

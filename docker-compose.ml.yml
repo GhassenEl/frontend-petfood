@@ -1,0 +1,36 @@
+# Overlay ML (FastAPI XGBoost) — usage :
+#   docker compose -f docker-compose.yml -f docker-compose.ml.yml --env-file .env.docker up -d --build
+#
+# Stack complète (ML + VPN) :
+#   docker compose -f docker-compose.yml -f docker-compose.ml.yml -f docker-compose.vpn.yml --env-file .env.docker up -d --build
+
+services:
+  ml:
+    build:
+      context: ./fastapi_service
+      dockerfile: Dockerfile
+    container_name: petfood-ml
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Africa/Tunis}
+    ports:
+      - '${ML_PORT:-8000}:8000'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)",
+        ]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 25s
+
+  backend:
+    environment:
+      FASTAPI_URL: http://ml:8000
+    depends_on:
+      ml:
+        condition: service_healthy

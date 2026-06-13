@@ -19,8 +19,8 @@ export const ROLE_REALTIME_META = {
     secondaryLabel: 'CA live (DT)',
     accent: '#e67e22',
     accent2: '#27ae60',
-    detailLink: '/admin/sales',
-    detailLabel: 'Détail ventes',
+    detailLink: '/admin/powerbi',
+    detailLabel: 'Power BI',
   },
   vendor: {
     title: 'Boutique — temps réel',
@@ -28,8 +28,8 @@ export const ROLE_REALTIME_META = {
     secondaryLabel: 'CA live (DT)',
     accent: '#14b8a6',
     accent2: '#0d9488',
-    detailLink: '/vendor/sales',
-    detailLabel: 'Historique ventes',
+    detailLink: '/vendor/bi',
+    detailLabel: 'Dashboard BI',
   },
   moderator: {
     title: 'Modération — temps réel',
@@ -37,8 +37,8 @@ export const ROLE_REALTIME_META = {
     secondaryLabel: 'Cas résolus',
     accent: '#d97706',
     accent2: '#059669',
-    detailLink: '/moderator/analytics',
-    detailLabel: 'Rapports',
+    detailLink: '/moderator/bi',
+    detailLabel: 'Dashboard BI',
   },
   livreur: {
     title: 'Livraisons — temps réel',
@@ -46,8 +46,8 @@ export const ROLE_REALTIME_META = {
     secondaryLabel: 'Gains live (DT)',
     accent: '#27ae60',
     accent2: '#059669',
-    detailLink: '/livreur/stats',
-    detailLabel: 'Statistiques',
+    detailLink: '/livreur/bi',
+    detailLabel: 'Dashboard BI',
   },
   vet: {
     title: 'Cabinet — temps réel',

@@ -23,6 +23,7 @@ const VendorSidebar = ({ onLogout, user, onNavigate }) => {
       title: '📊 Tableau de bord',
       items: [
         { id: 'dashboard', label: 'Vue d\'ensemble', icon: '📊' },
+        { id: 'bi', label: 'Dashboard BI', icon: '📈' },
       ],
     },
     {

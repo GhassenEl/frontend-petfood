@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend-build:
+    name: Frontend — build Vite
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Production build
+        run: npm run build
+        env:
+          VITE_API_BASE: /api
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist/
+          retention-days: 3
+
+  backend-tests:
+    name: Backend — Prisma + tests ML
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Prisma generate
+        working-directory: backend
+        run: npx prisma generate
+        env:
+          DATABASE_URL: file:./dev.db
+
+      - name: ML architecture tests
+        working-directory: backend
+        run: npm run test:ml
+        env:
+          DATABASE_URL: file:./dev.db
+          JWT_SECRET: ci-test-secret-min-32-characters-long
+          DEMO_MODE: 'true'
+
+  ml-service:
+    name: FastAPI ML — smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: fastapi_service/requirements.txt
+
+      - name: Install ML dependencies
+        run: pip install -r fastapi_service/requirements.txt
+
+      - name: Start ML service
+        run: |
+          cd fastapi_service
+          uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+          sleep 3
+          curl -fsS http://127.0.0.1:8000/health | grep -q '"status"'
+
+  docker-build:
+    name: Docker — compose build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: [frontend-build, backend-tests]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build stack images
+        run: docker compose --env-file .env.docker.example build
+
+      - name: Build ML overlay
+        run: docker compose -f docker-compose.yml -f docker-compose.ml.yml --env-file .env.docker.example build ml
