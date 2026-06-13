@@ -5,7 +5,6 @@ import api from '../utils/api';
 import LivreurDeliveryMap from '../components/LivreurDeliveryMap';
 import LivreurMissionPanel from '../components/LivreurMissionPanel';
 import useLivreurGps from '../hooks/useLivreurGps';
-import LivreurOrderMlBadge from '../components/LivreurOrderMlBadge';
 
 const LivreurRoutePage = () => {
   const [route, setRoute] = useState(null);
@@ -62,10 +61,7 @@ const LivreurRoutePage = () => {
           <Route color="#059669" /> Tournée optimisée
         </h1>
         <p style={{ color: '#64748b', marginTop: 8 }}>
-          Ordre suggéré par GPS + priorité IA (risque annulation XGBoost)
-          {route?.mlPowered && (
-            <span style={{ marginLeft: 8, color: '#7c3aed', fontWeight: 700 }}>· XGBoost actif</span>
-          )}
+          Ordre suggéré par GPS pour une tournée fluide
         </p>
       </motion.div>
 
@@ -95,7 +91,7 @@ const LivreurRoutePage = () => {
         {(route?.stops || []).length === 0 ? (
           <p style={{ textAlign: 'center', color: '#94a3b8', padding: 32 }}>Aucun arrêt en cours — revenez plus tard 🎉</p>
         ) : (
-          route.stops.map(({ order, stopNumber, distanceKm, hasGps, mapsUrl, mlRisk, mlPriorityScore }) => (
+          route.stops.map(({ order, stopNumber, distanceKm, hasGps, mapsUrl }) => (
             <div key={order.id || order._id} style={stopCard}>
               <div style={{
                 width: 36, height: 36, borderRadius: '50%', background: '#059669', color: 'white',
@@ -106,7 +102,6 @@ const LivreurRoutePage = () => {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   #{String(order.id || order._id).slice(-6)} · {order.total} DT
-                  <LivreurOrderMlBadge risk={mlRisk} priority={mlPriorityScore != null ? { priorityScore: mlPriorityScore, cancelRisk: mlRisk?.cancelRisk } : null} compact />
                 </div>
                 <div style={{ fontSize: 13, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
                   <MapPin size={14} /> {order.address || 'Adresse non renseignée'}

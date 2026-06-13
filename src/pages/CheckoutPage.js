@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Elements, useStripe, useElements } from '@stripe/react-stripe-js';
 import { motion } from 'framer-motion';
-import { CreditCard, Truck, CheckCircle, Lock } from 'lucide-react';
+import { CreditCard, Truck, CheckCircle, Lock, MapPin, Store } from 'lucide-react';
+import { fetchRelayPoints } from '../services/ecosystemService';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { getStripePromise } from '../utils/stripeLoader';
@@ -44,6 +45,10 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
   const [bankTransfer, setBankTransfer] = useState(DEFAULT_BANK_TRANSFER);
   const [paymentStatus, setPaymentStatus] = useState('idle');
   const [walletBalance, setWalletBalance] = useState(null);
+  const [deliveryMode, setDeliveryMode] = useState('home');
+  const [relayPoints, setRelayPoints] = useState([]);
+  const [selectedRelayId, setSelectedRelayId] = useState('');
+  const promoDiscount = 0;
   const cart = Array.isArray(cartProp) && cartProp.length > 0 ? cartProp : storedCart;
   const computedSubtotal = cart.reduce(
     (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
@@ -81,7 +86,18 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
   useEffect(() => {
     loadPaymentConfig();
     getWallet().then((w) => setWalletBalance(w?.balance ?? 0)).catch(() => setWalletBalance(0));
+    fetchRelayPoints()
+      .then((d) => setRelayPoints(d.points || []))
+      .catch(() => setRelayPoints([]));
   }, [loadPaymentConfig]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('petfood_relay_point_id');
+    if (saved && relayPoints.some((p) => p.id === saved)) {
+      setSelectedRelayId(saved);
+      setDeliveryMode('relay');
+    }
+  }, [relayPoints]);
 
   useEffect(() => {
     refreshStripeIntent();
@@ -120,8 +136,18 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
       navigate('/client-products');
       return;
     }
-    if (!address || !phone) {
+    const relay = relayPoints.find((p) => p.id === selectedRelayId);
+    if (deliveryMode === 'relay') {
+      if (!selectedRelayId || !relay) {
+        window.alert('Choisissez un point relais partenaire');
+        return;
+      }
+    } else if (!address || !phone) {
       window.alert('Veuillez remplir l\'adresse et le téléphone');
+      return;
+    }
+    if (!phone) {
+      window.alert('Téléphone requis');
       return;
     }
 
@@ -152,7 +178,14 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
       const orderPayload = {
         paymentMethod,
         paymentNote: paymentNote || undefined,
-        address,
+        deliveryMode,
+        relayPointId: deliveryMode === 'relay' ? selectedRelayId : undefined,
+        relayPointName: relay?.name,
+        relayPointType: relay?.type,
+        address:
+          deliveryMode === 'relay'
+            ? `[Retrait] ${relay.name} — ${relay.address}`
+            : address,
         phone,
         items: cart.map((item) => ({
           productId: item.productId || item._id || item.id,
@@ -289,16 +322,66 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
         style={sectionStyle}
       >
         <h3 style={sectionTitleStyle}>
-          <Truck size={18} color="#e67e22" /> Livraison
+          <Truck size={18} color="#e67e22" /> Livraison ou retrait
         </h3>
-        <input
-          type="text"
-          placeholder="Adresse complète de livraison"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          style={inputFieldStyle}
-          required
-        />
+        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+          <button
+            type="button"
+            onClick={() => setDeliveryMode('home')}
+            style={modeBtnStyle(deliveryMode === 'home')}
+          >
+            <Truck size={16} /> À domicile
+          </button>
+          <button
+            type="button"
+            onClick={() => setDeliveryMode('relay')}
+            style={modeBtnStyle(deliveryMode === 'relay')}
+          >
+            <Store size={16} /> Point relais
+          </button>
+        </div>
+        {deliveryMode === 'relay' ? (
+          <>
+            <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 10px' }}>
+              Animaleries et cliniques vétérinaires partenaires —{' '}
+              <a href="/client-relay-points" style={{ color: '#1d4ed8' }}>
+                carte complète
+              </a>
+            </p>
+            <select
+              value={selectedRelayId}
+              onChange={(e) => {
+                setSelectedRelayId(e.target.value);
+                localStorage.setItem('petfood_relay_point_id', e.target.value);
+              }}
+              style={inputFieldStyle}
+              required
+            >
+              <option value="">— Choisir un point relais —</option>
+              {relayPoints.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.typeIcon} {p.name} — {p.city || p.region}
+                  {p.distanceKm != null ? ` (${p.distanceKm} km)` : ''}
+                </option>
+              ))}
+            </select>
+            {selectedRelayId && (
+              <p style={{ fontSize: 12, color: '#059669', margin: '8px 0 0' }}>
+                <MapPin size={12} style={{ verticalAlign: 'middle' }} />{' '}
+                {relayPoints.find((p) => p.id === selectedRelayId)?.address}
+              </p>
+            )}
+          </>
+        ) : (
+          <input
+            type="text"
+            placeholder="Adresse complète de livraison"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            style={inputFieldStyle}
+            required
+          />
+        )}
         <input
           type="tel"
           placeholder="Téléphone de contact"
@@ -464,5 +547,20 @@ const confirmBtnStyle = {
   fontSize: '15px',
   boxShadow: '0 8px 20px rgba(230,126,34,0.3)',
 };
+
+const modeBtnStyle = (active) => ({
+  flex: 1,
+  padding: '12px 10px',
+  borderRadius: 12,
+  border: active ? '2px solid #e67e22' : '1px solid #e5e7eb',
+  background: active ? 'rgba(230,126,34,0.08)' : '#fff',
+  fontWeight: 700,
+  cursor: 'pointer',
+  fontSize: 13,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 6,
+});
 
 export default CheckoutPage;

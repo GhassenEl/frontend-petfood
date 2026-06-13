@@ -16,8 +16,6 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       title: '📊 Analytics',
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: '📈' },
-        { id: 'ml-agent', label: 'Agent IA', icon: '🧠' },
-        { id: 'powerbi', label: 'Power BI', icon: '📊' },
         { id: 'history', label: 'Historique', icon: '📜' },
       ]
     },
@@ -42,7 +40,6 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       items: [
         { id: 'reviews', label: 'Avis', icon: '⭐' },
         { id: 'complaints', label: 'Réclamations', icon: '⚠️' },
-        { id: 'incidents-ml', label: 'Agent IA incidents', icon: '🛡️' },
       ]
     },
     {

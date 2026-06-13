@@ -5,6 +5,21 @@ Tunnel VPN optionnel pour :
 - Accéder à l’API / au frontend **à distance** sans exposer les ports publiquement
 - Faire passer les requêtes **ESP32 → distributeur IoT** uniquement par le réseau privé (option `FEEDER_REQUIRE_VPN`)
 
+## Prérequis Windows (Docker + WSL2)
+
+Si `docker ps` renvoie **500 Internal Server Error** ou `wsl --status` indique que la **virtualisation** est désactivée :
+
+1. **PowerShell en administrateur** dans `frontend Lido` :
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/enable-wsl-for-docker.ps1
+```
+
+2. **Redémarrer** le PC, ouvrir **Docker Desktop** (état *Running*).
+3. Relancer `scripts/setup-vpn.ps1` ou `npm run docker:vpn:up`.
+
+Activez **Intel VT-x / AMD-V** dans le BIOS si le message persiste : [aka.ms/enablevirtualization](https://aka.ms/enablevirtualization).
+
 ## Démarrage rapide (Docker)
 
 ```powershell

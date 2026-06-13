@@ -19,8 +19,7 @@ const VetSidebar = ({ onLogout, user, onNavigate }) => {
         { id: 'clinic', label: 'Ma clinique', icon: '🏥' },
         { id: 'medical-dossiers', label: 'Dossiers médicaux', icon: '📁' },
         { id: 'vaccinations', label: 'Vaccinations', icon: '💉' },
-        { id: 'diagnostics', label: 'Anomalies & maladie (IA)', icon: '🔬' },
-        { id: 'ml-agent', label: 'Agents IA', icon: '🧠' },
+        { id: 'diagnostics', label: 'Détection précoce', icon: '🔬' },
       ],
     },
     {
@@ -34,7 +33,7 @@ const VetSidebar = ({ onLogout, user, onNavigate }) => {
     {
       title: '🤖 Assistance',
       items: [
-        { id: '__open-chat__', label: 'Assistant IA clinique', icon: '🤖', action: 'open-chat' },
+        { id: '__open-chat__', label: 'Assistance clinique', icon: '🤖', action: 'open-chat' },
       ],
     },
     {

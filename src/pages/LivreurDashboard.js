@@ -6,9 +6,6 @@ import LivreurMissionPanel from '../components/LivreurMissionPanel';
 import LivreurDashboardCharts from '../components/LivreurDashboardCharts';
 import DeliveryProofModal from '../components/DeliveryProofModal';
 import useLivreurGps from '../hooks/useLivreurGps';
-import RoleMlPanel from '../components/RoleMlPanel';
-import LivreurOrderMlBadge from '../components/LivreurOrderMlBadge';
-import useLivreurMlRisk from '../hooks/useLivreurMlRisk';
 
 const oid = (o) => o?.id || o?._id;
 
@@ -20,7 +17,6 @@ const LivreurDashboard = () => {
   const [proofOrder, setProofOrder] = useState(null);
   const [claiming, setClaiming] = useState(null);
 
-  const { getRisk, getPriority, pythonPowered } = useLivreurMlRisk();
   const isAvailable = data?.livreur?.isAvailable !== false;
   useLivreurGps(isAvailable && (data?.stats?.activeDeliveries > 0 || data?.pool?.length > 0));
 
@@ -102,7 +98,6 @@ const LivreurDashboard = () => {
       <div style={{ flex: 1 }}>
         <p style={{ margin: 0, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           #{String(oid(order)).slice(-6)} · {order.total} DT
-          <LivreurOrderMlBadge risk={getRisk(order)} priority={getPriority(order)} compact />
         </p>
         <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#888' }}>
           {order.address || 'Adresse non spécifiée'}
@@ -114,7 +109,6 @@ const LivreurDashboard = () => {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
-      <RoleMlPanel role="livreur" compact />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -133,11 +127,11 @@ const LivreurDashboard = () => {
               {livreur?.isAvailable === false && ' · ⏸ En pause'}
             </p>
           </div>
-          <Link to="/livreur/ml" style={{
+          <Link to="/livreur/stats" style={{
             padding: '10px 16px', background: '#7c3aed', color: 'white', borderRadius: 12,
             fontWeight: 700, textDecoration: 'none', fontSize: 13,
           }}>
-            🧠 IA{pythonPowered ? ' XGBoost' : ''}
+            📊 Statistiques
           </Link>
           <Link to="/livreur/route" style={{
             padding: '12px 20px', background: '#059669', color: 'white', borderRadius: 12,

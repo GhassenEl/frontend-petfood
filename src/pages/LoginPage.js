@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import {
@@ -12,9 +12,11 @@ import {
   validateLoginForm,
 } from '../utils/loginValidation';
 import LoginPetsLogo from '../components/LoginPetsLogo';
+import PetfoodLogo from '../components/PetfoodLogo';
 
 const LoginPage = () => {
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
+  const formRef = useRef(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -25,6 +27,8 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [capsLockOn, setCapsLockOn] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutDone, setSignOutDone] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -49,6 +53,7 @@ const LoginPage = () => {
     setEmail(value);
     if (touched.email) runFieldValidation('email', value);
     if (error) setError('');
+    if (signOutDone) setSignOutDone(false);
   };
 
   const handlePasswordChange = (e) => {
@@ -56,6 +61,7 @@ const LoginPage = () => {
     setPassword(value);
     if (touched.password) runFieldValidation('password', value);
     if (error) setError('');
+    if (signOutDone) setSignOutDone(false);
   };
 
   const handleSubmit = async (e) => {
@@ -80,6 +86,29 @@ const LoginPage = () => {
       setError(result.error || 'Erreur de connexion');
     }
     setLoading(false);
+  };
+
+  const handleSignInFocus = () => {
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('login-email')?.focus();
+  };
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    setError('');
+    setSignOutDone(false);
+    try {
+      await logout();
+      setEmail(getRememberedEmail() || '');
+      setPassword('');
+      setFieldErrors({ email: '', password: '' });
+      setTouched({ email: false, password: false });
+      setSignOutDone(true);
+    } catch {
+      setError('Impossible de se déconnecter. Réessayez.');
+    } finally {
+      setSigningOut(false);
+    }
   };
 
   const inputStyle = (field) => {
@@ -234,6 +263,61 @@ const LoginPage = () => {
     },
     registerHint: { textAlign: 'center', color: '#475569', fontSize: '14px', margin: '18px 0 0' },
     registerLink: { color: '#10b981', fontWeight: 700, textDecoration: 'none' },
+    topBar: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 2,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '16px 20px',
+      gap: '12px',
+      flexWrap: 'wrap',
+    },
+    topBarLeft: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+    },
+    topBarActions: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+      flexWrap: 'wrap',
+    },
+    homeLink: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      textDecoration: 'none',
+      padding: '6px 10px',
+      borderRadius: '12px',
+      background: 'rgba(255,255,255,0.12)',
+      backdropFilter: 'blur(8px)',
+    },
+    signInBtn: {
+      padding: '10px 18px',
+      borderRadius: '12px',
+      border: 'none',
+      background: 'linear-gradient(135deg, #10b981, #059669)',
+      color: 'white',
+      fontSize: '14px',
+      fontWeight: 700,
+      cursor: 'pointer',
+      boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+    },
+    signOutBtn: {
+      padding: '10px 18px',
+      borderRadius: '12px',
+      border: '2px solid rgba(255,255,255,0.85)',
+      background: 'rgba(255,255,255,0.15)',
+      color: 'white',
+      fontSize: '14px',
+      fontWeight: 700,
+      cursor: 'pointer',
+      backdropFilter: 'blur(8px)',
+    },
     capsHint: {
       fontSize: '12px',
       color: '#b45309',
@@ -252,7 +336,33 @@ const LoginPage = () => {
     <div style={styles.container}>
       <div style={styles.overlay} />
 
+      <header style={styles.topBar} aria-label="Actions de connexion">
+        <div style={styles.topBarLeft}>
+          <Link to="/" style={styles.homeLink} aria-label="PetfoodTN — accueil">
+            <PetfoodLogo size="sm" variant="light" />
+          </Link>
+        </div>
+        <div style={styles.topBarActions}>
+          <button type="button" style={styles.signInBtn} onClick={handleSignInFocus}>
+            Sign in
+          </button>
+          <button
+            type="button"
+            style={{
+              ...styles.signOutBtn,
+              opacity: signingOut ? 0.7 : 1,
+              cursor: signingOut ? 'not-allowed' : 'pointer',
+            }}
+            onClick={handleSignOut}
+            disabled={signingOut}
+          >
+            {signingOut ? 'Sign out…' : 'Sign out'}
+          </button>
+        </div>
+      </header>
+
       <div
+        ref={formRef}
         className="login-page-card"
         style={{
           ...styles.card,
@@ -262,9 +372,14 @@ const LoginPage = () => {
       >
         <div style={styles.logoSection}>
           <LoginPetsLogo />
-          <h1 style={styles.title}>PetfoodTN</h1>
           <p style={styles.subtitle}>Bienvenue sur votre espace</p>
         </div>
+
+        {signOutDone && !error && (
+          <div style={{ ...styles.errorBox, background: 'rgba(209, 250, 229, 0.9)', borderColor: '#6ee7b7', color: '#065f46' }} role="status">
+            <span>✓</span> Session fermée — vous pouvez vous reconnecter.
+          </div>
+        )}
 
         {error && (
           <div style={styles.errorBox} role="alert">
@@ -379,6 +494,15 @@ const LoginPage = () => {
 
         <p style={styles.registerHint}>
           Pas de compte ? <Link to="/register" style={styles.registerLink}>Créer un compte</Link>
+        </p>
+        <p style={{ ...styles.registerHint, marginTop: 12 }}>
+          <Link to="/" style={{ ...styles.registerLink, color: '#059669' }}>← Découvrir les services PetfoodTN</Link>
+          {' · '}
+          <Link to="/visitor" style={{ ...styles.registerLink, color: '#0284c7' }}>Espace visiteur 👀</Link>
+          {' · '}
+          <Link to="/vendor" style={{ ...styles.registerLink, color: '#0d9488' }}>Espace vendeur 🏬</Link>
+          {' · '}
+          <Link to="/moderator" style={{ ...styles.registerLink, color: '#d97706' }}>Espace modération 🛡️</Link>
         </p>
       </div>
     </div>

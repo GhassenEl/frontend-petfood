@@ -110,6 +110,11 @@ const StoreLocatorPage = () => {
         <p style={{ margin: '8px 0 0', color: '#777', fontSize: '0.95rem' }}>
           Trouvez le magasin le plus proche de chez vous 🐕🐈
         </p>
+        <p style={{ margin: '12px 0 0', fontSize: '0.9rem' }}>
+          <a href="/client-relay-points" style={{ color: '#1d4ed8', fontWeight: 700 }}>
+            Points relais partenaires (animaleries & cliniques) →
+          </a>
+        </p>
         {userLocation && (
           <span style={{
             display: 'inline-flex',

@@ -52,6 +52,7 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
       title: '🛒 Boutique',
       items: [
         { id: 'client-products', label: 'Produits', icon: '🏷️' },
+        { id: 'client-traceability', label: 'Traçabilité blockchain', icon: '🔗' },
         { id: 'client-favorites', label: 'Favoris', icon: '❤️' },
         { id: 'client-orders', label: 'Mes Commandes', icon: '📦' },
         { id: 'client-invoices', label: 'Factures', icon: '🧾' },
@@ -60,29 +61,25 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
       ]
     },
     {
-      title: '💬 Feedback',
+      title: '⭐ Avis & Réclamations',
       items: [
         { id: 'client-reviews', label: 'Mes Avis', icon: '⭐' },
-        { id: 'client-emotions', label: 'Ressenti & émotions', icon: '💗' },
         { id: 'client-complaints', label: 'Réclamations', icon: '⚠️' },
       ]
     },
     {
-      title: '🐾 Services',
+      title: '🐾 Services PetfoodTN',
       items: [
-        { id: '__open-chat__', label: 'Assistant en ligne', icon: '💬', action: 'open-chat' },
+        { id: 'client-ecosystem', label: 'Assistant IA', icon: '💡' },
         { id: 'pet-feeder', label: 'Distributeur IoT', icon: '🍽️' },
-        { id: 'client-ml-agent', label: 'Agent IA', icon: '🧠' },
-        { id: 'smart-food-agent', label: 'NutriPro', icon: '🥗' },
-        { id: 'pet-calories', label: 'Calories / animal', icon: '🔥' },
-        { id: 'nutripro-history', label: 'Historique NutriPro', icon: '📚' },
-        { id: 'pet-advice', label: 'Conseils', icon: '💡' },
+        { id: 'client-smart-water', label: 'Smart Water Monitor', icon: '💧' },
         { id: 'client-services', label: 'Toilettage & Pension', icon: '✂️' },
-        { id: 'client-events', label: 'Événements', icon: '📅' },
+        { id: 'client-rehabilitation', label: 'Réhabilitation refuges', icon: '💚' },
         { id: 'found-me', label: 'Retrouvé Moi', icon: '🔍' },
         { id: 'veterinary', label: 'Santé & Vétérinaire', icon: '🩺' },
         { id: 'medical-dossier', label: 'Dossier médical', icon: '📁' },
         { id: 'store-locator', label: 'Magasins', icon: '📍' },
+        { id: 'client-relay-points', label: 'Points relais', icon: '📦' },
         { id: 'contact', label: 'Contact', icon: '📧' },
       ]
     },

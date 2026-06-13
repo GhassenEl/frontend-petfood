@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
-import { fetchAdminOrdersRisk } from '../services/mlService';
 
 const emptyForm = {
   userId: '',
@@ -30,15 +29,11 @@ const AdminOrders = () => {
   const [editingOrder, setEditingOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState(emptyForm);
-  const [orderRisks, setOrderRisks] = useState({});
 
   useEffect(() => {
     fetchOrders();
     fetchUsers();
     fetchProducts();
-    fetchAdminOrdersRisk()
-      .then((data) => setOrderRisks(data?.risks || {}))
-      .catch(() => setOrderRisks({}));
   }, []);
 
   const fetchUsers = async () => {
@@ -89,7 +84,7 @@ const AdminOrders = () => {
   const openEdit = (order) => {
     setEditingOrder(order);
     setFormData({
-      userId: order.userId?._id || order.userId || '',
+      userId: order.user?.id || order.user?._id || order.userId || '',
       items: order.items.map(i => ({
         productId: i.productId?._id || i.productId || '',
         quantity: i.quantity,
@@ -123,7 +118,7 @@ const AdminOrders = () => {
         })),
       };
       if (editingOrder) {
-        await api.put(`/orders/${editingOrder._id}`, payload);
+        await api.put(`/orders/${editingOrder.id || editingOrder._id}`, payload);
       } else {
         await api.post('/orders/admin', payload);
       }
@@ -166,7 +161,9 @@ const AdminOrders = () => {
   };
 
   const filteredOrders = orders.filter((order) =>
-    `${order.userId?.email || ''} ${order.status || ''} ${new Date(order.createdAt).toLocaleDateString('fr-TN')}`.toLowerCase().includes(searchTerm.toLowerCase())
+    `${order.user?.name || order.user?.email || order.userId?.email || ''} ${order.status || ''} ${order.id || order._id || ''} ${new Date(order.createdAt).toLocaleDateString('fr-TN')}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -210,7 +207,7 @@ const AdminOrders = () => {
               <th style={styles.th}>Client</th>
               <th style={styles.th}>Articles</th>
               <th style={styles.th}>Total</th>
-              <th style={styles.th}>Statut / IA</th>
+              <th style={styles.th}>Statut</th>
               <th style={styles.th}>Date</th>
               <th style={styles.th}>Actions</th>
             </tr>
@@ -218,11 +215,10 @@ const AdminOrders = () => {
           <tbody>
             {filteredOrders.map((order) => {
               const oid = order.id || order._id;
-              const risk = orderRisks[oid];
               return (
               <tr key={oid} style={styles.tr}>
                 <td style={styles.td}>
-                  <strong>{order.userId?.email || 'N/A'}</strong>
+                  <strong>{order.user?.name || order.user?.email || 'N/A'}</strong>
                 </td>
                 <td style={styles.td}>{order.items?.length || 0}</td>
                 <td style={styles.td}>
@@ -238,11 +234,6 @@ const AdminOrders = () => {
                       <option key={s} value={s}>{statusLabels[s]}</option>
                     ))}
                   </select>
-                  {risk?.highRisk && (
-                    <div style={{ marginTop: 6, fontSize: 11, color: '#b91c1c', fontWeight: 700 }}>
-                      ⚠ Risque annulation {(risk.cancelRisk * 100).toFixed(0)}% (XGBoost)
-                    </div>
-                  )}
                 </td>
                 <td style={styles.td}>{new Date(order.createdAt).toLocaleDateString('fr-TN')}</td>
                 <td style={styles.td}>
@@ -275,7 +266,7 @@ const AdminOrders = () => {
               >
                 <option value="">Choisir un client</option>
                 {users.map((u) => (
-                  <option key={u._id} value={u._id}>{u.name} ({u.email})</option>
+                  <option key={u.id || u._id} value={u.id || u._id}>{u.name} ({u.email})</option>
                 ))}
               </select>
               <div style={styles.row2}>
@@ -300,7 +291,7 @@ const AdminOrders = () => {
                       const finalPrice = getDiscountedPrice(p);
                       const discount = Number(p.discount || 0);
                       return (
-                        <option key={p._id} value={p._id}>
+                        <option key={p.id || p._id} value={p.id || p._id}>
                           {p.name} — {finalPrice.toFixed(2)} DT{discount > 0 ? ` (-${discount}%)` : ''}
                         </option>
                       );

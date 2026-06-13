@@ -34,9 +34,13 @@ const MobileBottomNav = ({ items = [] }) => {
           <NavLink
             key={item.id}
             to={item.to}
-            className={({ isActive }) =>
-              `mobile-bottom-nav__item ${isActive || (item.match && location.pathname.startsWith(item.match)) ? 'mobile-bottom-nav__item--active' : ''}`
-            }
+            className={({ isActive }) => {
+              const queryMatch = item.matchQuery
+                ? location.search.includes(item.matchQuery)
+                : false;
+              const pathMatch = isActive || (item.match && location.pathname.startsWith(item.match));
+              return `mobile-bottom-nav__item ${pathMatch || queryMatch ? 'mobile-bottom-nav__item--active' : ''}`;
+            }}
           >
             <span className="mobile-bottom-nav__icon" aria-hidden>{item.icon}</span>
             <span className="mobile-bottom-nav__label">{item.label}</span>
@@ -75,6 +79,42 @@ export const ADMIN_MOBILE_NAV = [
   { id: 'orders', to: '/admin/orders', icon: '📦', label: 'Commandes' },
   { id: 'products', to: '/admin/products', icon: '🏷️', label: 'Produits' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
+];
+
+export const MODERATOR_MOBILE_NAV = [
+  { id: 'dash', to: '/moderator/dashboard', icon: '🛡️', label: 'Accueil' },
+  { id: 'reviews', to: '/moderator/reviews', icon: '⭐', label: 'Avis' },
+  { id: 'complaints', to: '/moderator/complaints', icon: '⚠️', label: 'Tickets' },
+  { id: 'events', to: '/moderator/events', icon: '🎪', label: 'Événements' },
+  { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
+];
+
+export const VENDOR_MOBILE_NAV = [
+  { id: 'dash', to: '/vendor/dashboard', icon: '🏬', label: 'Boutique' },
+  { id: 'products', to: '/vendor/products', icon: '🏷️', label: 'Produits', match: '/vendor/products' },
+  { id: 'orders', to: '/vendor/orders', icon: '📦', label: 'Commandes', match: '/vendor/orders' },
+  { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
+];
+
+export const MODERATOR_PUBLIC_MOBILE_NAV = [
+  { id: 'hub', to: '/moderator', icon: '🛡️', label: 'Hub' },
+  { id: 'reviews', to: '/moderator', icon: '⭐', label: 'Avis', match: '/moderator' },
+  { id: 'visitor', to: '/visitor', icon: '👀', label: 'Visiteur' },
+  { id: 'login', to: '/login', icon: '🔑', label: 'Connexion' },
+];
+
+export const VENDOR_PUBLIC_MOBILE_NAV = [
+  { id: 'hub', to: '/vendor', icon: '🏬', label: 'Hub' },
+  { id: 'commissions', to: '/vendor', icon: '💰', label: 'Commissions', match: '/vendor' },
+  { id: 'visitor', to: '/visitor', icon: '👀', label: 'Visiteur' },
+  { id: 'login', to: '/login', icon: '🔑', label: 'Connexion' },
+];
+
+export const VISITOR_MOBILE_NAV = [
+  { id: 'hub', to: '/visitor', icon: '👀', label: 'Découvrir' },
+  { id: 'vendor', to: '/vendor', icon: '🏬', label: 'Vendeur' },
+  { id: 'moderator', to: '/moderator', icon: '🛡️', label: 'Modération' },
+  { id: 'register', to: '/register', icon: '✨', label: 'Inscription' },
 ];
 
 export default MobileBottomNav;

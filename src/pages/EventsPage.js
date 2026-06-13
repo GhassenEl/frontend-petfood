@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { PlusCircle, Edit, Trash2, Calendar, Clock, Tag, User, Info, XCircle, Star, MessageSquare } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { registerForEvent } from '../services/adminOpsService';
 
 const EventsPage = () => {
   const { user } = useAuth(); // Get user to check role
@@ -26,7 +27,11 @@ const EventsPage = () => {
     ownerId: '',
     meetingLink: '',
     isPublic: true,
+    eventVenue: '',
+    eventCapacity: '',
   });
+  const [eventCategoryFilter, setEventCategoryFilter] = useState('all');
+  const [registeringId, setRegisteringId] = useState(null);
   const [clients, setClients] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -44,13 +49,20 @@ const EventsPage = () => {
   const [reviewLoading, setReviewLoading] = useState(false);
 
   const eventTypes = [
-    { value: 'autre', label: 'Autre' },
+    { value: 'concours', label: 'Concours' },
+    { value: 'exposition', label: 'Exposition' },
+    { value: 'journee_adoption', label: "Journée d'adoption" },
+    { value: 'competitions', label: 'Compétition (legacy)' },
     { value: 'anniversaire', label: 'Anniversaire' },
-    { value: 'competitions', label: 'Compétition' },
     { value: 'salle de sport', label: 'Salle de sport' },
     { value: 'coiffure', label: 'Coiffure / toilettage' },
     { value: 'cadeau', label: 'Cadeau / promo' },
+    { value: 'autre', label: 'Autre' },
   ];
+
+  const ANIMAL_EVENT_TYPES = new Set([
+    'competitions', 'concours', 'exposition', 'journee_adoption',
+  ]);
 
   const animalTypes = [
     { value: 'dog', label: 'Chien' },
@@ -87,7 +99,7 @@ const EventsPage = () => {
         })
         .catch(() => setClients([]));
     }
-  }, [user, isAdmin, viewMode]);
+  }, [user, isAdmin, viewMode, eventCategoryFilter]);
 
 
   const fetchAppointments = async () => {
@@ -95,7 +107,9 @@ const EventsPage = () => {
     setError('');
     try {
       const scope = isAdmin ? 'all' : viewMode;
-      const res = await api.get('/events', { params: { scope } });
+      const params = { scope };
+      if (eventCategoryFilter === 'animal') params.animalOnly = 'true';
+      const res = await api.get('/events', { params });
 
 
       const data = Array.isArray(res.data)
@@ -159,6 +173,8 @@ const EventsPage = () => {
       ownerId: '',
       meetingLink: '',
       isPublic: true,
+      eventVenue: '',
+      eventCapacity: '',
     });
     setEditingAppointment(null);
     setSubmitError('');
@@ -188,6 +204,10 @@ const EventsPage = () => {
       };
       if (formData.meetingLink) {
         payload.meetingLink = formData.meetingLink.trim();
+      }
+      if (formData.eventVenue) payload.eventVenue = formData.eventVenue.trim();
+      if (formData.eventCapacity !== '') {
+        payload.eventCapacity = Number(formData.eventCapacity);
       }
 
       const appointmentId = editingAppointment?._id || editingAppointment?.id;
@@ -232,8 +252,26 @@ const EventsPage = () => {
       ownerId: appointment.ownerId || appointment.owner?.id || appointment.owner?._id || '',
       meetingLink: appointment.meetingLink || '',
       isPublic: appointment.isPublic !== false,
+      eventVenue: appointment.eventVenue || '',
+      eventCapacity: appointment.eventCapacity != null ? String(appointment.eventCapacity) : '',
     });
     setShowCreateForm(true);
+  };
+
+  const handleRegister = async (event) => {
+    const id = event._id || event.id;
+    if (!id) return;
+    setRegisteringId(id);
+    setSubmitError('');
+    try {
+      await registerForEvent(id, { petName: event.petName || '' });
+      setSubmitSuccess('Inscription enregistrée !');
+      fetchAppointments();
+    } catch (err) {
+      setSubmitError(err.response?.data?.error || 'Inscription impossible');
+    } finally {
+      setRegisteringId(null);
+    }
   };
 
   const handleDeleteAppointment = async (id) => {
@@ -330,9 +368,13 @@ const EventsPage = () => {
         </h1>
         <p style={{ fontSize: '16px', color: '#6b7280', margin: '0 0 20px' }}>
           {isAdmin
-            ? 'Créez et gérez anniversaires, salle de sport, compétitions, promos…'
-            : 'Découvrez les activités près de chez vous : anniversaires, sport, toilettage, promos'}
+            ? 'Concours, expositions, journées d\'adoption, anniversaires et promos…'
+            : 'Concours, expositions, journées d\'adoption et activités PetfoodTN'}
         </p>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <FilterChip active={eventCategoryFilter === 'all'} onClick={() => setEventCategoryFilter('all')} label="Tous" />
+          <FilterChip active={eventCategoryFilter === 'animal'} onClick={() => setEventCategoryFilter('animal')} label="Événements animaliers" />
+        </div>
 
         {isAdmin && (
           <button
@@ -578,6 +620,33 @@ const EventsPage = () => {
                 </div>
               )}
               {isAdmin && (
+                <>
+                  <div className="form-group">
+                    <label htmlFor="eventVenue">Lieu</label>
+                    <input
+                      type="text"
+                      id="eventVenue"
+                      name="eventVenue"
+                      value={formData.eventVenue}
+                      onChange={handleInputChange}
+                      placeholder="Parc, refuge, salle d'expo…"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="eventCapacity">Capacité (places)</label>
+                    <input
+                      type="number"
+                      id="eventCapacity"
+                      name="eventCapacity"
+                      min="0"
+                      value={formData.eventCapacity}
+                      onChange={handleInputChange}
+                      placeholder="Ex: 50"
+                    />
+                  </div>
+                </>
+              )}
+              {isAdmin && (
                 <div className="form-group">
                   <label htmlFor="meetingLink">Lien de réunion</label>
                   <input
@@ -736,7 +805,20 @@ const EventsPage = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontSize: '14px', color: '#4b5563' }}>
                 <Tag size={16} />
                 <span>{getEventTypeLabel(event.type)}</span>
+                {ANIMAL_EVENT_TYPES.has(event.type) && (
+                  <span style={{ fontSize: 10, fontWeight: 700, color: '#065f46', background: '#d1fae5', padding: '2px 6px', borderRadius: 6 }}>
+                    Animalier
+                  </span>
+                )}
               </div>
+              {event.eventVenue && (
+                <p style={{ fontSize: 13, color: '#4b5563', margin: '0 0 8px' }}>📍 {event.eventVenue}</p>
+              )}
+              {event.eventCapacity != null && (
+                <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 8px' }}>
+                  Places : {event.registrationsCount ?? 0} / {event.eventCapacity}
+                </p>
+              )}
               {isAdmin && event.owner && ( // Display owner info for admin
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontSize: '13px', color: '#059669', fontWeight: 600 }}>
                   <User size={16} />
@@ -809,7 +891,27 @@ const EventsPage = () => {
                 </div>
               ) : (
                 !isAdmin && (
-                  <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f3f4f6' }}>
+                  <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {event.isPublic && ANIMAL_EVENT_TYPES.has(event.type) && (
+                      <button
+                        type="button"
+                        onClick={() => handleRegister(event)}
+                        disabled={registeringId === (event._id || event.id)}
+                        style={{
+                          width: '100%',
+                          padding: '10px',
+                          background: 'linear-gradient(135deg, #059669, #10b981)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '10px',
+                          fontWeight: 700,
+                          fontSize: '13px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {registeringId === (event._id || event.id) ? 'Inscription…' : "S'inscrire"}
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         setSelectedEventId(event._id || event.id);
@@ -844,5 +946,23 @@ const EventsPage = () => {
     </div>
   );
 };
+
+const FilterChip = ({ active, onClick, label }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    style={{
+      padding: '8px 14px',
+      borderRadius: 10,
+      border: active ? '2px solid #059669' : '1px solid #d1d5db',
+      background: active ? 'rgba(5,150,105,0.12)' : 'white',
+      fontWeight: 700,
+      cursor: 'pointer',
+      fontSize: 13,
+    }}
+  >
+    {label}
+  </button>
+);
 
 export default EventsPage;

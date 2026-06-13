@@ -66,8 +66,8 @@ const AdminInvoices = () => {
   const openEdit = (invoice) => {
     setEditingInvoice(invoice);
     setFormData({
-      userId: invoice.userId?._id || invoice.userId || '',
-      orderId: invoice.orderId?._id || invoice.orderId || '',
+      userId: invoice.user?.id || invoice.user?._id || invoice.userId || '',
+      orderId: invoice.order?.id || invoice.order?._id || invoice.orderId || '',
       amount: invoice.amount || '',
       status: invoice.status || 'unpaid',
       paymentMethod: invoice.paymentMethod || 'cash',
@@ -120,7 +120,9 @@ const AdminInvoices = () => {
   };
 
   const filteredInvoices = invoices.filter((inv) =>
-    `${inv.userId?.name || ''} ${inv.userId?.email || ''} ${inv._id || ''}`.toLowerCase().includes(searchTerm.toLowerCase())
+    `${inv.user?.name || inv.userId?.name || ''} ${inv.user?.email || inv.userId?.email || ''} ${inv._id || ''}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -185,17 +187,17 @@ const AdminInvoices = () => {
           </thead>
           <tbody>
             {filteredInvoices.map((inv, idx) => (
-              <tr key={inv._id} style={styles.tr}>
-                <td style={styles.td}><strong>#{inv._id?.substring(0, 8).toUpperCase()}</strong></td>
-                <td style={styles.td}>{inv.userId?.name || 'Inconnu'}</td>
-                <td style={styles.td}>{inv.userId?.email || 'N/A'}</td>
+              <tr key={inv.id || inv._id} style={styles.tr}>
+                <td style={styles.td}><strong>#{String(inv.id || inv._id).substring(0, 8).toUpperCase()}</strong></td>
+                <td style={styles.td}>{inv.user?.name || inv.userId?.name || 'Inconnu'}</td>
+                <td style={styles.td}>{inv.user?.email || inv.userId?.email || 'N/A'}</td>
                 <td style={styles.td}>
                   <strong style={{ color: '#059669', fontSize: '16px' }}>{inv.amount} TND</strong>
                 </td>
                 <td style={styles.td}>
                   <select
                     value={inv.status}
-                    onChange={(e) => updateStatus(inv._id, e.target.value)}
+                    onChange={(e) => updateStatus(inv.id || inv._id, e.target.value)}
                     style={styles.select}
                   >
                     <option value="paid">✅ Payée</option>
@@ -215,7 +217,7 @@ const AdminInvoices = () => {
                       📄
                     </button>
                     <button style={styles.editBtn} onClick={() => openEdit(inv)} title="Modifier">✏️</button>
-                    <button style={styles.deleteBtn} onClick={() => handleDelete(inv._id)} title="Supprimer">🗑️</button>
+                    <button style={styles.deleteBtn} onClick={() => handleDelete(inv.id || inv._id)} title="Supprimer">🗑️</button>
                   </div>
                 </td>
               </tr>
@@ -241,7 +243,7 @@ const AdminInvoices = () => {
               >
                 <option value="">Choisir un client</option>
                 {users.map((u) => (
-                  <option key={u._id} value={u._id}>{u.name} ({u.email})</option>
+                  <option key={u.id || u._id} value={u.id || u._id}>{u.name} ({u.email})</option>
                 ))}
               </select>
               <select
@@ -252,7 +254,7 @@ const AdminInvoices = () => {
               >
                 <option value="">Choisir une commande</option>
                 {orders.map((o) => (
-                  <option key={o._id} value={o._id}>{o._id?.substring(0, 8)} — {o.total} DT</option>
+                  <option key={o.id || o._id} value={o.id || o._id}>{String(o.id || o._id).substring(0, 8)} — {o.total} DT</option>
                 ))}
               </select>
               <div style={styles.row2}>

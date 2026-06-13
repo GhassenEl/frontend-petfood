@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import api from '../utils/api';
-import RoleMlPanel from '../components/RoleMlPanel';
 
 const COLORS = ['#27ae60', '#f39c12', '#3498db', '#e74c3c', '#9b59b6'];
 
@@ -49,8 +48,6 @@ const LivreurStatsPage = () => {
       {stats?.region && (
         <p style={{ color: '#64748b', marginBottom: 16 }}>Zone {stats.region} · commission {stats.commissionPerDelivery} DT / livraison</p>
       )}
-
-      <RoleMlPanel role="livreur" compact />
 
       <div style={{
         display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',

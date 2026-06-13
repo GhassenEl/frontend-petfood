@@ -38,6 +38,16 @@ if (-not (Test-Path $configDir)) {
   Write-Host "[OK] Dossier vpn\config pret"
 }
 
+$wslOut = (wsl --status 2>&1 | ForEach-Object { ($_ | Out-String) -replace "`0", '' }) -join "`n"
+if ($wslOut -match 'virtualisation|VirtualMachinePlatform|ne peut pas d') {
+  Write-Host ''
+  Write-Host '[BLOQUE] WSL2 indisponible - Docker ne peut pas demarrer.' -ForegroundColor Red
+  Write-Host '  Executez EN ADMINISTRATEUR : scripts\enable-wsl-for-docker.ps1'
+  Write-Host '  Puis redemarrez, ouvrez Docker Desktop, relancez ce script.'
+  Write-Host '  BIOS : activer Intel VT-x / AMD-V si besoin (aka.ms/enablevirtualization)'
+  exit 1
+}
+
 $dockerCmd = Get-Command docker -ErrorAction SilentlyContinue
 if (-not $dockerCmd) {
   Write-Host ""

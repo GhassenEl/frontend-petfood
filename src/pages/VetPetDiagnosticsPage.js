@@ -28,6 +28,64 @@ const urgencyLabel = {
   urgent: { text: 'Urgence possible', color: '#ef4444' },
 };
 
+const riskLevelStyle = {
+  low: { bg: '#ecfdf5', border: '#6ee7b7', bar: '#22c55e' },
+  medium: { bg: '#fffbeb', border: '#fcd34d', bar: '#f59e0b' },
+  high: { bg: '#fff7ed', border: '#fdba74', bar: '#ea580c' },
+  critical: { bg: '#fef2f2', border: '#fca5a5', bar: '#dc2626' },
+};
+
+const RiskGauge = ({ early }) => {
+  if (!early) return null;
+  const st = riskLevelStyle[early.riskLevel] || riskLevelStyle.medium;
+  return (
+    <div
+      style={{
+        ...cardStyle,
+        background: st.bg,
+        border: `2px solid ${st.border}`,
+        marginBottom: 16,
+      }}
+    >
+      <h2 style={{ margin: '0 0 8px', fontSize: '1.15rem' }}>🩺 Détection précoce des maladies</h2>
+      <p style={{ margin: '0 0 12px', color: '#475569', fontSize: 14 }}>
+        Analyse des symptômes renseignés — niveau de risque calculé par IA ({early.model}).
+      </p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center' }}>
+        <div style={{ flex: '1 1 200px' }}>
+          <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Niveau de risque</p>
+          <p style={{ margin: '4px 0', fontSize: 26, fontWeight: 800, color: early.riskColor || st.bar }}>
+            {early.riskLabel}
+          </p>
+          <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{early.recommendedAction}</p>
+        </div>
+        <div style={{ flex: '1 1 180px' }}>
+          <p style={{ margin: '0 0 6px', fontSize: 12, color: '#64748b' }}>
+            Score risque : <strong>{early.riskScore}/100</strong>
+          </p>
+          <div style={{ height: 12, background: '#fff', borderRadius: 6, overflow: 'hidden' }}>
+            <div
+              style={{
+                width: `${early.riskScore}%`,
+                height: '100%',
+                background: st.bar,
+                borderRadius: 6,
+              }}
+            />
+          </div>
+          <p style={{ margin: '8px 0 0', fontSize: 12, color: '#64748b' }}>
+            Probabilité pathologie : {Math.round((early.diseaseProbability || 0) * 100)} % · Urgence ML :{' '}
+            {Math.round((early.urgencyScore || 0) * 100)} %
+          </p>
+        </div>
+      </div>
+      {early.summary && (
+        <p style={{ margin: '14px 0 0', fontSize: 14, lineHeight: 1.55, color: '#334155' }}>{early.summary}</p>
+      )}
+    </div>
+  );
+};
+
 const cardStyle = {
   background: 'white',
   borderRadius: '14px',
@@ -200,15 +258,15 @@ const VetPetDiagnosticsPage = () => {
       <header style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <div>
-            <h1 style={{ margin: '0 0 8px' }}>🔬 Agent IA — Anomalies & maladie</h1>
+            <h1 style={{ margin: '0 0 8px' }}>🔬 Détection précoce & diagnostic IA</h1>
             <p style={{ margin: 0, color: '#64748b', maxWidth: '720px' }}>
-              Détection urgent / non urgent, diagnostic assisté, ordonnance, médicaments et suivi santé
-              avec dossier médical et historique des consultations.
+              Analyse des symptômes, niveau de risque par IA, alertes précoces, diagnostic assisté,
+              ordonnance et suivi avec dossier médical.
             </p>
           </div>
-          <Link to="/vet/ml-agent" style={{ fontSize: 14, color: '#0369a1', fontWeight: 600 }}>
-            ← Hub agents IA
-          </Link>
+          <span style={{ fontSize: 14, color: '#0369a1', fontWeight: 600 }}>
+            ← Retour au diagnostic
+          </span>
         </div>
         {!agentLoading && agentPack?.summary && (
           <div style={{ ...cardStyle, marginTop: 16, background: '#f0f9ff', border: '1px solid #bae6fd' }}>
@@ -346,7 +404,7 @@ const VetPetDiagnosticsPage = () => {
           {error && <p style={{ color: '#b91c1c', fontSize: '0.9rem' }}>{error}</p>}
 
           <button type="submit" className="btn btn-primary" disabled={analyzing}>
-            {analyzing ? 'Analyse en cours…' : '🔍 Détecter anomalies (IA)'}
+            {analyzing ? 'Analyse en cours…' : '🔍 Analyser symptômes & risque (IA)'}
           </button>
         </form>
 
@@ -421,6 +479,58 @@ const VetPetDiagnosticsPage = () => {
 
       {result && (
         <div>
+          <RiskGauge early={result.earlyDetection} />
+
+          {result.earlyDetection?.symptomAnalysis?.length > 0 && (
+            <section style={cardStyle}>
+              <h3 style={{ marginTop: 0 }}>📋 Analyse des symptômes</h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+                <thead>
+                  <tr style={{ textAlign: 'left', borderBottom: '2px solid #f1f5f9' }}>
+                    <th style={{ padding: 8 }}>Symptôme / signal</th>
+                    <th style={{ padding: 8 }}>Gravité</th>
+                    <th style={{ padding: 8 }}>Source</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.earlyDetection.symptomAnalysis.map((s, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid #f8fafc' }}>
+                      <td style={{ padding: 8 }}>{s.symptom}</td>
+                      <td style={{ padding: 8 }}>{s.severity}</td>
+                      <td style={{ padding: 8, color: '#64748b' }}>{s.source === 'ml_signal' ? 'IA' : 'Saisie'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          )}
+
+          {(result.earlyDetection?.earlyWarnings?.length > 0) && (
+            <section style={cardStyle}>
+              <h3 style={{ marginTop: 0 }}>⚡ Alertes précoces</h3>
+              <ul style={{ margin: 0, paddingLeft: 18 }}>
+                {result.earlyDetection.earlyWarnings.map((w, i) => (
+                  <li key={i} style={{ marginBottom: 8, color: w.priority === 'critical' ? '#b91c1c' : '#334155' }}>
+                    {w.message}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {(result.earlyDetection?.screeningRecommendations?.length > 0) && (
+            <section style={{ ...cardStyle, marginBottom: 16 }}>
+              <h3 style={{ marginTop: 0 }}>🧪 Examens suggérés</h3>
+              <ul style={{ margin: 0, paddingLeft: 18 }}>
+                {result.earlyDetection.screeningRecommendations.map((t, i) => (
+                  <li key={i} style={{ marginBottom: 6 }}>
+                    <strong>{t.test}</strong> — {t.reason}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           {profile && (
             <div style={{ ...cardStyle, background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)' }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center' }}>
@@ -466,6 +576,20 @@ const VetPetDiagnosticsPage = () => {
                       }}
                     >
                       {urgency.text}
+                    </span>
+                  )}
+                  {result.mlModel && (
+                    <span
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        background: '#f1f5f9',
+                        color: '#475569',
+                        fontSize: '0.75rem',
+                      }}
+                      title={`Score urgence: ${result.mlModel.urgencyScore} · Maladie: ${Math.round((result.mlModel.diseaseProbability || 0) * 100)}%`}
+                    >
+                      ML {result.mlModel.modelId}
                     </span>
                   )}
                 </div>

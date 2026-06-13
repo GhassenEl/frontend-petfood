@@ -664,7 +664,26 @@ img {
   }
 }
 
-/* Logo empreintes CAT/DOG dynamique — page login */
+/* Logo PetfoodTN cliquable — page login */
+.login-brand-link {
+  display: inline-flex;
+  justify-content: center;
+  text-decoration: none;
+  margin: 0 auto 4px;
+  transition: transform 0.2s ease;
+}
+
+.login-brand-link:hover {
+  transform: scale(1.02);
+}
+
+.login-brand-link:focus-visible {
+  outline: 3px solid #10b981;
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+/* Ancien logo empreintes CAT/DOG — conservé pour référence */
 .login-paws-dynamic {
   position: relative;
   display: flex;

@@ -24,9 +24,9 @@ const ClientInvoicesPage = () => {
       if (orderIdFromUrl) {
         const match = list.find(
           (inv) =>
-            inv.orderId?._id === orderIdFromUrl ||
             inv.orderId === orderIdFromUrl ||
-            inv.orderId?.id === orderIdFromUrl
+            inv.order?.id === orderIdFromUrl ||
+            inv.order?._id === orderIdFromUrl
         );
         if (match && match.status !== 'paid') setSelectedInvoice(match);
       }
@@ -58,11 +58,11 @@ const ClientInvoicesPage = () => {
       ) : (
         <div style={{ display: 'grid', gap: '18px' }}>
           {invoices.map((invoice) => (
-            <article key={invoice._id} style={invoiceCardStyle}>
+            <article key={invoice.id || invoice._id} style={invoiceCardStyle}>
               <div style={invoiceHeadStyle}>
                 <div>
-                  <small style={{ color: '#6b7280' }}>Facture #{invoice._id.slice(-6)}</small>
-                  <h3 style={{ margin: '6px 0' }}>{invoice.orderId?.items?.length || 0} article(s)</h3>
+                  <small style={{ color: '#6b7280' }}>Facture #{String(invoice.id || invoice._id).slice(-6)}</small>
+                  <h3 style={{ margin: '6px 0' }}>{invoice.order?.items?.length || 0} article(s)</h3>
                 </div>
                 <span style={{ ...statusBadgeStyle, backgroundColor: invoice.status === 'paid' ? '#dcfce7' : '#fef3c7', color: invoice.status === 'paid' ? '#166534' : '#92400e' }}>
                   {invoice.status === 'paid' ? 'Payée' : invoice.status === 'pending' ? 'En attente' : 'Non payée'}
@@ -73,12 +73,12 @@ const ClientInvoicesPage = () => {
                 <div><strong>Montant</strong><p>{invoice.amount} DT</p></div>
                 <div><strong>Emission</strong><p>{new Date(invoice.issuedAt).toLocaleDateString('fr-FR')}</p></div>
                 <div><strong>Methode</strong><p>{getPaymentLabel(invoice.paymentMethod)}</p></div>
-                <div><strong>Commande</strong><p>{invoice.orderId?._id?.slice(-6) || 'N/A'}</p></div>
+                <div><strong>Commande</strong><p>{invoice.order?.id?.slice(-6) || invoice.order?._id?.slice(-6) || 'N/A'}</p></div>
               </div>
 
               <div style={{ marginTop: '16px' }}>
-                {(invoice.orderId?.items || []).map((item, index) => (
-                  <div key={`${invoice._id}-${index}`} style={lineItemStyle}>
+                {(invoice.order?.items || []).map((item, index) => (
+                  <div key={`${invoice.id || invoice._id}-${index}`} style={lineItemStyle}>
                     <span>{item.productId?.name || 'Produit'} x {item.quantity}</span>
                     <strong>{(item.price * item.quantity).toFixed(2)} DT</strong>
                   </div>

@@ -8,13 +8,12 @@ import {
   deleteComplaint,
 } from '../services/complaintService';
 import { Link } from 'react-router-dom';
-import { validateIncidentProposal } from '../services/incidentMlService';
 import './ClientComplaintsPage.css';
 
 const STATUS_LABELS = {
   pending: 'En attente',
   in_progress: 'En cours',
-  ai_proposed: 'IA — à valider',
+  ai_proposed: 'À valider',
   resolved: 'Résolue',
   rejected: 'Refusée',
 };
@@ -66,7 +65,7 @@ const AdminComplaints = () => {
   const stats = useMemo(() => ({
     total: complaints.length,
     pending: complaints.filter((c) => (c.status || 'pending') === 'pending').length,
-    aiProposed: complaints.filter((c) => c.status === 'ai_proposed').length,
+    toValidate: complaints.filter((c) => c.status === 'ai_proposed').length,
     inProgress: complaints.filter((c) => c.status === 'in_progress').length,
     resolved: complaints.filter((c) => c.status === 'resolved').length,
   }), [complaints]);
@@ -155,19 +154,6 @@ const AdminComplaints = () => {
     }
   };
 
-  const handleQuickValidate = async (c, approved) => {
-    try {
-      await validateIncidentProposal(complaintId(c), {
-        approved,
-        response: c.aiProposedResponse || c.response,
-      });
-      await load();
-      showToast(approved ? 'Proposition IA validée.' : 'Proposition IA rejetée.');
-    } catch {
-      showToast('Erreur validation IA.', 'error');
-    }
-  };
-
   const handleDelete = async (id) => {
     if (!window.confirm('Supprimer cette réclamation ?')) return;
     try {
@@ -191,9 +177,6 @@ const AdminComplaints = () => {
               Traitez les demandes clients, répondez sous 48 h et suivez l’historique des litiges
               commandes et livraisons.
             </p>
-            <Link to="/admin/incidents-ml" style={{ fontSize: 13, fontWeight: 700, color: '#fecaca' }}>
-              Agent IA incidents → validation
-            </Link>
           </div>
           <button
             type="button"
@@ -217,8 +200,8 @@ const AdminComplaints = () => {
           <span>En attente</span>
         </div>
         <div className="cc-stat">
-          <strong style={{ color: '#dc2626' }}>{stats.aiProposed}</strong>
-          <span>IA à valider</span>
+          <strong style={{ color: '#dc2626' }}>{stats.toValidate}</strong>
+          <span>À valider</span>
         </div>
         <div className="cc-stat">
           <strong style={{ color: '#2563eb' }}>{stats.inProgress}</strong>
@@ -305,7 +288,7 @@ const AdminComplaints = () => {
             { id: 'all', label: 'Toutes' },
             { id: 'pending', label: 'En attente' },
             { id: 'in_progress', label: 'En cours' },
-            { id: 'ai_proposed', label: 'IA à valider' },
+            { id: 'ai_proposed', label: 'À valider' },
             { id: 'resolved', label: 'Résolues' },
             { id: 'rejected', label: 'Refusées' },
           ].map((f) => (
@@ -357,33 +340,14 @@ const AdminComplaints = () => {
                   </span>
                 </div>
                 <p className="cc-message">{c.message}</p>
-                {c.aiCategory && (
-                  <p style={{ fontSize: 12, color: '#b45309', margin: '0 0 8px' }}>
-                    IA : {c.aiCategory} · priorité {c.aiPriority}
-                    {c.aiConfidence != null && ` · ${Math.round(c.aiConfidence * 100)} %`}
-                  </p>
-                )}
                 {c.response && (
                   <div className="cc-response">
-                    <strong>{status === 'ai_proposed' ? 'Réponse proposée par l\'IA' : 'Votre réponse'}</strong>
+                    <strong>Réponse</strong>
                     <p>{c.response}</p>
                   </div>
                 )}
                 <div className="cc-actions">
-                  {status === 'ai_proposed' && (
-                    <>
-                      <button type="button" className="cc-submit" style={{ width: 'auto', padding: '8px 12px', background: '#059669' }} onClick={() => handleQuickValidate(c, true)}>
-                        Valider IA
-                      </button>
-                      <button type="button" className="cc-btn-danger" style={{ width: 'auto' }} onClick={() => handleQuickValidate(c, false)}>
-                        Rejeter IA
-                      </button>
-                      <Link to="/admin/incidents-ml" className="cc-btn-ghost" style={{ textDecoration: 'none' }}>
-                        Hub IA
-                      </Link>
-                    </>
-                  )}
-                  {status !== 'resolved' && status !== 'rejected' && status !== 'ai_proposed' && (
+                  {status !== 'resolved' && status !== 'rejected' && (
                     <>
                       <button
                         type="button"

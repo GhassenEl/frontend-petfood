@@ -29,6 +29,9 @@ export const fetchVetClinicalMlAgentPack = () => api.get('/ml/vet/clinical/agent
 export const postVetClinicalAnalyze = (body) =>
   api.post('/ml/vet/clinical/analyze', body).then((r) => r.data);
 
+export const postVetEarlyDetection = (body) =>
+  api.post('/ml/vet/early-detection/analyze', body).then((r) => r.data);
+
 export const fetchVetClinicalPatientContext = (params) =>
   api.get('/ml/vet/clinical/patient-context', { params }).then((r) => r.data);
 

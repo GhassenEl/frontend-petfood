@@ -91,7 +91,7 @@ const InvoicePayForm = ({ invoice, onSuccess, onCancel }) => {
         }
       }
 
-      await api.post(`/invoices/${invoice._id}/pay`, {
+      await api.post(`/invoices/${invoice.id || invoice._id}/pay`, {
         paymentMethod,
         paymentNote: paymentNote || undefined,
       });

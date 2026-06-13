@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Brain, TrendingUp, AlertTriangle, Package, Route } from 'lucide-react';
-import RoleMlPanel from '../components/RoleMlPanel';
 import useLivreurMlRisk from '../hooks/useLivreurMlRisk';
 
 const LivreurMlPage = () => {
@@ -22,20 +21,18 @@ const LivreurMlPage = () => {
       >
         <h1 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 800, color: '#5b21b6' }}>
           <Brain size={28} style={{ verticalAlign: 'middle', marginRight: 8 }} />
-          IA Livraison
+          Prévisions de tournée
         </h1>
         <p style={{ margin: 0, color: '#6b7280' }}>
-          Modèles XGBoost : risque d&apos;annulation, priorité des courses et prévision de charge.
+          Vue synthétique des commandes en attente, des prévisions de charge et des alertes de livraison.
         </p>
       </motion.div>
-
-      <RoleMlPanel role="livreur" />
 
       {data && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
           <StatCard
             icon="📦"
-            label="Livraisons prévues (IA)"
+            label="Livraisons prévues"
             value={data.todayDeliveriesForecast ?? '—'}
           />
           <StatCard
@@ -46,8 +43,8 @@ const LivreurMlPage = () => {
           <StatCard icon="⏰" label="Heures chargées" value={data.busyHoursHint || '—'} small />
           <StatCard
             icon="🧠"
-            label="Moteur"
-            value={pythonPowered ? 'XGBoost' : 'Règles'}
+            label="Source"
+            value={data.modelName || 'Prévisions internes'}
             small
           />
         </div>
@@ -56,7 +53,7 @@ const LivreurMlPage = () => {
       <div style={{ background: 'white', borderRadius: 16, padding: 20, border: '1px solid #e5e7eb' }}>
         <h3 style={{ margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
           <Route size={20} color="#7c3aed" />
-          Priorité file d&apos;attente (IA)
+          Priorité file d&apos;attente
         </h3>
         {loading ? (
           <p style={{ color: '#94a3b8' }}>Calcul des scores…</p>
@@ -68,7 +65,7 @@ const LivreurMlPage = () => {
               <tr style={{ textAlign: 'left', color: '#64748b' }}>
                 <th style={{ padding: '8px 4px' }}>#</th>
                 <th style={{ padding: '8px 4px' }}>Commande</th>
-                <th style={{ padding: '8px 4px' }}>Score IA</th>
+                <th style={{ padding: '8px 4px' }}>Priorité</th>
                 <th style={{ padding: '8px 4px' }}>Risque</th>
                 <th style={{ padding: '8px 4px' }}>Conseil</th>
               </tr>

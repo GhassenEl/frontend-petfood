@@ -9,10 +9,6 @@ import { formatDT } from '../utils/formatCurrency';
 
 const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899', '#84cc16'];
 
-const SAMPLE_CSV = `maladie,animal,medicament,dosage,frequence,duree,quantite,unite
-Gastro-entérite,chien,Oméprazole,5 mg,2x/jour,7 jours,14,comprimés
-Allergie cutanée,chat,Cétirizine,10 mg,1x/jour,14 jours,14,comprimés`;
-
 const PERIOD_OPTIONS = [
   { value: '', label: 'Toute la période' },
   { value: '30', label: '30 derniers jours' },
@@ -35,12 +31,6 @@ const VetBiDashboard = () => {
   const [periodDays, setPeriodDays] = useState('90');
   const [animalFilter, setAnimalFilter] = useState('all');
   const [tableSearch, setTableSearch] = useState('');
-  const [showImports, setShowImports] = useState(false);
-  const [importCsv, setImportCsv] = useState(SAMPLE_CSV);
-  const [pharmacyCsv, setPharmacyCsv] = useState('');
-  const [importMsg, setImportMsg] = useState('');
-  const [pharmacyMsg, setPharmacyMsg] = useState('');
-  const [importing, setImporting] = useState(false);
   const [lastRefresh, setLastRefresh] = useState(null);
 
   const fetchBi = useCallback(async () => {
@@ -93,47 +83,6 @@ const VetBiDashboard = () => {
     );
   }, [data, tableSearch]);
 
-  const handleImport = async () => {
-    setImporting(true);
-    setImportMsg('');
-    try {
-      const { data: res } = await api.post('/vet/bi/import', { csv: importCsv });
-      setImportMsg(res.message || 'Import réussi');
-      await fetchBi();
-    } catch (err) {
-      setImportMsg(err.response?.data?.error || 'Erreur import');
-    } finally {
-      setImporting(false);
-    }
-  };
-
-  const handlePharmacyImport = async () => {
-    setImporting(true);
-    setPharmacyMsg('');
-    try {
-      const { data: res } = await api.post('/vet/bi/pharmacy-import', { csv: pharmacyCsv });
-      setPharmacyMsg(res.message || 'Réapprovisionnement OK');
-      setPharmacyCsv('');
-      await fetchBi();
-    } catch (err) {
-      setPharmacyMsg(err.response?.data?.error || 'Erreur import pharmacie');
-    } finally {
-      setImporting(false);
-    }
-  };
-
-  const fillMissingMeds = () => {
-    if (!data?.missingMedications?.length) return;
-    const lines = ['medicament,quantite,unite'];
-    data.missingMedications.forEach((m) => {
-      const qty = Math.max(m.minStock - m.stockQty, m.minStock);
-      lines.push(`${m.name},${qty},${m.unit || 'unité'}`);
-    });
-    setPharmacyCsv(lines.join('\n'));
-    setPharmacyMsg('CSV pré-rempli — vérifiez puis importez.');
-    setShowImports(true);
-  };
-
   const exportCsv = () => {
     const rows = data?.diseaseTreatments ?? [];
     if (!rows.length) return;
@@ -185,7 +134,7 @@ const VetBiDashboard = () => {
         <div>
           <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800 }}>Dashboard BI — Santé animale</h1>
           <p style={{ margin: '8px 0 0', opacity: 0.9, fontSize: 14 }}>
-            Analyses cliniques, pharmacie partenaire et référentiel maladie → traitement
+            Analyses cliniques, pharmacie et référentiel maladie → traitement
           </p>
           {lastRefresh && (
             <p style={{ margin: '6px 0 0', fontSize: 12, opacity: 0.75 }}>
@@ -244,11 +193,10 @@ const VetBiDashboard = () => {
         ))}
       </div>
 
-      {/* Insights IA / règles */}
       {(data?.insights?.length ?? 0) > 0 && (
         <div style={{ ...cardStyle, marginBottom: 24, background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)' }}>
           <h2 style={{ margin: '0 0 12px', fontSize: '1rem', fontWeight: 800, color: '#065f46' }}>
-            💡 Synthèse automatique
+            💡 Synthèse
           </h2>
           <ul style={{ margin: 0, paddingLeft: 20, color: '#334155', lineHeight: 1.7, fontSize: 14 }}>
             {data.insights.map((line, i) => (
@@ -381,32 +329,27 @@ const VetBiDashboard = () => {
           {(data?.missingMedications?.length ?? 0) === 0 ? (
             <p style={{ color: '#10b981', fontWeight: 600, margin: 0 }}>✅ Stock et référentiel OK</p>
           ) : (
-            <>
-              <div style={{ display: 'grid', gap: 8, marginBottom: 12 }}>
-                {data.missingMedications.slice(0, 8).map((m, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      padding: '10px 12px',
-                      borderRadius: 10,
-                      background: m.reason === 'absent_catalogue' ? '#fef2f2' : '#fffbeb',
-                      border: `1px solid ${m.reason === 'absent_catalogue' ? '#fecaca' : '#fde68a'}`,
-                      fontSize: 13,
-                    }}
-                  >
-                    <strong>{m.name}</strong>
-                    <span style={{ color: '#64748b', marginLeft: 8 }}>
-                      {m.reason === 'absent_catalogue'
-                        ? 'Absent du catalogue'
-                        : `Stock ${m.stockQty} / min ${m.minStock}`}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <button type="button" onClick={fillMissingMeds} style={{ ...primaryBtn, background: '#ef4444' }}>
-                Pré-remplir CSV réappro
-              </button>
-            </>
+            <div style={{ display: 'grid', gap: 8 }}>
+              {data.missingMedications.slice(0, 8).map((m, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    background: m.reason === 'absent_catalogue' ? '#fef2f2' : '#fffbeb',
+                    border: `1px solid ${m.reason === 'absent_catalogue' ? '#fecaca' : '#fde68a'}`,
+                    fontSize: 13,
+                  }}
+                >
+                  <strong>{m.name}</strong>
+                  <span style={{ color: '#64748b', marginLeft: 8 }}>
+                    {m.reason === 'absent_catalogue'
+                      ? 'Absent du catalogue'
+                      : `Stock ${m.stockQty} / min ${m.minStock}`}
+                  </span>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
@@ -521,64 +464,6 @@ const VetBiDashboard = () => {
         </div>
       </div>
 
-      {/* Imports (repliable) */}
-      <button
-        type="button"
-        onClick={() => setShowImports(!showImports)}
-        style={{
-          width: '100%',
-          padding: '14px 20px',
-          borderRadius: 14,
-          border: '1px solid #e2e8f0',
-          background: 'white',
-          fontWeight: 700,
-          cursor: 'pointer',
-          marginBottom: showImports ? 16 : 0,
-          textAlign: 'left',
-        }}
-      >
-        {showImports ? '▼' : '▶'} Import données & pharmacie partenaire
-      </button>
-
-      {showImports && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
-          <div style={cardStyle}>
-            <h3 style={{ margin: '0 0 10px', fontSize: '1rem' }}>📥 Référentiel maladie → traitement</h3>
-            <p style={{ fontSize: 12, color: '#64748b', margin: '0 0 10px' }}>
-              CSV : maladie, animal, medicament, dosage, frequence, duree, quantite, unite
-            </p>
-            <textarea
-              value={importCsv}
-              onChange={(e) => setImportCsv(e.target.value)}
-              rows={5}
-              style={textareaStyle}
-            />
-            <button type="button" onClick={handleImport} disabled={importing} style={primaryBtn}>
-              {importing ? 'Import…' : 'Importer'}
-            </button>
-            {importMsg && <MsgLine text={importMsg} />}
-          </div>
-          <div style={cardStyle}>
-            <h3 style={{ margin: '0 0 10px', fontSize: '1rem' }}>🏥 Stock pharmacie</h3>
-            <textarea
-              value={pharmacyCsv}
-              onChange={(e) => setPharmacyCsv(e.target.value)}
-              placeholder="medicament,quantite,unite,prix"
-              rows={5}
-              style={textareaStyle}
-            />
-            <button
-              type="button"
-              onClick={handlePharmacyImport}
-              disabled={importing || !pharmacyCsv.trim()}
-              style={primaryBtn}
-            >
-              {importing ? 'Import…' : 'Réapprovisionner'}
-            </button>
-            {pharmacyMsg && <MsgLine text={pharmacyMsg} />}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
