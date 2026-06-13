@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getOrders, deleteOrder } from '../services/orderService';
+import { getOrders, cancelOrder } from '../services/orderService';
 import { getPaymentLabel } from '../constants/paymentMethods';
+import { DEMO_ORDERS, withDemoFallback } from '../utils/clientDemoData';
 import OrderTrackingPanel from '../components/OrderTrackingPanel';
 
 const orderIdOf = (order) => order?.id || order?._id;
@@ -11,7 +12,30 @@ const ClientOrdersPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [cancellingId, setCancellingId] = useState(null);
+  const [toast, setToast] = useState('');
   const navigate = useNavigate();
+
+  const canClientCancel = (status) => ['pending', 'paid'].includes(status);
+
+  const handleCancelOrder = async (order) => {
+    const id = orderIdOf(order);
+    if (!id || !canClientCancel(order.status)) return;
+    if (!window.confirm('Annuler cette commande ? Cette action est définitive.')) return;
+
+    setCancellingId(id);
+    setToast('');
+    try {
+      await cancelOrder(id);
+      await fetchOrders();
+      setSelectedOrder(null);
+      setToast('Commande annulée avec succès.');
+    } catch (err) {
+      setToast(err.response?.data?.error || 'Erreur lors de l\'annulation.');
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   useEffect(() => {
     fetchOrders();
@@ -19,9 +43,10 @@ const ClientOrdersPage = () => {
 
   const fetchOrders = async () => {
     try {
-      setOrders(await getOrders());
+      const list = await getOrders();
+      setOrders(withDemoFallback(Array.isArray(list) ? list : [], DEMO_ORDERS));
     } catch (err) {
-      setError('Erreur chargement commandes');
+      setOrders(DEMO_ORDERS);
     } finally {
       setLoading(false);
     }
@@ -59,6 +84,17 @@ const ClientOrdersPage = () => {
         )}
       </div>
 
+      {toast && (
+        <div style={{
+          marginBottom: 16, padding: '12px 16px', borderRadius: 12,
+          background: toast.includes('succès') ? '#dcfce7' : '#fee2e2',
+          color: toast.includes('succès') ? '#065f46' : '#991b1b',
+          fontWeight: 600, fontSize: 14,
+        }}>
+          {toast}
+        </div>
+      )}
+
       {orders.length === 0 ? (
         <div style={emptyStyle}>Aucune commande pour le moment. Ajoutez d abord des produits au panier.</div>
       ) : (
@@ -87,20 +123,17 @@ const ClientOrdersPage = () => {
                 <strong style={{ fontSize: '22px' }}>{order.total} DT</strong>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   <button onClick={() => setSelectedOrder(order)} style={secondaryButtonStyle}>Voir details</button>
-                  <button onClick={() => navigate(`/client-invoices?orderId=${orderIdOf(order)}`)} style={primaryButtonStyle}>Payer facture</button>
-                  {order.status === 'pending' && (
-                    <button onClick={async () => {
-                      if (window.confirm('Annuler cette commande ?')) {
-                        try {
-                          await deleteOrder(orderIdOf(order));
-                          fetchOrders();
-                          window.alert('Commande annulee');
-                        } catch (error) {
-                          window.alert('Erreur annulation');
-                        }
-                      }
-                    }} style={{ padding: '12px 16px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>
-                      Annuler
+                  {order.status !== 'cancelled' && (
+                    <button onClick={() => navigate(`/client-invoices?orderId=${orderIdOf(order)}`)} style={primaryButtonStyle}>Payer facture</button>
+                  )}
+                  {canClientCancel(order.status) && (
+                    <button
+                      type="button"
+                      onClick={() => handleCancelOrder(order)}
+                      disabled={cancellingId === orderIdOf(order)}
+                      style={cancelButtonStyle}
+                    >
+                      {cancellingId === orderIdOf(order) ? 'Annulation…' : 'Annuler'}
                     </button>
                   )}
                   {order.status === 'delivered' && (
@@ -142,7 +175,19 @@ const ClientOrdersPage = () => {
           <div style={modalContentStyle}>
             <div style={modalHeaderStyle}>
               <h3 style={{ margin: 0 }}>Commande #{String(orderIdOf(selectedOrder)).slice(-6)}</h3>
-              <button onClick={() => setSelectedOrder(null)} style={secondaryButtonStyle}>Fermer</button>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {canClientCancel(selectedOrder.status) && (
+                  <button
+                    type="button"
+                    onClick={() => handleCancelOrder(selectedOrder)}
+                    disabled={cancellingId === orderIdOf(selectedOrder)}
+                    style={cancelButtonStyle}
+                  >
+                    {cancellingId === orderIdOf(selectedOrder) ? 'Annulation…' : 'Annuler'}
+                  </button>
+                )}
+                <button onClick={() => setSelectedOrder(null)} style={secondaryButtonStyle}>Fermer</button>
+              </div>
             </div>
             <div style={infoBoxStyle}>
               <div><strong>Statut:</strong> {getStatusLabel(selectedOrder.status)}</div>
@@ -178,6 +223,7 @@ const itemStyle = { display: 'flex', justifyContent: 'space-between', gap: '12px
 const footerStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginTop: '18px', flexWrap: 'wrap' };
 const primaryButtonStyle = { padding: '12px 16px', background: '#16a34a', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' };
 const secondaryButtonStyle = { padding: '12px 16px', background: '#e5e7eb', color: '#111827', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' };
+const cancelButtonStyle = { padding: '12px 16px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' };
 const modalOverlayStyle = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', zIndex: 1000 };
 const modalContentStyle = { background: 'white', borderRadius: '18px', padding: '24px', width: '560px', maxWidth: '100%', maxHeight: '85vh', overflow: 'auto' };
 const modalHeaderStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '18px' };

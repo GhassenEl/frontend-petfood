@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
+import {
+  DEMO_VET_PHARMACY_ALERTS,
+  DEMO_VET_PHARMACY_MEDS,
+  withDemoFallback,
+} from '../utils/vetDemoData';
 
 const VetPharmacyPage = () => {
   const [medications, setMedications] = useState([]);
@@ -13,10 +18,13 @@ const VetPharmacyPage = () => {
       api.get('/vet/pharmacy/stock-alerts'),
     ])
       .then(([meds, al]) => {
-        setMedications(meds.data || []);
-        setAlerts(al.data || []);
+        setMedications(withDemoFallback(meds.data, DEMO_VET_PHARMACY_MEDS));
+        setAlerts(withDemoFallback(al.data, DEMO_VET_PHARMACY_ALERTS));
       })
-      .catch(console.error)
+      .catch(() => {
+        setMedications(DEMO_VET_PHARMACY_MEDS);
+        setAlerts(DEMO_VET_PHARMACY_ALERTS);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -51,7 +59,7 @@ const VetPharmacyPage = () => {
               <th style={{ padding: 12 }}>Stock</th>
               <th style={{ padding: 12 }}>Min</th>
               <th style={{ padding: 12 }}>Unité</th>
-              <th style={{ padding: 12 }}>Pharmacie</th>
+              <th style={{ padding: 12 }}>Emplacement</th>
               <th style={{ padding: 12 }}>Protocoles BI</th>
             </tr>
           </thead>
@@ -62,7 +70,7 @@ const VetPharmacyPage = () => {
                 <td style={{ padding: 12, color: m.lowStock ? '#b45309' : '#059669', fontWeight: 700 }}>{m.stockQty}</td>
                 <td style={{ padding: 12 }}>{m.minStock}</td>
                 <td style={{ padding: 12 }}>{m.unit}</td>
-                <td style={{ padding: 12 }}>{m.pharmacy || '—'}</td>
+                <td style={{ padding: 12 }}>{m.location || m.pharmacy || 'Stock clinique'}</td>
                 <td style={{ padding: 12, fontSize: 12, color: '#64748b' }}>
                   {(m.treatments || []).map((t) => t.disease).filter(Boolean).join(', ') || '—'}
                 </td>

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 import {
   postVetClinicalAnalyze,
@@ -7,7 +7,11 @@ import {
   postVetClinicalApplyDossier,
   postVetClinicalApplyPrescription,
 } from '../services/mlService';
-import useVetClinicalMlAgent from '../hooks/useVetClinicalMlAgent';
+import {
+  DEMO_CLINICAL_ANALYSIS,
+  DEMO_PATIENT_CONTEXT,
+  mergeVetClients,
+} from '../utils/vetDemoData';
 
 const animalEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', other: '🐾' };
 
@@ -49,7 +53,7 @@ const RiskGauge = ({ early }) => {
     >
       <h2 style={{ margin: '0 0 8px', fontSize: '1.15rem' }}>🩺 Détection précoce des maladies</h2>
       <p style={{ margin: '0 0 12px', color: '#475569', fontSize: 14 }}>
-        Analyse des symptômes renseignés — niveau de risque calculé par IA ({early.model}).
+        Analyse des symptômes renseignés — niveau de risque selon le référentiel clinique ({early.model}).
       </p>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center' }}>
         <div style={{ flex: '1 1 200px' }}>
@@ -74,7 +78,7 @@ const RiskGauge = ({ early }) => {
             />
           </div>
           <p style={{ margin: '8px 0 0', fontSize: 12, color: '#64748b' }}>
-            Probabilité pathologie : {Math.round((early.diseaseProbability || 0) * 100)} % · Urgence ML :{' '}
+            Probabilité pathologie : {Math.round((early.diseaseProbability || 0) * 100)} % · Score urgence :{' '}
             {Math.round((early.urgencyScore || 0) * 100)} %
           </p>
         </div>
@@ -104,7 +108,7 @@ const timelineIcon = {
 
 const VetPetDiagnosticsPage = () => {
   const navigate = useNavigate();
-  const { pack: agentPack, loading: agentLoading } = useVetClinicalMlAgent();
+  const [searchParams] = useSearchParams();
   const [clients, setClients] = useState([]);
   const [loadingClients, setLoadingClients] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
@@ -113,9 +117,9 @@ const VetPetDiagnosticsPage = () => {
   const [patientCtx, setPatientCtx] = useState(null);
   const [ctxLoading, setCtxLoading] = useState(false);
 
-  const [ownerId, setOwnerId] = useState('');
+  const [ownerId, setOwnerId] = useState(() => searchParams.get('ownerId') || '');
   const [petId, setPetId] = useState('');
-  const [petName, setPetName] = useState('');
+  const [petName, setPetName] = useState(() => searchParams.get('petName') || '');
   const [animalType, setAnimalType] = useState('dog');
   const [symptoms, setSymptoms] = useState('');
   const [vitals, setVitals] = useState({ temperature: '', weight: '', heartRate: '' });
@@ -123,10 +127,29 @@ const VetPetDiagnosticsPage = () => {
   useEffect(() => {
     api
       .get('/vet/clients')
-      .then(({ data }) => setClients(data || []))
-      .catch(() => setError('Impossible de charger les clients'))
+      .then(({ data }) => setClients(mergeVetClients(data)))
+      .catch(() => setClients(mergeVetClients([])))
       .finally(() => setLoadingClients(false));
   }, []);
+
+  useEffect(() => {
+    const oid = searchParams.get('ownerId');
+    const pname = searchParams.get('petName');
+    if (oid && clients.length) {
+      setOwnerId(oid);
+      if (pname) {
+        setPetName(pname);
+        const client = clients.find((c) => (c.id || c._id) === oid);
+        const pet = client?.pets?.find((p) => p.name === pname);
+        if (pet) {
+          setPetId(pet.id || '');
+          setAnimalType(pet.type || 'dog');
+        }
+        loadPatientContext(oid, pname, pet?.id);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clients, searchParams]);
 
   const selectedClient = useMemo(
     () => clients.find((c) => (c.id || c._id) === ownerId),
@@ -149,7 +172,8 @@ const VetPetDiagnosticsPage = () => {
       });
       setPatientCtx(ctx);
     } catch {
-      setPatientCtx(null);
+      if (oid && pname) setPatientCtx(DEMO_PATIENT_CONTEXT);
+      else setPatientCtx(null);
     } finally {
       setCtxLoading(false);
     }
@@ -211,8 +235,11 @@ const VetPetDiagnosticsPage = () => {
       if (ownerId && petName) {
         loadPatientContext(ownerId, petName, petId);
       }
-    } catch (err) {
-      setError(err.response?.data?.error || 'Analyse indisponible. Réessayez.');
+    } catch {
+      setResult(DEMO_CLINICAL_ANALYSIS);
+      if (ownerId && petName && !patientCtx) {
+        setPatientCtx(DEMO_PATIENT_CONTEXT);
+      }
     } finally {
       setAnalyzing(false);
     }
@@ -223,9 +250,14 @@ const VetPetDiagnosticsPage = () => {
       window.alert('Relancez une analyse avant de créer l\'ordonnance.');
       return;
     }
+    if (result.analysisId === 'demo-analysis-1') {
+      window.alert('Ordonnance simulée (mode démonstration).');
+      navigate('/vet/prescriptions');
+      return;
+    }
     try {
       await postVetClinicalApplyPrescription(result.analysisId);
-      window.alert('Ordonnance créée à partir de l\'analyse IA.');
+      window.alert('Ordonnance créée à partir de l\'analyse clinique.');
       navigate('/vet/prescriptions');
     } catch (err) {
       window.alert(err.response?.data?.error || 'Erreur création ordonnance.');
@@ -234,6 +266,11 @@ const VetPetDiagnosticsPage = () => {
 
   const applyDossier = async () => {
     if (!result?.analysisId) return;
+    if (result.analysisId === 'demo-analysis-1') {
+      window.alert('Consultation simulée (mode démonstration).');
+      navigate('/vet/medical-dossiers');
+      return;
+    }
     try {
       const { dossier } = await postVetClinicalApplyDossier(result.analysisId);
       window.alert('Consultation enregistrée dans le dossier médical.');
@@ -258,26 +295,16 @@ const VetPetDiagnosticsPage = () => {
       <header style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <div>
-            <h1 style={{ margin: '0 0 8px' }}>🔬 Détection précoce & diagnostic IA</h1>
+            <h1 style={{ margin: '0 0 8px' }}>🔬 Détection précoce des maladies</h1>
             <p style={{ margin: 0, color: '#64748b', maxWidth: '720px' }}>
-              Analyse des symptômes, niveau de risque par IA, alertes précoces, diagnostic assisté,
+              Analyse des symptômes, niveau de risque, alertes précoces, diagnostic assisté,
               ordonnance et suivi avec dossier médical.
             </p>
           </div>
-          <span style={{ fontSize: 14, color: '#0369a1', fontWeight: 600 }}>
-            ← Retour au diagnostic
-          </span>
+          <Link to="/vet/dashboard" style={{ fontSize: 14, color: '#0369a1', fontWeight: 600, textDecoration: 'none' }}>
+            ← Tableau de bord
+          </Link>
         </div>
-        {!agentLoading && agentPack?.summary && (
-          <div style={{ ...cardStyle, marginTop: 16, background: '#f0f9ff', border: '1px solid #bae6fd' }}>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>{agentPack.summary}</p>
-            {agentPack.stats && (
-              <p style={{ margin: '8px 0 0', fontSize: 12, color: '#64748b' }}>
-                {agentPack.stats.urgentLast7Days} urgent(s) · {agentPack.stats.diseaseSuspectedLast30Days} suspicion(s) maladie (30 j)
-              </p>
-            )}
-          </div>
-        )}
       </header>
 
       <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
@@ -404,7 +431,7 @@ const VetPetDiagnosticsPage = () => {
           {error && <p style={{ color: '#b91c1c', fontSize: '0.9rem' }}>{error}</p>}
 
           <button type="submit" className="btn btn-primary" disabled={analyzing}>
-            {analyzing ? 'Analyse en cours…' : '🔍 Analyser symptômes & risque (IA)'}
+            {analyzing ? 'Analyse en cours…' : '🔍 Analyser symptômes & risque'}
           </button>
         </form>
 
@@ -424,7 +451,7 @@ const VetPetDiagnosticsPage = () => {
           )}
           {pastAnalyses.length > 0 && (
             <>
-              <p style={{ fontSize: 12, color: '#64748b', margin: '12px 0 6px' }}>Analyses IA précédentes</p>
+              <p style={{ fontSize: 12, color: '#64748b', margin: '12px 0 6px' }}>Analyses précédentes</p>
               <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: 13 }}>
                 {pastAnalyses.map((a) => (
                   <li
@@ -497,7 +524,7 @@ const VetPetDiagnosticsPage = () => {
                     <tr key={i} style={{ borderBottom: '1px solid #f8fafc' }}>
                       <td style={{ padding: 8 }}>{s.symptom}</td>
                       <td style={{ padding: 8 }}>{s.severity}</td>
-                      <td style={{ padding: 8, color: '#64748b' }}>{s.source === 'ml_signal' ? 'IA' : 'Saisie'}</td>
+                      <td style={{ padding: 8, color: '#64748b' }}>{s.source === 'ml_signal' ? 'Analyse' : 'Saisie'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -576,20 +603,6 @@ const VetPetDiagnosticsPage = () => {
                       }}
                     >
                       {urgency.text}
-                    </span>
-                  )}
-                  {result.mlModel && (
-                    <span
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: '6px',
-                        background: '#f1f5f9',
-                        color: '#475569',
-                        fontSize: '0.75rem',
-                      }}
-                      title={`Score urgence: ${result.mlModel.urgencyScore} · Maladie: ${Math.round((result.mlModel.diseaseProbability || 0) * 100)}%`}
-                    >
-                      ML {result.mlModel.modelId}
                     </span>
                   )}
                 </div>
@@ -728,7 +741,7 @@ const VetPetDiagnosticsPage = () => {
 
           {result.clinicalNotes && (
             <section style={cardStyle}>
-              <h3 style={{ marginTop: 0 }}>📋 Notes cliniques IA</h3>
+              <h3 style={{ marginTop: 0 }}>📋 Notes cliniques</h3>
               <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{result.clinicalNotes}</p>
             </section>
           )}

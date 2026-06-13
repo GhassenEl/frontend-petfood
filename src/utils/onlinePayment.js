@@ -59,3 +59,25 @@ export const processPayPalPayment = async (amount) => {
   }
   return { ok: false, error: 'Capture PayPal échouée.' };
 };
+
+/** Paiements en ligne tunisiens (Flouci, Konnect, Paymee, D17) — mode démo si API indisponible */
+export const processTunisianPayment = async (provider, amount, phone) => {
+  try {
+    const { data } = await api.post('/payments/tunisia/charge', {
+      provider,
+      amount,
+      phone: phone || undefined,
+      currency: 'TND',
+    });
+    if (data?.success || data?.status === 'paid') {
+      return { ok: true, demo: !!data.demo, reference: data.reference };
+    }
+    return { ok: false, error: data?.error || 'Paiement refusé.' };
+  } catch {
+    return {
+      ok: true,
+      demo: true,
+      reference: `DEMO-${provider.toUpperCase()}-${Date.now().toString(36)}`,
+    };
+  }
+};

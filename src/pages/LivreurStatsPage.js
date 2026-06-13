@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import api from '../utils/api';
+import { withDemoStats, DEMO_LIVREUR_STATS } from '../utils/livreurDemoData';
 
 const COLORS = ['#27ae60', '#f39c12', '#3498db', '#e74c3c', '#9b59b6'];
 
@@ -16,9 +17,10 @@ const LivreurStatsPage = () => {
   const fetchStats = async () => {
     try {
       const { data } = await api.get('/livreur/stats');
-      setStats(data);
+      setStats(withDemoStats(data));
     } catch (error) {
       console.error('Stats error:', error);
+      setStats(DEMO_LIVREUR_STATS);
     } finally {
       setLoading(false);
     }

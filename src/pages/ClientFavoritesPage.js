@@ -9,6 +9,7 @@ import {
 } from '../services/favoriteService';
 import { getEffectiveDiscount, getPromoPrice } from '../utils/productDetails';
 import { productId, dedupeProducts, withProductIds } from '../utils/productId';
+import { DEMO_FAVORITES, withDemoFallback } from '../utils/clientDemoData';
 
 const cardStyle = {
   background: 'white',
@@ -27,7 +28,7 @@ const ClientFavoritesPage = () => {
     setLoading(true);
     try {
       const [fav, freq] = await Promise.all([getFavorites(), getFrequentProducts(8)]);
-      setFavorites(dedupeProducts((Array.isArray(fav) ? fav : []).map(withProductIds)));
+      setFavorites(withDemoFallback(dedupeProducts((Array.isArray(fav) ? fav : []).map(withProductIds)), DEMO_FAVORITES));
       setFrequent(dedupeProducts((Array.isArray(freq) ? freq : []).map(withProductIds)));
     } catch (err) {
       console.error(err);

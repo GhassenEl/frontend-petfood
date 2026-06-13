@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import { getLoyaltyAccount, getPersonalizedOffers } from '../services/loyaltyService';
+import { DEMO_LOYALTY, DEMO_LOYALTY_OFFERS } from '../utils/clientDemoData';
 import { getPromoPrice, getEffectiveDiscount } from '../utils/productDetails';
 
 const card = {
@@ -21,10 +22,11 @@ const ClientLoyaltyPage = () => {
     setLoading(true);
     try {
       const [acc, off] = await Promise.all([getLoyaltyAccount(), getPersonalizedOffers()]);
-      setAccount(acc);
-      setOffers(off);
+      setAccount(acc?.points != null ? acc : DEMO_LOYALTY);
+      setOffers(off?.products?.length ? off : DEMO_LOYALTY_OFFERS);
     } catch (err) {
-      console.error(err);
+      setAccount(DEMO_LOYALTY);
+      setOffers(DEMO_LOYALTY_OFFERS);
     } finally {
       setLoading(false);
     }

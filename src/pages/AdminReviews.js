@@ -9,6 +9,8 @@ import {
 } from '../services/reviewService';
 import { productId, dedupeProducts, withProductIds } from '../utils/productId';
 import AdminServiceRatingsPanel from '../components/AdminServiceRatingsPanel';
+import CommentSentimentPanel from '../components/CommentSentimentPanel';
+import { DEMO_ADMIN_REVIEWS, DEMO_ADMIN_USERS, withDemoFallback } from '../utils/adminDemoData';
 import './ClientComplaintsPage.css';
 
 const EMOTIONS = [
@@ -71,11 +73,11 @@ const AdminReviews = () => {
         api.get('/users').catch(() => ({ data: [] })),
         api.get('/products').catch(() => ({ data: [] })),
       ]);
-      setReviews(reviewList);
-      setUsers(usersRes.data || []);
+      setReviews(withDemoFallback(reviewList, DEMO_ADMIN_REVIEWS));
+      setUsers(withDemoFallback(usersRes.data || [], DEMO_ADMIN_USERS));
       setProducts(dedupeProducts((productsRes.data || []).map(withProductIds)));
     } catch {
-      setReviews([]);
+      setReviews(DEMO_ADMIN_REVIEWS);
     } finally {
       setLoading(false);
     }
@@ -211,6 +213,7 @@ const AdminReviews = () => {
         {[
           { id: 'products', label: '🛍️ Avis produits' },
           { id: 'services', label: '🚚 Livraison & Vétérinaire' },
+          { id: 'sentiments', label: '🧠 Analyse sentiments' },
         ].map(({ id, label }) => (
           <button
             key={id}
@@ -225,6 +228,8 @@ const AdminReviews = () => {
 
       {pageTab === 'services' ? (
         <AdminServiceRatingsPanel showToast={showToast} />
+      ) : pageTab === 'sentiments' ? (
+        <CommentSentimentPanel variant="admin" />
       ) : (
         <>
           <div className="cc-stats">

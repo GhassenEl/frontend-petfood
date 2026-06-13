@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import useSocket from '../hooks/useSocket';
 import { useNavigate } from 'react-router-dom';
 import { getEffectiveDiscount, isOnPromotion } from '../utils/productDetails';
+import ChatNlpInsight from './ChatNlpInsight';
 
 const PET_GREETING_LABELS = { dog: 'chien', cat: 'chat', bird: 'oiseau', fish: 'poisson', other: 'animal' };
 
@@ -82,11 +83,11 @@ const VARIANT_CONFIG = {
     }),
   },
   vet: {
-    title: 'Assistant Clinique',
+    title: 'Assistant IA',
     makeGreeting: () => ({
       role: 'assistant',
       content:
-        'Bonjour Docteur. Assistant clinique PetfoodTN : analyse, pistes diagnostiques et recommandations. Mes suggestions ne remplacent pas votre jugement clinique. Comment puis-je vous aider ?',
+        'Bonjour Docteur. Assistant IA PetfoodTN : analyse, pistes diagnostiques et recommandations. Mes suggestions ne remplacent pas votre jugement clinique. Comment puis-je vous aider ?',
       quickReplies: ['Analyse symptômes', 'Protocole vaccin', 'Posologie', 'Urgence'],
       products: [],
     }),
@@ -129,12 +130,13 @@ const mapHistoryRow = (m) => ({
   products: m.products || [],
   quickReplies: m.quickReplies || [],
   shouldShowVetCTA: !!m.shouldShowVetCTA,
+  nlp: m.nlp || null,
 });
 
 /**
- * @param {{ variant?: 'client' | 'admin' | 'livreur' | 'vet', title?: string }} props
+ * @param {{ variant?: 'client' | 'admin' | 'livreur' | 'vet', title?: string, embedded?: boolean }} props
  */
-const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
+const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = false }) => {
   const cfg = VARIANT_CONFIG[variant] || VARIANT_CONFIG.client;
   const displayTitle = titleOverride || cfg.title;
   const { user } = useAuth();
@@ -148,7 +150,7 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
     };
   }, [cfg]);
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(embedded);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -215,6 +217,10 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
       cancelled = true;
     };
   }, [isOpen, messages.length, makeGreetingMessage, variant]);
+
+  useEffect(() => {
+    if (embedded) setIsOpen(true);
+  }, [embedded]);
 
   useEffect(() => {
     const open = () => setIsOpen(true);
@@ -294,8 +300,19 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
         content: String(assistantText),
         products: data.products || [],
         quickReplies: data.quickReplies || [],
+        shouldShowVetCTA: !!data.shouldShowVetCTA,
+        nlp: data.nlp || null,
       };
-      setMessages((prev) => [...prev, assistantMsg]);
+      setMessages((prev) => {
+        const updated = [...prev];
+        if (data.nlp && updated.length > 0) {
+          const lastUserIdx = updated.length - 1;
+          if (updated[lastUserIdx]?.role === 'user') {
+            updated[lastUserIdx] = { ...updated[lastUserIdx], nlp: data.nlp };
+          }
+        }
+        return [...updated, assistantMsg];
+      });
       setIsBackendOnline(true);
       // Socket emit removed: backend HTTP endpoint already returns the assistant reply,
       // and the backend socket handler broadcasts the same message to the room,
@@ -343,7 +360,6 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
 
     if (cleanReply === 'Agent IA complet') {
       setIsOpen(false);
-      navigate('/client-ai');
       return;
     }
 
@@ -376,6 +392,29 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
     if (variant === 'admin' && adminNav[cleanReply]) {
       setIsOpen(false);
       navigate(adminNav[cleanReply]);
+      return;
+    }
+
+    if (cleanReply === 'Réclamation' || cleanReply === 'Réclamations') {
+      setIsOpen(false);
+      navigate(variant === 'admin' ? '/admin/complaints' : '/client-complaints');
+      return;
+    }
+
+    if (cleanReply === 'Contacter le support') {
+      sendMessage('J\'ai un problème avec ma commande et j\'ai besoin d\'aide');
+      return;
+    }
+
+    if (cleanReply === 'Contacter vétérinaire') {
+      setIsOpen(false);
+      navigate('/veterinary');
+      return;
+    }
+
+    if (cleanReply === 'Centre IoT') {
+      setIsOpen(false);
+      navigate('/client-iot');
       return;
     }
 
@@ -504,6 +543,187 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
     );
   };
 
+  const panelStyle = embedded
+    ? { ...styles.chatPanel, ...styles.chatPanelEmbedded }
+    : styles.chatPanel;
+
+  const chatPanel = (
+    <motion.div
+      id="petfood-chat-panel"
+      className="platform-chat-panel"
+      role="dialog"
+      aria-modal={!embedded}
+      aria-label={displayTitle}
+      initial={embedded ? false : { opacity: 0, y: 20, scale: 0.95 }}
+      animate={embedded ? undefined : { opacity: 1, y: 0, scale: 1 }}
+      exit={embedded ? undefined : { opacity: 0, y: 20, scale: 0.95 }}
+      transition={{ duration: 0.25 }}
+      style={panelStyle}
+    >
+      <div style={styles.header}>
+        <div style={styles.headerLeft}>
+          <div style={styles.headerIcon}>
+            <AssistantAvatar variant={variant} size={40} />
+          </div>
+          <div>
+            <div style={styles.headerTitle}>{displayTitle}</div>
+            <div
+              style={{
+                ...styles.headerSubtitle,
+                color: isBackendOnline ? '#059669' : '#dc2626',
+              }}
+            >
+              {historyLoading
+                ? 'Chargement…'
+                : loading
+                  ? "En train d'écrire..."
+                  : isBackendOnline
+                    ? 'En ligne'
+                    : 'Hors ligne'}
+            </div>
+          </div>
+        </div>
+        <div style={styles.headerActions}>
+          <button
+            type="button"
+            onClick={startNewConversation}
+            style={styles.iconActionBtn}
+            title="Nouvelle conversation"
+            aria-label="Nouvelle conversation"
+          >
+            <MessageSquarePlus size={18} color="#666" />
+          </button>
+          {!embedded && (
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              style={styles.closeBtn}
+              aria-label="Fermer"
+            >
+              <X size={18} color="#666" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div style={styles.messagesContainer}>
+        {historyLoading && messages.length === 0 && (
+          <div style={styles.historyLoadingBanner} role="status">
+            Chargement de la conversation…
+          </div>
+        )}
+        {messages.map((msg, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              ...styles.messageBubble,
+              alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+              background: msg.role === 'user' ? 'linear-gradient(135deg, #e67e22, #d35400)' : '#f8f9fa',
+              color: msg.role === 'user' ? 'white' : '#374151',
+              borderBottomRightRadius: msg.role === 'user' ? '4px' : '18px',
+              borderBottomLeftRadius: msg.role === 'assistant' ? '4px' : '18px',
+            }}
+          >
+            <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5, fontSize: '14px' }}>{msg.content}</div>
+
+            {msg.nlp && <ChatNlpInsight nlp={msg.nlp} compact={msg.role === 'user'} />}
+
+            {msg.products && msg.products.length > 0 && (
+              <div style={styles.productsGrid}>
+                {msg.products
+                  .filter((product) => (product.stock ?? 0) > 0)
+                  .map((product, pidx) => (
+                    <motion.div key={pidx} whileHover={{ scale: 1.03 }} style={styles.productCard}>
+                      <div style={styles.productIcon}>{product.icon || '📦'}</div>
+                      <div style={styles.productInfo}>
+                        <div style={styles.productName}>{product.name}</div>
+                        <div style={styles.productReason}>{product.reason}</div>
+                        <div style={styles.productPrice}>{formatPrice(product.price, product.discount)}</div>
+                      </div>
+                      {variant === 'client' && (
+                        <button
+                          type="button"
+                          onClick={() => addToCart(product)}
+                          style={styles.addToCartBtn}
+                          title="Ajouter au panier"
+                        >
+                          <ShoppingCart size={14} color="white" />
+                        </button>
+                      )}
+                    </motion.div>
+                  ))}
+              </div>
+            )}
+
+            {msg.quickReplies && msg.quickReplies.length > 0 && msg.role === 'assistant' && (
+              <div style={styles.quickReplies}>
+                {msg.quickReplies.map((qr, qidx) => (
+                  <button key={qidx} onClick={() => handleQuickReply(qr)} style={styles.quickReplyBtn}>
+                    {qr}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {(msg.role === 'assistant' && (msg.shouldShowVetCTA || shouldShowVetCTA(msg.content))) && (
+              <div style={styles.vetCtaWrap}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigate('/veterinary');
+                  }}
+                  style={styles.vetCtaBtn}
+                >
+                  Contacter vétérinaire
+                </button>
+              </div>
+            )}
+
+          </motion.div>
+        ))}
+
+        {loading && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={styles.typingIndicator}>
+            <span style={styles.dot}></span>
+            <span style={styles.dot}></span>
+            <span style={styles.dot}></span>
+          </motion.div>
+        )}
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div style={styles.inputArea}>
+        <input
+          ref={inputRef}
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
+          placeholder="Écrivez un message..."
+          style={styles.input}
+        />
+        <button
+          onClick={() => sendMessage(input)}
+          disabled={!input.trim() || loading}
+          style={{
+            ...styles.sendBtn,
+            opacity: input.trim() && !loading ? 1 : 0.5,
+          }}
+        >
+          <Send size={18} color="white" />
+        </button>
+      </div>
+    </motion.div>
+  );
+
+  if (embedded) {
+    return chatPanel;
+  }
+
   return (
     <>
       <motion.button
@@ -521,174 +741,7 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride }) => {
       </motion.button>
 
       <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            id="petfood-chat-panel"
-            className="platform-chat-panel"
-            role="dialog"
-            aria-modal="true"
-            aria-label={displayTitle}
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.25 }}
-            style={styles.chatPanel}
-          >
-            <div style={styles.header}>
-              <div style={styles.headerLeft}>
-                <div style={styles.headerIcon}>
-                  <AssistantAvatar variant={variant} size={40} />
-                </div>
-                <div>
-                  <div style={styles.headerTitle}>{displayTitle}</div>
-                  <div
-                    style={{
-                      ...styles.headerSubtitle,
-                      color: isBackendOnline ? '#059669' : '#dc2626',
-                    }}
-                  >
-                    {historyLoading
-                      ? 'Chargement…'
-                      : loading
-                        ? "En train d'écrire..."
-                        : isBackendOnline
-                          ? 'En ligne'
-                          : 'Hors ligne'}
-                  </div>
-                </div>
-              </div>
-              <div style={styles.headerActions}>
-                <button
-                  type="button"
-                  onClick={startNewConversation}
-                  style={styles.iconActionBtn}
-                  title="Nouvelle conversation"
-                  aria-label="Nouvelle conversation"
-                >
-                  <MessageSquarePlus size={18} color="#666" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  style={styles.closeBtn}
-                  aria-label="Fermer"
-                >
-                  <X size={18} color="#666" />
-                </button>
-              </div>
-            </div>
-
-            <div style={styles.messagesContainer}>
-              {historyLoading && messages.length === 0 && (
-                <div style={styles.historyLoadingBanner} role="status">
-                  Chargement de la conversation…
-                </div>
-              )}
-              {messages.map((msg, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  style={{
-                    ...styles.messageBubble,
-                    alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                    background: msg.role === 'user' ? 'linear-gradient(135deg, #e67e22, #d35400)' : '#f8f9fa',
-                    color: msg.role === 'user' ? 'white' : '#374151',
-                    borderBottomRightRadius: msg.role === 'user' ? '4px' : '18px',
-                    borderBottomLeftRadius: msg.role === 'assistant' ? '4px' : '18px',
-                  }}
-                >
-                  <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5, fontSize: '14px' }}>{msg.content}</div>
-
-                  {msg.products && msg.products.length > 0 && (
-                    <div style={styles.productsGrid}>
-                      {msg.products
-                        .filter((product) => (product.stock ?? 0) > 0)
-                        .map((product, pidx) => (
-                          <motion.div key={pidx} whileHover={{ scale: 1.03 }} style={styles.productCard}>
-                            <div style={styles.productIcon}>{product.icon || '📦'}</div>
-                            <div style={styles.productInfo}>
-                              <div style={styles.productName}>{product.name}</div>
-                              <div style={styles.productReason}>{product.reason}</div>
-                              <div style={styles.productPrice}>{formatPrice(product.price, product.discount)}</div>
-                            </div>
-                            {variant === 'client' && (
-                              <button
-                                type="button"
-                                onClick={() => addToCart(product)}
-                                style={styles.addToCartBtn}
-                                title="Ajouter au panier"
-                              >
-                                <ShoppingCart size={14} color="white" />
-                              </button>
-                            )}
-                          </motion.div>
-                        ))}
-                    </div>
-                  )}
-
-                  {msg.quickReplies && msg.quickReplies.length > 0 && msg.role === 'assistant' && (
-                    <div style={styles.quickReplies}>
-                      {msg.quickReplies.map((qr, qidx) => (
-                        <button key={qidx} onClick={() => handleQuickReply(qr)} style={styles.quickReplyBtn}>
-                          {qr}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {(msg.role === 'assistant' && (msg.shouldShowVetCTA || shouldShowVetCTA(msg.content))) && (
-                    <div style={styles.vetCtaWrap}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsOpen(false);
-                          navigate('/veterinary');
-                        }}
-                        style={styles.vetCtaBtn}
-                      >
-                        Contacter vétérinaire
-                      </button>
-                    </div>
-                  )}
-
-                </motion.div>
-              ))}
-
-              {loading && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={styles.typingIndicator}>
-                  <span style={styles.dot}></span>
-                  <span style={styles.dot}></span>
-                  <span style={styles.dot}></span>
-                </motion.div>
-              )}
-
-              <div ref={messagesEndRef} />
-            </div>
-
-            <div style={styles.inputArea}>
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-                placeholder="Écrivez un message..."
-                style={styles.input}
-              />
-              <button
-                onClick={() => sendMessage(input)}
-                disabled={!input.trim() || loading}
-                style={{
-                  ...styles.sendBtn,
-                  opacity: input.trim() && !loading ? 1 : 0.5,
-                }}
-              >
-                <Send size={18} color="white" />
-              </button>
-            </div>
-          </motion.div>
-        )}
+        {isOpen && chatPanel}
       </AnimatePresence>
     </>
   );
@@ -709,12 +762,12 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1400,
+    zIndex: 900,
     transition: 'all 0.3s ease',
   },
   chatPanel: {
     position: 'fixed',
-    bottom: '90px',
+    bottom: '158px',
     right: '24px',
     width: '380px',
     maxWidth: 'calc(100vw - 48px)',
@@ -727,6 +780,18 @@ const styles = {
     flexDirection: 'column',
     overflow: 'hidden',
     zIndex: 1400,
+  },
+  chatPanelEmbedded: {
+    position: 'relative',
+    bottom: 'auto',
+    right: 'auto',
+    width: '100%',
+    maxWidth: '100%',
+    height: 'min(72vh, 640px)',
+    minHeight: 420,
+    maxHeight: 'none',
+    zIndex: 1,
+    border: '1px solid #e5e7eb',
   },
   header: {
     padding: '16px 20px',

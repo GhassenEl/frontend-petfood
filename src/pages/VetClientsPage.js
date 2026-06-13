@@ -1,15 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
+import {
+  DEMO_VET_CLIENTS,
+  mergeVetClients,
+  saveExtraVetClient,
+} from '../utils/vetDemoData';
 
 const animalEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', rabbit: '🐰', other: '🐾' };
 
 const clientId = (c) => c?.id || c?._id;
 
+const emptyForm = {
+  name: '',
+  email: '',
+  phone: '',
+  address: '',
+  city: '',
+  petName: '',
+  petType: 'dog',
+  petBreed: '',
+};
+
 const VetClientsPage = () => {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState(emptyForm);
 
   useEffect(() => {
     fetchClients();
@@ -18,11 +37,58 @@ const VetClientsPage = () => {
   const fetchClients = async () => {
     try {
       const { data } = await api.get('/vet/clients');
-      setClients(data || []);
+      setClients(mergeVetClients(data));
     } catch (error) {
       console.error('Clients error:', error);
+      setClients(mergeVetClients([]));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddClient = async (e) => {
+    e.preventDefault();
+    if (!form.name.trim() || !form.email.trim()) {
+      window.alert('Nom et e-mail obligatoires.');
+      return;
+    }
+    setSubmitting(true);
+    const payload = {
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim() || undefined,
+      address: form.address.trim() || undefined,
+      city: form.city.trim() || undefined,
+      pets: form.petName.trim()
+        ? [{
+            id: `pet-${Date.now()}`,
+            name: form.petName.trim(),
+            type: form.petType,
+            breed: form.petBreed.trim() || undefined,
+          }]
+        : [],
+    };
+    try {
+      const { data } = await api.post('/vet/clients', payload);
+      setClients((prev) => [data, ...prev]);
+      setShowForm(false);
+      setForm(emptyForm);
+    } catch {
+      const newClient = {
+        id: `demo-client-${Date.now()}`,
+        _id: `demo-client-${Date.now()}`,
+        ...payload,
+        since: new Date().toISOString().slice(0, 10),
+        appointmentCount: 0,
+        consultationCount: 0,
+        notes: 'Client ajouté localement (mode démonstration).',
+      };
+      saveExtraVetClient(newClient);
+      setClients((prev) => [newClient, ...prev]);
+      setShowForm(false);
+      setForm(emptyForm);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -37,10 +103,75 @@ const VetClientsPage = () => {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
-      <h1 style={{ margin: '0 0 8px' }}>👥 Clients & animaux</h1>
-      <p style={{ color: '#64748b', marginTop: 0, marginBottom: 20 }}>
-        Accédez rapidement au dossier, à l&apos;historique clinique ou à l&apos;agenda pour chaque patient.
-      </p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
+        <div>
+          <h1 style={{ margin: '0 0 8px' }}>👥 Clients & animaux</h1>
+          <p style={{ color: '#64748b', margin: 0 }}>
+            {clients.length} client(s) — fiche détaillée, historique et dossiers.
+          </p>
+        </div>
+        <button type="button" className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
+          {showForm ? 'Annuler' : '+ Ajouter client'}
+        </button>
+      </div>
+
+      {showForm && (
+        <form
+          onSubmit={handleAddClient}
+          style={{
+            background: 'white',
+            borderRadius: 16,
+            padding: 20,
+            marginBottom: 20,
+            boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+            border: '1px solid #e2e8f0',
+          }}
+        >
+          <h2 style={{ margin: '0 0 14px', fontSize: '1rem' }}>Nouveau client</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+            <label style={labelStyle}>
+              Nom *
+              <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} style={inputStyle} />
+            </label>
+            <label style={labelStyle}>
+              E-mail *
+              <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} style={inputStyle} />
+            </label>
+            <label style={labelStyle}>
+              Téléphone
+              <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} style={inputStyle} />
+            </label>
+            <label style={labelStyle}>
+              Adresse
+              <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} style={inputStyle} />
+            </label>
+            <label style={labelStyle}>
+              Ville
+              <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} style={inputStyle} />
+            </label>
+            <label style={labelStyle}>
+              Animal
+              <input placeholder="Nom du 1er animal" value={form.petName} onChange={(e) => setForm({ ...form, petName: e.target.value })} style={inputStyle} />
+            </label>
+            <label style={labelStyle}>
+              Espèce
+              <select value={form.petType} onChange={(e) => setForm({ ...form, petType: e.target.value })} style={inputStyle}>
+                <option value="dog">Chien</option>
+                <option value="cat">Chat</option>
+                <option value="bird">Oiseau</option>
+                <option value="other">Autre</option>
+              </select>
+            </label>
+            <label style={labelStyle}>
+              Race
+              <input value={form.petBreed} onChange={(e) => setForm({ ...form, petBreed: e.target.value })} style={inputStyle} />
+            </label>
+          </div>
+          <button type="submit" className="btn btn-primary" disabled={submitting} style={{ marginTop: 14 }}>
+            {submitting ? 'Enregistrement…' : 'Enregistrer le client'}
+          </button>
+        </form>
+      )}
 
       <input
         type="search"
@@ -59,15 +190,7 @@ const VetClientsPage = () => {
       />
 
       {filtered.length === 0 ? (
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '48px 24px',
-            background: '#f8fafc',
-            borderRadius: 16,
-            color: '#94a3b8',
-          }}
-        >
+        <div style={{ textAlign: 'center', padding: '48px 24px', background: '#f8fafc', borderRadius: 16, color: '#94a3b8' }}>
           <p style={{ margin: 0, fontSize: '1.1rem' }}>
             {search ? `Aucun client pour « ${search} »` : 'Aucun client enregistré.'}
           </p>
@@ -92,10 +215,15 @@ const VetClientsPage = () => {
                   border: '1px solid #f1f5f9',
                 }}
               >
-                <h3 style={{ margin: '0 0 4px', fontSize: '1.05rem' }}>{client.name}</h3>
+                <Link to={`/vet/clients/${id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <h3 style={{ margin: '0 0 4px', fontSize: '1.05rem' }}>{client.name}</h3>
+                </Link>
                 <p style={{ margin: '0 0 8px', fontSize: '0.85rem', color: '#64748b' }}>{client.email}</p>
                 {client.phone && (
-                  <p style={{ margin: '0 0 12px', fontSize: '0.85rem', color: '#94a3b8' }}>📞 {client.phone}</p>
+                  <p style={{ margin: '0 0 4px', fontSize: '0.85rem', color: '#94a3b8' }}>📞 {client.phone}</p>
+                )}
+                {client.city && (
+                  <p style={{ margin: '0 0 12px', fontSize: '0.8rem', color: '#94a3b8' }}>📍 {client.city}</p>
                 )}
 
                 <div style={{ marginBottom: 12 }}>
@@ -108,12 +236,6 @@ const VetClientsPage = () => {
                         <li key={pet.id || pet.name} style={{ fontSize: '0.9rem', marginBottom: 6 }}>
                           {animalEmoji[pet.type] || '🐾'} {pet.name}
                           {pet.breed ? ` · ${pet.breed}` : ''}
-                          <Link
-                            to={`/vet/history?ownerId=${encodeURIComponent(id)}&petName=${encodeURIComponent(pet.name)}`}
-                            style={{ marginLeft: 8, fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 700 }}
-                          >
-                            Timeline
-                          </Link>
                         </li>
                       ))}
                     </ul>
@@ -126,10 +248,13 @@ const VetClientsPage = () => {
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   <Link
-                    to={historyLink}
-                    className="btn btn-outline"
+                    to={`/vet/clients/${id}`}
+                    className="btn btn-primary"
                     style={{ fontSize: 12, padding: '6px 12px', textDecoration: 'none' }}
                   >
+                    👤 Détails
+                  </Link>
+                  <Link to={historyLink} className="btn btn-outline" style={{ fontSize: 12, padding: '6px 12px', textDecoration: 'none' }}>
                     📜 Historique
                   </Link>
                   <Link
@@ -140,18 +265,11 @@ const VetClientsPage = () => {
                     📁 Dossier
                   </Link>
                   <Link
-                    to="/vet/calendar"
+                    to="/vet/diagnostics"
                     className="btn btn-outline"
                     style={{ fontSize: 12, padding: '6px 12px', textDecoration: 'none' }}
                   >
-                    📅 Agenda
-                  </Link>
-                  <Link
-                    to="/vet/diagnostics"
-                    className="btn btn-primary"
-                    style={{ fontSize: 12, padding: '6px 12px', textDecoration: 'none' }}
-                  >
-                    🔬 Diagnostic IA
+                    🔬 Détection précoce
                   </Link>
                 </div>
               </article>
@@ -162,5 +280,8 @@ const VetClientsPage = () => {
     </div>
   );
 };
+
+const labelStyle = { display: 'flex', flexDirection: 'column', gap: 6, fontSize: 13, fontWeight: 600 };
+const inputStyle = { padding: '10px 12px', borderRadius: 10, border: '1px solid #e2e8f0', marginTop: 4 };
 
 export default VetClientsPage;

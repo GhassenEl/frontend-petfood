@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
+import { DEMO_ADMIN_INVOICES, withDemoFallback } from '../utils/adminDemoData';
 import { PAYMENT_METHODS, getPaymentLabel } from '../constants/paymentMethods';
 import { downloadInvoicePdf, downloadInvoicesPdfBatch } from '../utils/invoicePdf';
 
@@ -30,10 +31,10 @@ const AdminInvoices = () => {
   const fetchInvoices = async () => {
     try {
       const res = await api.get('/invoices/all');
-      setInvoices(res.data || []);
+      setInvoices(withDemoFallback(res.data || [], DEMO_ADMIN_INVOICES));
     } catch (error) {
       console.error('Erreur chargement factures', error);
-      setInvoices([]);
+      setInvoices(DEMO_ADMIN_INVOICES);
     } finally {
       setLoading(false);
     }

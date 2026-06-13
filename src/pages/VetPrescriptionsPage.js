@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import MedicationFormFields from '../components/MedicationFormFields';
+import VetMedicationRecommender from '../components/VetMedicationRecommender';
 import {
   emptyMedicationRow,
   parseMedications,
@@ -15,6 +17,7 @@ const VetPrescriptionsPage = () => {
   const [form, setForm] = useState({
     petName: '',
     ownerId: '',
+    diagnosis: '',
     medications: [emptyMedicationRow()],
     instructions: '',
   });
@@ -68,6 +71,7 @@ const VetPrescriptionsPage = () => {
       setForm({
         petName: '',
         ownerId: '',
+        diagnosis: '',
         medications: [emptyMedicationRow()],
         instructions: '',
       });
@@ -77,11 +81,28 @@ const VetPrescriptionsPage = () => {
     }
   };
 
+  const selectedPet = clients
+    .find((c) => (c.id || c._id) === form.ownerId)
+    ?.pets?.find((p) => p.name === form.petName);
+
+  const petContext = useMemo(() => ({
+    petName: form.petName,
+    name: form.petName,
+    animalType: selectedPet?.type || selectedPet?.animalType,
+    weightKg: selectedPet?.weight ?? selectedPet?.weightKg,
+    breed: selectedPet?.breed,
+  }), [form.petName, selectedPet]);
+
   if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>Chargement...</div>;
 
   return (
     <div style={{ padding: '24px', maxWidth: '1000px', margin: '0 auto' }}>
-      <h1>💊 Ordonnances</h1>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 8 }}>
+        <h1 style={{ margin: 0 }}>💊 Ordonnances</h1>
+        <Link to="/vet/medication-recommendations" style={{ color: '#7c3aed', fontSize: 14, fontWeight: 600 }}>
+          Recommandations médicaments →
+        </Link>
+      </div>
 
       <form
         onSubmit={handleCreate}
@@ -117,19 +138,30 @@ const VetPrescriptionsPage = () => {
           />
         </div>
 
+        <label style={{ display: 'block', marginBottom: 12, fontWeight: 600, fontSize: 13 }}>
+          Diagnostic
+          <input
+            value={form.diagnosis}
+            onChange={(e) => setForm((f) => ({ ...f, diagnosis: e.target.value }))}
+            placeholder="Ex: Dermatite allergique, Arthrose…"
+            style={{ width: '100%', marginTop: 6, padding: '10px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box' }}
+          />
+        </label>
+
+        <VetMedicationRecommender
+          petContext={petContext}
+          diagnosis={form.diagnosis}
+          onApply={(rows) => setForm((f) => ({ ...f, medications: rows }))}
+          compact
+          showInputs={false}
+        />
+
         <MedicationFormFields
           medications={form.medications}
           onChange={(medications) => setForm((f) => ({ ...f, medications }))}
-          petWeightKg={
-            clients
-              .find((c) => (c.id || c._id) === form.ownerId)
-              ?.pets?.find((p) => p.name === form.petName)?.weight
-          }
-          animalType={
-            clients
-              .find((c) => (c.id || c._id) === form.ownerId)
-              ?.pets?.find((p) => p.name === form.petName)?.type
-          }
+          petWeightKg={petContext.weightKg}
+          animalType={petContext.animalType}
+          diagnosis={form.diagnosis}
         />
 
         <label style={{ display: 'block', marginTop: 16, fontWeight: 600 }}>

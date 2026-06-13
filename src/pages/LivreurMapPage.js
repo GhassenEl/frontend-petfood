@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Navigation } from 'lucide-react';
 import api from '../utils/api';
+import { DEMO_LIVREUR_ORDERS, withDemoFallback } from '../utils/livreurDemoData';
 import LivreurDeliveryMap, { getOrderCoords } from '../components/LivreurDeliveryMap';
 
 const LivreurMapPage = () => {
@@ -15,11 +16,13 @@ const LivreurMapPage = () => {
   const fetchOrders = async () => {
     try {
       const res = await api.get('/orders');
+      const all = withDemoFallback(res.data || [], DEMO_LIVREUR_ORDERS);
       setOrders(
-        (res.data || []).filter((o) => ['pending', 'shipped'].includes(o.status))
+        all.filter((o) => ['pending', 'shipped'].includes(o.status))
       );
     } catch (error) {
       console.error('Map orders error:', error);
+      setOrders(DEMO_LIVREUR_ORDERS.filter((o) => ['pending', 'shipped'].includes(o.status)));
     } finally {
       setLoading(false);
     }

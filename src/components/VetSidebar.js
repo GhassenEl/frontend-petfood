@@ -15,6 +15,7 @@ const VetSidebar = ({ onLogout, user, onNavigate }) => {
         { id: 'calendar', label: 'Calendrier', icon: '📅' },
         { id: 'availability', label: 'Disponibilité', icon: '🟢' },
         { id: 'prescriptions', label: 'Ordonnances', icon: '💊' },
+        { id: 'medication-recommendations', label: 'Recommandations médicaments', icon: '✨' },
         { id: 'pharmacy', label: 'Pharmacie', icon: '🏪' },
         { id: 'clinic', label: 'Ma clinique', icon: '🏥' },
         { id: 'medical-dossiers', label: 'Dossiers médicaux', icon: '📁' },
@@ -31,9 +32,10 @@ const VetSidebar = ({ onLogout, user, onNavigate }) => {
       ],
     },
     {
-      title: '🤖 Assistance',
+      title: '🤖 Assistant IA',
       items: [
-        { id: '__open-chat__', label: 'Assistance clinique', icon: '🤖', action: 'open-chat' },
+        { id: '__open-chat__', label: 'Assistant IA', icon: '🤖', action: 'open-chat' },
+        { id: 'platform-services', label: 'Catalogue services', icon: '📋' },
       ],
     },
     {

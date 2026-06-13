@@ -19,3 +19,6 @@ export const fetchAdminStockBiPack = () =>
 
 export const registerForEvent = (eventId, body) =>
   api.post(`/events/${eventId}/register`, body).then((r) => r.data);
+
+export const fetchMyEventPrizes = () =>
+  api.get('/events/my-prizes').then((r) => r.data);

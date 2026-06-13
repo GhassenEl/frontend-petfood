@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { PlusCircle, Edit, Trash2, Calendar, Clock, Tag, User, Info, XCircle, Star, MessageSquare } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Calendar, Clock, Tag, User, Info, XCircle, Star, MessageSquare, Trophy, Gift } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { registerForEvent } from '../services/adminOpsService';
+import { registerForEvent, fetchMyEventPrizes } from '../services/adminOpsService';
 
 const EventsPage = () => {
   const { user } = useAuth(); // Get user to check role
@@ -40,6 +40,10 @@ const EventsPage = () => {
 
   // Client: 'platform' = catalogue PetfoodTN, 'mine' = mes inscriptions
   const [viewMode, setViewMode] = useState('platform');
+  const [clientTab, setClientTab] = useState('competitions');
+  const [myPrizes, setMyPrizes] = useState({ prizes: [], registrations: [], totalWins: 0 });
+  const [registerModal, setRegisterModal] = useState(null);
+  const [registerPetName, setRegisterPetName] = useState('');
 
 
   // Review specific states
@@ -61,8 +65,16 @@ const EventsPage = () => {
   ];
 
   const ANIMAL_EVENT_TYPES = new Set([
-    'competitions', 'concours', 'exposition', 'journee_adoption',
+    'competitions', 'concours', 'exposition', 'journee_adoption', 'cadeau',
   ]);
+
+  const PRIZE_ICONS = {
+    free_animal: '🐾',
+    adoption_voucher: '🏠',
+    product_pack: '🎁',
+    loyalty_points: '⭐',
+    voucher_dt: '💰',
+  };
 
   const animalTypes = [
     { value: 'dog', label: 'Chien' },
@@ -91,6 +103,11 @@ const EventsPage = () => {
     // Backend/middleware will still handle demo data generation.
     if (!user) return;
     fetchAppointments();
+    if (!isAdmin) {
+      fetchMyEventPrizes()
+        .then((data) => setMyPrizes(data || { prizes: [], registrations: [], totalWins: 0 }))
+        .catch(() => setMyPrizes({ prizes: [], registrations: [], totalWins: 0 }));
+    }
     if (isAdmin) {
       api.get('/users')
         .then((res) => {
@@ -99,7 +116,7 @@ const EventsPage = () => {
         })
         .catch(() => setClients([]));
     }
-  }, [user, isAdmin, viewMode, eventCategoryFilter]);
+  }, [user, isAdmin, viewMode, eventCategoryFilter, clientTab]);
 
 
   const fetchAppointments = async () => {
@@ -109,6 +126,9 @@ const EventsPage = () => {
       const scope = isAdmin ? 'all' : viewMode;
       const params = { scope };
       if (eventCategoryFilter === 'animal') params.animalOnly = 'true';
+      if (!isAdmin && clientTab === 'competitions' && viewMode === 'platform') {
+        params.competitionsOnly = 'true';
+      }
       const res = await api.get('/events', { params });
 
 
@@ -261,12 +281,21 @@ const EventsPage = () => {
   const handleRegister = async (event) => {
     const id = event._id || event.id;
     if (!id) return;
+    if (!registerModal || registerModal !== id) {
+      setRegisterModal(id);
+      setRegisterPetName(event.petName && event.petName !== 'Open' && event.petName !== 'Tous' ? event.petName : '');
+      return;
+    }
     setRegisteringId(id);
     setSubmitError('');
     try {
-      await registerForEvent(id, { petName: event.petName || '' });
-      setSubmitSuccess('Inscription enregistrée !');
+      await registerForEvent(id, { petName: registerPetName.trim() || null });
+      setSubmitSuccess('Inscription enregistrée — bonne chance ! 🍀');
+      setRegisterModal(null);
+      setRegisterPetName('');
       fetchAppointments();
+      const prizesData = await fetchMyEventPrizes();
+      setMyPrizes(prizesData || { prizes: [], registrations: [], totalWins: 0 });
     } catch (err) {
       setSubmitError(err.response?.data?.error || 'Inscription impossible');
     } finally {
@@ -364,16 +393,23 @@ const EventsPage = () => {
         }}
       >
         <h1 style={{ fontSize: '36px', fontWeight: 800, color: '#065f46', margin: '0 0 8px' }}>
-          {isAdmin ? '📅 Gestion des événements' : '📅 Événements PetfoodTN'}
+          {isAdmin ? '📅 Gestion des événements' : '🏆 Compétitions & cadeaux'}
         </h1>
         <p style={{ fontSize: '16px', color: '#6b7280', margin: '0 0 20px' }}>
           {isAdmin
             ? 'Concours, expositions, journées d\'adoption, anniversaires et promos…'
-            : 'Concours, expositions, journées d\'adoption et activités PetfoodTN'}
+            : 'Participez aux concours PetfoodTN et gagnez des lots : adoption gratuite, packs croquettes, bons d\'achat…'}
         </p>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
           <FilterChip active={eventCategoryFilter === 'all'} onClick={() => setEventCategoryFilter('all')} label="Tous" />
           <FilterChip active={eventCategoryFilter === 'animal'} onClick={() => setEventCategoryFilter('animal')} label="Événements animaliers" />
+          {!isAdmin && (
+            <FilterChip
+              active={clientTab === 'prizes'}
+              onClick={() => setClientTab(clientTab === 'prizes' ? 'competitions' : 'prizes')}
+              label={`🎁 Mes gains (${myPrizes.totalWins || 0})`}
+            />
+          )}
         </div>
 
         {isAdmin && (
@@ -396,6 +432,82 @@ const EventsPage = () => {
           </button>
         )}
       </motion.div>
+
+      {!isAdmin && clientTab === 'prizes' && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+            borderRadius: '20px',
+            padding: '24px',
+            marginBottom: '28px',
+            border: '2px solid #fcd34d',
+          }}
+        >
+          <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#92400e', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Trophy size={22} /> Mes gains & inscriptions
+          </h2>
+          {myPrizes.prizes?.length > 0 ? (
+            <div style={{ display: 'grid', gap: 12, marginBottom: 20 }}>
+              {myPrizes.prizes.map((p) => (
+                <div
+                  key={p.id}
+                  style={{
+                    background: 'white',
+                    borderRadius: 14,
+                    padding: 16,
+                    border: '1px solid #fde68a',
+                    display: 'flex',
+                    gap: 12,
+                    alignItems: 'flex-start',
+                  }}
+                >
+                  <span style={{ fontSize: 28 }}>{p.prizeIcon || PRIZE_ICONS[p.prizeType] || '🎁'}</span>
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 800, color: '#78350f', fontSize: 16 }}>{p.prizeLabel}</p>
+                    <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: 14 }}>{p.eventTitle}</p>
+                    {p.entryNumber && (
+                      <p style={{ margin: '4px 0 0', fontSize: 12, color: '#059669', fontWeight: 600 }}>
+                        N° d&apos;entrée : {p.entryNumber}
+                        {p.petName ? ` · ${p.petName}` : ''}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ color: '#78716c', marginBottom: 16 }}>
+              Pas encore de lot gagné. Inscrivez-vous à une compétition ci-dessous pour tenter de remporter un animal gratuit ou des cadeaux !
+            </p>
+          )}
+          {myPrizes.registrations?.length > 0 && (
+            <>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#57534e', margin: '0 0 10px' }}>Mes inscriptions</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {myPrizes.registrations.map((r) => (
+                  <span
+                    key={r.id}
+                    style={{
+                      background: 'white',
+                      padding: '8px 12px',
+                      borderRadius: 10,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: r.status === 'winner' ? '#059669' : '#4b5563',
+                      border: '1px solid #e5e7eb',
+                    }}
+                  >
+                    {r.eventTitle} {r.entryNumber ? `(${r.entryNumber})` : ''}
+                    {r.status === 'winner' ? ' 🏆' : ''}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+        </motion.div>
+      )}
 
       {submitSuccess && (
         <motion.div
@@ -699,7 +811,20 @@ const EventsPage = () => {
             Liste des événements ({appointments.length})
           </h2>
           {!isAdmin && (
-            <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+            <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button
+                onClick={() => { switchViewMode('platform'); setClientTab('competitions'); }}
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: 10,
+                  border: viewMode === 'platform' && clientTab !== 'prizes' ? '2px solid #3b82f6' : '1px solid #e5e7eb',
+                  background: viewMode === 'platform' && clientTab !== 'prizes' ? 'rgba(59,130,246,0.08)' : 'white',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                }}
+              >
+                🏆 Compétitions ouvertes
+              </button>
               <button
                 onClick={() => switchViewMode('mine')}
                 style={{
@@ -711,20 +836,20 @@ const EventsPage = () => {
                   fontWeight: 700,
                 }}
               >
-                Mes événements
+                Mes inscriptions
               </button>
               <button
-                onClick={() => switchViewMode('platform')}
+                onClick={() => { setClientTab('prizes'); switchViewMode('platform'); }}
                 style={{
                   padding: '6px 10px',
                   borderRadius: 10,
-                  border: viewMode === 'platform' ? '2px solid #3b82f6' : '1px solid #e5e7eb',
-                  background: viewMode === 'platform' ? 'rgba(59,130,246,0.08)' : 'white',
+                  border: clientTab === 'prizes' ? '2px solid #f59e0b' : '1px solid #e5e7eb',
+                  background: clientTab === 'prizes' ? 'rgba(245,158,11,0.1)' : 'white',
                   cursor: 'pointer',
                   fontWeight: 700,
                 }}
               >
-                Tous les événements PetfoodTN
+                🎁 Mes gains
               </button>
             </div>
           )}
@@ -819,6 +944,31 @@ const EventsPage = () => {
                   Places : {event.registrationsCount ?? 0} / {event.eventCapacity}
                 </p>
               )}
+              {event.isCompetition && event.prizes?.length > 0 && (
+                <div style={{ marginBottom: 12, padding: 10, background: '#f0fdf4', borderRadius: 12, border: '1px solid #bbf7d0' }}>
+                  <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 800, color: '#065f46', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Gift size={14} /> Lots à gagner
+                  </p>
+                  {event.prizes.slice(0, 3).map((prize) => (
+                    <p key={prize.id || prize.rank} style={{ margin: '4px 0', fontSize: 12, color: '#047857' }}>
+                      {prize.rank === 1 ? '🥇' : prize.rank === 2 ? '🥈' : prize.rank === 3 ? '🥉' : '🎁'}{' '}
+                      {PRIZE_ICONS[prize.type] || '🎁'} {prize.label}
+                    </p>
+                  ))}
+                </div>
+              )}
+              {event.userRegistered && (
+                <span style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, color: '#047857', background: '#d1fae5', padding: '4px 8px', borderRadius: 8, marginBottom: 8 }}>
+                  ✓ Inscrit {event.userEntryNumber ? `(${event.userEntryNumber})` : ''}
+                </span>
+              )}
+              {event.userPrize && (
+                <div style={{ marginBottom: 10, padding: 10, background: '#fffbeb', borderRadius: 10, border: '1px solid #fcd34d' }}>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 800, color: '#92400e' }}>
+                    🏆 {event.userPrize.label}
+                  </p>
+                </div>
+              )}
               {isAdmin && event.owner && ( // Display owner info for admin
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontSize: '13px', color: '#059669', fontWeight: 600 }}>
                   <User size={16} />
@@ -892,25 +1042,70 @@ const EventsPage = () => {
               ) : (
                 !isAdmin && (
                   <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {event.isPublic && ANIMAL_EVENT_TYPES.has(event.type) && (
-                      <button
-                        type="button"
-                        onClick={() => handleRegister(event)}
-                        disabled={registeringId === (event._id || event.id)}
-                        style={{
-                          width: '100%',
-                          padding: '10px',
-                          background: 'linear-gradient(135deg, #059669, #10b981)',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '10px',
-                          fontWeight: 700,
-                          fontSize: '13px',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {registeringId === (event._id || event.id) ? 'Inscription…' : "S'inscrire"}
-                      </button>
+                    {event.isPublic && (event.isCompetition || ANIMAL_EVENT_TYPES.has(event.type)) && !event.userRegistered && (
+                      <>
+                        {registerModal === (event._id || event.id) && (
+                          <div style={{ padding: 10, background: '#f9fafb', borderRadius: 10, marginBottom: 4 }}>
+                            <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 6 }}>
+                              Nom de votre animal (pour la compétition)
+                            </label>
+                            <input
+                              type="text"
+                              value={registerPetName}
+                              onChange={(e) => setRegisterPetName(e.target.value)}
+                              placeholder="Ex. Rex, Luna…"
+                              style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #d1d5db', marginBottom: 8 }}
+                            />
+                            <div style={{ display: 'flex', gap: 8 }}>
+                              <button
+                                type="button"
+                                onClick={() => handleRegister(event)}
+                                disabled={registeringId === (event._id || event.id)}
+                                style={{
+                                  flex: 1,
+                                  padding: '8px',
+                                  background: 'linear-gradient(135deg, #059669, #10b981)',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: 8,
+                                  fontWeight: 700,
+                                  fontSize: 12,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                {registeringId === (event._id || event.id) ? 'Inscription…' : 'Confirmer'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => { setRegisterModal(null); setRegisterPetName(''); }}
+                                style={{ padding: '8px 12px', background: '#f3f4f6', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}
+                              >
+                                Annuler
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        {registerModal !== (event._id || event.id) && (
+                          <button
+                            type="button"
+                            onClick={() => handleRegister(event)}
+                            disabled={registeringId === (event._id || event.id)}
+                            style={{
+                              width: '100%',
+                              padding: '10px',
+                              background: 'linear-gradient(135deg, #059669, #10b981)',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '10px',
+                              fontWeight: 700,
+                              fontSize: '13px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {registeringId === (event._id || event.id) ? 'Inscription…' : "S'inscrire à la compétition"}
+                          </button>
+                        )}
+                      </>
                     )}
                     <button
                       onClick={() => {

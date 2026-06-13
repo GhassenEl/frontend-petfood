@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
+import { DEMO_ADMIN_USERS, DEMO_ADMIN_VET_RECORDS, withDemoFallback } from '../utils/adminDemoData';
 
 const emptyForm = {
   petName: '',
@@ -44,10 +45,10 @@ const AdminVeterinary = () => {
   const fetchRecords = async () => {
     try {
       const res = await api.get('/veterinary');
-      setRecords(res.data || []);
+      setRecords(withDemoFallback(res.data || [], DEMO_ADMIN_VET_RECORDS));
     } catch (error) {
       console.error('Erreur chargement fiches', error);
-      setRecords([]);
+      setRecords(DEMO_ADMIN_VET_RECORDS);
     } finally {
       setLoading(false);
     }
@@ -56,7 +57,7 @@ const AdminVeterinary = () => {
   const fetchUsers = async () => {
     try {
       const res = await api.get('/users');
-      setUsers(res.data || []);
+      setUsers(withDemoFallback(res.data || [], DEMO_ADMIN_USERS.filter((u) => u.role === 'client')));
     } catch (error) {
       console.error('Users load error', error);
     }

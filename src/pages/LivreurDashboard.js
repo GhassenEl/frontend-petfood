@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
+import { livreurCancelOrder } from '../services/orderService';
+import { withDemoDashboard, withDemoStats } from '../utils/livreurDemoData';
 import LivreurMissionPanel from '../components/LivreurMissionPanel';
 import LivreurDashboardCharts from '../components/LivreurDashboardCharts';
 import DeliveryProofModal from '../components/DeliveryProofModal';
@@ -16,6 +18,7 @@ const LivreurDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [proofOrder, setProofOrder] = useState(null);
   const [claiming, setClaiming] = useState(null);
+  const [cancelling, setCancelling] = useState(null);
 
   const isAvailable = data?.livreur?.isAvailable !== false;
   useLivreurGps(isAvailable && (data?.stats?.activeDeliveries > 0 || data?.pool?.length > 0));
@@ -23,7 +26,7 @@ const LivreurDashboard = () => {
   useEffect(() => {
     fetchData();
     api.get('/livreur/stats')
-      .then(({ data: s }) => setChartStats(s))
+      .then(({ data: s }) => setChartStats(withDemoStats(s)))
       .catch(console.error)
       .finally(() => setChartsLoading(false));
   }, []);
@@ -31,9 +34,10 @@ const LivreurDashboard = () => {
   const fetchData = async () => {
     try {
       const { data: dash } = await api.get('/livreur/dashboard');
-      setData(dash);
+      setData(withDemoDashboard(dash));
     } catch (error) {
       console.error('Livreur dashboard error:', error);
+      setData(withDemoDashboard(null));
     } finally {
       setLoading(false);
     }
@@ -56,6 +60,20 @@ const LivreurDashboard = () => {
     await api.post(`/livreur/orders/${id}/complete`, payload);
     setProofOrder(null);
     fetchData();
+  };
+
+  const cancelDelivery = async (orderId) => {
+    const reason = window.prompt('Motif d\'annulation (optionnel) :');
+    if (reason === null) return;
+    setCancelling(orderId);
+    try {
+      await livreurCancelOrder(orderId, { reason: reason?.trim() || undefined });
+      fetchData();
+    } catch (error) {
+      window.alert(error.response?.data?.error || 'Impossible d\'annuler cette course');
+    } finally {
+      setCancelling(null);
+    }
   };
 
   if (loading) {
@@ -174,7 +192,17 @@ const LivreurDashboard = () => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {active.map((order) => renderOrderRow(order, (
-              <button type="button" onClick={() => setProofOrder(order)} style={btnGreen}>✅ Clôturer</button>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button type="button" onClick={() => setProofOrder(order)} style={btnGreen}>✅ Clôturer</button>
+                <button
+                  type="button"
+                  onClick={() => cancelDelivery(oid(order))}
+                  disabled={cancelling === oid(order)}
+                  style={btnCancel}
+                >
+                  {cancelling === oid(order) ? '…' : 'Annuler'}
+                </button>
+              </div>
             )))}
           </div>
         )}
@@ -217,6 +245,10 @@ const btnGreen = {
 };
 const btnOrange = {
   padding: '8px 16px', background: '#f39c12', color: 'white', border: 'none',
+  borderRadius: 10, fontWeight: 600, cursor: 'pointer',
+};
+const btnCancel = {
+  padding: '8px 16px', background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca',
   borderRadius: 10, fontWeight: 600, cursor: 'pointer',
 };
 

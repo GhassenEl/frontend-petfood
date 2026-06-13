@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Package, FileText, Star, AlertCircle, Calendar } from 'lucide-react';
 import api from '../utils/api';
+import { buildDemoHistoryEntries, DEMO_ADMIN_ORDERS, DEMO_ADMIN_INVOICES, DEMO_ADMIN_REVIEWS, DEMO_ADMIN_COMPLAINTS, withDemoFallback } from '../utils/adminDemoData';
 
 const typeConfig = {
   order: { icon: <Package size={16} />, color: '#e67e22', bg: 'rgba(230,126,34,0.1)', label: 'Commande' },
@@ -25,40 +26,45 @@ const AdminHistory = () => {
           api.get('/complaints/all'),
         ]);
 
+        const orders = withDemoFallback(ordersRes.data || [], DEMO_ADMIN_ORDERS);
+        const invoices = withDemoFallback(invoicesRes.data || [], DEMO_ADMIN_INVOICES);
+        const reviews = withDemoFallback(reviewsRes.data || [], DEMO_ADMIN_REVIEWS);
+        const complaints = withDemoFallback(complaintsRes.data || [], DEMO_ADMIN_COMPLAINTS);
+
         const combined = [
-          ...(ordersRes.data || []).map((order) => ({
-            id: `order-${order._id}`,
+          ...orders.map((order) => ({
+            id: `order-${order._id || order.id}`,
             date: order.createdAt,
-            title: `Commande #${order._id.slice(-6)}`,
-            description: `${order.userId?.email || 'client'} — ${order.total} DT — ${order.status}`,
+            title: `Commande #${String(order._id || order.id).slice(-6)}`,
+            description: `${order.user?.email || order.userId?.email || 'client'} — ${order.total} DT — ${order.status}`,
             type: 'order',
           })),
-          ...(invoicesRes.data || []).map((invoice) => ({
-            id: `invoice-${invoice._id}`,
+          ...invoices.map((invoice) => ({
+            id: `invoice-${invoice._id || invoice.id}`,
             date: invoice.issuedAt,
-            title: `Facture #${invoice._id.slice(-6)}`,
+            title: `Facture #${String(invoice._id || invoice.id).slice(-6)}`,
             description: `${invoice.userId?.email || 'client'} — ${invoice.amount} DT — ${invoice.status}`,
             type: 'invoice',
           })),
-          ...(reviewsRes.data || []).map((review) => ({
-            id: `review-${review._id}`,
+          ...reviews.map((review) => ({
+            id: `review-${review._id || review.id}`,
             date: review.createdAt,
             title: `Avis sur ${review.productId?.name || 'produit'}`,
-            description: `${review.userId?.email || 'client'} — note ${review.rating}/5`,
+            description: `${review.user?.email || review.userId?.email || 'client'} — note ${review.rating}/5`,
             type: 'review',
           })),
-          ...(complaintsRes.data || []).map((complaint) => ({
-            id: `complaint-${complaint._id}`,
+          ...complaints.map((complaint) => ({
+            id: `complaint-${complaint._id || complaint.id}`,
             date: complaint.createdAt,
             title: `Réclamation: ${complaint.subject}`,
-            description: `${complaint.userId?.email || 'client'} — ${complaint.status}`,
+            description: `${complaint.user?.email || complaint.userId?.email || 'client'} — ${complaint.status}`,
             type: 'complaint',
           })),
         ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        setEntries(combined);
+        setEntries(combined.length ? combined : buildDemoHistoryEntries());
       } catch (error) {
-        setEntries([]);
+        setEntries(buildDemoHistoryEntries());
       } finally {
         setLoading(false);
       }

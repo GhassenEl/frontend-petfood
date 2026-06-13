@@ -18,7 +18,6 @@ export const PLATFORM_SERVICE_TABS = [
   { id: 'grooming', label: '✂️ Toilettage' },
   { id: 'boarding', label: '🏠 Pension' },
   { id: 'training', label: '🎓 Dressage' },
-  { id: 'delivery', label: '🚚 Livraison' },
   { id: 'veterinary', label: '🩺 Vétérinaire' },
 ];
 

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Package, Truck, CheckCircle, XCircle, ChevronDown, ChevronUp, Phone, MapPin, Calendar, CreditCard, AlertTriangle } from 'lucide-react';
 import api from '../utils/api';
+import { livreurCancelOrder } from '../services/orderService';
+import { DEMO_LIVREUR_ORDERS, withDemoFallback } from '../utils/livreurDemoData';
 import { getPaymentLabel } from '../constants/paymentMethods';
 import DeliveryProofModal from '../components/DeliveryProofModal';
 import useLivreurGps from '../hooks/useLivreurGps';
@@ -26,6 +28,7 @@ const LivreurOrdersPage = () => {
   const [sortBy, setSortBy] = useState('date-desc');
   const [proofOrder, setProofOrder] = useState(null);
   const [claiming, setClaiming] = useState(null);
+  const [cancelling, setCancelling] = useState(null);
 
   const hasActive = orders.some((o) => o.status === 'shipped');
   useLivreurGps(hasActive);
@@ -69,11 +72,13 @@ const LivreurOrdersPage = () => {
   const fetchOrders = async () => {
     try {
       const res = await api.get('/orders');
-      const data = res.data || [];
+      const data = withDemoFallback(res.data || [], DEMO_LIVREUR_ORDERS);
       setOrders(data);
       setFilteredOrders(data);
     } catch (error) {
       console.error('Orders error:', error);
+      setOrders(DEMO_LIVREUR_ORDERS);
+      setFilteredOrders(DEMO_LIVREUR_ORDERS);
     } finally {
       setLoading(false);
     }
@@ -106,6 +111,23 @@ const LivreurOrdersPage = () => {
       window.alert('Signalement envoyé à l\'équipe');
     } catch (error) {
       window.alert(error.response?.data?.error || 'Échec du signalement');
+    }
+  };
+
+  const cancelDelivery = async (orderId) => {
+    const reason = window.prompt(
+      'Motif d\'annulation (optionnel) — la commande repassera en file d\'attente pour un autre livreur.',
+    );
+    if (reason === null) return;
+    setCancelling(orderId);
+    try {
+      await livreurCancelOrder(orderId, { reason: reason?.trim() || undefined });
+      fetchOrders();
+      window.alert('Course annulée — commande remise en attente.');
+    } catch (error) {
+      window.alert(error.response?.data?.error || 'Impossible d\'annuler cette course');
+    } finally {
+      setCancelling(null);
     }
   };
 
@@ -323,6 +345,28 @@ const LivreurOrdersPage = () => {
                           {claiming === orderId ? '…' : action.label}
                         </button>
                       )}
+                      {order.status === 'shipped' && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            cancelDelivery(orderId);
+                          }}
+                          disabled={cancelling === orderId}
+                          style={{
+                            padding: '8px 14px',
+                            background: '#fef2f2',
+                            color: '#b91c1c',
+                            border: '1px solid #fecaca',
+                            borderRadius: '10px',
+                            fontWeight: 600,
+                            fontSize: '0.85rem',
+                            cursor: cancelling === orderId ? 'wait' : 'pointer',
+                          }}
+                        >
+                          {cancelling === orderId ? '…' : 'Annuler'}
+                        </button>
+                      )}
                       {isExpanded ? <ChevronUp size={18} color="#888" /> : <ChevronDown size={18} color="#888" />}
                     </div>
                   </div>
@@ -408,6 +452,21 @@ const LivreurOrdersPage = () => {
                                 <MapPin size={16} />
                                 Google Maps
                               </a>
+                            )}
+                            {order.status === 'shipped' && (
+                              <button
+                                type="button"
+                                onClick={() => cancelDelivery(orderId)}
+                                disabled={cancelling === orderId}
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 16px',
+                                  background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca',
+                                  borderRadius: 10, fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer',
+                                }}
+                              >
+                                <XCircle size={16} />
+                                {cancelling === orderId ? 'Annulation…' : 'Annuler la course'}
+                              </button>
                             )}
                             {['pending', 'shipped'].includes(order.status) && (
                               <button

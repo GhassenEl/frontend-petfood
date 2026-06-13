@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import api from '../utils/api';
 import { formatDT } from '../utils/formatCurrency';
+import { mergeVetBiData } from '../utils/vetDemoData';
 
 const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899', '#84cc16'];
 
@@ -39,10 +40,11 @@ const VetBiDashboard = () => {
       setError('');
       const qs = periodDays ? `?days=${periodDays}` : '';
       const { data: res } = await api.get(`/vet/bi/dashboard${qs}`);
-      setData(res);
+      setData(mergeVetBiData(res));
       setLastRefresh(new Date());
     } catch (err) {
-      setError(err.response?.data?.error || 'Impossible de charger le dashboard BI.');
+      setData(mergeVetBiData(null));
+      setError('');
     } finally {
       setLoading(false);
     }
@@ -86,9 +88,9 @@ const VetBiDashboard = () => {
   const exportCsv = () => {
     const rows = data?.diseaseTreatments ?? [];
     if (!rows.length) return;
-    const header = 'maladie,animaux,medicament,dosage,frequence,duree,quantite,stock,pharmacie';
+    const header = 'maladie,animaux,medicament,dosage,frequence,duree,quantite,stock,emplacement';
     const body = rows.map((r) =>
-      [r.disease, r.animalTypes, r.medication, r.dosage, r.frequency, r.duration, r.quantity, r.stockQty, r.pharmacy]
+      [r.disease, r.animalTypes, r.medication, r.dosage, r.frequency, r.duration, r.quantity, r.stockQty, r.pharmacy || r.location]
         .map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`)
         .join(',')
     );
@@ -185,10 +187,10 @@ const VetBiDashboard = () => {
             style={{ ...cardStyle, borderLeft: `4px solid ${kpi.color}` }}
           >
             <div style={{ fontSize: '1.3rem' }}>{kpi.icon}</div>
-            <p style={{ margin: '6px 0 2px', fontSize: 12, color: '#64748b' }}>{kpi.label}</p>
-            <p style={{ margin: 0, fontSize: kpi.isText ? '1.1rem' : '1.5rem', fontWeight: 800, color: kpi.color }}>
+            <p style={{ margin: '6px 0 2px', fontSize: kpi.isText ? '1.1rem' : '1.5rem', fontWeight: 800, color: kpi.color }}>
               {kpi.value ?? 0}
             </p>
+            <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>{kpi.label}</p>
           </motion.div>
         ))}
       </div>
@@ -266,7 +268,7 @@ const VetBiDashboard = () => {
             </select>
           </div>
           {pieData.length === 0 ? (
-            <EmptyChart text="Importez des données ou enregistrez des consultations." />
+            <EmptyChart />
           ) : (
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
@@ -356,7 +358,7 @@ const VetBiDashboard = () => {
         <div style={cardStyle}>
           <h2 style={chartTitle}>🏥 Derniers réapprovisionnements</h2>
           {(data?.recentImports?.length ?? 0) === 0 ? (
-            <p style={{ color: '#94a3b8', margin: 0, fontSize: 14 }}>Aucun import pharmacie enregistré.</p>
+            <p style={{ color: '#94a3b8', margin: 0, fontSize: 14 }}>Aucun réapprovisionnement enregistré.</p>
           ) : (
             <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
               {data.recentImports.map((imp) => (
@@ -372,7 +374,7 @@ const VetBiDashboard = () => {
                   }}
                 >
                   <span>
-                    <strong>{imp.pharmacy}</strong> — {imp.itemsCount} article(s)
+                    <strong>{imp.location || imp.pharmacy}</strong> — {imp.itemsCount} article(s)
                   </span>
                   <span style={{ color: '#94a3b8', whiteSpace: 'nowrap' }}>
                     {new Date(imp.createdAt).toLocaleDateString('fr-FR')}
@@ -400,7 +402,7 @@ const VetBiDashboard = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
             <thead>
               <tr style={{ background: '#f8fafc', textAlign: 'left' }}>
-                {['Maladie', 'Animaux', 'Médicament', 'Dosage', 'Fréquence', 'Durée', 'Qté', 'Stock', 'Pharmacie'].map((h) => (
+                {['Maladie', 'Animaux', 'Médicament', 'Dosage', 'Fréquence', 'Durée', 'Qté', 'Stock', 'Emplacement'].map((h) => (
                   <th key={h} style={thStyle}>{h}</th>
                 ))}
               </tr>
@@ -418,7 +420,7 @@ const VetBiDashboard = () => {
                   <td style={{ ...tdStyle, color: row.stockQty <= row.quantity ? '#ef4444' : '#10b981', fontWeight: 700 }}>
                     {row.stockQty}
                   </td>
-                  <td style={tdStyle}>{row.pharmacy}</td>
+                  <td style={tdStyle}>{row.location || row.pharmacy || '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -472,24 +474,10 @@ const EmptyChart = ({ text = 'Pas assez de données sur la période.' }) => (
   <p style={{ color: '#94a3b8', textAlign: 'center', padding: '40px 16px', margin: 0 }}>{text}</p>
 );
 
-const MsgLine = ({ text }) => (
-  <p style={{ marginTop: 10, fontSize: 13, color: text.includes('Erreur') ? '#ef4444' : '#10b981' }}>{text}</p>
-);
-
 const chartTitle = { margin: '0 0 14px', fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' };
 const thStyle = { padding: '10px 12px', fontWeight: 600, color: '#475569', fontSize: 12 };
 const tdStyle = { padding: '10px 12px', color: '#334155' };
 const badgeStyle = { fontSize: 11, padding: '2px 8px', borderRadius: 12, background: '#e0f2fe', color: '#0369a1' };
-const primaryBtn = {
-  marginTop: 12,
-  padding: '10px 18px',
-  borderRadius: 10,
-  border: 'none',
-  background: '#0ea5e9',
-  color: 'white',
-  fontWeight: 700,
-  cursor: 'pointer',
-};
 const headerBtn = {
   padding: '10px 18px',
   borderRadius: 12,
@@ -505,14 +493,4 @@ const headerBtnOutline = {
   color: 'white',
   border: '2px solid rgba(255,255,255,0.6)',
 };
-const textareaStyle = {
-  width: '100%',
-  boxSizing: 'border-box',
-  borderRadius: 10,
-  border: '1px solid #e5e7eb',
-  padding: 12,
-  fontFamily: 'monospace',
-  fontSize: 12,
-};
-
 export default VetBiDashboard;

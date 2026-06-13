@@ -61,12 +61,12 @@ const PaymentMethodPicker = ({ value, onChange, layout = 'grid' }) => {
                 style={{
                   display: 'block',
                   fontSize: '10px',
-                  color: '#6b7280',
+                  color: method.tunisian ? '#0369a1' : '#6b7280',
                   marginTop: '4px',
                   fontWeight: 500,
                 }}
               >
-                Paiement en ligne
+                {method.tunisian ? 'Paiement TN en ligne' : 'Paiement en ligne'}
               </span>
             )}
             {method.id === 'wallet' && (

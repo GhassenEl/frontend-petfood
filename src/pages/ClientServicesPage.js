@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Calendar, Send, Trash2, CreditCard } from 'lucide-react';
-import ClientOwnerEmotionPanel from '../components/ClientOwnerEmotionPanel';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { Calendar, Send, Trash2, CreditCard, Heart, ChevronRight } from 'lucide-react';
 import PaymentMethodPicker from '../components/PaymentMethodPicker';
 import PaymentMethodDetails from '../components/PaymentMethodDetails';
+import ClientServiceRatingsPanel from '../components/ClientServiceRatingsPanel';
 import { isWalletPayment } from '../constants/paymentMethods';
 import { getWallet } from '../services/walletService';
 import {
@@ -15,7 +14,15 @@ import {
   cancelServiceBooking,
   estimateServicePrice,
 } from '../services/serviceBookingService';
+import { fetchRehabOverview, applyAdoption } from '../services/ecosystemService';
 import { createStripeIntent, processPayPalPayment } from '../utils/onlinePayment';
+import { SERVICE_RATE_CARDS } from '../utils/clientDemoData';
+import {
+  mergeServiceCatalog,
+  estimateLocalServicePrice,
+  SERVICES_WITH_DATE_RANGE,
+  getDefaultServiceSlots,
+} from '../utils/serviceCatalogUtils';
 import './ClientComplaintsPage.css';
 import './ClientServicesPage.css';
 
@@ -42,12 +49,16 @@ const ClientServicesPage = () => {
   const [slots, setSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState('');
   const [estimatedPrice, setEstimatedPrice] = useState(null);
+  const [priceNote, setPriceNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [listLoading, setListLoading] = useState(true);
   const [payModal, setPayModal] = useState(null);
   const [payMethod, setPayMethod] = useState('wallet');
   const [walletBalance, setWalletBalance] = useState(0);
   const [toast, setToast] = useState(null);
+  const [rehabData, setRehabData] = useState(null);
+  const [rehabLoading, setRehabLoading] = useState(true);
+  const [adoptMsg, setAdoptMsg] = useState('');
 
   const showToast = (text, type = 'success') => {
     setToast({ text, type });
@@ -62,10 +73,11 @@ const ClientServicesPage = () => {
         getMyServiceBookings(),
         getWallet().catch(() => ({ balance: 0 })),
       ]);
-      setCatalog(cat);
+      setCatalog(mergeServiceCatalog(cat));
       setBookings(list);
       setWalletBalance(wallet.balance || 0);
     } catch {
+      setCatalog(mergeServiceCatalog([]));
       setBookings([]);
     } finally {
       setListLoading(false);
@@ -76,6 +88,34 @@ const ClientServicesPage = () => {
     load();
   }, []);
 
+  const loadRehab = useCallback(async () => {
+    setRehabLoading(true);
+    try {
+      setRehabData(await fetchRehabOverview({ scaredOnly: 'true' }));
+    } catch {
+      setRehabData(null);
+    } finally {
+      setRehabLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadRehab();
+  }, [loadRehab]);
+
+  const handleAdoptInterest = async (animalId, name) => {
+    setAdoptMsg('');
+    try {
+      await applyAdoption({
+        shelterAnimalId: animalId,
+        message: `Je souhaite adopter ${name} après sa réhabilitation — foyer calme et patient.`,
+      });
+      setAdoptMsg('Demande envoyée — le refuge vous recontactera.');
+    } catch (e) {
+      setAdoptMsg(e.response?.data?.error || 'Demande impossible');
+    }
+  };
+
   useEffect(() => {
     getWallet().then((w) => setWalletBalance(w?.balance ?? 0)).catch(() => setWalletBalance(0));
   }, [payModal]);
@@ -84,10 +124,10 @@ const ClientServicesPage = () => {
     (async () => {
       try {
         const data = await getServiceSlots(form.date);
-        setSlots(data.slots || []);
+        setSlots(data.slots?.length ? data.slots : getDefaultServiceSlots(form.date));
         setSelectedSlot('');
       } catch {
-        setSlots([]);
+        setSlots(getDefaultServiceSlots(form.date));
       }
     })();
   }, [form.date]);
@@ -98,19 +138,30 @@ const ClientServicesPage = () => {
         const est = await estimateServicePrice(
           serviceType,
           selectedSlot || form.date,
-          serviceType === 'boarding' ? form.endDate : undefined
+          SERVICES_WITH_DATE_RANGE.includes(serviceType) ? form.endDate : undefined
         );
         setEstimatedPrice(est.price);
+        setPriceNote('');
       } catch {
-        setEstimatedPrice(null);
+        const local = estimateLocalServicePrice(
+          serviceType,
+          form.date,
+          SERVICES_WITH_DATE_RANGE.includes(serviceType) ? form.endDate : undefined
+        );
+        setEstimatedPrice(local.price);
+        setPriceNote(local.discountNote || '');
       }
     })();
   }, [serviceType, form.date, form.endDate, selectedSlot]);
 
   const activeService = useMemo(
-    () => catalog.find((s) => s.type === serviceType) || catalog[0],
+    () => catalog.find((s) => s.type === serviceType) || SERVICE_RATE_CARDS.find((s) => s.type === serviceType),
     [catalog, serviceType]
   );
+
+  const displayCatalog = catalog.length ? catalog : mergeServiceCatalog([]);
+
+  const usesDateRange = SERVICES_WITH_DATE_RANGE.includes(serviceType);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -118,12 +169,12 @@ const ClientServicesPage = () => {
       showToast('Indiquez le nom de votre animal.', 'error');
       return;
     }
-    if (!selectedSlot && serviceType !== 'boarding') {
+    if (!selectedSlot && !usesDateRange) {
       showToast('Choisissez un créneau horaire.', 'error');
       return;
     }
-    if (serviceType === 'boarding' && !form.endDate) {
-      showToast('Indiquez la date de fin de pension.', 'error');
+    if (usesDateRange && !form.endDate) {
+      showToast('Indiquez la date de fin.', 'error');
       return;
     }
 
@@ -136,7 +187,7 @@ const ClientServicesPage = () => {
         notes: form.notes.trim() || undefined,
         slotStart: selectedSlot || undefined,
         date: form.date,
-        endDate: serviceType === 'boarding' ? form.endDate : undefined,
+        endDate: usesDateRange ? form.endDate : undefined,
       });
       await load();
       setPayModal(booking);
@@ -202,10 +253,10 @@ const ClientServicesPage = () => {
       {toast && <div className={`cc-toast ${toast.type}`}>{toast.text}</div>}
 
       <header className="cc-hero cc-hero--services">
-        <h1>🐾 Réservation de services</h1>
+        <h1>🐾 Mes services PetfoodTN</h1>
         <p>
-          Toilettage, pension et dressage — réservez en ligne et payez via vos moyens de paiement
-          (portefeuille, carte, PayPal).
+          Toilettage, coupe griffes, nettoyage dentaire, forfait bien-être (-10 %), garde à domicile,
+          pension et dressage — réservez en ligne et consultez les tarifs & avis clients.
         </p>
         {walletBalance != null && (
           <p style={{ marginTop: 8, fontSize: '0.85rem' }}>
@@ -214,32 +265,26 @@ const ClientServicesPage = () => {
         )}
       </header>
 
-      <ClientOwnerEmotionPanel compact />
-
-      <p style={{ marginBottom: 16, fontSize: 14 }}>
-        Après votre prestation, partagez votre{' '}
-        <Link to="/client-emotions" style={{ color: '#be185d', fontWeight: 700 }}>
-          ressenti émotionnel
-        </Link>{' '}
-        (toilettage, dressage, pension, livraison, vétérinaire).
-      </p>
+      <section style={{ marginBottom: 24 }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: 12 }}>Tarifs & avis par service</h2>
+        <ClientServiceRatingsPanel showToast={showToast} />
+      </section>
 
       <div className="cc-service-grid">
-        {(catalog.length ? catalog : [
-          { type: 'grooming', label: 'Toilettage', description: 'Soins esthétiques', basePrice: 45, unit: 'session', icon: '✂️' },
-          { type: 'boarding', label: 'Pension', description: 'Hébergement', basePrice: 35, unit: 'jour', icon: '🏠' },
-          { type: 'training', label: 'Dressage', description: 'Éducation canine', basePrice: 60, unit: 'session', icon: '🎓' },
-        ]).map((s) => (
+        {displayCatalog.map((s) => (
           <button
             key={s.type}
             type="button"
             className={`cc-service-card ${serviceType === s.type ? 'active' : ''}`}
             onClick={() => setServiceType(s.type)}
           >
+            {s.badge && <span className="cc-service-badge">{s.badge}</span>}
             <div className="icon">{s.icon}</div>
             <h3>{s.label}</h3>
-            <p>{s.description}</p>
-            <span className="cc-price-tag">{s.basePrice} DT / {s.unit}</span>
+            <p>{s.description || `${s.avgRating || '—'} ★ · ${s.reviewCount || 0} avis`}</p>
+            <span className="cc-price-tag">
+              {s.basePrice > 0 ? `${s.basePrice} DT / ${s.unit}` : 'Sur demande'}
+            </span>
           </button>
         ))}
       </div>
@@ -271,9 +316,9 @@ const ClientServicesPage = () => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: serviceType === 'boarding' ? '1fr 1fr' : '1fr', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: usesDateRange ? '1fr 1fr' : '1fr', gap: 12 }}>
             <div className="cc-field">
-              <label>{serviceType === 'boarding' ? 'Arrivée' : 'Date'}</label>
+              <label>{usesDateRange ? 'Arrivée / début' : 'Date'}</label>
               <input
                 type="date"
                 required
@@ -282,9 +327,9 @@ const ClientServicesPage = () => {
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
               />
             </div>
-            {serviceType === 'boarding' && (
+            {usesDateRange && (
               <div className="cc-field">
-                <label>Départ</label>
+                <label>{serviceType === 'boarding' ? 'Départ' : 'Fin de garde'}</label>
                 <input
                   type="date"
                   required
@@ -296,7 +341,7 @@ const ClientServicesPage = () => {
             )}
           </div>
 
-          {serviceType !== 'boarding' && (
+          {!usesDateRange && (
             <div className="cc-field">
               <label>Créneau horaire</label>
               <div className="cc-slots">
@@ -330,9 +375,19 @@ const ClientServicesPage = () => {
           </div>
 
           {estimatedPrice != null && (
-            <p style={{ fontWeight: 800, color: '#065f46', marginBottom: 16 }}>
-              Total estimé : {estimatedPrice} DT
-            </p>
+            <div style={{ marginBottom: 16 }}>
+              <p style={{ fontWeight: 800, color: '#065f46', margin: 0 }}>
+                Total estimé : {estimatedPrice} DT
+              </p>
+              {priceNote && (
+                <p style={{ margin: '6px 0 0', fontSize: 13, color: '#047857' }}>{priceNote}</p>
+              )}
+              {serviceType === 'wellness_pack' && (
+                <p style={{ margin: '6px 0 0', fontSize: 13, color: '#64748b' }}>
+                  Inclus : toilettage (45 DT) + bain (35 DT) + griffes (15 DT)
+                </p>
+              )}
+            </div>
           )}
 
           <button type="submit" className="cc-submit services" disabled={loading}>
@@ -394,6 +449,72 @@ const ClientServicesPage = () => {
           ))}
         </div>
       )}
+
+      <section className="cc-form-card" style={{ marginTop: 32, background: 'linear-gradient(135deg, #ecfdf5, #f0fdf4)' }}>
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Heart size={20} color="#059669" />
+          Réhabilitation refuges
+        </h2>
+        <p style={{ color: '#64748b', fontSize: 14, marginBottom: 16 }}>
+          Soutenez la réhabilitation des animaux de refuge — programmes d&apos;adaptation et adoption responsable.
+        </p>
+        {adoptMsg && <p style={{ color: '#059669', fontWeight: 700, fontSize: 14 }}>{adoptMsg}</p>}
+        {rehabLoading ? (
+          <p style={{ color: '#94a3b8' }}>Chargement des programmes…</p>
+        ) : !(rehabData?.programs?.length) ? (
+          <p style={{ color: '#64748b' }}>Aucun programme actif pour le moment. Revenez bientôt.</p>
+        ) : (
+          <div style={{ display: 'grid', gap: 12 }}>
+            {rehabData.programs.slice(0, 4).map((prog) => {
+              const animal = prog.animal || {};
+              const id = prog.shelterAnimalId || animal.id;
+              const name = animal.name || 'Animal refuge';
+              return (
+                <div
+                  key={id}
+                  style={{
+                    background: '#fff',
+                    borderRadius: 12,
+                    padding: 14,
+                    border: '1px solid #bbf7d0',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 12,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div>
+                    <strong>{name}</strong>
+                    <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b' }}>
+                      {prog.phaseLabel || prog.status || 'Programme en cours'} · {animal.species || 'chien/chat'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleAdoptInterest(id, name)}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: 10,
+                      border: 'none',
+                      background: '#059669',
+                      color: 'white',
+                      fontWeight: 700,
+                      fontSize: 13,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                    }}
+                  >
+                    Soutenir / adopter <ChevronRight size={14} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
       {payModal && (
         <div className="cc-modal-overlay" onClick={() => setPayModal(null)}>

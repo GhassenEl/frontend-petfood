@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
+import { DEMO_VET_VACCINATIONS, withDemoFallback } from '../utils/vetDemoData';
 
 const statusStyle = (status, nextDue) => {
   const overdue = nextDue && new Date(nextDue) < new Date();
@@ -16,8 +17,8 @@ const VetVaccinationsPage = () => {
 
   useEffect(() => {
     api.get('/vet/vaccinations')
-      .then(({ data }) => setVaccines(data || []))
-      .catch(console.error)
+      .then(({ data }) => setVaccines(withDemoFallback(data, DEMO_VET_VACCINATIONS)))
+      .catch(() => setVaccines(DEMO_VET_VACCINATIONS))
       .finally(() => setLoading(false));
   }, []);
 

@@ -1,18 +1,21 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '../utils/api';
-import { jwtDecode } from 'jwt-decode';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import api, { AUTH_EVENTS } from '../utils/api';
 import {
   clearAuthToken,
   getStoredToken,
   persistAuthToken,
 } from '../utils/authStorage';
 import { mapAuthError } from '../utils/authErrors';
+import {
+  emitSessionExpiring,
+  isTokenExpired,
+  isValidToken,
+  userFromToken,
+  validateTokenClaims,
+} from '../utils/jwtSecurity';
 
-const safeJsonError = (err) => {
-  if (!err) return null;
-  if (typeof err === 'string') return err;
-  return err?.message || err?.error || err?.backendErrorMessage || err?.toString?.() || null;
-};
+const SESSION_CHECK_MS = 30_000;
+const SESSION_WARNING_MS = 5 * 60 * 1000;
 
 const AuthContext = createContext();
 
@@ -26,39 +29,61 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null); // Start with null, check localStorage in effect
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
 
-  // Initialize auth state safely
+  const applySession = useCallback((nextToken, apiUser = null) => {
+    if (!nextToken) {
+      setToken(null);
+      setUser(null);
+      delete api.defaults.headers.common.Authorization;
+      return { ok: false };
+    }
+
+    const validation = validateTokenClaims(nextToken);
+    if (!validation.valid) {
+      clearAuthToken();
+      setToken(null);
+      setUser(null);
+      delete api.defaults.headers.common.Authorization;
+      return { ok: false, reason: validation.reason };
+    }
+
+    const sessionUser = userFromToken(validation.decoded, apiUser);
+    setToken(nextToken);
+    setUser(sessionUser);
+    api.defaults.headers.common.Authorization = `Bearer ${nextToken}`;
+    return { ok: true, user: sessionUser };
+  }, []);
+
+  const logout = useCallback(async () => {
+    const storedToken = getStoredToken();
+    if (storedToken) {
+      try {
+        await api.post('/auth/logout', {}, { _skipAuthRefresh: true });
+      } catch {
+        // Ignore — local logout still required
+      }
+    }
+    clearAuthToken();
+    setToken(null);
+    setUser(null);
+    delete api.defaults.headers.common.Authorization;
+  }, []);
+
   useEffect(() => {
     const initializeAuth = async () => {
       try {
         const storedToken = getStoredToken();
-        
         if (storedToken) {
-          // Validate token before setting
-          try {
-            const decoded = jwtDecode(storedToken);
-            
-            if (decoded.exp && decoded.exp * 1000 < Date.now()) {
-              clearAuthToken();
-              setToken(null);
-              setUser(null);
-            } else {
-              setToken(storedToken);
-              setUser(decoded);
-              api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-            }
-          } catch (decodeError) {
-            console.error('❌ Invalid token, clearing:', decodeError.message);
-            clearAuthToken();
-            setToken(null);
-            setUser(null);
+          const result = applySession(storedToken);
+          if (!result.ok) {
+            console.warn('Session JWT invalide au démarrage:', result.reason);
           }
         }
       } catch (error) {
-        console.error('💥 Auth initialization error:', error);
+        console.error('Erreur initialisation auth:', error);
         setAuthError(error.message);
         clearAuthToken();
         setToken(null);
@@ -69,17 +94,77 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeAuth();
-  }, []);
+  }, [applySession]);
+
+  useEffect(() => {
+    const onLogout = () => {
+      clearAuthToken();
+      setToken(null);
+      setUser(null);
+      delete api.defaults.headers.common.Authorization;
+    };
+
+    const onTokenRefreshed = (event) => {
+      const nextToken = event.detail?.token;
+      if (nextToken) {
+        applySession(nextToken, user);
+      }
+    };
+
+    window.addEventListener(AUTH_EVENTS.LOGOUT, onLogout);
+    window.addEventListener(AUTH_EVENTS.TOKEN_REFRESHED, onTokenRefreshed);
+    return () => {
+      window.removeEventListener(AUTH_EVENTS.LOGOUT, onLogout);
+      window.removeEventListener(AUTH_EVENTS.TOKEN_REFRESHED, onTokenRefreshed);
+    };
+  }, [applySession, user]);
+
+  useEffect(() => {
+    if (!token) return undefined;
+
+    let warned = false;
+
+    const checkSession = () => {
+      const storedToken = getStoredToken();
+      if (!storedToken || !isValidToken(storedToken)) {
+        logout();
+        if (!window.location.pathname.includes('/login')) {
+          window.location.assign('/login');
+        }
+        return;
+      }
+
+      if (isTokenExpired(storedToken, SESSION_WARNING_MS) && !warned) {
+        warned = true;
+        const decoded = validateTokenClaims(storedToken).decoded;
+        const expiresInMs = decoded?.exp ? decoded.exp * 1000 - Date.now() : 0;
+        emitSessionExpiring(Math.max(0, expiresInMs));
+      }
+    };
+
+    checkSession();
+    const intervalId = window.setInterval(checkSession, SESSION_CHECK_MS);
+    return () => window.clearInterval(intervalId);
+  }, [token, logout]);
 
   const login = async (email, password, rememberMe = false) => {
     try {
       const res = await api.post('/auth/login', { email, password });
-      const { token, user } = res.data;
-      persistAuthToken(token, rememberMe);
-      setToken(token);
-      setUser(user);
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      return { success: true, user };
+      const { token: accessToken, user: apiUser } = res.data;
+      const validation = validateTokenClaims(accessToken);
+      if (!validation.valid) {
+        return {
+          success: false,
+          error: 'Jeton de session invalide renvoyé par le serveur.',
+        };
+      }
+
+      persistAuthToken(accessToken, rememberMe);
+      const sessionUser = userFromToken(validation.decoded, apiUser);
+      setToken(accessToken);
+      setUser(sessionUser);
+      api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+      return { success: true, user: sessionUser };
     } catch (error) {
       const st = error.response?.status;
       if (!error.response || st === 502 || st === 503) {
@@ -103,12 +188,21 @@ export const AuthProvider = ({ children }) => {
   const register = async (data, rememberMe = false) => {
     try {
       const res = await api.post('/auth/register', data);
-      const { token, user } = res.data;
-      persistAuthToken(token, rememberMe);
-      setToken(token);
-      setUser(user);
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      return { success: true, user };
+      const { token: accessToken, user: apiUser } = res.data;
+      const validation = validateTokenClaims(accessToken);
+      if (!validation.valid) {
+        return {
+          success: false,
+          error: 'Jeton de session invalide renvoyé par le serveur.',
+        };
+      }
+
+      persistAuthToken(accessToken, rememberMe);
+      const sessionUser = userFromToken(validation.decoded, apiUser);
+      setToken(accessToken);
+      setUser(sessionUser);
+      api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+      return { success: true, user: sessionUser };
     } catch (error) {
       const st = error.response?.status;
       if (!error.response || st === 502 || st === 503) {
@@ -123,17 +217,10 @@ export const AuthProvider = ({ children }) => {
         success: false,
         error: mapAuthError(
           error.response?.data?.error || error.response?.data?.message,
-          'Erreur lors de l\'inscription.'
+          "Erreur lors de l'inscription."
         ),
       };
     }
-  };
-
-  const logout = () => {
-    clearAuthToken();
-    setToken(null);
-    setUser(null);
-    delete api.defaults.headers.common['Authorization'];
   };
 
   const value = {
@@ -144,13 +231,8 @@ export const AuthProvider = ({ children }) => {
     authError,
     login,
     register,
-    logout
+    logout,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-

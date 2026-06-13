@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
+import { DEMO_INVOICES, withDemoFallback } from '../utils/clientDemoData';
 import InvoicePayModal from '../components/InvoicePayModal';
 import { getPaymentLabel } from '../constants/paymentMethods';
 import { downloadInvoicePdf } from '../utils/invoicePdf';
@@ -20,7 +21,7 @@ const ClientInvoicesPage = () => {
     try {
       const res = await api.get('/invoices');
       const list = res.data || [];
-      setInvoices(list);
+      setInvoices(withDemoFallback(list, DEMO_INVOICES));
       if (orderIdFromUrl) {
         const match = list.find(
           (inv) =>

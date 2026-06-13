@@ -2,6 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { isHomeVisit, isOnlineVisit } from '../constants/visitModes';
 import api from '../utils/api';
+import {
+  DEMO_VET_APPOINTMENTS,
+  DEMO_VET_UNASSIGNED,
+  withDemoFallback,
+} from '../utils/vetDemoData';
 
 const statusLabel = {
   scheduled: 'Planifié',
@@ -58,10 +63,12 @@ const VetCalendarPage = () => {
         api.get('/vet/appointments'),
         api.get('/vet/appointments/unassigned'),
       ]);
-      setAppointments(Array.isArray(apptRes.data) ? apptRes.data : []);
-      setUnassigned(Array.isArray(unassignedRes.data) ? unassignedRes.data : []);
+      setAppointments(withDemoFallback(apptRes.data, DEMO_VET_APPOINTMENTS));
+      setUnassigned(withDemoFallback(unassignedRes.data, DEMO_VET_UNASSIGNED));
     } catch (error) {
       console.error('Calendar error:', error);
+      setAppointments(DEMO_VET_APPOINTMENTS);
+      setUnassigned(DEMO_VET_UNASSIGNED);
       showToast('Impossible de charger le calendrier.', 'error');
     } finally {
       setLoading(false);

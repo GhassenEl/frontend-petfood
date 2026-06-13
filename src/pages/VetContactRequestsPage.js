@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
+import { DEMO_VET_CONTACT_REQUESTS, isDemoVetId, withDemoFallback } from '../utils/vetDemoData';
 
 const STATUS_LABELS = {
   pending: 'En attente',
@@ -21,9 +22,10 @@ const VetContactRequestsPage = () => {
   const fetchRequests = async () => {
     try {
       const { data } = await api.get('/vet/contact-requests');
-      setRequests(data || []);
+      setRequests(withDemoFallback(data, DEMO_VET_CONTACT_REQUESTS));
     } catch (error) {
       console.error('Contact requests error:', error);
+      setRequests(DEMO_VET_CONTACT_REQUESTS);
     } finally {
       setLoading(false);
     }
@@ -41,8 +43,9 @@ const VetContactRequestsPage = () => {
   const submitResponse = async () => {
     if (!modal) return;
     setSubmitting(true);
+    const reqId = modal.id;
     try {
-      await api.put(`/vet/contact-requests/${modal.id}/respond`, {
+      await api.put(`/vet/contact-requests/${reqId}/respond`, {
         status: modal.status,
         response: responseText.trim() || undefined,
       });
@@ -50,7 +53,19 @@ const VetContactRequestsPage = () => {
       setResponseText('');
       fetchRequests();
     } catch {
-      window.alert('Erreur lors de la réponse');
+      if (isDemoVetId(reqId)) {
+        setRequests((prev) =>
+          prev.map((r) =>
+            (r.id || r._id) === reqId
+              ? { ...r, status: modal.status, response: responseText.trim() }
+              : r
+          )
+        );
+        setModal(null);
+        setResponseText('');
+      } else {
+        window.alert('Erreur lors de la réponse');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -90,6 +105,11 @@ const VetContactRequestsPage = () => {
             </span>
           </div>
           <p style={{ margin: '12px 0', color: '#444' }}>{req.message}</p>
+          {req.response && (
+            <p style={{ fontSize: '0.85rem', color: '#059669', marginTop: 8, fontStyle: 'italic' }}>
+              Réponse : {req.response}
+            </p>
+          )}
           {req.preferredDate && (
             <p style={{ fontSize: '0.85rem', color: '#888' }}>
               Date souhaitée : {new Date(req.preferredDate).toLocaleDateString('fr-FR')}

@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import api from '../utils/api';
 import { visitModeBadge } from '../constants/visitModes';
+import VetDashboardCharts from '../components/VetDashboardCharts';
+import { DEMO_VET_BI, withDemoDashboard, buildDemoVetWeekChart } from '../utils/vetDemoData';
 
 const STATUS_LABELS = {
   scheduled: 'Planifié',
@@ -44,9 +46,10 @@ const VetDashboard = () => {
     else setRefreshing(true);
     try {
       const { data: dash } = await api.get('/vet/dashboard');
-      setData(dash);
+      setData(withDemoDashboard(dash));
     } catch (error) {
       console.error('Vet dashboard error:', error);
+      setData(withDemoDashboard(null));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -81,7 +84,16 @@ const VetDashboard = () => {
     unassignedPreview = [],
     draftEntries = [],
     weekStats = {},
+    weekChart = [],
+    statusChart = [],
   } = data || {};
+
+  const chartWeek = weekChart?.length ? weekChart : buildDemoVetWeekChart();
+  const chartStatus = statusChart?.length ? statusChart : [
+    { name: 'Planifié', value: pendingAppointments },
+    { name: 'Terminé', value: weekStats.completedAppointments ?? 0 },
+    { name: 'Consultations', value: weekStats.consultations ?? 0 },
+  ];
 
   const todayLabel = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long',
@@ -219,8 +231,8 @@ const VetDashboard = () => {
                     <Icon size={22} color={kpi.color} />
                   </div>
                   <div>
-                    <p style={{ margin: 0, fontSize: 12, color: '#64748b', fontWeight: 600 }}>{kpi.label}</p>
-                    <p style={{ margin: '2px 0 0', fontSize: 26, fontWeight: 800, color: kpi.color }}>{kpi.value}</p>
+                    <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: kpi.color }}>{kpi.value}</p>
+                    <p style={{ margin: '2px 0 0', fontSize: 12, color: '#64748b', fontWeight: 600 }}>{kpi.label}</p>
                   </div>
                 </div>
               </Link>
@@ -250,6 +262,13 @@ const VetDashboard = () => {
           </div>
         ))}
       </div>
+
+      <VetDashboardCharts
+        weekChart={chartWeek}
+        statusChart={chartStatus}
+        casesByMonth={DEMO_VET_BI.casesByMonth}
+        animalDistribution={DEMO_VET_BI.animalDistribution}
+      />
 
       {/* Actions rapides */}
       <div style={{ marginBottom: 24 }}>
@@ -282,6 +301,46 @@ const VetDashboard = () => {
               </Link>
             );
           })}
+        </div>
+      </div>
+
+      {/* Aperçu BI clinique */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#334155' }}>Synthèse clinique (BI)</h2>
+          <Link to="/vet/bi" style={linkStyle}>Dashboard BI →</Link>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
+          <div style={{ background: 'white', borderRadius: 16, padding: 18, boxShadow: '0 2px 12px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' }}>
+            <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700 }}>📦 Réapprovisionnements</h3>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: 13 }}>
+              {DEMO_VET_BI.recentImports.slice(0, 3).map((imp) => (
+                <li key={imp.id} style={{ padding: '6px 0', borderBottom: '1px solid #f8fafc', color: '#475569' }}>
+                  <strong>{imp.pharmacy}</strong> — {imp.itemsCount} art. · {new Date(imp.createdAt).toLocaleDateString('fr-FR')}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div style={{ background: 'white', borderRadius: 16, padding: 18, boxShadow: '0 2px 12px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' }}>
+            <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700 }}>🔗 Référentiel maladie</h3>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: 13 }}>
+              {DEMO_VET_BI.diseaseTreatments.slice(0, 3).map((row) => (
+                <li key={row.id} style={{ padding: '6px 0', borderBottom: '1px solid #f8fafc', color: '#475569' }}>
+                  <strong>{row.disease}</strong> → {row.medication}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div style={{ background: 'white', borderRadius: 16, padding: 18, boxShadow: '0 2px 12px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' }}>
+            <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700 }}>🩺 Derniers cas cliniques</h3>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: 13 }}>
+              {DEMO_VET_BI.casesWithMeds.slice(0, 3).map((c) => (
+                <li key={c.id} style={{ padding: '6px 0', borderBottom: '1px solid #f8fafc', color: '#475569' }}>
+                  <strong>{c.petName}</strong> ({c.animalType}) — {c.diagnosis}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
 

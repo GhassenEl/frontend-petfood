@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { AlertCircle, Package, Truck, CreditCard, HelpCircle, Send, Trash2 } from 'lucide-react';
 import { getOrders } from '../services/orderService';
 import { getMyComplaints, createComplaint, deleteComplaint } from '../services/complaintService';
+import { DEMO_COMPLAINTS, withDemoFallback } from '../utils/clientDemoData';
 import './ClientComplaintsPage.css';
 
 const CATEGORIES = [
@@ -46,7 +47,7 @@ const ClientComplaintsPage = () => {
         getMyComplaints(),
         getOrders().catch(() => []),
       ]);
-      setComplaints(complaintList);
+      setComplaints(withDemoFallback(complaintList, DEMO_COMPLAINTS));
       setOrders(Array.isArray(orderList) ? orderList : []);
     } catch {
       setComplaints([]);

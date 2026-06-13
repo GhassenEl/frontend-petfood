@@ -108,7 +108,7 @@ const VetAppointmentDetailPage = () => {
 
   const runAiAnalysis = async () => {
     if (!consultation.symptoms?.trim()) {
-      window.alert('Renseignez les symptômes avant l\'analyse IA.');
+      window.alert('Renseignez les symptômes avant l\'analyse clinique.');
       return;
     }
     setAiLoading(true);
@@ -140,7 +140,7 @@ const VetAppointmentDetailPage = () => {
         }));
       }
     } catch {
-      window.alert('Analyse IA indisponible');
+      window.alert('Analyse clinique indisponible');
     } finally {
       setAiLoading(false);
     }
@@ -296,7 +296,7 @@ const VetAppointmentDetailPage = () => {
           </a>
         )}
         <button type="button" className="btn btn-outline" onClick={runAiAnalysis} disabled={aiLoading}>
-          {aiLoading ? 'IA…' : '🤖 Analyse IA'}
+          {aiLoading ? 'Analyse…' : '🔬 Analyse clinique'}
         </button>
         <button type="button" className="btn btn-outline" onClick={openDossier}>📁 Dossier médical</button>
         <button type="button" className="btn btn-primary" onClick={finalizeToDossier}>

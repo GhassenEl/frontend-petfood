@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Shield, Link2, MapPin, CheckCircle2, XCircle, Search } from 'lucide-react';
 import api from '../utils/api';
 import {
@@ -7,6 +7,7 @@ import {
   fetchProductTraceability,
   verifyProductTraceability,
 } from '../services/ecosystemService';
+import { getDemoProductTraceability } from '../utils/clientDemoData';
 
 const card = {
   background: '#fff',
@@ -29,14 +30,17 @@ const certBadge = (verified) => ({
 });
 
 const ClientTraceabilityPage = () => {
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [selectedId, setSelectedId] = useState('');
   const [trace, setTrace] = useState(null);
   const [verify, setVerify] = useState(null);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
+  const [demoMode, setDemoMode] = useState(false);
 
   useEffect(() => {
+    const urlProductId = searchParams.get('productId');
     Promise.all([
       fetchTraceabilityList({ limit: 30 }).catch(() => ({ traces: [] })),
       api.get('/products').catch(() => ({ data: [] })),
@@ -45,7 +49,9 @@ const ClientTraceabilityPage = () => {
         const fromApi = (pRes.data || []).filter((p) => p.category === 'nourriture' || /croquette/i.test(p.name || ''));
         setProducts(fromApi.slice(0, 40));
         const traces = list.traces || [];
-        if (traces[0]?.product?.id) {
+        if (urlProductId) {
+          setSelectedId(urlProductId);
+        } else if (traces[0]?.product?.id) {
           setSelectedId(traces[0].product.id);
           setTrace(traces[0]);
         } else if (fromApi[0]?.id) {
@@ -53,20 +59,25 @@ const ClientTraceabilityPage = () => {
         }
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [searchParams]);
 
   const loadTrace = async (productId) => {
     if (!productId) return;
     setLoading(true);
     setMsg('');
+    setDemoMode(false);
     try {
       const t = await fetchProductTraceability(productId);
       setTrace(t);
       const v = await verifyProductTraceability(productId);
       setVerify(v);
     } catch (e) {
-      setMsg(e.response?.data?.error || 'Traçabilité indisponible');
-      setTrace(null);
+      const productName = products.find((p) => p.id === productId)?.name;
+      const demo = getDemoProductTraceability(productId, productName);
+      setTrace(demo);
+      setVerify(demo.blockchain?.verification);
+      setDemoMode(true);
+      setMsg('');
     } finally {
       setLoading(false);
     }
@@ -88,6 +99,19 @@ const ClientTraceabilityPage = () => {
       <p style={{ color: '#64748b', marginBottom: 20 }}>
         Origine des aliments, certifications vérifiées et chaîne d&apos;approvisionnement immuable (SHA-256).
       </p>
+      {demoMode && (
+        <p style={{ margin: '0 0 16px', padding: '10px 14px', borderRadius: 10, background: '#f5f3ff', color: '#6d28d9', fontSize: 13, fontWeight: 600 }}>
+          Mode démo — registre blockchain simulé pour ce produit
+        </p>
+      )}
+      <div style={{ marginBottom: 16, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <Link to="/client-iot" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: '#eff6ff', borderRadius: 10 }}>
+          📡 Centre IoT
+        </Link>
+        <Link to="/client-products" style={{ fontSize: 13, fontWeight: 700, color: '#475569', textDecoration: 'none', padding: '8px 14px', background: '#f8fafc', borderRadius: 10 }}>
+          🏷️ Boutique
+        </Link>
+      </div>
 
       <div style={{ ...card, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
         <Search size={18} color="#64748b" />
@@ -218,7 +242,9 @@ const ClientTraceabilityPage = () => {
         n&apos;a été modifiée après enregistrement.
       </p>
       <p>
-        <Link to="/client-products">← Boutique</Link>
+        <Link to="/client-iot">← Centre IoT</Link>
+        {' · '}
+        <Link to="/client-products">Boutique</Link>
       </p>
     </div>
   );

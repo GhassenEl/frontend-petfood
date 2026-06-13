@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Navigation, MapPin, Route, RefreshCw, Phone } from 'lucide-react';
 import api from '../utils/api';
+import { withDemoRoute } from '../utils/livreurDemoData';
 import LivreurDeliveryMap from '../components/LivreurDeliveryMap';
 import LivreurMissionPanel from '../components/LivreurMissionPanel';
 import useLivreurGps from '../hooks/useLivreurGps';
@@ -16,7 +17,7 @@ const LivreurRoutePage = () => {
     try {
       const qs = coords ? `?lat=${coords.lat}&lng=${coords.lng}` : '';
       const { data } = await api.get(`/livreur/route${qs}`);
-      setRoute(data);
+      setRoute(withDemoRoute(data));
     } catch (e) {
       console.error(e);
     } finally {

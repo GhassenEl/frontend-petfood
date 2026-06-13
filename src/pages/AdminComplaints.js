@@ -8,12 +8,13 @@ import {
   deleteComplaint,
 } from '../services/complaintService';
 import { Link } from 'react-router-dom';
+import { DEMO_ADMIN_COMPLAINTS, DEMO_ADMIN_USERS, withDemoFallback } from '../utils/adminDemoData';
 import './ClientComplaintsPage.css';
 
 const STATUS_LABELS = {
   pending: 'En attente',
   in_progress: 'En cours',
-  ai_proposed: 'À valider',
+  ai_proposed: 'À traiter',
   resolved: 'Résolue',
   rejected: 'Refusée',
 };
@@ -49,10 +50,10 @@ const AdminComplaints = () => {
         getAllComplaints(),
         api.get('/users').catch(() => ({ data: [] })),
       ]);
-      setComplaints(list);
-      setUsers(usersRes.data || []);
+      setComplaints(withDemoFallback(list, DEMO_ADMIN_COMPLAINTS));
+      setUsers(withDemoFallback(usersRes.data || [], DEMO_ADMIN_USERS));
     } catch {
-      setComplaints([]);
+      setComplaints(DEMO_ADMIN_COMPLAINTS);
     } finally {
       setLoading(false);
     }

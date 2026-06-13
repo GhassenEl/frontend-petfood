@@ -3,15 +3,38 @@ import { Send, MessageCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import getSocket from '../utils/socketClient';
 import { getMessages, sendMessage, getMessagePartners } from '../services/messageService';
+import {
+  buildDemoLivreurMessages,
+  DEMO_LIVREUR_MESSAGE_PARTNERS,
+} from '../utils/livreurDemoData';
+import {
+  buildDemoAdminMessages,
+  DEMO_ADMIN_MESSAGE_PARTNERS,
+  withDemoFallback,
+} from '../utils/adminDemoData';
 import './HumanMessageInbox.css';
 
-const ROLE_EMOJI = { admin: '🛡️', livreur: '🚚', client: '🛒' };
+const ROLE_EMOJI = { admin: '🛡️', livreur: '🚚', client: '🛒', vet: '🩺' };
 
 const LIVREUR_QUICK = [
   'Commande livrée avec succès ✅',
   'Retard estimé de 15 minutes',
   'Adresse introuvable — merci de me rappeler',
   'Je suis disponible pour de nouvelles livraisons',
+];
+
+const LIVREUR_CLIENT_QUICK = [
+  'Bonjour, je suis en route vers votre adresse 🚚',
+  'Arrivée estimée dans 15 minutes',
+  'Je suis devant l\'immeuble — pouvez-vous m\'ouvrir ?',
+  'Colis déposé devant la porte comme convenu ✅',
+];
+
+const LIVREUR_ADMIN_QUICK = [
+  'Problème d\'accès sur une livraison — besoin d\'aide',
+  'Client injoignable — que faire ?',
+  'Tournée terminée, je suis disponible',
+  'Signalement incident — commande en cours',
 ];
 
 const ADMIN_QUICK = [
@@ -96,7 +119,7 @@ const buildConversations = (messages, myId, usersById) => {
       return {
         ...conv,
         name: user?.name || (conv.partnerId === 'admin' || conv.partnerId === 'demo_admin' ? 'Administration' : 'Utilisateur'),
-        role: user?.role || (conv.partnerId === 'demo_admin' ? 'admin' : 'client'),
+        role: user?.role || (conv.partnerId === 'admin' || conv.partnerId === 'demo_admin' ? 'admin' : 'client'),
         region: user?.region,
       };
     });
@@ -109,7 +132,7 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
 
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
-  const [selectedId, setSelectedId] = useState(mode === 'livreur' ? 'admin' : '');
+  const [selectedId, setSelectedId] = useState(mode === 'livreur' ? 'demo_admin' : '');
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -124,14 +147,23 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
     const map = new Map();
     users.forEach((u) => map.set(idOf(u), u));
     map.set('admin', { id: 'admin', name: 'Administration', role: 'admin' });
-    map.set('demo_admin', { id: 'demo_admin', name: 'Administration', role: 'admin' });
+    map.set('demo_admin', { id: 'demo_admin', name: 'Administration PetfoodTN', role: 'admin' });
+    if (mode === 'livreur') {
+      DEMO_LIVREUR_MESSAGE_PARTNERS.forEach((u) => map.set(idOf(u), u));
+    }
     return map;
-  }, [users]);
+  }, [users, mode]);
 
   const load = useCallback(async () => {
     try {
       const msgData = await getMessages();
-      const list = Array.isArray(msgData) ? msgData : [];
+      let list = Array.isArray(msgData) ? msgData : [];
+      if (mode === 'livreur' && list.length === 0) {
+        list = buildDemoLivreurMessages(myId);
+      }
+      if (mode === 'admin' && list.length === 0) {
+        list = buildDemoAdminMessages(myId);
+      }
       setMessages(list);
       list.forEach((m) => knownIds.current.add(msgId(m)));
       if (mode === 'admin') {
@@ -141,8 +173,27 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
           return '';
         });
       }
+      if (mode === 'livreur' && list.length) {
+        setSelectedId((prev) => {
+          if (prev) return prev;
+          const partnerMap = new Map();
+          DEMO_LIVREUR_MESSAGE_PARTNERS.forEach((u) => partnerMap.set(idOf(u), u));
+          const convs = buildConversations(list, myId, partnerMap);
+          return convs[0]?.partnerId || 'demo_admin';
+        });
+      }
     } catch (err) {
       console.error('Messages load error', err);
+      if (mode === 'livreur') {
+        const demo = buildDemoLivreurMessages(myId);
+        setMessages(demo);
+        demo.forEach((m) => knownIds.current.add(msgId(m)));
+      }
+      if (mode === 'admin') {
+        const demo = buildDemoAdminMessages(myId);
+        setMessages(demo);
+        demo.forEach((m) => knownIds.current.add(msgId(m)));
+      }
     } finally {
       setLoading(false);
     }
@@ -150,8 +201,15 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
 
   useEffect(() => {
     load();
+    if (mode === 'livreur') {
+      setUsers(DEMO_LIVREUR_MESSAGE_PARTNERS);
+    }
     if (mode === 'admin') {
-      getMessagePartners().then(setUsers).catch(console.error);
+      getMessagePartners()
+        .then((partners) => {
+          setUsers(withDemoFallback(partners || [], DEMO_ADMIN_MESSAGE_PARTNERS));
+        })
+        .catch(() => setUsers(DEMO_ADMIN_MESSAGE_PARTNERS));
     }
   }, [load, mode]);
 
@@ -218,11 +276,19 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
 
   const threadMessages = useMemo(() => {
     if (mode === 'livreur') {
-      return messages.filter((m) => {
-        const sid = senderIdOf(m);
-        const rid = receiverIdOf(m);
-        return sid === myId || rid === myId;
-      });
+      if (!selectedId) return [];
+      return messages
+        .filter((m) => {
+          const sid = senderIdOf(m);
+          const rid = receiverIdOf(m);
+          return (
+            (sid === myId && rid === selectedId) ||
+            (rid === myId && sid === selectedId) ||
+            (sid === selectedId && rid === myId) ||
+            (rid === selectedId && sid === myId)
+          );
+        })
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     }
     if (!selectedId) return [];
     return messages.filter((m) => partnerIdOf(m, myId) === selectedId);
@@ -230,14 +296,38 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
 
   const selectedConv = conversations.find((c) => c.partnerId === selectedId);
 
+  const quickReplies = useMemo(() => {
+    if (mode !== 'livreur') return ADMIN_QUICK;
+    const role = selectedConv?.role || usersById.get(selectedId)?.role;
+    if (role === 'client') return LIVREUR_CLIENT_QUICK;
+    if (role === 'admin') return LIVREUR_ADMIN_QUICK;
+    return LIVREUR_QUICK;
+  }, [mode, selectedConv, selectedId, usersById]);
+
   const handleSend = async (text) => {
     const body = (text ?? draft).trim();
     if (!body || sending) return;
-    const receiverId = mode === 'livreur' ? 'admin' : selectedId;
+    const receiverId = selectedId;
     if (!receiverId) return;
+
+    const isDemoPartner = String(receiverId).startsWith('demo');
 
     setSending(true);
     try {
+      if (isDemoPartner && (mode === 'livreur' || mode === 'admin')) {
+        const local = {
+          _id: `local-${Date.now()}`,
+          senderId: myId,
+          receiverId,
+          senderType: myRole || (mode === 'admin' ? 'admin' : 'livreur'),
+          message: body,
+          createdAt: new Date().toISOString(),
+          isRead: true,
+        };
+        setMessages((prev) => [...prev, local]);
+        setDraft('');
+        return;
+      }
       const created = await sendMessage(receiverId, body);
       const id = msgId(created);
       if (id) knownIds.current.add(id);
@@ -264,8 +354,6 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
       handleSend();
     }
   };
-
-  const quickReplies = mode === 'livreur' ? LIVREUR_QUICK : ADMIN_QUICK;
 
   const renderMessages = () => {
     if (!threadMessages.length) {
@@ -314,13 +402,13 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
         <h1>💬 Messages</h1>
         <p>
           {mode === 'livreur'
-            ? 'Contactez l\'administration en temps réel pour signaler un problème ou une livraison.'
+            ? 'Échangez avec l\'administration et vos clients — livraisons, retards et consignes d\'accès.'
             : 'Conversations avec clients et livreurs — réponses en direct.'}
         </p>
       </div>
 
-      <div className={`hmi-layout ${mode === 'livreur' ? 'hmi-layout--single' : ''}`}>
-        {mode === 'admin' && (
+      <div className="hmi-layout">
+        {(mode === 'admin' || mode === 'livreur') && (
           <aside className="hmi-sidebar">
             <div className="hmi-sidebar-tools">
               <input
@@ -329,6 +417,7 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
+              {mode === 'admin' && (
               <select
                 className="hmi-filter"
                 value={roleFilter}
@@ -338,6 +427,7 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
                 <option value="client">Clients</option>
                 <option value="livreur">Livreurs</option>
               </select>
+              )}
             </div>
             <div className="hmi-conv-list">
               {filteredConversations.length === 0 ? (
@@ -369,6 +459,7 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
                   </button>
                 ))
               )}
+              {mode === 'admin' && (
               <div style={{ padding: '8px 12px', borderTop: '1px solid #f1f5f9' }}>
                 <select
                   className="hmi-filter"
@@ -383,6 +474,7 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
                   ))}
                 </select>
               </div>
+              )}
             </div>
           </aside>
         )}
@@ -391,13 +483,15 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
           <div className="hmi-thread-header">
             <div>
               <h2 className="hmi-thread-title">
-                {mode === 'livreur'
-                  ? '🛡️ Administration PetfoodTN'
-                  : selectedConv
-                    ? `${ROLE_EMOJI[selectedConv.role] || '👤'} ${selectedConv.name}`
-                    : 'Sélectionnez une conversation'}
+                {mode === 'livreur' && selectedConv
+                  ? `${ROLE_EMOJI[selectedConv.role] || '👤'} ${selectedConv.name}`
+                  : mode === 'livreur'
+                    ? '🛡️ Administration PetfoodTN'
+                    : selectedConv
+                      ? `${ROLE_EMOJI[selectedConv.role] || '👤'} ${selectedConv.name}`
+                      : 'Sélectionnez une conversation'}
               </h2>
-              {mode === 'admin' && selectedConv?.region && (
+              {(mode === 'admin' || mode === 'livreur') && selectedConv?.region && (
                 <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: '#6b7280' }}>
                   Région : {selectedConv.region}
                 </p>

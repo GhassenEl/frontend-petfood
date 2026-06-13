@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { MapPin, Navigation, Phone, Package, RefreshCw } from 'lucide-react';
 import api from '../utils/api';
+import { livreurCancelOrder } from '../services/orderService';
 import DeliveryProofModal from './DeliveryProofModal';
 
 const oid = (o) => o?.id || o?._id;
@@ -9,6 +10,7 @@ const LivreurMissionPanel = ({ onMissionChange }) => {
   const [mission, setMission] = useState(null);
   const [loading, setLoading] = useState(true);
   const [proofOrder, setProofOrder] = useState(null);
+  const [cancelling, setCancelling] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -34,6 +36,23 @@ const LivreurMissionPanel = ({ onMissionChange }) => {
     setProofOrder(null);
     await load();
     return res;
+  };
+
+  const cancelDelivery = async () => {
+    if (!mission?.order) return;
+    const id = oid(mission.order);
+    const reason = window.prompt('Motif d\'annulation (optionnel) :');
+    if (reason === null) return;
+    setCancelling(true);
+    try {
+      await livreurCancelOrder(id, { reason: reason?.trim() || undefined });
+      await load();
+      onMissionChange?.();
+    } catch (e) {
+      window.alert(e.response?.data?.error || 'Impossible d\'annuler cette course');
+    } finally {
+      setCancelling(false);
+    }
   };
 
   if (loading) {
@@ -100,6 +119,14 @@ const LivreurMissionPanel = ({ onMissionChange }) => {
           )}
           <button type="button" onClick={() => setProofOrder(order)} style={{ ...actionBtn, background: '#059669', color: 'white', border: 'none' }}>
             <Package size={16} /> Clôturer livraison
+          </button>
+          <button
+            type="button"
+            onClick={cancelDelivery}
+            disabled={cancelling}
+            style={{ ...actionBtn, background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}
+          >
+            {cancelling ? 'Annulation…' : 'Annuler la course'}
           </button>
         </div>
       </div>

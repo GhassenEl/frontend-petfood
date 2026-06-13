@@ -18,6 +18,8 @@ import {
 } from '../utils/productCatalog';
 import { getEffectiveDiscount, getPromoPrice, isOnPromotion } from '../utils/productDetails';
 import { productId, dedupeProducts, withProductIds } from '../utils/productId';
+import { resolveNaturalProductImage } from '../utils/productImages';
+import { DEMO_NEAREST_STORE } from '../utils/clientDemoData';
 
 const PET_LABELS = {
   dog: 'chien',
@@ -114,7 +116,7 @@ const ClientProductsPage = () => {
       ...p,
       stock: Number(stockRaw || 0),
       price: Number(priceRaw || 0),
-      imageUrl: p.imageUrl ?? p.image ?? undefined,
+      imageUrl: resolveNaturalProductImage({ ...p, imageUrl: p.imageUrl ?? p.image ?? undefined }),
     };
     return withProductIds({ ...base, discount: getEffectiveDiscount(base) });
   };
@@ -409,7 +411,19 @@ const ClientProductsPage = () => {
 
       {/* Nearby */}
       {inStockNearby.length > 0 && (
-        <Section title="📍 Près de chez vous" titleColor="#8b5cf6" icon={<MapPin size={20} />}>
+        <Section title="📍 Près de chez vous — magasin assigné automatiquement" titleColor="#8b5cf6" icon={<MapPin size={20} />}>
+          <div style={{
+            marginBottom: 16,
+            padding: '14px 18px',
+            borderRadius: 14,
+            background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)',
+            border: '1px solid #c4b5fd',
+            fontSize: 14,
+            color: '#5b21b6',
+          }}>
+            🏪 Votre magasin le plus proche : <strong>{DEMO_NEAREST_STORE.name}</strong> ({DEMO_NEAREST_STORE.distanceKm} km)
+            — {DEMO_NEAREST_STORE.address} · ouvert jusqu&apos;à {DEMO_NEAREST_STORE.openUntil}
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
             {inStockNearby.map(product => (
               <ProductCard key={`near-${productId(product)}`} product={product} onAdd={addToCart} onLike={likeProduct} isLiked={favoriteIds.has(productId(product))} getPrice={getPrice} isNearby onView={setSelectedProduct} />
@@ -499,7 +513,7 @@ const productFallbackImage = (product) => {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 };
 
-const getProductImage = (product) => product.imageUrl || product.image || productFallbackImage(product);
+const getProductImage = (product) => resolveNaturalProductImage(product) || productFallbackImage(product);
 
 const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearby, onView, profilePetType, isLiked }) => {
   const discount = getEffectiveDiscount(product);

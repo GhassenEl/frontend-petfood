@@ -123,7 +123,7 @@ const styles = {
     position: 'fixed',
     right: '24px',
     bottom: '92px',
-    zIndex: 900,
+    zIndex: 901,
     width: '52px',
     height: '52px',
     borderRadius: '50%',

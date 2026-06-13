@@ -3,6 +3,11 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { FileDown } from 'lucide-react';
 import api from '../utils/api';
 import { exportMedicalDossierPdf } from '../utils/medicalDossierPdf';
+import {
+  DEMO_VET_MEDICAL_DOSSIERS,
+  mergeVetClients,
+  withDemoFallback,
+} from '../utils/vetDemoData';
 
 const animalEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', other: '🐾' };
 
@@ -33,10 +38,13 @@ const VetMedicalDossiersPage = () => {
   useEffect(() => {
     Promise.all([api.get('/vet/medical-dossiers'), api.get('/vet/clients')])
       .then(([dRes, cRes]) => {
-        setDossiers(dRes.data || []);
-        setClients(cRes.data || []);
+        setDossiers(withDemoFallback(dRes.data, DEMO_VET_MEDICAL_DOSSIERS));
+        setClients(mergeVetClients(cRes.data));
       })
-      .catch(console.error)
+      .catch(() => {
+        setDossiers(DEMO_VET_MEDICAL_DOSSIERS);
+        setClients(mergeVetClients([]));
+      })
       .finally(() => setLoading(false));
   }, []);
 

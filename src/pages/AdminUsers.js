@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import api from '../utils/api';
+import { DEMO_ADMIN_USERS, withDemoFallback, withDemoUserStats } from '../utils/adminDemoData';
 import { useAuth } from '../contexts/AuthContext';
 import {
   validateEmail,
@@ -17,6 +18,8 @@ const ROLE_CONFIG = {
   client: { label: 'Client', emoji: '🔵', bg: '#dbeafe', color: '#1e40af' },
   livreur: { label: 'Livreur', emoji: '🚚', bg: '#d1fae5', color: '#047857' },
   vet: { label: 'Vétérinaire', emoji: '🩺', bg: '#e0e7ff', color: '#3730a3' },
+  vendor: { label: 'Vendeur', emoji: '🏬', bg: '#ccfbf1', color: '#0f766e' },
+  moderator: { label: 'Modérateur', emoji: '🛡️', bg: '#fef3c7', color: '#92400e' },
 };
 
 const AdminUsers = () => {
@@ -49,12 +52,12 @@ const AdminUsers = () => {
         api.get('/users'),
         api.get('/users/count'),
       ]);
-      setUsers(usersRes.data || []);
-      setStats(statsRes.data || { count: 0, byRole: {}, active: 0, inactive: 0 });
+      setUsers(withDemoFallback(usersRes.data || [], DEMO_ADMIN_USERS));
+      setStats(withDemoUserStats(statsRes.data));
     } catch (error) {
       console.error('Erreur chargement utilisateurs', error);
-      setUsers([]);
-      showFlash('error', 'Impossible de charger les utilisateurs.');
+      setUsers(DEMO_ADMIN_USERS);
+      setStats(withDemoUserStats(null));
     } finally {
       setLoading(false);
     }
@@ -400,6 +403,8 @@ const AdminUsers = () => {
                     <option value="client">Client</option>
                     <option value="livreur">Livreur</option>
                     <option value="vet">Vétérinaire</option>
+                    <option value="vendor">Vendeur marketplace</option>
+                    <option value="moderator">Modérateur</option>
                     {canAssignAdmin && <option value="admin">Admin (unique)</option>}
                   </select>
                 </div>

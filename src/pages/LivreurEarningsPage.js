@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { DollarSign, TrendingUp, Calendar, Package, CreditCard, BarChart3 } from 'lucide-react';
 import api from '../utils/api';
+import { DEMO_LIVREUR_ORDERS, getLivreurCommission, withDemoFallback } from '../utils/livreurDemoData';
 
 const LivreurEarningsPage = () => {
   const [orders, setOrders] = useState([]);
@@ -15,7 +16,7 @@ const LivreurEarningsPage = () => {
   const fetchOrders = async () => {
     try {
       const res = await api.get('/orders');
-      setOrders(res.data || []);
+      setOrders(withDemoFallback(res.data || [], DEMO_LIVREUR_ORDERS));
     } catch (error) {
       console.error('Earnings error:', error);
     } finally {
@@ -43,7 +44,7 @@ const LivreurEarningsPage = () => {
   };
 
   const filteredOrders = getFilteredOrders();
-  const totalEarnings = filteredOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+  const totalEarnings = filteredOrders.reduce((sum, o) => sum + getLivreurCommission(o), 0);
   const totalDeliveries = filteredOrders.length;
   const avgEarning = totalDeliveries > 0 ? totalEarnings / totalDeliveries : 0;
 
@@ -51,7 +52,7 @@ const LivreurEarningsPage = () => {
   const todayDeliveries = orders.filter(o => o.status === 'delivered' && o.createdAt && o.createdAt.startsWith(todayStr)).length;
   const todayEarnings = orders
     .filter(o => o.status === 'delivered' && o.createdAt && o.createdAt.startsWith(todayStr))
-    .reduce((sum, o) => sum + (o.total || 0), 0);
+    .reduce((sum, o) => sum + getLivreurCommission(o), 0);
 
   const weeklyData = () => {
     const data = {};
@@ -65,7 +66,7 @@ const LivreurEarningsPage = () => {
     orders.filter(o => o.status === 'delivered').forEach(o => {
       const date = o.createdAt ? o.createdAt.split('T')[0] : null;
       if (date && data[date]) {
-        data[date].earnings += (o.total || 0);
+        data[date].earnings += getLivreurCommission(o);
         data[date].count += 1;
       }
     });
@@ -93,7 +94,7 @@ const LivreurEarningsPage = () => {
       >
         <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 800 }}>💰 Mes Gains</h1>
         <p style={{ color: '#888', marginTop: '8px' }}>
-          Suivez vos revenus et vos performances de livraison
+          Commission de {getLivreurCommission({})} DT par livraison — suivez vos revenus
         </p>
       </motion.div>
 
@@ -264,10 +265,10 @@ const LivreurEarningsPage = () => {
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <p style={{ margin: 0, fontWeight: 700, color: '#27ae60', fontSize: '1rem' }}>
-                    +{order.total} DT
+                    +{getLivreurCommission(order).toFixed(2)} DT
                   </p>
                   <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#aaa' }}>
-                    {order.createdAt ? new Date(order.createdAt).toLocaleDateString('fr-FR') : ''}
+                    Commande {order.total} DT · {order.createdAt ? new Date(order.createdAt).toLocaleDateString('fr-FR') : ''}
                   </p>
                 </div>
               </motion.div>

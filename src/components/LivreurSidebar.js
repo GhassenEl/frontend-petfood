@@ -19,7 +19,6 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
     {
       title: '📊 Statistiques',
       items: [
-        { id: 'ml', label: 'IA Livraison', icon: '🧠' },
         { id: 'stats', label: 'Statistiques', icon: '📈' },
         { id: 'earnings', label: 'Gains', icon: '💰' },
       ]
@@ -29,6 +28,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
       items: [
         { id: '__open-chat__', label: 'Assistant en ligne', icon: '🤖', action: 'open-chat' },
         { id: 'messages', label: 'Messages', icon: '💬' },
+        { id: 'platform-services', label: 'Catalogue services', icon: '📋' },
       ]
     },
     {

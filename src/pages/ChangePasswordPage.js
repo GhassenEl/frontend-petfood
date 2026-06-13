@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../utils/api';
 
 const ChangePasswordPage = () => {
   const [formData, setFormData] = useState({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
@@ -9,7 +10,7 @@ const ChangePasswordPage = () => {
   const [passwordStrength, setPasswordStrength] = useState('weak');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -76,21 +77,12 @@ const ChangePasswordPage = () => {
 
     setLoading(true);
     try {
-      // Backend API call to change password - use relative URL to go through proxy
-      await fetch('/api/auth/change-password', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(formData)
-      });
+      await api.put('/auth/change-password', formData);
 
       setMessage('✅ Mot de passe modifié avec succès! Reconnectez-vous.');
-      setTimeout(() => {
+      setTimeout(async () => {
         setMessage('');
-        // Logout after password change
-        localStorage.removeItem('token');
+        await logout();
         window.location.href = '/login';
       }, 2000);
     } catch (error) {

@@ -126,11 +126,22 @@ const ClientSmartDeliveryPage = () => {
     <div style={{ padding: 24, maxWidth: 1000, margin: '0 auto' }}>
       <h1 style={{ fontWeight: 800, marginBottom: 8 }}>
         <Truck size={28} style={{ verticalAlign: 'middle', marginRight: 8 }} />
-        Livraison intelligente & bien-être
+        Livraison prédictive
       </h1>
       <p style={{ color: '#64748b', marginBottom: 20 }}>
-        Prédiction de rupture alimentaire, suivi GPS temps réel et analyse émotionnelle (vidéo / comportement).
+        Prédiction de rupture alimentaire, suivi GPS temps réel et réappro lié au distributeur IoT.
       </p>
+      <div style={{ marginBottom: 20, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <Link to="/client-iot" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: '#eff6ff', borderRadius: 10 }}>
+          📡 Centre IoT
+        </Link>
+        <Link to="/pet-feeder" style={{ fontSize: 13, fontWeight: 700, color: '#475569', textDecoration: 'none', padding: '8px 14px', background: '#f8fafc', borderRadius: 10 }}>
+          🍽️ Distributeur
+        </Link>
+        <Link to="/client-orders" style={{ fontSize: 13, fontWeight: 700, color: '#475569', textDecoration: 'none', padding: '8px 14px', background: '#f8fafc', borderRadius: 10 }}>
+          📦 Mes commandes
+        </Link>
+      </div>
 
       {pets.length > 0 && (
         <select
@@ -315,7 +326,9 @@ const ClientSmartDeliveryPage = () => {
       </div>
 
       <p style={{ fontSize: 14 }}>
-        <Link to="/client-ecosystem">← Retour à l’Assistant IA</Link>
+        <Link to="/client-iot">← Centre IoT</Link>
+        {' · '}
+        <Link to="/pet-feeder">Distributeur</Link>
       </p>
     </div>
   );

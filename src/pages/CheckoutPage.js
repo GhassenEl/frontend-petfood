@@ -12,6 +12,7 @@ import {
   isStripeCardMethod,
   isOnlinePayment,
   isWalletPayment,
+  isTunisianOnlinePayment,
   getPaymentLabel,
   DEFAULT_BANK_TRANSFER,
 } from '../constants/paymentMethods';
@@ -19,7 +20,9 @@ import {
   createStripeIntent,
   confirmStripeCardPayment,
   processPayPalPayment,
+  processTunisianPayment,
 } from '../utils/onlinePayment';
+import { DEMO_ADMIN_COUPONS } from '../utils/adminDemoData';
 import { getWallet } from '../services/walletService';
 
 const CART_STORAGE_KEY = 'petfood_cart';
@@ -38,7 +41,7 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
   const [loading, setLoading] = useState(false);
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentMethod, setPaymentMethod] = useState('flouci');
   const [paymentNote, setPaymentNote] = useState('');
   const [clientSecret, setClientSecret] = useState(null);
   const [stripeDemo, setStripeDemo] = useState(false);
@@ -48,14 +51,16 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
   const [deliveryMode, setDeliveryMode] = useState('home');
   const [relayPoints, setRelayPoints] = useState([]);
   const [selectedRelayId, setSelectedRelayId] = useState('');
-  const promoDiscount = 0;
+  const [promoCode, setPromoCode] = useState('');
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoMessage, setPromoMessage] = useState('');
   const cart = Array.isArray(cartProp) && cartProp.length > 0 ? cartProp : storedCart;
   const computedSubtotal = cart.reduce(
     (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
     0
   );
   const subtotal = Number(Number(totalCartProp ?? computedSubtotal).toFixed(2));
-  const totalCart = subtotal;
+  const totalCart = Math.max(0, Number((subtotal - promoDiscount).toFixed(2)));
   const closeCheckout = onClose || (() => navigate('/client-products'));
 
   const loadPaymentConfig = useCallback(async () => {
@@ -127,7 +132,43 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
       }
       return true;
     }
+    if (isTunisianOnlinePayment(paymentMethod)) {
+      const result = await processTunisianPayment(paymentMethod, totalCart, phone);
+      if (!result.ok) {
+        window.alert(result.error);
+        return false;
+      }
+      if (result.demo) {
+        setPaymentNote((prev) => prev || result.reference);
+      }
+      return true;
+    }
     return false;
+  };
+
+  const applyPromoCode = () => {
+    const code = promoCode.trim().toUpperCase();
+    if (!code) {
+      setPromoDiscount(0);
+      setPromoMessage('');
+      return;
+    }
+    const coupon = DEMO_ADMIN_COUPONS.find((c) => c.code === code && c.active);
+    if (!coupon) {
+      setPromoDiscount(0);
+      setPromoMessage('Code invalide ou expiré.');
+      return;
+    }
+    if (subtotal < coupon.minOrder) {
+      setPromoMessage(`Commande minimum ${coupon.minOrder} DT pour ce code.`);
+      setPromoDiscount(0);
+      return;
+    }
+    const discount = coupon.type === 'percent'
+      ? Number((subtotal * coupon.value / 100).toFixed(2))
+      : Math.min(coupon.value, subtotal);
+    setPromoDiscount(discount);
+    setPromoMessage(`Code ${code} appliqué — −${discount.toFixed(2)} DT`);
   };
 
   const handleCheckout = async () => {
@@ -136,13 +177,8 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
       navigate('/client-products');
       return;
     }
-    const relay = relayPoints.find((p) => p.id === selectedRelayId);
-    if (deliveryMode === 'relay') {
-      if (!selectedRelayId || !relay) {
-        window.alert('Choisissez un point relais partenaire');
-        return;
-      }
-    } else if (!address || !phone) {
+    const relay = null;
+    if (!address || !phone) {
       window.alert('Veuillez remplir l\'adresse et le téléphone');
       return;
     }
@@ -178,14 +214,11 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
       const orderPayload = {
         paymentMethod,
         paymentNote: paymentNote || undefined,
-        deliveryMode,
-        relayPointId: deliveryMode === 'relay' ? selectedRelayId : undefined,
-        relayPointName: relay?.name,
-        relayPointType: relay?.type,
-        address:
-          deliveryMode === 'relay'
-            ? `[Retrait] ${relay.name} — ${relay.address}`
-            : address,
+        deliveryMode: 'home',
+        relayPointId: undefined,
+        relayPointName: undefined,
+        relayPointType: undefined,
+        address,
         phone,
         items: cart.map((item) => ({
           productId: item.productId || item._id || item.id,
@@ -194,6 +227,8 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
         })),
         total: totalCart,
         paid: paidOnline,
+        promoCode: promoCode.trim() || undefined,
+        promoDiscount: promoDiscount || undefined,
       };
 
       const result = onPlaceOrder
@@ -322,66 +357,16 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
         style={sectionStyle}
       >
         <h3 style={sectionTitleStyle}>
-          <Truck size={18} color="#e67e22" /> Livraison ou retrait
+          <Truck size={18} color="#e67e22" /> Livraison à domicile
         </h3>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-          <button
-            type="button"
-            onClick={() => setDeliveryMode('home')}
-            style={modeBtnStyle(deliveryMode === 'home')}
-          >
-            <Truck size={16} /> À domicile
-          </button>
-          <button
-            type="button"
-            onClick={() => setDeliveryMode('relay')}
-            style={modeBtnStyle(deliveryMode === 'relay')}
-          >
-            <Store size={16} /> Point relais
-          </button>
-        </div>
-        {deliveryMode === 'relay' ? (
-          <>
-            <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 10px' }}>
-              Animaleries et cliniques vétérinaires partenaires —{' '}
-              <a href="/client-relay-points" style={{ color: '#1d4ed8' }}>
-                carte complète
-              </a>
-            </p>
-            <select
-              value={selectedRelayId}
-              onChange={(e) => {
-                setSelectedRelayId(e.target.value);
-                localStorage.setItem('petfood_relay_point_id', e.target.value);
-              }}
-              style={inputFieldStyle}
-              required
-            >
-              <option value="">— Choisir un point relais —</option>
-              {relayPoints.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.typeIcon} {p.name} — {p.city || p.region}
-                  {p.distanceKm != null ? ` (${p.distanceKm} km)` : ''}
-                </option>
-              ))}
-            </select>
-            {selectedRelayId && (
-              <p style={{ fontSize: 12, color: '#059669', margin: '8px 0 0' }}>
-                <MapPin size={12} style={{ verticalAlign: 'middle' }} />{' '}
-                {relayPoints.find((p) => p.id === selectedRelayId)?.address}
-              </p>
-            )}
-          </>
-        ) : (
-          <input
-            type="text"
-            placeholder="Adresse complète de livraison"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            style={inputFieldStyle}
-            required
-          />
-        )}
+        <input
+          type="text"
+          placeholder="Adresse complète de livraison"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          style={inputFieldStyle}
+          required
+        />
         <input
           type="tel"
           placeholder="Téléphone de contact"
@@ -432,6 +417,32 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
           <span>Total :</span>
           <span style={{ color: '#e67e22' }}>{totalCart.toFixed(2)} DT</span>
         </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        style={sectionStyle}
+      >
+        <h3 style={sectionTitleStyle}>🏷️ Code promo / coupon</h3>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            placeholder="Ex. PETFOOD10, WELCOME20"
+            value={promoCode}
+            onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+            style={{ flex: '1 1 180px', padding: '12px 14px', borderRadius: 12, border: '2px solid #e5e7eb' }}
+          />
+          <button type="button" onClick={applyPromoCode} style={{ padding: '12px 18px', borderRadius: 12, border: 'none', background: '#e67e22', color: 'white', fontWeight: 700, cursor: 'pointer' }}>
+            Appliquer
+          </button>
+        </div>
+        {promoMessage && (
+          <p style={{ margin: '10px 0 0', fontSize: 13, color: promoDiscount > 0 ? '#15803d' : '#dc2626', fontWeight: 600 }}>
+            {promoMessage}
+          </p>
+        )}
       </motion.div>
 
       <motion.div

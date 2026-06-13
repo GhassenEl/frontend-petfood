@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, Filter } from 'lucide-react';
 import api from '../utils/api';
+import { DEMO_ADMIN_LEAVE_REQUESTS, withDemoFallback } from '../utils/adminDemoData';
 import {
   LEAVE_TYPES,
   getLeaveTypeLabel,
@@ -25,10 +26,10 @@ const AdminLeaveRequestsPage = () => {
       if (filterRole && filterRole !== 'all') params.set('staffRole', filterRole);
       const qs = params.toString();
       const { data } = await api.get(`/leave-requests${qs ? `?${qs}` : ''}`);
-      setRequests(data || []);
+      setRequests(withDemoFallback(data || [], DEMO_ADMIN_LEAVE_REQUESTS));
     } catch (error) {
       console.error(error);
-      setRequests([]);
+      setRequests(DEMO_ADMIN_LEAVE_REQUESTS);
     } finally {
       setLoading(false);
     }

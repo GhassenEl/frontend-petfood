@@ -1,6 +1,10 @@
 /** Méthodes de paiement client — alignées sur backend/utils/paymentMethods.js */
 export const PAYMENT_METHODS = [
   { id: 'wallet', label: 'Portefeuille', emoji: '👛', online: true, wallet: true },
+  { id: 'flouci', label: 'Flouci', emoji: '🇹🇳', online: true, tunisian: true, description: 'Paiement mobile tunisien' },
+  { id: 'konnect', label: 'Konnect', emoji: '🔗', online: true, tunisian: true, description: 'Carte & wallet TN' },
+  { id: 'paymee', label: 'Paymee', emoji: '💳', online: true, tunisian: true, description: 'Passerelle Paymee' },
+  { id: 'd17', label: 'D17 (La Poste)', emoji: '📮', online: true, tunisian: true, description: 'e-Dinar / D17' },
   { id: 'stripe', label: 'Stripe', emoji: '⚡', online: true },
   { id: 'paypal', label: 'PayPal', emoji: '🅿️', online: true },
   { id: 'card', label: 'Carte bancaire', emoji: '💳', online: true },
@@ -22,6 +26,10 @@ export const getPaymentLabel = (id) => PAYMENT_LABELS[id] || id || 'Non précis�
 export const isStripeCardMethod = (id) => STRIPE_CARD_IDS.includes(id);
 
 export const isOnlinePayment = (id) => ONLINE_PAYMENT_IDS.includes(id);
+
+export const TUNISIAN_PAYMENT_IDS = PAYMENT_METHODS.filter((m) => m.tunisian).map((m) => m.id);
+
+export const isTunisianOnlinePayment = (id) => TUNISIAN_PAYMENT_IDS.includes(id);
 
 export const isWalletPayment = (id) => id === 'wallet';
 

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
-import { Droplets, Wifi, WifiOff, AlertTriangle, Plus, RefreshCw } from 'lucide-react';
+import { Droplets, Wifi, WifiOff, AlertTriangle, Plus, RefreshCw, Thermometer, Filter } from 'lucide-react';
 import api from '../utils/api';
 import {
   fetchWaterMonitorOverview,
@@ -12,6 +12,13 @@ import {
   logWaterConsumption,
   recordWaterRefill,
 } from '../services/ecosystemService';
+import {
+  getDemoWaterOverview,
+  getDemoWaterTracking,
+  applyDemoWaterLog,
+  applyDemoWaterRefill,
+  DEMO_WATER_PETS,
+} from '../utils/clientDemoData';
 
 const card = {
   background: '#fff',
@@ -25,6 +32,24 @@ const alertColor = { high: '#dc2626', medium: '#d97706', low: '#64748b' };
 
 const petEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', other: '🐾' };
 
+const SensorGauge = ({ label, value, unit, min, max, optimal, color }) => {
+  if (value == null) return null;
+  const pct = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+  const inRange = optimal && value >= optimal[0] && value <= optimal[1];
+  const barColor = inRange ? color : '#f59e0b';
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#64748b', marginBottom: 4 }}>
+        <span>{label}</span>
+        <strong style={{ color: barColor }}>{value}{unit}</strong>
+      </div>
+      <div style={{ height: 8, background: '#e2e8f0', borderRadius: 6, overflow: 'hidden' }}>
+        <div style={{ width: `${pct}%`, height: '100%', background: barColor, borderRadius: 6 }} />
+      </div>
+    </div>
+  );
+};
+
 const ClientSmartWaterPage = () => {
   const [overview, setOverview] = useState([]);
   const [pets, setPets] = useState([]);
@@ -33,62 +58,101 @@ const ClientSmartWaterPage = () => {
   const [loading, setLoading] = useState(true);
   const [volumeInput, setVolumeInput] = useState('150');
   const [msg, setMsg] = useState('');
+  const [demoMode, setDemoMode] = useState(false);
 
-  useEffect(() => {
-    api.get('/pets').then((r) => setPets(r.data || [])).catch(() => {});
-    fetchWaterMonitorOverview()
-      .then((d) => {
-        const list = d.pets || [];
-        setOverview(list);
-        if (list[0]?.petId) setPetId(list[0].petId);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+  const applyDemoForPet = useCallback((id) => {
+    const pid = id || 'demo-pet-1';
+    setDemoMode(true);
+    setOverview(DEMO_WATER_PETS);
+    setPetId(pid);
+    setTracking(getDemoWaterTracking(pid));
   }, []);
 
   useEffect(() => {
-    if (!petId && pets[0]?.id) setPetId(pets[0].id);
-  }, [pets, petId]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const [petsRes, overviewRes] = await Promise.all([
+          api.get('/pets').catch(() => ({ data: [] })),
+          fetchWaterMonitorOverview().catch(() => null),
+        ]);
+        if (cancelled) return;
+        setPets(petsRes.data || []);
+        const list = overviewRes?.pets || [];
+        if (list.length > 0) {
+          setDemoMode(false);
+          setOverview(list);
+          setPetId(list[0].petId);
+        } else {
+          applyDemoForPet('demo-pet-1');
+        }
+      } catch {
+        if (!cancelled) applyDemoForPet('demo-pet-1');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [applyDemoForPet]);
 
-  const loadTracking = useCallback(async () => {
-    if (!petId) return;
-    setLoading(true);
+  const loadTracking = useCallback(async (id, silent = false) => {
+    if (!id) return;
+    if (!silent) setLoading(true);
     setMsg('');
-    try {
-      setTracking(await fetchWaterMonitorTracking(petId));
-    } catch (e) {
-      setMsg(e.response?.data?.error || 'Erreur chargement');
-      setTracking(null);
-    } finally {
-      setLoading(false);
+    if (demoMode || id.startsWith('demo-')) {
+      setTracking(getDemoWaterTracking(id));
+      if (!silent) setLoading(false);
+      return;
     }
-  }, [petId]);
+    try {
+      setTracking(await fetchWaterMonitorTracking(id));
+      setDemoMode(false);
+    } catch (e) {
+      applyDemoForPet(id);
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  }, [demoMode, applyDemoForPet]);
 
   useEffect(() => {
-    if (petId) loadTracking();
+    if (petId) loadTracking(petId, true);
   }, [petId, loadTracking]);
 
   const submitLog = async (e) => {
     e.preventDefault();
     const vol = Number(volumeInput);
     if (!petId || !vol) return;
+    if (demoMode) {
+      setTracking((prev) => applyDemoWaterLog(prev, vol));
+      setMsg('Consommation enregistrée (mode démo)');
+      return;
+    }
     try {
       const r = await logWaterConsumption(petId, { volumeMl: vol });
       setTracking(r.tracking);
       setMsg('Consommation enregistrée');
     } catch (err) {
-      setMsg(err.response?.data?.error || 'Erreur');
+      setTracking((prev) => applyDemoWaterLog(prev, vol));
+      setDemoMode(true);
+      setMsg('Consommation enregistrée (mode démo)');
     }
   };
 
   const doRefill = async () => {
     if (!petId) return;
+    if (demoMode) {
+      setTracking((prev) => applyDemoWaterRefill(prev, 1500));
+      setMsg('Réservoir rechargé (mode démo)');
+      return;
+    }
     try {
       const r = await recordWaterRefill(petId, { volumeMl: 1500 });
       setTracking(r.tracking);
       setMsg('Réservoir rechargé');
     } catch (err) {
-      setMsg(err.response?.data?.error || 'Erreur recharge');
+      setTracking((prev) => applyDemoWaterRefill(prev, 1500));
+      setDemoMode(true);
+      setMsg('Réservoir rechargé (mode démo)');
     }
   };
 
@@ -96,8 +160,11 @@ const ClientSmartWaterPage = () => {
     ? overview
     : pets.map((p) => ({ petId: p.id, name: p.name, type: p.type }));
 
-  const pct = tracking?.percentOfTarget ?? 0;
+  const pct = tracking?.percentOfTarget ?? (tracking?.targetMl
+    ? Math.round((tracking.todayMl / tracking.targetMl) * 100)
+    : 0);
   const ringColor = pct >= 80 ? '#10b981' : pct >= 50 ? '#0ea5e9' : '#f59e0b';
+  const monitor = tracking?.monitor || {};
 
   if (loading && !tracking) {
     return <p style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>Chargement du moniteur…</p>;
@@ -116,16 +183,36 @@ const ClientSmartWaterPage = () => {
           color: '#fff',
         }}
       >
-        <p style={{ margin: 0, fontSize: 12, opacity: 0.9, letterSpacing: 1 }}>SMART WATER MONITOR</p>
+        <p style={{ margin: 0, fontSize: 12, opacity: 0.9, letterSpacing: 1 }}>FONTAINE CONNECTÉE</p>
         <h1 style={{ margin: '8px 0', fontSize: 26, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
           <Droplets size={28} /> Surveillance de la consommation d&apos;eau
         </h1>
         <p style={{ margin: 0, opacity: 0.9, fontSize: 14 }}>
-          Fontaine connectée · objectifs hydratation · alertes intelligentes
+          Fontaine connectée · capteurs en temps réel · alertes hydratation
         </p>
+        {demoMode && (
+          <p style={{
+            margin: '12px 0 0', display: 'inline-block', padding: '6px 14px', borderRadius: 20,
+            background: 'rgba(255,255,255,0.2)', fontSize: 13, fontWeight: 600,
+          }}
+          >
+            Mode démo — fontaine simulée · actions locales
+          </p>
+        )}
+        <div style={{ marginTop: 14, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <Link to="/client-iot" style={{ fontSize: 13, fontWeight: 700, color: '#0c4a6e', textDecoration: 'none', padding: '8px 14px', background: 'rgba(255,255,255,0.9)', borderRadius: 10 }}>
+            📡 Centre IoT
+          </Link>
+          <Link to="/pet-calories" style={{ fontSize: 13, fontWeight: 700, color: '#0c4a6e', textDecoration: 'none', padding: '8px 14px', background: 'rgba(255,255,255,0.9)', borderRadius: 10 }}>
+            🔥 Calculateur calories
+          </Link>
+          <Link to="/pet-feeder" style={{ fontSize: 13, fontWeight: 700, color: '#0c4a6e', textDecoration: 'none', padding: '8px 14px', background: 'rgba(255,255,255,0.85)', borderRadius: 10 }}>
+            🍽️ Distributeur nourriture
+          </Link>
+        </div>
       </motion.div>
 
-      {allPets.length > 1 && (
+      {allPets.length > 0 && (
         <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
           {allPets.map((p) => (
             <button
@@ -136,7 +223,7 @@ const ClientSmartWaterPage = () => {
                 padding: '10px 16px',
                 borderRadius: 12,
                 border: petId === p.petId ? '2px solid #0284c7' : '1px solid #e2e8f0',
-                background: '#fff',
+                background: petId === p.petId ? '#f0f9ff' : '#fff',
                 fontWeight: 700,
                 cursor: 'pointer',
               }}
@@ -145,68 +232,106 @@ const ClientSmartWaterPage = () => {
               {p.alert ? ' ⚠️' : ''}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => loadTracking(petId, false)}
+            style={{
+              marginLeft: 'auto', padding: '10px 14px', borderRadius: 12,
+              border: '1px solid #bae6fd', background: '#fff', cursor: 'pointer', fontWeight: 600,
+            }}
+          >
+            <RefreshCw size={14} style={{ verticalAlign: 'middle' }} /> Actualiser
+          </button>
         </div>
       )}
 
       {tracking && (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 16 }}>
-            <div style={{ ...card, textAlign: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 16 }}>
+            <div style={{ ...card, textAlign: 'center', marginBottom: 0 }}>
               <div style={{ fontSize: 12, color: '#64748b' }}>Aujourd&apos;hui</div>
               <div style={{ fontSize: 32, fontWeight: 800, color: ringColor }}>{tracking.todayMl} ml</div>
               <div style={{ fontSize: 12, color: '#64748b' }}>objectif {tracking.targetMl} ml</div>
-              <div
-                style={{
-                  marginTop: 8,
-                  height: 8,
-                  borderRadius: 4,
-                  background: '#e2e8f0',
-                  overflow: 'hidden',
-                }}
-              >
-                <div style={{ width: `${pct}%`, height: '100%', background: ringColor, borderRadius: 4 }} />
+              <div style={{ marginTop: 8, height: 8, borderRadius: 4, background: '#e2e8f0', overflow: 'hidden' }}>
+                <div style={{ width: `${Math.min(100, pct)}%`, height: '100%', background: ringColor, borderRadius: 4 }} />
               </div>
             </div>
-
-            <div style={{ ...card }}>
+            <div style={{ ...card, marginBottom: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                {tracking.monitor?.online ? (
-                  <Wifi size={18} color="#10b981" />
-                ) : (
-                  <WifiOff size={18} color="#94a3b8" />
-                )}
-                <strong>{tracking.monitor?.name || 'Capteur'}</strong>
+                {monitor.online ? <Wifi size={18} color="#10b981" /> : <WifiOff size={18} color="#94a3b8" />}
+                <strong>{monitor.name || 'Capteur fontaine'}</strong>
               </div>
               <div style={{ fontSize: 13, color: '#64748b' }}>
-                Statut : {tracking.monitor?.status === 'online' ? 'En ligne' : 'Hors ligne'}
+                Statut : {monitor.status === 'online' ? 'En ligne' : 'Hors ligne'}
               </div>
-              {tracking.monitor?.reservoirMl != null && (
+              {monitor.reservoirMl != null && (
                 <div style={{ marginTop: 8, fontSize: 14 }}>
-                  Réservoir : <strong>{tracking.monitor.reservoirMl} ml</strong>
-                  <button
-                    type="button"
-                    onClick={doRefill}
-                    style={{
-                      marginLeft: 10,
-                      padding: '4px 10px',
-                      borderRadius: 8,
-                      border: '1px solid #bae6fd',
-                      background: '#f0f9ff',
-                      cursor: 'pointer',
-                      fontSize: 12,
-                    }}
-                  >
-                    <RefreshCw size={12} style={{ verticalAlign: 'middle' }} /> Recharger
-                  </button>
+                  Réservoir : <strong>{monitor.reservoirMl} ml</strong>
+                  {monitor.reservoirCapacityMl ? ` / ${monitor.reservoirCapacityMl} ml` : ''}
                 </div>
               )}
             </div>
-
-            <div style={{ ...card }}>
+            <div style={{ ...card, marginBottom: 0 }}>
               <div style={{ fontSize: 12, color: '#64748b' }}>Moyenne 7 j</div>
               <div style={{ fontSize: 28, fontWeight: 800 }}>{tracking.stats?.avg7dMl ?? 0} ml</div>
               <div style={{ fontSize: 12, color: '#64748b' }}>pic {tracking.stats?.maxDayMl ?? 0} ml</div>
             </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 16 }}>
+            <div style={{ ...card, marginBottom: 0 }}>
+              <h2 style={{ margin: '0 0 12px', fontSize: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Thermometer size={18} color="#0ea5e9" /> Capteurs temps réel
+              </h2>
+              <SensorGauge label="Température eau" value={monitor.waterTempC} unit="°C" min={10} max={28} optimal={[16, 22]} color="#0ea5e9" />
+              <SensorGauge
+                label="Niveau réservoir"
+                value={monitor.reservoirCapacityMl ? Math.round((monitor.reservoirMl / monitor.reservoirCapacityMl) * 100) : null}
+                unit="%"
+                min={0}
+                max={100}
+                optimal={[30, 100]}
+                color="#0284c7"
+              />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 8 }}>
+                <div style={{ padding: 10, background: '#f8fafc', borderRadius: 10, textAlign: 'center', fontSize: 12 }}>
+                  <div style={{ fontSize: 18 }}>💧</div>
+                  <strong>Débit</strong>
+                  <div style={{ color: '#64748b' }}>{monitor.flowRateMlMin ?? 0} ml/min</div>
+                </div>
+                <div style={{ padding: 10, background: monitor.filterDaysLeft <= 7 ? '#fffbeb' : '#f8fafc', borderRadius: 10, textAlign: 'center', fontSize: 12 }}>
+                  <div style={{ fontSize: 18 }}><Filter size={16} style={{ verticalAlign: 'middle' }} /></div>
+                  <strong>Filtre</strong>
+                  <div style={{ color: monitor.filterDaysLeft <= 7 ? '#b45309' : '#64748b' }}>
+                    {monitor.filterDaysLeft ?? '—'} j restants
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={doRefill}
+                style={{
+                  width: '100%', marginTop: 12, padding: '10px 14px', borderRadius: 10,
+                  border: '1px solid #bae6fd', background: '#f0f9ff', cursor: 'pointer', fontWeight: 700,
+                }}
+              >
+                <RefreshCw size={14} style={{ verticalAlign: 'middle' }} /> Recharger réservoir
+              </button>
+            </div>
+
+            {(tracking.insights || []).length > 0 && (
+              <div style={{ ...card, marginBottom: 0 }}>
+                <h2 style={{ margin: '0 0 12px', fontSize: 16 }}>💡 Insights hydratation</h2>
+                <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                  {tracking.insights.map((ins, i) => (
+                    <li key={i} style={{ padding: '10px 12px', background: '#f0f9ff', borderRadius: 12, marginBottom: 8, fontSize: 13, display: 'flex', gap: 8 }}>
+                      <span>{ins.icon}</span>
+                      <span>{ins.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {(tracking.alerts || []).length > 0 && (
@@ -264,16 +389,9 @@ const ClientSmartWaterPage = () => {
               <button
                 type="submit"
                 style={{
-                  padding: '10px 18px',
-                  borderRadius: 10,
-                  border: 'none',
-                  background: '#0284c7',
-                  color: '#fff',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
+                  padding: '10px 18px', borderRadius: 10, border: 'none',
+                  background: '#0284c7', color: '#fff', fontWeight: 700, cursor: 'pointer',
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
                 }}
               >
                 <Plus size={16} /> Ajouter
@@ -296,7 +414,6 @@ const ClientSmartWaterPage = () => {
       )}
 
       <p style={{ fontSize: 13, marginTop: 16 }}>
-        <Link to="/pet-feeder" style={{ color: '#0284c7', marginRight: 16 }}>Distributeur IoT nourriture →</Link>
         <Link to="/pet-advice" style={{ color: '#0284c7' }}>Conseils hydratation →</Link>
       </p>
     </div>

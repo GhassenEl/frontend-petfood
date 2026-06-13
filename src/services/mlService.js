@@ -40,3 +40,21 @@ export const postVetClinicalApplyDossier = (analysisId) =>
 
 export const postVetClinicalApplyPrescription = (analysisId) =>
   api.post(`/ml/vet/clinical/analyses/${analysisId}/apply-prescription`).then((r) => r.data);
+
+export const fetchNlpModelBenchmark = () =>
+  api.get('/ml/admin/nlp-models/benchmark').then((r) => r.data);
+
+export const updateNlpModelConfig = (body) =>
+  api.put('/ml/admin/nlp-models/config', body).then((r) => r.data);
+
+export const postNlpAnalyze = (text) =>
+  api.post('/ml/nlp/analyze', { text }).then((r) => r.data);
+
+export const postAnalyzeComment = (body) =>
+  api.post('/ml/sentiment/comment', body).then((r) => r.data);
+
+export const fetchMyCommentSentiments = () =>
+  api.get('/ml/sentiment/comments/me').then((r) => r.data);
+
+export const fetchAdminCommentSentiments = () =>
+  api.get('/ml/sentiment/comments').then((r) => r.data);

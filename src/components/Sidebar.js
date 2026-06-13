@@ -10,12 +10,17 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
   const sections = [
     {
       title: '🤖 Assistant',
-      items: [{ id: '__open-chat__', label: 'Chat assistant', icon: '💬', action: 'open-chat' }],
+      items: [
+        { id: '__open-chat__', label: 'Chat assistant', icon: '💬', action: 'open-chat' },
+        { id: 'platform-services', label: 'Catalogue services', icon: '📋' },
+      ],
     },
     {
       title: '📊 Analytics',
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: '📈' },
+        { id: 'powerbi', label: 'Power BI', icon: '📊' },
+        { id: 'nlp-models', label: 'Modèles NLP', icon: '🧠' },
         { id: 'history', label: 'Historique', icon: '📜' },
       ]
     },
@@ -23,12 +28,14 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       title: '🛒 Gestion',
       items: [
         { id: 'orders', label: 'Commandes', icon: '📦' },
+        { id: 'sales', label: 'Ventes & CA', icon: '💰' },
         { id: 'invoices', label: 'Factures', icon: '🧾' },
         { id: 'products', label: 'Produits', icon: '🏷️' },
-        { id: 'promotions', label: 'Promotions produits', icon: '🏷️' },
-        { id: 'blog-articles', label: 'Articles blog', icon: '📰' },
+        { id: 'stock', label: 'Stock avancé', icon: '📦' },
+        { id: 'promotions', label: 'Promotions & coupons', icon: '🎟️' },
         { id: 'users', label: 'Utilisateurs', icon: '👥' },
         { id: 'livreurs', label: 'Livreurs', icon: '🚚' },
+        { id: 'vendors', label: 'Fournisseurs', icon: '🏬' },
         { id: 'leave-requests', label: 'Congés / maladie', icon: '🏖️' },
         { id: 'messages', label: 'Messages', icon: '💬' },
         { id: 'veterinary', label: 'Suivi Vétérinaire', icon: '🩺' },

@@ -3,9 +3,15 @@ import { Link } from 'react-router-dom';
 import { Star, Plus, Trash2, Edit3, Send, Sparkles, Package } from 'lucide-react';
 import { getProducts } from '../services/productService';
 import { getMyReviews, createReview, updateReview, deleteReview } from '../services/reviewService';
+import { postAnalyzeComment } from '../services/mlService';
+import { DEMO_REVIEWS, withDemoFallback } from '../utils/clientDemoData';
 import { productId, dedupeProducts, withProductIds } from '../utils/productId';
+import { emotionFromRating, ratingLabel } from '../utils/ratingHelpers';
 import ClientServiceRatingsPanel from '../components/ClientServiceRatingsPanel';
 import ClientNutritionBlogPanel from '../components/ClientNutritionBlogPanel';
+import CommentSentimentPanel from '../components/CommentSentimentPanel';
+import StarRatingPicker from '../components/StarRatingPicker';
+import StarRatingDisplay from '../components/StarRatingDisplay';
 import './ClientComplaintsPage.css';
 
 const EMOTIONS = [
@@ -26,23 +32,6 @@ const EMOTION_STYLE = {
 
 const reviewId = (r) => r?.id || r?._id;
 const productOf = (r) => r?.product || r?.productId;
-
-const StarRow = ({ value, onChange, size = 28 }) => (
-  <div className="cc-star-picker">
-    {[1, 2, 3, 4, 5].map((n) => (
-      <button
-        key={n}
-        type="button"
-        className="cc-star-btn"
-        onClick={() => onChange(n)}
-        aria-label={`${n} étoiles`}
-      >
-        <Star size={size} fill={n <= value ? '#f59e0b' : 'none'} color={n <= value ? '#f59e0b' : '#d1d5db'} />
-      </button>
-    ))}
-    <span style={{ marginLeft: 8, fontWeight: 800, color: '#92400e' }}>{value}/5</span>
-  </div>
-);
 
 const ClientReviewsPage = () => {
   const [pageTab, setPageTab] = useState(() => {
@@ -81,7 +70,7 @@ const ClientReviewsPage = () => {
         getProducts().catch(() => []),
       ]);
       const prods = dedupeProducts((productsList || []).map(withProductIds));
-      setReviews(reviewsList);
+      setReviews(withDemoFallback(reviewsList, DEMO_REVIEWS));
       setProducts(prods);
       if (prods.length && !formData.productId) {
         setFormData((c) => ({ ...c, productId: productId(prods[0]) }));
@@ -125,21 +114,35 @@ const ClientReviewsPage = () => {
     }
     setAnalyzing(true);
     try {
-      const response = await fetch('/fastapi/analyze-sentiment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ comment: formData.comment }),
+      const res = await postAnalyzeComment({
+        comment: formData.comment,
+        rating: formData.rating,
+        serviceType: 'products',
       });
-      if (!response.ok) throw new Error('IA indisponible');
-      const suggestion = await response.json();
+      const analysis = res?.analysis;
+      if (!analysis) throw new Error('IA indisponible');
+      const suggestion = {
+        emotion: analysis.emotion,
+        confidence: analysis.confidence,
+        sentiment: analysis.sentiment,
+      };
       setAiSuggestion(suggestion);
       setFormData((prev) => ({ ...prev, emotion: suggestion.emotion || prev.emotion }));
-      showToast(`IA : ${suggestion.emotion} (${Math.round((suggestion.confidence || 0) * 100)} %)`);
+      showToast(`${analysis.emotionEmoji || ''} ${analysis.emotionLabel} · ${analysis.sentiment} (${Math.round((suggestion.confidence || 0) * 100)} %)`);
     } catch {
-      showToast('Analyse IA indisponible — choisissez l’émotion manuellement.', 'error');
+      showToast('Analyse IA indisponible — émotion déduite de la note.', 'error');
+      setFormData((prev) => ({ ...prev, emotion: emotionFromRating(prev.rating) }));
     } finally {
       setAnalyzing(false);
     }
+  };
+
+  const handleRatingChange = (rating) => {
+    setFormData((prev) => ({
+      ...prev,
+      rating,
+      emotion: emotionFromRating(rating),
+    }));
   };
 
   const openNewForm = () => {
@@ -169,7 +172,7 @@ const ClientReviewsPage = () => {
       productId: formData.productId,
       rating: formData.rating,
       comment: formData.comment.trim(),
-      emotion: formData.emotion,
+      emotion: formData.emotion || emotionFromRating(formData.rating),
       aiSuggested: !!aiSuggestion && formData.emotion === aiSuggestion.emotion,
     };
 
@@ -228,10 +231,10 @@ const ClientReviewsPage = () => {
       <header className="cc-hero cc-hero--reviews">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h1>⭐ Mes avis</h1>
+            <h1>⭐ Mes avis sur 5</h1>
             <p>
-              Notez vos produits, la livraison et le service vétérinaire. Consultez aussi nos conseils
-              nutrition et articles de blog pour mieux nourrir vos compagnons.
+              Notez vos produits (1 à 5 étoiles), la livraison et tous les services PetfoodTN.
+              L’émotion est déduite automatiquement de votre note et de votre commentaire.
             </p>
           </div>
           {pageTab === 'products' && (
@@ -245,8 +248,9 @@ const ClientReviewsPage = () => {
 
       <div className="cc-tabs-main">
         {[
-          { id: 'products', label: '🛍️ Avis produits' },
-          { id: 'services', label: '🚚 Livraison & Vétérinaire' },
+          { id: 'products', label: '🛍️ Avis produits (5★)' },
+          { id: 'services', label: '🛎️ Services & livraison (5★)' },
+          { id: 'sentiments', label: '🧠 Sentiments' },
           { id: 'nutrition', label: '🥗 Nutrition & Blog' },
         ].map(({ id, label }) => (
           <button
@@ -262,6 +266,8 @@ const ClientReviewsPage = () => {
 
       {pageTab === 'services' ? (
         <ClientServiceRatingsPanel showToast={showToast} />
+      ) : pageTab === 'sentiments' ? (
+        <CommentSentimentPanel variant="client" />
       ) : pageTab === 'nutrition' ? (
         <ClientNutritionBlogPanel />
       ) : (
@@ -310,8 +316,11 @@ const ClientReviewsPage = () => {
                 </div>
 
                 <div className="cc-field">
-                  <label>Note</label>
-                  <StarRow value={formData.rating} onChange={(rating) => setFormData({ ...formData, rating })} />
+                  <label>Note sur 5</label>
+                  <StarRatingPicker value={formData.rating} onChange={handleRatingChange} />
+                  <span style={{ fontSize: 12, color: '#64748b', marginTop: 4, display: 'block' }}>
+                    {ratingLabel(formData.rating)}
+                  </span>
                 </div>
 
                 <div className="cc-field">
@@ -434,10 +443,8 @@ const ClientReviewsPage = () => {
                         )}
                         <div>
                           <h3 style={{ margin: 0 }}>{prod?.name || 'Produit'}</h3>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 6 }}>
-                            {[1, 2, 3, 4, 5].map((i) => (
-                              <Star key={i} size={16} fill={i <= review.rating ? '#f59e0b' : 'none'} color={i <= review.rating ? '#f59e0b' : '#d1d5db'} />
-                            ))}
+                          <div style={{ marginTop: 6 }}>
+                            <StarRatingDisplay value={review.rating} size={16} />
                           </div>
                         </div>
                       </div>
@@ -446,6 +453,17 @@ const ClientReviewsPage = () => {
                       <span className="cc-badge" style={{ background: emStyle.bg, color: emStyle.color, textTransform: 'none' }}>
                         {em.emoji} {em.label}
                       </span>
+                      {review.sentiment && (
+                        <span
+                          className="cc-badge"
+                          style={{
+                            background: review.sentiment === 'positive' ? '#dcfce7' : review.sentiment === 'negative' ? '#fee2e2' : '#f3f4f6',
+                            color: review.sentiment === 'positive' ? '#166534' : review.sentiment === 'negative' ? '#991b1b' : '#4b5563',
+                          }}
+                        >
+                          {review.sentiment === 'positive' ? '👍 Positif' : review.sentiment === 'negative' ? '👎 Négatif' : '😐 Neutre'}
+                        </span>
+                      )}
                       {review.aiSuggested && (
                         <span className="cc-badge" style={{ background: '#ede9fe', color: '#5b21b6' }}>
                           ✨ IA

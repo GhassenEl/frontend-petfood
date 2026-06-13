@@ -36,6 +36,17 @@ export const fetchVendorDashboard = () => api.get('/ecosystem/vendor/dashboard')
 
 export const fetchVendorMlAgent = () => api.get('/ecosystem/vendor/ml-agent').then((r) => r.data);
 
+export const fetchAdminVendors = () => api.get('/ecosystem/admin/vendors').then((r) => r.data);
+
+export const fetchAdminVendor = (vendorId) =>
+  api.get(`/ecosystem/admin/vendors/${vendorId}`).then((r) => r.data);
+
+export const fetchAdminMarketplaceStats = () =>
+  api.get('/ecosystem/admin/marketplace').then((r) => r.data);
+
+export const updateAdminVendor = (vendorId, body) =>
+  api.patch(`/ecosystem/admin/vendors/${vendorId}`, body).then((r) => r.data);
+
 
 
 export const fetchSubscriptions = () => api.get('/ecosystem/subscriptions').then((r) => r.data);

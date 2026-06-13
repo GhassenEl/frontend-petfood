@@ -4,6 +4,7 @@ import api from '../utils/api';
 import { exportMedicalDossierPdf } from '../utils/medicalDossierPdf';
 import ClientPrescriptionCard from '../components/ClientPrescriptionCard';
 import ClientVaccineRemindersPanel from '../components/ClientVaccineRemindersPanel';
+import ClientRelayPointsPanel from '../components/ClientRelayPointsPanel';
 
 const animalEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', other: '🐾' };
 
@@ -259,6 +260,14 @@ const ClientMedicalDossierPage = () => {
           ))}
         </div>
       )}
+
+      <section style={{ marginTop: 32 }}>
+        <h2 style={{ fontSize: '1.1rem', margin: '0 0 8px', fontWeight: 800 }}>📦 Retrait médicaments — points relais</h2>
+        <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: 12 }}>
+          Retirez vos produits vétérinaires ou ordonnances dans une clinique ou animalerie partenaire.
+        </p>
+        <ClientRelayPointsPanel compact />
+      </section>
     </div>
   );
 };

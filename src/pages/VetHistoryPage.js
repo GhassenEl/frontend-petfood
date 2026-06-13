@@ -2,6 +2,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { FileDown, Utensils, Stethoscope } from 'lucide-react';
 import api from '../utils/api';
+import {
+  DEMO_VET_NUTRITION,
+  DEMO_VET_TIMELINE,
+  filterVetHistory,
+  filterVetTimeline,
+  mergeVetClients,
+  mergeVetHistory,
+} from '../utils/vetDemoData';
 import { getVetClinicalReport, getVetNutritionRecommendation } from '../services/vetService';
 import { exportVetClinicalReportPdf, exportDossierFromReport } from '../utils/vetClinicalReportPdf';
 import { exportMedicalDossierPdf } from '../utils/medicalDossierPdf';
@@ -34,7 +42,9 @@ const VetHistoryPage = () => {
   const [view, setView] = useState('consultations');
 
   useEffect(() => {
-    api.get('/vet/clients').then(({ data }) => setClients(data || [])).catch(() => setClients([]));
+    api.get('/vet/clients')
+      .then(({ data }) => setClients(mergeVetClients(data)))
+      .catch(() => setClients(mergeVetClients([])));
   }, []);
 
   const fetchHistory = async (opts = {}) => {
@@ -51,10 +61,15 @@ const VetHistoryPage = () => {
           ? api.get('/vet/clinical/timeline', { params: { petName: pet, ownerId: owner } })
           : Promise.resolve({ data: [] }),
       ]);
-      setLegacy(histRes.data);
-      setTimeline(tlRes.data || []);
+      const merged = filterVetHistory(mergeVetHistory(histRes.data), owner, pet);
+      setLegacy(merged);
+      const tl = filterVetTimeline(tlRes.data || [], owner, pet);
+      setTimeline(tl.length ? tl : (owner && pet ? DEMO_VET_TIMELINE : []));
     } catch (error) {
       console.error('History error:', error);
+      const merged = filterVetHistory(mergeVetHistory(null), owner, pet);
+      setLegacy(merged);
+      setTimeline(owner && pet ? DEMO_VET_TIMELINE : []);
     } finally {
       setLoading(false);
     }
@@ -72,7 +87,7 @@ const VetHistoryPage = () => {
       const data = await getVetNutritionRecommendation(owner, pet);
       setNutrition(data);
     } catch {
-      setNutrition(null);
+      setNutrition(owner && pet ? DEMO_VET_NUTRITION : null);
     } finally {
       setNutritionLoading(false);
     }

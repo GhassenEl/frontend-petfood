@@ -20,6 +20,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import Toast from '../components/Toast';
 import ClientVetHealthHub from '../components/ClientVetHealthHub';
 import ClientVetAiPanel from '../components/ClientVetAiPanel';
+import ClientRelayPointsPanel from '../components/ClientRelayPointsPanel';
 import MedicationSchedule from '../components/MedicationSchedule';
 import { VISIT_MODES, visitModeLabel, isHomeVisit, isOnlineVisit, visitModeBadge } from '../constants/visitModes';
 import TeleconsultMeetPanel from '../components/TeleconsultMeetPanel';
@@ -115,6 +116,7 @@ const VeterinaryPage = () => {
     { id: 'assistant', label: 'Assistant santé' },
     { id: 'rdv', label: 'Rendez-vous' },
     { id: 'suivi', label: 'Ordonnances & suivi' },
+    { id: 'relais', label: 'Points relais' },
     { id: 'historique', label: 'Historique' },
   ];
 
@@ -915,6 +917,12 @@ const VeterinaryPage = () => {
           )}
         </div>
       </motion.div>
+      )}
+
+      {!isVet && clientTab === 'relais' && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={styles.section}>
+          <ClientRelayPointsPanel />
+        </motion.div>
       )}
 
       {(isVet || clientTab === 'historique') && (

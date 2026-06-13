@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
+import { DEMO_ADMIN_ORDERS, withDemoFallback } from '../utils/adminDemoData';
 
 const emptyForm = {
   userId: '',
@@ -57,10 +58,10 @@ const AdminOrders = () => {
   const fetchOrders = async () => {
     try {
       const res = await api.get('/orders');
-      setOrders(res.data || []);
+      setOrders(withDemoFallback(res.data || [], DEMO_ADMIN_ORDERS));
     } catch (error) {
       console.error('Erreur chargement commandes', error);
-      setOrders([]);
+      setOrders(DEMO_ADMIN_ORDERS);
     } finally {
       setLoading(false);
     }

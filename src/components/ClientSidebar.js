@@ -52,41 +52,49 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
       title: '🛒 Boutique',
       items: [
         { id: 'client-products', label: 'Produits', icon: '🏷️' },
-        { id: 'client-traceability', label: 'Traçabilité blockchain', icon: '🔗' },
-        { id: 'client-favorites', label: 'Favoris', icon: '❤️' },
-        { id: 'client-orders', label: 'Mes Commandes', icon: '📦' },
-        { id: 'client-invoices', label: 'Factures', icon: '🧾' },
+        { id: 'client-favorites', label: 'Mes favoris', icon: '❤️' },
+        { id: 'client-orders', label: 'Mes commandes', icon: '📦' },
+        { id: 'client-invoices', label: 'Mes factures', icon: '🧾' },
         { id: 'client-history', label: 'Historique', icon: '📜' },
         { id: 'client-loyalty', label: 'Fidélité', icon: '🎁' },
       ]
     },
     {
+      title: '📡 IoT & connecté',
+      items: [
+        { id: 'client-iot', label: 'Centre IoT', icon: '📡' },
+        { id: 'pet-feeder', label: 'Distributeur IoT', icon: '🍽️' },
+        { id: 'client-smart-water', label: 'Fontaine connectée', icon: '💧' },
+        { id: 'client-smart-delivery', label: 'Livraison prédictive', icon: '🚚' },
+        { id: 'client-traceability', label: 'Traçabilité blockchain', icon: '🔗' },
+      ]
+    },
+    {
       title: '⭐ Avis & Réclamations',
       items: [
-        { id: 'client-reviews', label: 'Mes Avis', icon: '⭐' },
+        { id: 'client-reviews', label: 'Mes avis', icon: '⭐' },
         { id: 'client-complaints', label: 'Réclamations', icon: '⚠️' },
       ]
     },
     {
       title: '🐾 Services PetfoodTN',
       items: [
-        { id: 'client-ecosystem', label: 'Assistant IA', icon: '💡' },
-        { id: 'pet-feeder', label: 'Distributeur IoT', icon: '🍽️' },
-        { id: 'client-smart-water', label: 'Smart Water Monitor', icon: '💧' },
-        { id: 'client-services', label: 'Toilettage & Pension', icon: '✂️' },
-        { id: 'client-rehabilitation', label: 'Réhabilitation refuges', icon: '💚' },
+        { id: 'client-events', label: 'Compétitions & cadeaux', icon: '🏆' },
+        { id: 'platform-services', label: 'Catalogue services', icon: '📋' },
+        { id: 'client-services', label: 'Mes services', icon: '✂️' },
+        { id: 'pet-calories', label: 'Nutrition par animal', icon: '🥗' },
+        { id: 'pet-advice', label: 'Conseils pour pets', icon: '💡' },
         { id: 'found-me', label: 'Retrouvé Moi', icon: '🔍' },
         { id: 'veterinary', label: 'Santé & Vétérinaire', icon: '🩺' },
         { id: 'medical-dossier', label: 'Dossier médical', icon: '📁' },
-        { id: 'store-locator', label: 'Magasins', icon: '📍' },
-        { id: 'client-relay-points', label: 'Points relais', icon: '📦' },
+        { id: 'store-locator', label: 'Magasin le plus proche', icon: '📍' },
         { id: 'contact', label: 'Contact', icon: '📧' },
       ]
     },
     {
       title: '⚙️ Compte',
       items: [
-        { id: 'client-profile', label: 'Mon Profil', icon: '👤' },
+        { id: 'client-profile', label: 'Mon profil', icon: '👤' },
         { id: 'change-password', label: 'Mot de passe', icon: '🔐' },
       ]
     }
@@ -97,7 +105,6 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
 
   return (
     <aside className="admin-sidebar" style={{ display: 'flex', flexDirection: 'column' }} aria-label="Navigation client">
-      {/* Brand Header */}
       <div style={{
         padding: '20px',
         borderBottom: '1px solid rgba(0,0,0,0.06)',
@@ -128,7 +135,6 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         </div>
       </div>
 
-      {/* Personalized Profile Section */}
       <div
         style={{
           padding: '16px 20px',
@@ -144,7 +150,7 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {!sidebarImageError ? (
             <img 
-              src="https://images.unsplash.com/photo-1552053831-71594a27632d?w=100&h=100&fit=crop&crop=face" 
+              src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=100&h=100&fit=crop&crop=face" 
               alt="Profile" 
               style={{
                 width: '48px',
@@ -197,7 +203,6 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         </div>
       </div>
 
-      {/* Navigation */}
       <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
         {sections.map((section, idx) => (
           <div key={section.title} className="admin-sidebar-section">
@@ -250,7 +255,6 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         ))}
       </nav>
 
-      {/* Bottom Actions */}
       <div style={{
         padding: '16px',
         borderTop: '1px solid rgba(0,0,0,0.06)',

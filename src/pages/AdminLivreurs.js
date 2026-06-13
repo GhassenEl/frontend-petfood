@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import api from '../utils/api';
+import {
+  DEMO_ADMIN_ORDERS,
+  DEMO_ADMIN_REGIONS,
+  DEMO_ADMIN_USERS,
+  withDemoFallback,
+} from '../utils/adminDemoData';
 
 const emptyForm = {
   name: '',
@@ -40,9 +46,10 @@ const AdminLivreurs = () => {
         api.get('/orders'),
         api.get('/users/regions'),
       ]);
-      setLivreurs((usersRes.data || []).filter((u) => u.role === 'livreur'));
-      setOrders(ordersRes.data || []);
-      setRegions(regionsRes.data || []);
+      const allUsers = withDemoFallback(usersRes.data || [], DEMO_ADMIN_USERS);
+      setLivreurs(allUsers.filter((u) => u.role === 'livreur'));
+      setOrders(withDemoFallback(ordersRes.data || [], DEMO_ADMIN_ORDERS));
+      setRegions((regionsRes.data || []).length ? regionsRes.data : DEMO_ADMIN_REGIONS);
     } catch (error) {
       console.error('Erreur chargement livreurs', error);
     } finally {

@@ -1,27 +1,51 @@
 import { getCookie, setCookie, removeCookie } from './cookies';
 
+const TOKEN_SESSION_KEY = 'token';
 const TOKEN_LS_KEY = 'token';
-const TOKEN_COOKIE = 'petfoodtn_token';
 const EMAIL_COOKIE = 'petfoodtn_email';
 const REMEMBER_COOKIE = 'petfoodtn_remember';
 
-export const getStoredToken = () =>
-  localStorage.getItem(TOKEN_LS_KEY) || getCookie(TOKEN_COOKIE);
+const getSessionStorage = () => {
+  try {
+    return typeof sessionStorage !== 'undefined' ? sessionStorage : null;
+  } catch {
+    return null;
+  }
+};
+
+const getLocalStorage = () => {
+  try {
+    return typeof localStorage !== 'undefined' ? localStorage : null;
+  } catch {
+    return null;
+  }
+};
+
+export const getStoredToken = () => {
+  const session = getSessionStorage();
+  const local = getLocalStorage();
+  return session?.getItem(TOKEN_SESSION_KEY) || local?.getItem(TOKEN_LS_KEY) || null;
+};
 
 export const persistAuthToken = (token, rememberMe = false) => {
-  localStorage.setItem(TOKEN_LS_KEY, token);
+  const session = getSessionStorage();
+  const local = getLocalStorage();
+
   if (rememberMe) {
-    setCookie(TOKEN_COOKIE, token, 30);
+    local?.setItem(TOKEN_LS_KEY, token);
+    session?.removeItem(TOKEN_SESSION_KEY);
     setCookie(REMEMBER_COOKIE, '1', 30);
   } else {
-    removeCookie(TOKEN_COOKIE);
+    session?.setItem(TOKEN_SESSION_KEY, token);
+    local?.removeItem(TOKEN_LS_KEY);
     removeCookie(REMEMBER_COOKIE);
   }
 };
 
 export const clearAuthToken = () => {
-  localStorage.removeItem(TOKEN_LS_KEY);
-  removeCookie(TOKEN_COOKIE);
+  getSessionStorage()?.removeItem(TOKEN_SESSION_KEY);
+  getLocalStorage()?.removeItem(TOKEN_LS_KEY);
+  removeCookie(REMEMBER_COOKIE);
 };
 
 export const persistRememberedEmail = (email, rememberMe) => {

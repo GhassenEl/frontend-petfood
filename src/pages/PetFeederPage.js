@@ -15,6 +15,14 @@ import {
   fetchFeederFirebaseStatus,
   mergeFeederWithFirebaseGrandeurs,
 } from '../services/feederFirebaseService';
+import {
+  getDemoFeederList,
+  getDemoFeederBundle,
+  DEMO_FEEDER_PETS,
+} from '../utils/clientDemoData';
+
+const DEMO_FEEDER_ID = 'demo-feeder-1';
+const isDemoFeederId = (id) => id === DEMO_FEEDER_ID || String(id || '').startsWith('demo-');
 
 const statusColor = (s) => (s === 'online' ? '#059669' : '#9ca3af');
 
@@ -46,22 +54,58 @@ const PetFeederPage = () => {
   const [scheduleForm, setScheduleForm] = useState({ time: '08:00', portionGrams: 30, label: 'Repas' });
   const [firebaseEnabled, setFirebaseEnabled] = useState(false);
   const [firebaseRecordedAt, setFirebaseRecordedAt] = useState(null);
+  const [demoMode, setDemoMode] = useState(false);
   const pollRef = useRef(null);
+
+  const applyDemoBundle = useCallback((bundle) => {
+    setFeeder(bundle.feeder);
+    setFeederName(bundle.feeder.name || '');
+    setPlan(bundle.plan);
+    setStats(bundle.stats);
+    setAlerts(bundle.alerts);
+    setInsights(bundle.insights);
+    setSpeciesGuide(bundle.speciesGuide);
+    setFeederMlPowered(false);
+    setHistory(bundle.history);
+    setPets(bundle.pets);
+    if (bundle.speciesGuide?.suggestedPortionGrams) {
+      setGrams(bundle.speciesGuide.suggestedPortionGrams);
+    } else if (bundle.plan?.portionGrams) {
+      setGrams(bundle.plan.portionGrams);
+    }
+  }, []);
 
   const loadFeeders = useCallback(async () => {
     try {
       const { data } = await api.get('/feeder');
-      setFeeders(data || []);
-      if (data?.length && !selectedId) setSelectedId(data[0].id);
+      const list = data || [];
+      if (list.length === 0) {
+        const demoList = getDemoFeederList();
+        setDemoMode(true);
+        setFeeders(demoList);
+        if (!selectedId) setSelectedId(demoList[0].id);
+        return;
+      }
+      setDemoMode(false);
+      setFeeders(list);
+      if (!selectedId) setSelectedId(list[0].id);
     } catch (e) {
       console.error(e);
-      setFeeders([]);
+      const demoList = getDemoFeederList();
+      setDemoMode(true);
+      setFeeders(demoList);
+      if (!selectedId) setSelectedId(demoList[0].id);
     }
   }, [selectedId]);
 
   const loadFeederDetail = useCallback(async (id, silent = false) => {
     if (!id) return;
     if (!silent) setLoading(true);
+    if (demoMode || isDemoFeederId(id)) {
+      applyDemoBundle(getDemoFeederBundle());
+      if (!silent) setLoading(false);
+      return;
+    }
     try {
       const [detailRes, planRes, statsRes, alertsRes, insightsRes, historyRes, petsRes, fbLatestRes] = await Promise.all([
         api.get(`/feeder/${id}`),
@@ -92,10 +136,13 @@ const PetFeederPage = () => {
       if (planRes.data?.portionGrams) setGrams(planRes.data.portionGrams);
     } catch (e) {
       console.error(e);
+      if (isDemoFeederId(id)) {
+        applyDemoBundle(getDemoFeederBundle());
+      }
     } finally {
       if (!silent) setLoading(false);
     }
-  }, []);
+  }, [applyDemoBundle, demoMode]);
 
   useEffect(() => {
     (async () => {
@@ -116,12 +163,16 @@ const PetFeederPage = () => {
   }, [selectedId, loadFeederDetail]);
 
   useEffect(() => {
-    if (!selectedId) return undefined;
+    if (!selectedId || demoMode) return undefined;
     pollRef.current = setInterval(() => loadFeederDetail(selectedId, true), 12000);
     return () => clearInterval(pollRef.current);
-  }, [selectedId, loadFeederDetail]);
+  }, [selectedId, loadFeederDetail, demoMode]);
 
   const registerFeeder = async () => {
+    if (demoMode) {
+      window.alert('Mode démo : connectez un ESP32 réel via l\'API pour enregistrer un distributeur.');
+      return;
+    }
     setActionLoading(true);
     try {
       const { data } = await api.post('/feeder', { name: 'Mon distributeur' });
@@ -136,6 +187,11 @@ const PetFeederPage = () => {
 
   const saveFeederSettings = async () => {
     if (!selectedId) return;
+    if (demoMode) {
+      setFeeder((prev) => (prev ? { ...prev, name: feederName } : prev));
+      setEditingName(false);
+      return;
+    }
     setActionLoading(true);
     try {
       await api.put(`/feeder/${selectedId}`, {
@@ -153,6 +209,14 @@ const PetFeederPage = () => {
 
   const linkPet = async (petId) => {
     if (!selectedId) return;
+    if (demoMode) {
+      const pet = DEMO_FEEDER_PETS.find((p) => p.id === petId);
+      setFeeder((prev) => (prev ? { ...prev, petId: petId || null } : prev));
+      if (pet) {
+        setPlan((prev) => (prev ? { ...prev, pet: { id: pet.id, name: pet.name, type: pet.type } } : prev));
+      }
+      return;
+    }
     try {
       await api.put(`/feeder/${selectedId}`, { petId: petId || null });
       await loadFeederDetail(selectedId, true);
@@ -163,6 +227,39 @@ const PetFeederPage = () => {
 
   const dispense = async () => {
     if (!selectedId) return;
+    if (demoMode) {
+      setActionLoading(true);
+      const portion = grams;
+      setFeeder((prev) => {
+        if (!prev) return prev;
+        const nextPct = Math.max(5, (prev.reservoirPercent ?? 42) - Math.round(portion / 8));
+        return {
+          ...prev,
+          reservoirPercent: nextPct,
+          isLowFood: nextPct < 30,
+          foodGrams: portion,
+          animalPresent: true,
+        };
+      });
+      setStats((prev) => prev ? {
+        ...prev,
+        todayGrams: (prev.todayGrams ?? 0) + portion,
+        weekGrams: (prev.weekGrams ?? 0) + portion,
+        dispenseCount: (prev.dispenseCount ?? 0) + 1,
+      } : prev);
+      setHistory((prev) => [{
+        id: `demo-log-${Date.now()}`,
+        eventType: 'manual_request',
+        portionGrams: portion,
+        message: 'Distribution manuelle (mode démo)',
+        createdAt: new Date().toISOString(),
+      }, ...prev]);
+      setTimeout(() => {
+        setFeeder((prev) => (prev ? { ...prev, animalPresent: false } : prev));
+        setActionLoading(false);
+      }, 800);
+      return;
+    }
     setActionLoading(true);
     try {
       await api.post(`/feeder/${selectedId}/dispense`, { grams });
@@ -176,6 +273,25 @@ const PetFeederPage = () => {
 
   const markRefill = async () => {
     if (!selectedId) return;
+    if (demoMode) {
+      setActionLoading(true);
+      setFeeder((prev) => (prev ? {
+        ...prev,
+        reservoirPercent: 95,
+        reservoirCm: 28,
+        isLowFood: false,
+      } : prev));
+      setAlerts((prev) => prev.filter((a) => a.level !== 'warning'));
+      setHistory((prev) => [{
+        id: `demo-refill-${Date.now()}`,
+        eventType: 'refill',
+        portionGrams: 500,
+        message: 'Recharge réservoir enregistrée (mode démo)',
+        createdAt: new Date().toISOString(),
+      }, ...prev]);
+      setActionLoading(false);
+      return;
+    }
     setActionLoading(true);
     try {
       await api.post(`/feeder/${selectedId}/refill`, { grams: 500 });
@@ -189,6 +305,10 @@ const PetFeederPage = () => {
 
   const applySchedules = async () => {
     if (!selectedId) return;
+    if (demoMode) {
+      window.alert('Planning automatique appliqué (simulation démo).');
+      return;
+    }
     setActionLoading(true);
     try {
       await api.post(`/feeder/${selectedId}/apply-schedules`);
@@ -203,6 +323,12 @@ const PetFeederPage = () => {
   const addSchedule = async (e) => {
     e.preventDefault();
     if (!selectedId) return;
+    if (demoMode) {
+      const newSch = { ...scheduleForm, id: `sch-demo-${Date.now()}`, enabled: true };
+      setFeeder((prev) => (prev ? { ...prev, schedules: [...(prev.schedules || []), newSch] } : prev));
+      setScheduleForm({ time: '08:00', portionGrams: 30, label: 'Repas' });
+      return;
+    }
     try {
       await api.post(`/feeder/${selectedId}/schedules`, scheduleForm);
       await loadFeederDetail(selectedId, true);
@@ -212,6 +338,18 @@ const PetFeederPage = () => {
   };
 
   const toggleSchedule = async (scheduleId, enabled) => {
+    if (demoMode) {
+      setFeeder((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          schedules: (prev.schedules || []).map((s) => (
+            s.id === scheduleId ? { ...s, enabled: !enabled } : s
+          )),
+        };
+      });
+      return;
+    }
     try {
       await api.patch(`/feeder/schedules/${scheduleId}`, { enabled: !enabled });
       await loadFeederDetail(selectedId, true);
@@ -221,6 +359,13 @@ const PetFeederPage = () => {
   };
 
   const deleteSchedule = async (scheduleId) => {
+    if (demoMode) {
+      setFeeder((prev) => {
+        if (!prev) return prev;
+        return { ...prev, schedules: (prev.schedules || []).filter((s) => s.id !== scheduleId) };
+      });
+      return;
+    }
     try {
       await api.delete(`/feeder/schedules/${scheduleId}`);
       await loadFeederDetail(selectedId, true);
@@ -270,8 +415,24 @@ const PetFeederPage = () => {
           🍽️ Distributeur IoT
         </h1>
         <p style={{ margin: 0, color: '#64748b' }}>
-          Nutrition automatique, capteurs en temps réel et insights intelligents (ESP32)
+          Nutrition automatique, capteurs en temps réel et recommandations personnalisées (ESP32)
         </p>
+        <div style={{ marginTop: 14, display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link to="/client-iot" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: 'white', borderRadius: 10, border: '1px solid #bfdbfe' }}>
+            📡 Centre IoT
+          </Link>
+          <Link to="/pet-calories" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: 'white', borderRadius: 10, border: '1px solid #bfdbfe' }}>
+            🔥 Calculateur calories
+          </Link>
+          <Link to="/client-smart-water" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: 'white', borderRadius: 10, border: '1px solid #bfdbfe' }}>
+            💧 Fontaine connectée
+          </Link>
+        </div>
+        {demoMode && (
+          <p style={{ margin: '12px 0 0', fontSize: 13, fontWeight: 600, color: '#7c3aed', background: 'rgba(255,255,255,0.7)', display: 'inline-block', padding: '6px 14px', borderRadius: 20 }}>
+            Mode démo — aucun ESP32 connecté · actions simulées localement
+          </p>
+        )}
         {firebaseEnabled && (
           <p style={{ margin: '10px 0 0', fontSize: 13, fontWeight: 600, color: '#ea580c' }}>
             🔥 Grandeurs synchronisées dans Firebase Firestore
@@ -282,15 +443,7 @@ const PetFeederPage = () => {
         )}
       </motion.div>
 
-      {feeders.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: 40, background: 'white', borderRadius: 20, border: '1px solid #e5e7eb' }}>
-          <PawPrint size={48} color="#94a3b8" style={{ marginBottom: 16 }} />
-          <p style={{ color: '#64748b', marginBottom: 20 }}>Aucun distributeur enregistré. Ajoutez votre ESP32 pour commencer.</p>
-          <button type="button" onClick={registerFeeder} disabled={actionLoading} style={btnPrimary}>
-            <Plus size={18} /> Ajouter un distributeur
-          </button>
-        </div>
-      ) : (
+      {feeders.length > 0 && (
         <>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16, alignItems: 'center' }}>
             {feeders.map((f) => (
@@ -307,9 +460,11 @@ const PetFeederPage = () => {
                 {f.status === 'online' ? '🟢' : '⚫'} {f.name}
               </button>
             ))}
-            <button type="button" onClick={registerFeeder} style={btnOutline} disabled={actionLoading}>
-              <Plus size={16} /> Nouveau
-            </button>
+            {!demoMode && (
+              <button type="button" onClick={registerFeeder} style={btnOutline} disabled={actionLoading}>
+                <Plus size={16} /> Nouveau
+              </button>
+            )}
             <button
               type="button"
               onClick={() => loadFeederDetail(selectedId, false)}
@@ -320,7 +475,9 @@ const PetFeederPage = () => {
             </button>
           </div>
 
-          {feeder && (
+          {loading && !feeder ? (
+            <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Chargement du distributeur…</div>
+          ) : feeder && (
             <>
               {/* Alertes */}
               {alerts.length > 0 && (
@@ -351,7 +508,7 @@ const PetFeederPage = () => {
                       Espèce : {speciesGuide.label} — {speciesGuide.suggestedPortionGrams} g / repas
                     </strong>
                     <p style={{ margin: '4px 0 0', fontSize: 12, color: '#047857' }}>
-                      Objectif {speciesGuide.dailyGrams} g/jour · {feederMlPowered ? 'IA XGBoost active' : 'Calcul nutritionnel'}
+                      Objectif {speciesGuide.dailyGrams} g/jour · Recommandations nutritionnelles
                     </p>
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -441,7 +598,26 @@ const PetFeederPage = () => {
                   </button>
                 </Card>
 
-                {/* Insights IA */}
+                {/* Capteurs temps réel */}
+                <Card title="Capteurs temps réel" icon={<Thermometer size={18} color="#0ea5e9" />}>
+                  <SensorGauge label="Température" value={feeder.temperature} unit="°C" min={15} max={35} optimal={[20, 26]} color="#f97316" />
+                  <SensorGauge label="Humidité" value={feeder.humidity} unit="%" min={30} max={80} optimal={[45, 65]} color="#0ea5e9" />
+                  <SensorGauge label="Niveau ultrason" value={feeder.reservoirPercent} unit="%" min={0} max={100} optimal={[40, 100]} color="#8b5cf6" invertLow />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 8 }}>
+                    <div style={{ padding: 10, background: feeder.animalPresent ? '#ecfdf5' : '#f8fafc', borderRadius: 10, textAlign: 'center', fontSize: 12 }}>
+                      <div style={{ fontSize: 18 }}>{feeder.animalPresent ? '👀' : '🚫'}</div>
+                      <strong>IR détection</strong>
+                      <div style={{ color: '#64748b' }}>{feeder.animalPresent ? 'Présent' : 'Absent'}</div>
+                    </div>
+                    <div style={{ padding: 10, background: '#f8fafc', borderRadius: 10, textAlign: 'center', fontSize: 12 }}>
+                      <div style={{ fontSize: 18 }}>⚖️</div>
+                      <strong>Balance HX711</strong>
+                      <div style={{ color: '#64748b' }}>{feeder.foodGrams != null ? `${feeder.foodGrams.toFixed(0)} g` : '—'}</div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Insights nutrition */}
                 <Card title="Insights nutrition" icon={<Lightbulb size={18} color="#f59e0b" />} wide={insights.length > 2}>
                   {insights.length === 0 ? (
                     <p style={{ color: '#94a3b8', fontSize: 14 }}>Liez un animal pour des recommandations personnalisées.</p>
@@ -485,9 +661,12 @@ const PetFeederPage = () => {
                     Quantité (grammes)
                     <input type="number" min={5} max={200} value={grams} onChange={(e) => setGrams(Number(e.target.value))} style={inputStyle} />
                   </label>
-                  <button type="button" onClick={dispense} disabled={actionLoading || feeder.isLowFood} style={{ ...btnPrimary, width: '100%', marginTop: 12, opacity: feeder.isLowFood ? 0.5 : 1 }}>
+                  <button type="button" onClick={dispense} disabled={actionLoading || (!demoMode && feeder.isLowFood)} style={{ ...btnPrimary, width: '100%', marginTop: 12, opacity: (!demoMode && feeder.isLowFood) ? 0.5 : 1 }}>
                     Distribuer maintenant
                   </button>
+                  {feeder.isLowFood && (
+                    <p style={{ fontSize: 12, color: '#b45309', marginTop: 8 }}>Niveau bas — rechargez le réservoir ou utilisez le mode démo.</p>
+                  )}
                 </Card>
 
                 {/* Plan nutritionnel */}
@@ -538,7 +717,7 @@ const PetFeederPage = () => {
                 </Card>
 
                 {/* Journal filtré */}
-                <Card title="Journal d'événements" icon={<Scale size={18} />} wide>
+                <Card title="Historique récent" icon={<Scale size={18} />} wide>
                   <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
                     {[
                       { id: 'all', label: 'Tout' },
@@ -583,6 +762,30 @@ const PetFeederPage = () => {
 
       <div style={{ marginTop: 32, padding: 20, background: '#fffbeb', borderRadius: 16, border: '1px solid #fde68a', fontSize: 14, color: '#92400e' }}>
         <strong>ESP32 :</strong> HC-SR04, IR, HX711, DHT11, Servo, Moteur DC, LED RGB — voir <code>firmware/README.md</code>
+      </div>
+    </div>
+  );
+};
+
+const SensorGauge = ({ label, value, unit, min, max, optimal, color, invertLow }) => {
+  if (value == null) {
+    return (
+      <div style={{ marginBottom: 12, fontSize: 13, color: '#94a3b8' }}>{label} : —</div>
+    );
+  }
+  const pct = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+  const inRange = optimal && value >= optimal[0] && value <= optimal[1];
+  const barColor = invertLow
+    ? (value < (optimal?.[0] ?? 30) ? '#ef4444' : inRange ? color : '#f59e0b')
+    : (inRange ? color : '#f59e0b');
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#64748b', marginBottom: 4 }}>
+        <span>{label}</span>
+        <strong style={{ color: barColor }}>{value}{unit}</strong>
+      </div>
+      <div style={{ height: 8, background: '#e2e8f0', borderRadius: 6, overflow: 'hidden' }}>
+        <div style={{ width: `${pct}%`, height: '100%', background: barColor, borderRadius: 6, transition: 'width 0.3s' }} />
       </div>
     </div>
   );

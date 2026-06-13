@@ -10,6 +10,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 from dotenv import load_dotenv
 
+from auth_jwt import require_jwt
+
 load_dotenv()
 
 app = FastAPI(title="PetfoodTN Recommendation API", version="2.0.0")
@@ -304,7 +306,7 @@ async def get_similar_products(product_id: str, limit: int = 3):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/analyze-sentiment", response_model=SentimentResponse)
-async def analyze_sentiment(req: SentimentRequest):
+async def analyze_sentiment(req: SentimentRequest, _user=Depends(require_jwt)):
     from .utils.sentiment import analyze_comment
     result = analyze_comment(req.comment)
     return SentimentResponse(**result)

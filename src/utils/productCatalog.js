@@ -113,5 +113,6 @@ export const askAiAboutProduct = (product, catalog, navigate) => {
     sessionStorage.setItem('ai:productContext', JSON.stringify(buildProductAiContext(product, catalog)));
     sessionStorage.setItem('ai:initialQuestion', `Parle-moi de "${product.name}" : composition, pour quel animal, avantages et comment l'utiliser.`);
   } catch (e) { /* ignore */ }
-  navigate('/client-ai');
+  window.dispatchEvent(new CustomEvent('petfood:open-chat'));
+  if (navigate) navigate('/client-products');
 };

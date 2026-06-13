@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
+import { DEMO_LIVREUR_ORDERS, getLivreurCommission, withDemoFallback } from '../utils/livreurDemoData';
 
 const LivreurHistoryPage = () => {
   const [orders, setOrders] = useState([]);
@@ -13,7 +14,8 @@ const LivreurHistoryPage = () => {
   const fetchHistory = async () => {
     try {
       const res = await api.get('/orders');
-      setOrders((res.data || []).filter(o => o.status === 'delivered'));
+      const all = withDemoFallback(res.data || [], DEMO_LIVREUR_ORDERS);
+      setOrders(all.filter(o => o.status === 'delivered'));
     } catch (error) {
       console.error('History error:', error);
     } finally {
@@ -68,7 +70,7 @@ const LivreurHistoryPage = () => {
                 </p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ margin: 0, fontWeight: 700, color: '#27ae60' }}>{order.total} DT</p>
+                <p style={{ margin: 0, fontWeight: 700, color: '#27ae60' }}>+{getLivreurCommission(order)} DT</p>
                 <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: '#aaa' }}>
                   {order.createdAt ? new Date(order.createdAt).toLocaleDateString('fr-FR') : ''}
                 </p>

@@ -7,8 +7,11 @@ import {
   getLeaveTypeLabel,
   getLeaveStatusMeta,
 } from '../constants/leaveRequests';
+import { DEMO_LIVREUR_LEAVE_REQUESTS, withDemoFallback } from '../utils/livreurDemoData';
+import { DEMO_VET_LEAVE_REQUESTS, isDemoVetId } from '../utils/vetDemoData';
 
-const StaffLeavePage = ({ roleLabel = 'Personnel' }) => {
+const StaffLeavePage = ({ roleLabel = 'Personnel', demoFallback = false }) => {
+  const fallbackList = roleLabel === 'Vétérinaire' ? DEMO_VET_LEAVE_REQUESTS : DEMO_LIVREUR_LEAVE_REQUESTS;
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -24,10 +27,13 @@ const StaffLeavePage = ({ roleLabel = 'Personnel' }) => {
     setLoading(true);
     try {
       const { data } = await api.get('/leave-requests/mine');
-      setRequests(data || []);
+      const list = demoFallback
+        ? withDemoFallback(data || [], fallbackList)
+        : (data || []);
+      setRequests(list);
     } catch (error) {
       console.error(error);
-      setRequests([]);
+      setRequests(demoFallback ? fallbackList : []);
     } finally {
       setLoading(false);
     }
@@ -51,7 +57,20 @@ const StaffLeavePage = ({ roleLabel = 'Personnel' }) => {
       await load();
       window.alert('Demande envoyée à l\'administration');
     } catch (error) {
-      window.alert(error.response?.data?.error || 'Erreur lors de l\'envoi');
+      if (demoFallback) {
+        const newReq = {
+          id: `leave-vet-${Date.now()}`,
+          _id: `leave-vet-${Date.now()}`,
+          ...form,
+          status: 'pending',
+        };
+        setRequests((prev) => [newReq, ...prev]);
+        setShowForm(false);
+        setForm({ type: 'conge', startDate: '', endDate: '', reason: '' });
+        window.alert('Demande enregistrée (mode démonstration).');
+      } else {
+        window.alert(error.response?.data?.error || 'Erreur lors de l\'envoi');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -63,7 +82,11 @@ const StaffLeavePage = ({ roleLabel = 'Personnel' }) => {
       await api.delete(`/leave-requests/${id}`);
       await load();
     } catch (error) {
-      window.alert(error.response?.data?.error || 'Erreur');
+      if (demoFallback && isDemoVetId(id)) {
+        setRequests((prev) => prev.filter((r) => (r.id || r._id) !== id));
+      } else {
+        window.alert(error.response?.data?.error || 'Erreur');
+      }
     }
   };
 

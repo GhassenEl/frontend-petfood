@@ -88,8 +88,8 @@ const ClientRelayPointsPage = () => {
         <FilterBtn active={!typeFilter} onClick={() => setTypeFilter('')} label="Tous" />
         <FilterBtn active={typeFilter === 'pet_shop'} onClick={() => setTypeFilter('pet_shop')} label="Animaleries" />
         <FilterBtn active={typeFilter === 'vet_clinic'} onClick={() => setTypeFilter('vet_clinic')} label="Cliniques" />
-        <Link to="/checkout" style={{ marginLeft: 'auto', fontWeight: 700, color: '#1d4ed8', fontSize: 14 }}>
-          Commander avec retrait →
+        <Link to="/veterinary" style={{ marginLeft: 'auto', fontWeight: 700, color: '#1d4ed8', fontSize: 14 }}>
+          Voir dans Santé & vétérinaire →
         </Link>
       </div>
 

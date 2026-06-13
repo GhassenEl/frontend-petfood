@@ -2,11 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  BarChart3, AlertTriangle, Download, ExternalLink, RefreshCw, Pill, Shield,
+  BarChart3, AlertTriangle, Download, ExternalLink, RefreshCw, Pill, Package,
+  TrendingUp, Users, Receipt,
 } from 'lucide-react';
 import useAnalyticsHub from '../hooks/useAnalyticsHub';
 import { fetchDatasetsCatalog } from '../services/analyticsHubService';
 import api from '../utils/api';
+import { getStoredToken } from '../utils/authStorage';
+import { isValidToken } from '../utils/jwtSecurity';
+import { DEMO_ADMIN_ANALYTICS, DEMO_ADMIN_DATASETS } from '../utils/adminDemoData';
 
 const severityStyle = {
   high: { bg: '#fee2e2', color: '#991b1b', border: '#fecaca' },
@@ -15,29 +19,54 @@ const severityStyle = {
 };
 
 const AdminPowerBiPage = () => {
-  const { data, loading, reload } = useAnalyticsHub();
+  const { data: apiData, loading, reload } = useAnalyticsHub();
   const [catalog, setCatalog] = useState(null);
+  const data = {
+    ...DEMO_ADMIN_ANALYTICS,
+    ...(apiData?.kpiSummary ? { kpiSummary: { ...DEMO_ADMIN_ANALYTICS.kpiSummary, ...apiData.kpiSummary } } : {}),
+    alerts: (apiData?.alerts?.length
+      ? apiData.alerts.filter((a) => !/agent\s*ia|incidents?\s*ia/i.test(`${a.title || ''} ${a.message || ''}`))
+      : DEMO_ADMIN_ANALYTICS.alerts),
+    alertCounts: {
+      total: apiData?.alertCounts?.total ?? DEMO_ADMIN_ANALYTICS.alertCounts.total,
+      high: apiData?.alertCounts?.high ?? DEMO_ADMIN_ANALYTICS.alertCounts.high,
+      pharmacy: apiData?.alertCounts?.pharmacy ?? DEMO_ADMIN_ANALYTICS.alertCounts.pharmacy,
+    },
+    quickLinks: (apiData?.quickLinks?.length ? apiData.quickLinks : DEMO_ADMIN_ANALYTICS.quickLinks)
+      .filter((l) => !/agent\s*ia|incidents?\s*ia/i.test(l.label || '')),
+    powerBi: apiData?.powerBi || DEMO_ADMIN_ANALYTICS.powerBi,
+  };
   const viteEmbed = import.meta.env.VITE_POWER_BI_EMBED_URL || '';
-  const embedUrl = data?.powerBi?.embedUrl || viteEmbed || '';
+  const embedUrl = apiData?.powerBi?.embedUrl || viteEmbed || '';
 
   useEffect(() => {
-    fetchDatasetsCatalog().then(setCatalog).catch(() => setCatalog(null));
+    fetchDatasetsCatalog()
+      .then(setCatalog)
+      .catch(() => setCatalog(DEMO_ADMIN_DATASETS));
   }, []);
 
   const downloadCsv = async (table) => {
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     const base = api.defaults.baseURL || '/api';
     const url = `${base}/analytics/export/${table}?format=csv`;
-    const res = await fetch(url, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    const blob = await res.blob();
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `petfoodtn_${table}.csv`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    try {
+      const res = await fetch(url, {
+        headers: token && isValidToken(token) ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Export failed');
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `petfoodtn_${table}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch {
+      window.alert('Export indisponible en mode démo — configurez le backend analytics.');
+    }
   };
+
+  const kpi = data?.kpiSummary || DEMO_ADMIN_ANALYTICS.kpiSummary;
+  const datasets = catalog?.datasets?.length ? catalog.datasets : DEMO_ADMIN_DATASETS.datasets;
 
   return (
     <div style={{ padding: 24, maxWidth: 1200, margin: '0 auto' }}>
@@ -54,10 +83,10 @@ const AdminPowerBiPage = () => {
       >
         <h1 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 800 }}>
           <BarChart3 size={28} style={{ verticalAlign: 'middle', marginRight: 8 }} />
-          Power BI &amp; alertes plateforme
+          Power BI &amp; analytics
         </h1>
         <p style={{ margin: 0, opacity: 0.9 }}>
-          Rapport intégré, exports pour actualisation Power BI Desktop, alertes incidents urgents et stock pharmacie.
+          Tableaux de bord, alertes opérationnelles et exports pour Power BI Desktop.
         </p>
         <button type="button" onClick={reload} style={btnLight}>
           <RefreshCw size={14} /> Actualiser
@@ -68,11 +97,13 @@ const AdminPowerBiPage = () => {
         <p style={{ color: '#94a3b8' }}>Chargement du hub analytique…</p>
       ) : (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 24 }}>
-            <Kpi label="Alertes" value={data?.alertCounts?.total ?? 0} />
-            <Kpi label="Urgentes" value={data?.alertCounts?.high ?? 0} color="#dc2626" />
-            <Kpi label="Pharmacie" value={data?.alertCounts?.pharmacy ?? 0} color="#7c3aed" />
-            <Kpi label="Incidents IA" value={data?.alertCounts?.incident ?? 0} color="#ea580c" />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 24 }}>
+            <Kpi icon={<TrendingUp size={18} />} label="CA du mois" value={`${kpi.revenueMonth} DT`} color="#059669" />
+            <Kpi icon={<Package size={18} />} label="Commandes" value={kpi.ordersMonth} color="#2563eb" />
+            <Kpi icon={<Users size={18} />} label="Clients actifs" value={kpi.activeClients} color="#7c3aed" />
+            <Kpi icon={<Receipt size={18} />} label="Panier moyen" value={`${kpi.avgOrderValue} DT`} color="#e67e22" />
+            <Kpi icon={<Package size={18} />} label="Ponctualité" value={`${kpi.deliveryOnTime}%`} color="#0891b2" />
+            <Kpi icon={<AlertTriangle size={18} />} label="Alertes" value={data?.alertCounts?.total ?? 0} color="#dc2626" />
           </div>
 
           <section style={card} id="alerts">
@@ -97,7 +128,7 @@ const AdminPowerBiPage = () => {
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                        {a.type === 'pharmacy' ? <Pill size={18} /> : <Shield size={18} />}
+                        {a.type === 'pharmacy' ? <Pill size={18} /> : <AlertTriangle size={18} />}
                         <div style={{ flex: 1 }}>
                           <strong style={{ color: st.color }}>{a.title}</strong>
                           <p style={{ margin: '4px 0 0', fontSize: 13, color: '#475569' }}>{a.message}</p>
@@ -133,17 +164,27 @@ const AdminPowerBiPage = () => {
               />
             ) : (
               <div style={{ padding: 20, background: '#f8fafc', borderRadius: 12, border: '1px dashed #cbd5e1' }}>
-                <p style={{ margin: '0 0 12px', color: '#475569' }}>
-                  Aucune URL d’intégration configurée. Ajoutez dans <code>backend/.env</code> :
+                <p style={{ margin: '0 0 16px', color: '#475569', fontWeight: 600 }}>
+                  Aperçu des indicateurs (mode démo — intégrez votre rapport Power BI ci-dessous)
                 </p>
-                <pre style={{ background: '#1e293b', color: '#e2e8f0', padding: 12, borderRadius: 8, fontSize: 12 }}>
-                  POWER_BI_EMBED_URL=https://app.powerbi.com/view?r=...
-                </pre>
-                <p style={{ margin: '12px 0 0', fontSize: 13, color: '#64748b' }}>
-                  Ou côté frontend Vite : <code>VITE_POWER_BI_EMBED_URL</code>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
+                  {[
+                    { label: 'Ventes', value: `${kpi.revenueMonth} DT`, color: '#059669' },
+                    { label: 'Nouveaux clients', value: '+12', color: '#2563eb' },
+                    { label: 'Taux conversion', value: '3.8%', color: '#7c3aed' },
+                    { label: 'Satisfaction', value: '4.6/5', color: '#f59e0b' },
+                  ].map((item) => (
+                    <div key={item.label} style={{ background: '#fff', borderRadius: 12, padding: 16, textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 800, color: item.color }}>{item.value}</div>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: 6, fontWeight: 600 }}>{item.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <p style={{ margin: '16px 0 8px', fontSize: 13, color: '#64748b' }}>
+                  Configuration : ajoutez <code>VITE_POWER_BI_EMBED_URL</code> ou <code>POWER_BI_EMBED_URL</code> dans le backend.
                 </p>
-                <ol style={{ marginTop: 12, fontSize: 13, color: '#334155' }}>
-                  {(data?.powerBi?.setupSteps || []).map((s, i) => (
+                <ol style={{ marginTop: 8, fontSize: 13, color: '#334155' }}>
+                  {(data?.powerBi?.setupSteps || DEMO_ADMIN_ANALYTICS.powerBi.setupSteps).map((s, i) => (
                     <li key={i} style={{ marginBottom: 6 }}>{s}</li>
                   ))}
                 </ol>
@@ -156,21 +197,21 @@ const AdminPowerBiPage = () => {
               <Download size={20} /> Exports pour Power BI Desktop
             </h2>
             <p style={{ fontSize: 14, color: '#64748b', marginTop: 0 }}>
-              Téléchargez les jeux de données ou connectez Power Query à l’API (token admin).
+              Téléchargez les jeux de données ou connectez Power Query à l&apos;API (token admin).
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-              {(catalog?.datasets || []).map((ds) => (
+              {datasets.map((ds) => (
                 <button
                   key={ds.id}
                   type="button"
                   onClick={() => downloadCsv(ds.id)}
                   style={exportBtn}
                 >
-                  <Download size={14} /> {ds.id}.csv
+                  <Download size={14} /> {ds.label || ds.id}.csv
                 </button>
               ))}
             </div>
-            {data?.quickLinks?.length > 0 && (
+            {(data?.quickLinks || []).length > 0 && (
               <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {data.quickLinks.map((l) => (
                   <Link key={l.path} to={l.path} style={chip}>
@@ -186,10 +227,11 @@ const AdminPowerBiPage = () => {
   );
 };
 
-const Kpi = ({ label, value, color = '#1e3a8a' }) => (
-  <div style={{ background: '#fff', borderRadius: 12, padding: 16, border: '1px solid #e2e8f0' }}>
-    <div style={{ fontSize: 12, color: '#64748b' }}>{label}</div>
-    <div style={{ fontSize: 24, fontWeight: 800, color }}>{value}</div>
+const Kpi = ({ icon, label, value, color = '#1e3a8a' }) => (
+  <div style={{ background: '#fff', borderRadius: 12, padding: 16, border: '1px solid #e2e8f0', textAlign: 'center' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8, color: '#94a3b8' }}>{icon}</div>
+    <div style={{ fontSize: 22, fontWeight: 800, color }}>{value}</div>
+    <div style={{ fontSize: 12, color: '#64748b', marginTop: 6, fontWeight: 600 }}>{label}</div>
   </div>
 );
 

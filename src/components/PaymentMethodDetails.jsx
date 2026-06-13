@@ -135,6 +135,51 @@ const PaymentMethodDetails = ({
     );
   }
 
+  if (method === 'flouci') {
+    return (
+      <div style={boxStyle}>
+        <p style={{ margin: '0 0 10px', fontWeight: 700 }}>🇹🇳 Flouci — paiement mobile Tunisie</p>
+        <p style={{ margin: 0, fontSize: 14 }}>
+          Vous serez redirigé vers l&apos;application Flouci ou recevrez une notification sur votre téléphone.
+          Mode démo : paiement simulé instantanément.
+        </p>
+      </div>
+    );
+  }
+
+  if (method === 'konnect') {
+    return (
+      <div style={boxStyle}>
+        <p style={{ margin: '0 0 10px', fontWeight: 700 }}>🔗 Konnect — carte & wallet</p>
+        <p style={{ margin: 0, fontSize: 14 }}>
+          Paiement sécurisé via la passerelle Konnect (cartes tunisiennes, e-wallets).
+        </p>
+      </div>
+    );
+  }
+
+  if (method === 'paymee') {
+    return (
+      <div style={boxStyle}>
+        <p style={{ margin: '0 0 10px', fontWeight: 700 }}>💳 Paymee</p>
+        <p style={{ margin: 0, fontSize: 14 }}>
+          Validation via Paymee — compatible banques et opérateurs mobiles tunisiens.
+        </p>
+      </div>
+    );
+  }
+
+  if (method === 'd17') {
+    return (
+      <div style={boxStyle}>
+        <p style={{ margin: '0 0 10px', fontWeight: 700 }}>📮 D17 / e-Dinar (La Poste)</p>
+        <p style={{ margin: 0, fontSize: 14 }}>
+          Paiement via compte D17 ou e-Dinar. Confirmez sur votre application La Poste Tunisienne.
+        </p>
+      </div>
+    );
+  }
+
   if (method === 'transfer') {
     return (
       <div style={boxStyle}>

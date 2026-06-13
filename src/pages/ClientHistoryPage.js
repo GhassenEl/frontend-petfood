@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import api from '../utils/api';
+import { buildDemoHistory } from '../utils/clientDemoData';
 
 const ClientHistoryPage = () => {
   const [entries, setEntries] = useState([]);
@@ -42,9 +43,9 @@ const ClientHistoryPage = () => {
           })),
         ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        setEntries(combined);
+        setEntries(combined.length ? combined : buildDemoHistory());
       } catch (error) {
-        setEntries([]);
+        setEntries(buildDemoHistory());
       } finally {
         setLoading(false);
       }

@@ -1,5 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import api from '../utils/api';
+import {
+  fetchPharmacyCatalog,
+  fetchMedicationRecommendations,
+  applyRecommendationsToRows,
+  calculateMedicationDose,
+} from '../services/vetMedicationService';
 import {
   emptyMedicationRow,
   FREQUENCY_OPTIONS,
@@ -21,9 +26,8 @@ const MedicationFormFields = ({
   const rows = medications?.length ? medications : [emptyMedicationRow()];
 
   useEffect(() => {
-    api
-      .get('/vet/pharmacy/medications')
-      .then(({ data }) => setCatalog(data || []))
+    fetchPharmacyCatalog()
+      .then((data) => setCatalog(data || []))
       .catch(() => setCatalog([]))
       .finally(() => setLoadingCatalog(false));
   }, []);
@@ -70,7 +74,7 @@ const MedicationFormFields = ({
     }
     setDoseLoading(index);
     try {
-      const { data } = await api.post('/vet/pharmacy/calculate-dose', {
+      const data = await calculateMedicationDose({
         medicationName: row.name,
         weightKg: Number(petWeightKg),
         animalType,
@@ -89,7 +93,7 @@ const MedicationFormFields = ({
         )
       );
     } catch (err) {
-      window.alert(err.response?.data?.error || 'Calcul impossible');
+      window.alert(err.message || 'Calcul impossible');
     } finally {
       setDoseLoading(null);
     }
@@ -101,23 +105,16 @@ const MedicationFormFields = ({
       return;
     }
     try {
-      const { data } = await api.get('/vet/pharmacy/suggest', {
-        params: { diagnosis, animalType },
+      const result = await fetchMedicationRecommendations({
+        diagnosis,
+        animalType,
+        weightKg: petWeightKg,
       });
-      if (!data?.length) {
+      if (!result.recommendations?.length) {
         window.alert('Aucun protocole trouvé pour ce diagnostic.');
         return;
       }
-      onChange(
-        data.map((s) => ({
-          name: s.name,
-          medicationId: s.medicationId,
-          dosage: s.dosage,
-          frequency: s.frequency,
-          duration: s.duration,
-          quantity: s.quantity,
-        }))
-      );
+      onChange(applyRecommendationsToRows(result.recommendations.slice(0, 5)));
     } catch {
       window.alert('Erreur suggestion protocole');
     }
