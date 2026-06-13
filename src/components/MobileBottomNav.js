@@ -92,7 +92,16 @@ export const MODERATOR_MOBILE_NAV = [
 export const VENDOR_MOBILE_NAV = [
   { id: 'dash', to: '/vendor/dashboard', icon: '📊', label: 'Dashboard' },
   { id: 'products', to: '/vendor/products', icon: '🏷️', label: 'Produits' },
+  { id: 'sales', to: '/vendor/sales', icon: '💰', label: 'Ventes' },
   { id: 'orders', to: '/vendor/orders', icon: '📦', label: 'Commandes' },
+  { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
+];
+
+export const SUPPORT_MOBILE_NAV = [
+  { id: 'complaints', to: '/support/complaints', icon: '⚠️', label: 'Réclam.' },
+  { id: 'tickets', to: '/support/tickets', icon: '🎫', label: 'Tickets' },
+  { id: 'assist', to: '/support/assist', icon: '🎧', label: 'Assist.' },
+  { id: 'returns', to: '/support/returns', icon: '↩️', label: 'Retours' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 

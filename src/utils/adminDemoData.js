@@ -27,6 +27,7 @@ export const DEMO_ADMIN_USERS = [
   { _id: 'demo-vendor-2', id: 'demo-vendor-2', name: 'Ridha Ben Ammar', email: 'ridha.animalerie@email.tn', role: 'vendor', phone: '+216 26 888 999', region: 'Sfax', isActive: true, createdAt: daysAgo(95) },
   { _id: 'demo-vendor-3', id: 'demo-vendor-3', name: 'Nour Haddad', email: 'nour.pets@sousse.tn', role: 'vendor', phone: '+216 29 111 222', region: 'Sousse', isActive: false, createdAt: daysAgo(40) },
   { _id: 'demo-moderator-1', id: 'demo-moderator-1', name: 'Nour Modération', email: 'moderator@petfood.tn', role: 'moderator', phone: '+216 21 555 666', isActive: true, createdAt: daysAgo(70) },
+  { _id: 'demo-support-1', id: 'demo-support-1', name: 'Sonia Service Client', email: 'support@petfood.tn', role: 'support', phone: '+216 71 888 999', isActive: true, createdAt: daysAgo(50) },
 ];
 
 export const DEMO_ADMIN_USER_STATS = {
@@ -40,6 +41,7 @@ export const DEMO_ADMIN_USER_STATS = {
     vet: 2,
     vendor: 3,
     moderator: 1,
+    support: 1,
   },
 };
 

@@ -24,7 +24,7 @@ const ModeratorUsersPage = () => {
   const load = useCallback(async () => {
     setLoading(true);
     const { data, demo: isDemo } = await fetchModeratorUsers();
-    setUsers(data.users || []);
+    setUsers((data.users || []).filter((u) => u.role === 'client'));
     setDemo(isDemo);
     setLoading(false);
   }, []);
@@ -49,8 +49,8 @@ const ModeratorUsersPage = () => {
   return (
     <div className="mod-page">
       <header className="mod-hero">
-        <h1><Users size={24} /> Gestion des utilisateurs {demo && <span className="mod-demo-pill">Mode démo</span>}</h1>
-        <p>Consulter les profils, suspendre, réactiver et signaler les comportements abusifs.</p>
+        <h1><Users size={24} /> Comptes clients {demo && <span className="mod-demo-pill">Mode démo</span>}</h1>
+        <p>Suspendre ou réactiver les comptes clients — la gestion vendeurs/modérateurs est réservée à l&apos;administrateur.</p>
       </header>
 
       {msg && <p className="mod-badge mod-badge--approved" style={{ marginBottom: 12 }}>{msg}</p>}

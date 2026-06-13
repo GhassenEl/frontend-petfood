@@ -13,6 +13,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       items: [
         { id: '__open-chat__', label: 'Chat assistant', icon: '💬', action: 'open-chat' },
         { id: 'platform-services', label: 'Catalogue services', icon: '📋' },
+        { id: '__capabilities__', label: 'Matrice capacités', icon: '📋', route: '/capabilities' },
       ],
     },
     {
@@ -30,6 +31,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'visitors', label: 'Espace visiteur', icon: '👀' },
         { id: 'vendors', label: 'Vendeurs', icon: '🏬' },
         { id: 'moderators', label: 'Modérateurs', icon: '🛡️' },
+        { id: 'vets', label: 'Vétérinaires', icon: '🩺' },
       ],
     },
     {
@@ -39,6 +41,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'sales', label: 'Ventes & CA', icon: '💰' },
         { id: 'invoices', label: 'Factures', icon: '🧾' },
         { id: 'products', label: 'Produits', icon: '🏷️' },
+        { id: 'categories', label: 'Catégories', icon: '📁' },
         { id: 'stock', label: 'Stock avancé', icon: '📦' },
         { id: 'promotions', label: 'Promotions & coupons', icon: '🎟️' },
         { id: 'users', label: 'Utilisateurs', icon: '👥' },
@@ -171,18 +174,18 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
               ) : (
                 <NavLink
                   key={item.id}
-                  to={`/admin/${item.id}`}
+                  to={item.route || `/admin/${item.id}`}
                   onClick={() => {
                     onNavigate?.(item.id);
                   }}
                   className={({ isActive }) =>
                     `admin-sidebar-item ${isActive ? 'active' : ''} animate-slide-left`
                   }
-                  style={({ isActive }) => ({
+                  style={{
                     textDecoration: 'none',
                     width: '100%',
                     boxSizing: 'border-box',
-                  })}
+                  }}
                 >
                   <span className="icon">{item.icon}</span>
                   <span>{item.label}</span>

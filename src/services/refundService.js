@@ -243,4 +243,39 @@ export const adminCancelTransaction = (id, note = '') => {
   return refund;
 };
 
+export const createClientRefundRequest = (body) =>
+  withDemo(
+    () => api.post('/refunds/request', body).then((r) => r.data),
+    () => {
+      const store = getStore();
+      const entry = {
+        id: uid(),
+        orderId: body.orderId,
+        clientName: body.clientName || 'Client',
+        vendorName: body.vendorName || 'Vendeur',
+        productName: body.productName || 'Produit',
+        amount: body.amount || 0,
+        reason: body.reason,
+        reasonCategory: body.reasonCategory || 'other',
+        status: 'pending',
+        returnReceived: false,
+        fraudScore: 0.05,
+        disputed: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        history: [{
+          at: new Date().toISOString(),
+          action: 'request_created',
+          actor: body.clientName || 'Client',
+          actorRole: 'client',
+          note: body.reason,
+        }],
+      };
+      store.unshift(entry);
+      persist(store);
+      logActivity({ actorRole: 'client', actorName: entry.clientName, action: 'refund_request', target: entry.orderId, module: 'boutique' });
+      return entry;
+    },
+  );
+
 export { REFUND_STATUS_LABELS };

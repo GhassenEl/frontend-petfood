@@ -1,0 +1,21 @@
+.sup-page { padding: 24px; max-width: 1100px; }
+.sup-hero { margin-bottom: 20px; padding: 20px; border-radius: 16px; background: linear-gradient(135deg, #eff6ff, #dbeafe); }
+.sup-hero h1 { margin: 0; font-size: 1.35rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sup-hero p { margin: 8px 0 0; color: #64748b; font-size: 0.9rem; }
+.sup-demo-pill { font-size: 0.7rem; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+.sup-card { background: white; border-radius: 14px; padding: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow-x: auto; }
+.sup-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.sup-table th, .sup-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+.sup-table th { color: #64748b; font-weight: 600; font-size: 0.78rem; text-transform: uppercase; }
+.sup-empty { color: #94a3b8; text-align: center; padding: 24px; }
+.sup-badge { padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+.sup-badge--high { background: #fee2e2; color: #b91c1c; }
+.sup-badge--medium { background: #fef3c7; color: #92400e; }
+.sup-badge--low { background: #dcfce7; color: #166534; }
+.sup-select { padding: 6px 8px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.82rem; }
+.sup-queue { list-style: none; margin: 0; padding: 0; }
+.sup-queue-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #e2e8f0; }
+.sup-queue-item p { margin: 4px 0; color: #475569; }
+.sup-queue-item small { color: #94a3b8; }
+.sup-btn { padding: 8px 14px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; font-size: 0.85rem; }
+.sup-btn--primary { background: #2563eb; color: white; }

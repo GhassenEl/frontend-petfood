@@ -110,6 +110,19 @@ import ModeratorContentPage from './pages/ModeratorContentPage';
 import ModeratorReportsPage from './pages/ModeratorReportsPage';
 import ModeratorRefundsPage from './pages/ModeratorRefundsPage';
 import ModeratorAnalyticsPage from './pages/ModeratorAnalyticsPage';
+import ModeratorUsersPage from './pages/ModeratorUsersPage';
+import PlatformCapabilitiesPage from './pages/PlatformCapabilitiesPage';
+import AdminCategoriesPage from './pages/AdminCategoriesPage';
+import AdminVetsPage from './pages/AdminVetsPage';
+import ClientReturnsPage from './pages/ClientReturnsPage';
+import VendorSalesPage from './pages/VendorSalesPage';
+import VetTeleconsultPage from './pages/VetTeleconsultPage';
+import VetNutritionAdvicePage from './pages/VetNutritionAdvicePage';
+import ServiceClientLayout from './layouts/ServiceClientLayout';
+import SupportComplaintsPage from './pages/SupportComplaintsPage';
+import SupportTicketsPage from './pages/SupportTicketsPage';
+import SupportAssistPage from './pages/SupportAssistPage';
+import SupportReturnsPage from './pages/SupportReturnsPage';
 
 const homeByRole = {
   admin: '/admin/dashboard',
@@ -118,6 +131,7 @@ const homeByRole = {
   vet: '/vet/dashboard',
   vendor: '/vendor/dashboard',
   moderator: '/moderator/dashboard',
+  support: '/support/complaints',
 };
 
 const RoleRoute = ({ user, roles, children }) => {
@@ -157,6 +171,7 @@ const App = () => {
         <Route path="/visitor/tools" element={<VisitorToolsPage />} />
         <Route path="/vendor" element={<VendorHubPage />} />
         <Route path="/moderator" element={<ModeratorHubPage />} />
+        <Route path="/capabilities" element={<PlatformCapabilitiesPage />} />
         <Route path="*" element={<MarketingLandingPage />} />
       </Routes>
     );
@@ -194,6 +209,9 @@ const App = () => {
       <Route path="/admin/events" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><EventsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/leave-requests" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminLeaveRequestsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/promotions" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPromotions /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/categories" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminCategoriesPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/vets" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVetsPage /></AdminLayout></RoleRoute>} />
+      <Route path="/capabilities" element={<PlatformCapabilitiesPage />} />
       <Route path="/admin/blog-articles" element={<Navigate to="/admin/dashboard" replace />} />
       <Route path="/admin/crm" element={<Navigate to="/admin/dashboard" replace />} />
       <Route path="/admin/rehabilitation" element={<Navigate to="/admin/dashboard" replace />} />
@@ -209,6 +227,7 @@ const App = () => {
       <Route path="/client-orders" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientOrdersPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-reviews" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientReviewsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-complaints" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientComplaintsPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-returns" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientReturnsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-profile" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientProfilePage /></ClientLayout></RoleRoute>} />
       <Route path="/client-pets" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-pet-passport" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetPassportPage /></ClientLayout></RoleRoute>} />
@@ -279,6 +298,8 @@ const App = () => {
       <Route path="/vet/profile" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetProfilePage /></VetLayout></RoleRoute>} />
       <Route path="/vet/leave-requests" element={<RoleRoute user={user} roles={['vet']}><VetLayout><StaffLeavePage roleLabel="Vétérinaire" demoFallback /></VetLayout></RoleRoute>} />
       <Route path="/vet/platform-services" element={<RoleRoute user={user} roles={['vet']}><VetLayout><PlatformServicesPage /></VetLayout></RoleRoute>} />
+      <Route path="/vet/teleconsult" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetTeleconsultPage /></VetLayout></RoleRoute>} />
+      <Route path="/vet/nutrition" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetNutritionAdvicePage /></VetLayout></RoleRoute>} />
       <Route path="/vet/ml-agent" element={<Navigate to="/vet/dashboard" replace />} />
       <Route path="/vet/rehabilitation" element={<Navigate to="/vet/dashboard" replace />} />
 
@@ -292,13 +313,14 @@ const App = () => {
       <Route path="/vendor/dashboard" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorDashboardPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/products" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorProductsPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/orders" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorOrdersPage /></VendorLayout></RoleRoute>} />
+      <Route path="/vendor/sales" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorSalesPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/returns" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorReturnsPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/communication" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorCommunicationPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/platform-services" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><PlatformServicesPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/profile" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><AdminProfilePage /></VendorLayout></RoleRoute>} />
 
       <Route path="/moderator/dashboard" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorDashboard /></ModeratorLayout></RoleRoute>} />
-      <Route path="/moderator/users" element={<Navigate to="/moderator/dashboard" replace />} />
+      <Route path="/moderator/users" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorUsersPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/vendors" element={<Navigate to="/moderator/dashboard" replace />} />
       <Route path="/moderator/content" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorContentPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/reports" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorReportsPage /></ModeratorLayout></RoleRoute>} />
@@ -310,6 +332,14 @@ const App = () => {
       <Route path="/moderator/messages" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><AdminMessages /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/platform-services" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><PlatformServicesPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/profile" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><AdminProfilePage /></ModeratorLayout></RoleRoute>} />
+
+      <Route path="/support" element={<Navigate to="/support/complaints" replace />} />
+      <Route path="/support/complaints" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportComplaintsPage /></ServiceClientLayout></RoleRoute>} />
+      <Route path="/support/tickets" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportTicketsPage /></ServiceClientLayout></RoleRoute>} />
+      <Route path="/support/assist" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportAssistPage /></ServiceClientLayout></RoleRoute>} />
+      <Route path="/support/returns" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportReturnsPage /></ServiceClientLayout></RoleRoute>} />
+      <Route path="/support/profile" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><AdminProfilePage /></ServiceClientLayout></RoleRoute>} />
+      <Route path="/support/dashboard" element={<Navigate to="/support/complaints" replace />} />
 
       <Route path="*" element={<Navigate to={userHome} replace />} />
     </Routes>

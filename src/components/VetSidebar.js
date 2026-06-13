@@ -21,6 +21,8 @@ const VetSidebar = ({ onLogout, user, onNavigate }) => {
         { id: 'medical-dossiers', label: 'Dossiers médicaux', icon: '📁' },
         { id: 'vaccinations', label: 'Vaccinations', icon: '💉' },
         { id: 'diagnostics', label: 'Détection précoce', icon: '🔬' },
+        { id: 'teleconsult', label: 'Téléconsultations', icon: '📹' },
+        { id: 'nutrition', label: 'Conseils nutrition', icon: '🥗' },
       ],
     },
     {
