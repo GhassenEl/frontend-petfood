@@ -56,7 +56,7 @@ test.describe('Refonte portefeuille & rappels vaccins', () => {
 });
 
 test.describe('Réservation services avec portefeuille', () => {
-  const groomingCard = (page) => page.getByRole('button', { name: /✂️\s*Toilettage/i });
+  const groomingCard = (page) => page.getByRole('button', { name: '✂️ Toilettage', exact: true });
   const pensionCard = (page) => page.getByRole('button', { name: /🏠\s*Pension/i });
   const trainingCard = (page) => page.getByRole('button', { name: /🎓\s*Dressage/i });
 
