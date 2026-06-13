@@ -1,13 +1,11 @@
-# PetfoodTN — Blueprint Render (repo frontend-petfood)
-# https://render.com/docs/blueprint-spec
+# PetfoodTN — Blueprint Render (stack complet depuis frontend-petfood)
+# Déploie : PostgreSQL + API (GHCR) + ML (GHCR) + frontend static
 #
-# ⚠️ Le backend est dans un repo séparé : GhassenEl/backend-petfood
-#    → voir docs/render-backend.yaml à copier dans ce second repo.
+# Prérequis : images GHCR publiques (workflow Publish Docker Images)
+#   ghcr.io/ghassenel/petfoodtn-backend:latest
+#   ghcr.io/ghassenel/petfoodtn-ml:latest
 #
-# Déploiement :
-#   1. Dashboard Render → New → Blueprint → connecter ce repo
-#   2. Créer le service API depuis backend-petfood (manuel ou son render.yaml)
-#   3. Renseigner VITE_API_BASE et CORS_ORIGINS (voir docs/RENDER-SETUP.md)
+# Dashboard : New → Blueprint → GhassenEl/frontend-petfood
 
 databases:
   - name: petfoodtn-db
@@ -16,7 +14,58 @@ databases:
     user: petfood
 
 services:
-  # ── Frontend React (site statique Vite) ──
+  # ── API Express (image GHCR — pas besoin du repo backend sur Render) ──
+  - type: web
+    name: petfoodtn-api
+    runtime: image
+    plan: free
+    image:
+      url: ghcr.io/ghassenel/petfoodtn-backend:latest
+      # Packages GHCR prives : decommenter apres creation credential "petfoodtn-ghcr"
+      # creds:
+      #   fromRegistryCreds:
+      #     name: petfoodtn-ghcr
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5002
+      - key: DEMO_MODE
+        value: 'true'
+      - key: RUN_SEED
+        value: 'true'
+      - key: DATABASE_URL
+        fromDatabase:
+          name: petfoodtn-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://petfoodtn-web.onrender.com
+      - key: FASTAPI_URL
+        value: https://petfoodtn-ml.onrender.com
+      - key: STRIPE_MOCK
+        value: '1'
+      - key: MCP_ENABLE
+        value: 'false'
+
+  # ── ML FastAPI (image GHCR) ──
+  - type: web
+    name: petfoodtn-ml
+    runtime: image
+    plan: free
+    image:
+      url: ghcr.io/ghassenel/petfoodtn-ml:latest
+      # creds:
+      #   fromRegistryCreds:
+      #     name: petfoodtn-ghcr
+    healthCheckPath: /health
+    envVars:
+      - key: TZ
+        value: Africa/Tunis
+
+  # ── Frontend React (static Vite) ──
   - type: web
     name: petfoodtn-web
     runtime: static
@@ -30,25 +79,9 @@ services:
     envVars:
       - key: NODE_VERSION
         value: '20'
-      # À définir après création du backend Render :
-      # https://petfoodtn-api.onrender.com/api
       - key: VITE_API_BASE
-        sync: false
+        value: https://petfoodtn-api.onrender.com/api
       - key: VITE_SOCKET_URL
-        sync: false
-      - key: VITE_SENTRY_DSN
-        sync: false
+        value: https://petfoodtn-api.onrender.com
       - key: VITE_APP_RELEASE
         value: petfoodtn@render
-
-  # ── Service ML FastAPI ──
-  - type: web
-    name: petfoodtn-ml
-    runtime: docker
-    plan: free
-    rootDir: fastapi_service
-    dockerfilePath: ./Dockerfile
-    healthCheckPath: /health
-    envVars:
-      - key: TZ
-        value: Africa/Tunis

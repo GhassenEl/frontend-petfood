@@ -2,14 +2,36 @@
 
 Guide pour mettre **PetfoodTN** en production sur [Render](https://render.com) avec CD automatique depuis GitHub.
 
-## Architecture Render
+## Architecture Render (un seul Blueprint)
 
 ```
-petfoodtn-web.onrender.com     → Frontend (static Vite)
-petfoodtn-api.onrender.com     → Backend Express (repo backend-petfood)
-petfoodtn-ml.onrender.com      → FastAPI ML (ce repo)
+petfoodtn-web.onrender.com     → Frontend (static Vite, build depuis ce repo)
+petfoodtn-api.onrender.com     → Backend Express (image GHCR)
+petfoodtn-ml.onrender.com      → FastAPI ML (image GHCR)
 petfoodtn-db                   → PostgreSQL managé
 ```
+
+Tout est défini dans **`render.yaml`** à la racine de `frontend-petfood`. Plus besoin du repo `backend-petfood` sur Render.
+
+---
+
+## Étape 0 — Images GHCR (prérequis)
+
+Le workflow **Publish Docker Images** pousse à chaque push sur `main` :
+
+- `ghcr.io/ghassenel/petfoodtn-backend:latest`
+- `ghcr.io/ghassenel/petfoodtn-ml:latest`
+
+### Rendre les packages publics (recommandé)
+
+1. GitHub → profil **GhassenEl** → **Packages**
+2. Pour `petfoodtn-backend` et `petfoodtn-ml` : **Package settings** → **Change visibility** → **Public**
+
+Sinon, avant d’appliquer le Blueprint :
+
+1. Render → **Workspace Settings** → **Registry Credentials** → **Add**
+2. Nom : `petfoodtn-ghcr`, Registry : `ghcr.io`, Username : `GhassenEl`, Password : PAT GitHub (`read:packages`)
+3. Décommenter les blocs `creds` dans `render.yaml` pour `petfoodtn-api` et `petfoodtn-ml`
 
 ---
 
@@ -20,69 +42,67 @@ petfoodtn-db                   → PostgreSQL managé
 
 ---
 
-## Étape 2 — Blueprint frontend (ce repo)
+## Étape 2 — Blueprint (stack complet)
 
-1. Render Dashboard → **New** → **Blueprint**.
-2. Sélectionner le repo **`GhassenEl/frontend-petfood`**.
-3. Render lit `render.yaml` et crée :
-   - `petfoodtn-db` (PostgreSQL)
-   - `petfoodtn-web` (frontend statique)
-   - `petfoodtn-ml` (Docker FastAPI)
-4. Cliquer **Apply**.
+1. [dashboard.render.com/blueprints/new](https://dashboard.render.com/blueprints/new)
+2. Repo : **`GhassenEl/frontend-petfood`**
+3. Blueprint path : `render.yaml` (défaut)
+4. Cliquer **Apply**
+
+Render crée en une fois :
+
+| Ressource | Type |
+|-----------|------|
+| `petfoodtn-db` | PostgreSQL free |
+| `petfoodtn-api` | Web (image GHCR backend) |
+| `petfoodtn-ml` | Web (image GHCR ML) |
+| `petfoodtn-web` | Static site (Vite) |
 
 ⏳ Premier déploiement ~5–10 min.
 
 ---
 
-## Étape 3 — Backend (repo séparé)
+## Étape 3 — Variables (déjà dans render.yaml)
 
-Le dossier `backend/` n’est **pas** dans le repo frontend. Créer l’API ainsi :
+La plupart des variables sont préconfigurées. Vérifier après le premier deploy :
 
-### Option A — Blueprint backend (recommandé)
-
-1. Copier `docs/render-backend.yaml` → `render.yaml` dans le repo **backend-petfood**.
-2. Commit + push sur `backend-petfood`.
-3. Render → **New** → **Blueprint** → repo **`GhassenEl/backend-petfood`**.
-4. Render crée **`petfoodtn-api`**.
-
-> Si la base `petfoodtn-db` existe déjà : dans Render → `petfoodtn-api` → Environment → lier la **Internal Database URL** de la base existante (éviter deux bases).
-
-### Option B — Service manuel
-
-1. Render → **New** → **Web Service**.
-2. Repo : `backend-petfood`, Runtime : **Docker**, Dockerfile : `./Dockerfile`.
-3. Health check : `/health`, Port : `5002`.
-
----
-
-## Étape 4 — Variables d’environnement
-
-### `petfoodtn-api` (backend)
+### `petfoodtn-api`
 
 | Variable | Valeur |
 |----------|--------|
-| `DATABASE_URL` | Internal Database URL de `petfoodtn-db` |
-| `JWT_SECRET` | Générer (48 caractères aléatoires) |
+| `DATABASE_URL` | Lié automatiquement à `petfoodtn-db` |
+| `JWT_SECRET` | Généré automatiquement |
 | `CORS_ORIGINS` | `https://petfoodtn-web.onrender.com` |
 | `FASTAPI_URL` | `https://petfoodtn-ml.onrender.com` |
-| `DEMO_MODE` | `true` (démo) ou `false` (prod) |
-| `RUN_SEED` | `true` (1er déploiement) puis `false` |
-| `PORT` | `5002` |
+| `RUN_SEED` | `true` au 1er deploy, puis passer à `false` |
 
-### `petfoodtn-web` (frontend)
+### `petfoodtn-web`
 
 | Variable | Valeur |
 |----------|--------|
 | `VITE_API_BASE` | `https://petfoodtn-api.onrender.com/api` |
 | `VITE_SOCKET_URL` | `https://petfoodtn-api.onrender.com` |
-| `VITE_SENTRY_DSN` | (optionnel) DSN Sentry |
-| `NODE_VERSION` | `20` |
 
-Après modification de `VITE_*` → **Manual Deploy** sur `petfoodtn-web` (rebuild obligatoire).
+Après modification de `VITE_*` → **Manual Deploy** sur `petfoodtn-web`.
 
-### `petfoodtn-ml`
+---
 
-Aucune variable obligatoire (`TZ=Africa/Tunis` par défaut).
+## Étape 4 — Automatisation (scripts)
+
+```powershell
+# Aide interactive
+npm run devops:render:setup
+
+# Sans cle API : tester les URLs
+node scripts/devops/render-provision.mjs health
+
+# Avec RENDER_API_KEY (Account Settings -> API Keys)
+node scripts/devops/render-provision.mjs validate
+node scripts/devops/render-provision.mjs status
+node scripts/devops/render-provision.mjs hooks
+```
+
+La commande `hooks` affiche les URLs à copier dans les secrets GitHub.
 
 ---
 
@@ -96,7 +116,7 @@ Pour chaque service Render :
 | Secret GitHub | Service Render |
 |---------------|----------------|
 | `RENDER_DEPLOY_HOOK_FRONTEND` | `petfoodtn-web` |
-| `RENDER_DEPLOY_HOOK_BACKEND` | `petfoodtn-api` (dans repo backend ou frontend selon où tu configures les secrets) |
+| `RENDER_DEPLOY_HOOK_BACKEND` | `petfoodtn-api` |
 | `RENDER_DEPLOY_HOOK_ML` | `petfoodtn-ml` |
 
 3. Créer l’environnement **`production`** (Settings → Environments).
@@ -109,8 +129,6 @@ Pour chaque service Render :
 
 ### Uptime GitHub Actions
 
-Secrets dans `frontend-petfood` :
-
 | Secret | Valeur |
 |--------|--------|
 | `UPTIME_FRONTEND_URL` | `https://petfoodtn-web.onrender.com` |
@@ -120,22 +138,13 @@ Secrets dans `frontend-petfood` :
 
 ### Sentry
 
-1. Projet React sur [sentry.io](https://sentry.io).
-2. Secret GitHub `VITE_SENTRY_DSN` (utilisé au build GHCR / Render rebuild).
-
-### UptimeRobot (externe)
-
-Monitors HTTP sur :
-- `https://petfoodtn-web.onrender.com`
-- `https://petfoodtn-api.onrender.com/health`
-- `https://petfoodtn-ml.onrender.com/health`
+Secret GitHub `VITE_SENTRY_DSN` (utilisé au build GHCR / Render rebuild).
 
 ---
 
 ## Étape 7 — Vérification
 
 ```bash
-# URLs publiques
 curl https://petfoodtn-api.onrender.com/health
 curl https://petfoodtn-ml.onrender.com/health
 # Ouvrir https://petfoodtn-web.onrender.com
@@ -147,25 +156,13 @@ Comptes démo (si `RUN_SEED=true`) :
 
 ---
 
-## Script d’aide local
-
-```powershell
-.\scripts\devops\setup-render.ps1
-```
-
-Génère les variables et liste les secrets GitHub à copier.
-
----
-
 ## Limites plan gratuit Render
 
 | Limite | Impact |
 |--------|--------|
 | Spin-down après 15 min inactivité | Premier chargement lent (~30 s) |
-| PostgreSQL free | 1 Go, expire après 90 jours (renouveler) |
-| Pas de domaine custom gratuit | URL `*.onrender.com` (custom domain possible sur plan payant) |
-
-Pour production sérieuse : passer les services en **Starter** ($7/mois/service).
+| PostgreSQL free | 1 Go, expire après 90 jours |
+| URL `*.onrender.com` | Domaine custom sur plan payant |
 
 ---
 
@@ -173,10 +170,10 @@ Pour production sérieuse : passer les services en **Starter** ($7/mois/service)
 
 | Problème | Solution |
 |----------|----------|
-| Frontend 404 sur `/admin/...` | Vérifier `routes` rewrite dans `render.yaml` |
-| CORS error | `CORS_ORIGINS` doit inclure l’URL exacte du frontend |
-| API 502 au réveil | Normal sur free tier — attendre 30–60 s |
-| `VITE_API_BASE` ignoré | Rebuild manuel du service web après changement |
-| Backend sans DB | Vérifier `DATABASE_URL` = Internal URL (pas External) |
+| Image pull failed (GHCR) | Packages publics ou credential `petfoodtn-ghcr` |
+| Frontend 404 sur routes | Vérifier `routes` rewrite dans `render.yaml` |
+| CORS error | `CORS_ORIGINS` = URL exacte du frontend |
+| API 502 au réveil | Normal free tier — attendre 30–60 s |
+| `VITE_API_BASE` ignoré | Manual Deploy sur `petfoodtn-web` |
 
 Voir aussi [CD.md](./CD.md) et [DEVOPS.md](./DEVOPS.md).
