@@ -27,3 +27,5 @@ export * as vetMedicationService from './vetMedicationService';
 export * as vendorService from './vendorService';
 export * as visitorService from './visitorService';
 export * as moderatorService from './moderatorService';
+export * as adminService from './adminService';
+export * as activityLogService from './activityLogService';

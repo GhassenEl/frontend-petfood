@@ -682,3 +682,43 @@ export const buildStockAlerts = (items) => {
       message: p.stock <= 0 ? 'Rupture de stock' : `Stock bas (${p.stock}/${p.minStock})`,
     }));
 };
+
+/** Configuration système plateforme (démo admin). */
+export const DEMO_SYSTEM_CONFIG = {
+  platformName: 'PetfoodTN',
+  maintenanceMode: false,
+  vendorCommissionRate: 12,
+  autoModerationNlpThreshold: 0.85,
+  maxProductsPerVendor: 200,
+  emailNotificationsEnabled: true,
+  sessionTimeoutMinutes: 60,
+  defaultCurrency: 'DT',
+  supportEmail: 'support@petfoodtn.tn',
+  allowVendorSelfRegistration: false,
+  requireModeratorApproval: true,
+  logRetentionDays: 90,
+  updatedAt: daysAgo(2),
+};
+
+/** Journal d'activité démo — tous les acteurs. */
+export const DEMO_ACTIVITY_LOGS = [
+  { id: 'log-1', at: hoursAgo(0), actorRole: 'admin', actorName: 'Ghassen Admin', action: 'config_update', target: 'Commission vendeur', details: 'Taux 12 %', module: 'admin' },
+  { id: 'log-2', at: hoursAgo(1), actorRole: 'moderator', actorName: 'Nour Modération', action: 'approve_product', target: 'Croquettes chiot premium 8 kg', module: 'moderation' },
+  { id: 'log-3', at: hoursAgo(2), actorRole: 'vendor', actorName: 'Leila Mansouri', action: 'create_product', target: 'Jouet interactif chat', module: 'vendor' },
+  { id: 'log-4', at: hoursAgo(3), actorRole: 'moderator', actorName: 'Nour Modération', action: 'suspend_user', target: 'Youssef Gharbi', module: 'moderation' },
+  { id: 'log-5', at: hoursAgo(4), actorRole: 'client', actorName: 'Amira B.', action: 'place_order', target: 'CMD-9102', details: '89 DT', module: 'boutique' },
+  { id: 'log-6', at: hoursAgo(5), actorRole: 'livreur', actorName: 'Karim Mansouri', action: 'delivery_complete', target: 'CMD-9085', module: 'livraison' },
+  { id: 'log-7', at: hoursAgo(6), actorRole: 'vet', actorName: 'Dr. Amira Khelifi', action: 'appointment_confirm', target: 'RDV Luna', module: 'sante' },
+  { id: 'log-8', at: hoursAgo(8), actorRole: 'admin', actorName: 'Ghassen Admin', action: 'vendor_approve', target: 'Pets & Co Sfax', module: 'admin' },
+  { id: 'log-9', at: hoursAgo(10), actorRole: 'moderator', actorName: 'Nour Modération', action: 'reject_review', target: 'Avis spam #fr-1', module: 'moderation' },
+  { id: 'log-10', at: hoursAgo(12), actorRole: 'vendor', actorName: 'Ridha Ben Ammar', action: 'update_stock', target: 'Pâtée chat saumon', details: 'Stock 3 → 15', module: 'vendor' },
+  { id: 'log-11', at: daysAgo(1), actorRole: 'admin', actorName: 'Ghassen Admin', action: 'moderator_create', target: 'moderator@petfood.tn', module: 'admin' },
+  { id: 'log-12', at: daysAgo(1), actorRole: 'client', actorName: 'Karim M.', action: 'submit_complaint', target: 'Produit endommagé', module: 'boutique' },
+  { id: 'log-13', at: daysAgo(2), actorRole: 'moderator', actorName: 'Nour Modération', action: 'resolve_dispute', target: 'CMD-8755', module: 'moderation' },
+  { id: 'log-14', at: daysAgo(2), actorRole: 'vendor', actorName: 'Leila Mansouri', action: 'accept_order', target: 'CMD-9098', module: 'vendor' },
+  { id: 'log-15', at: daysAgo(3), actorRole: 'system', actorName: 'Système NLP', action: 'fake_review_detected', target: 'Croquettes premium', details: 'Spam 94 %', module: 'moderation' },
+  { id: 'log-16', at: daysAgo(4), actorRole: 'livreur', actorName: 'Mohamed B.', action: 'route_start', target: 'Tournée Grand Tunis', module: 'livraison' },
+  { id: 'log-17', at: daysAgo(5), actorRole: 'admin', actorName: 'Ghassen Admin', action: 'vendor_suspend', target: 'Boutique Nour Pets', module: 'admin' },
+  { id: 'log-18', at: daysAgo(6), actorRole: 'vet', actorName: 'Dr. Hichem Sassi', action: 'prescription_issue', target: 'Max — antibiotique', module: 'sante' },
+];
+

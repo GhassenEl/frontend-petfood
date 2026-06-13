@@ -5,6 +5,8 @@ import {
   withDemoModeratorStats,
 } from '../utils/moderatorDemoData';
 
+import { logActivity } from './activityLogService';
+
 let demoStore = null;
 
 const ensureStore = () => {
@@ -31,6 +33,13 @@ const logAction = (action, target, moderator = 'Modérateur') => {
     target,
     moderator,
     at: new Date().toISOString(),
+  });
+  logActivity({
+    actorRole: 'moderator',
+    actorName: moderator,
+    action,
+    target,
+    module: 'moderation',
   });
 };
 

@@ -36,6 +36,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'users', label: 'Utilisateurs', icon: '👥' },
         { id: 'livreurs', label: 'Livreurs', icon: '🚚' },
         { id: 'vendors', label: 'Fournisseurs', icon: '🏬' },
+        { id: 'moderators', label: 'Modérateurs', icon: '🛡️' },
         { id: 'leave-requests', label: 'Congés / maladie', icon: '🏖️' },
         { id: 'messages', label: 'Messages', icon: '💬' },
         { id: 'veterinary', label: 'Suivi Vétérinaire', icon: '🩺' },
@@ -52,6 +53,8 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
     {
       title: '⚙️ Paramètres',
       items: [
+        { id: 'system', label: 'Configuration système', icon: '🔧' },
+        { id: 'activity-logs', label: 'Journaux d\'activité', icon: '📋' },
         { id: 'profile', label: 'Mon Profil', icon: '👤' },
       ]
     }

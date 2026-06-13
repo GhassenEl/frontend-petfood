@@ -1,5 +1,6 @@
 import api from '../utils/api';
 import { getDemoVendorStore } from '../utils/vendorDemoData';
+import { logActivity } from './activityLogService';
 
 let demoStore = null;
 
@@ -10,13 +11,27 @@ const ensureDemoStore = () => {
 
 const uid = (prefix) => `${prefix}-${Date.now().toString(36)}`;
 
-const withDemo = async (apiCall, fallbackFn) => {
+const withDemo = async (apiCall, fallbackFn, logFn) => {
   try {
     const data = await apiCall();
+    if (logFn) logFn(data);
     return { data, demo: false };
   } catch {
-    return { data: fallbackFn(), demo: true };
+    const data = fallbackFn();
+    if (logFn) logFn(data);
+    return { data, demo: true };
   }
+};
+
+const vendorLog = (action, target, details = '') => {
+  logActivity({
+    actorRole: 'vendor',
+    actorName: 'Vendeur',
+    action,
+    target,
+    details,
+    module: 'vendor',
+  });
 };
 
 // —— Produits ——
@@ -38,6 +53,7 @@ export const createVendorProduct = (body) =>
       s.products.push(product);
       return product;
     },
+    (p) => vendorLog('create_product', p.name || body.name),
   );
 
 export const updateVendorProduct = (id, body) =>
@@ -50,6 +66,11 @@ export const updateVendorProduct = (id, body) =>
       s.products[idx] = { ...s.products[idx], ...body };
       return s.products[idx];
     },
+    (p) => vendorLog(
+      body.stock !== undefined ? 'update_stock' : 'update_product',
+      p.name,
+      body.stock !== undefined ? `Stock → ${body.stock}` : '',
+    ),
   );
 
 export const deleteVendorProduct = (id) =>
@@ -57,9 +78,11 @@ export const deleteVendorProduct = (id) =>
     () => api.delete(`/ecosystem/vendor/products/${id}`).then((r) => r.data),
     () => {
       const s = ensureDemoStore();
-      s.products = s.products.filter((p) => p.id !== id);
-      return { ok: true };
+      const p = s.products.find((x) => x.id === id);
+      s.products = s.products.filter((x) => x.id !== id);
+      return { ok: true, name: p?.name || id };
     },
+    (r) => vendorLog('delete_product', r.name || id),
   );
 
 export const updateVendorStock = (id, stock) => updateVendorProduct(id, { stock: Number(stock) });
@@ -130,6 +153,10 @@ export const updateVendorOrderStatus = (id, status, extra = {}) =>
       }
       return s.orders[idx];
     },
+    (o) => vendorLog(
+      status === 'accepted' ? 'accept_order' : `order_${status}`,
+      o.id || o.orderId || id,
+    ),
   );
 
 export const fetchVendorSalesHistory = () =>
@@ -155,6 +182,7 @@ export const updateVendorReturn = (id, status) =>
       s.returns[idx].status = status;
       return s.returns[idx];
     },
+    (r) => vendorLog('update_return', r.orderId || id, status),
   );
 
 // —— Communication ——
@@ -174,6 +202,7 @@ export const replyVendorReview = (id, vendorReply) =>
       s.reviews[idx].vendorReply = vendorReply;
       return s.reviews[idx];
     },
+    (r) => vendorLog('reply_review', r.productName || id),
   );
 
 export const fetchVendorClientMessages = () =>
@@ -201,6 +230,7 @@ export const sendVendorClientMessage = (clientId, text) =>
       }
       return msg;
     },
+    () => vendorLog('send_message', clientId),
   );
 
 export const fetchVendorNotifications = () =>
