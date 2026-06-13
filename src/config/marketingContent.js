@@ -224,16 +224,12 @@ export const MARKETING_FAQ = [
 
 /** Raccourcis cliquables — hub visiteur (toutes sections publiques). */
 export const VISITOR_QUICK_LINKS = [
-  { id: 'services', icon: '📋', label: 'Services', route: '/#services' },
-  { id: 'acteurs', icon: '👥', label: 'Acteurs', route: '/#acteurs' },
-  { id: 'temoignages', icon: '⭐', label: 'Avis clients', route: '/#temoignages' },
-  { id: 'iot', icon: '📡', label: 'IoT', route: '/#iot' },
-  { id: 'tarifs', icon: '💰', label: 'Tarifs soins', route: '/#tarifs' },
-  { id: 'partenaires', icon: '🤝', label: 'Partenaires', route: '/#partenaires' },
-  { id: 'how', icon: '📖', label: 'Comment ça marche', route: '/#comment-ca-marche' },
-  { id: 'faq', icon: '❓', label: 'FAQ', route: '/#faq' },
+  { id: 'products', icon: '🏷️', label: 'Produits', route: '/visitor/products' },
+  { id: 'promos', icon: '🔥', label: 'Promotions', route: '/visitor/products?tab=promos' },
+  { id: 'tools', icon: '🧪', label: 'Outils nutrition', route: '/visitor/tools' },
+  { id: 'info', icon: '📚', label: 'Infos & FAQ', route: '/visitor/info' },
+  { id: 'reviews', icon: '⭐', label: 'Avis clients', route: '/visitor/info' },
   { id: 'vendor', icon: '🏬', label: 'Espace vendeur', route: '/vendor' },
-  { id: 'moderator', icon: '🛡️', label: 'Modération', route: '/moderator' },
   { id: 'register', icon: '✨', label: 'Inscription', route: '/register' },
   { id: 'login', icon: '🔑', label: 'Connexion', route: '/login' },
 ];

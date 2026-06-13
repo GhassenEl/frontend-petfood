@@ -1,0 +1,309 @@
+/* Pages vendeur connectées — thème marketplace teal */
+
+.vnd-page {
+  padding: 20px 24px 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.vnd-hero {
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  border: 1px solid #99f6e4;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.vnd-hero h1 {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #134e4a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vnd-hero p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.vnd-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.vnd-tab {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: #475569;
+}
+
+.vnd-tab--active {
+  background: #0d9488;
+  color: white;
+  border-color: #0d9488;
+}
+
+.vnd-card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+  margin-bottom: 16px;
+}
+
+.vnd-card h2 {
+  margin: 0 0 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.vnd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.vnd-btn--primary {
+  background: #0d9488;
+  color: white;
+}
+
+.vnd-btn--ghost {
+  background: white;
+  color: #0f766e;
+  border: 1px solid #99f6e4;
+}
+
+.vnd-btn--danger {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.vnd-btn--sm {
+  padding: 5px 10px;
+  font-size: 0.78rem;
+}
+
+.vnd-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.vnd-table th {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 2px solid #f1f5f9;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.vnd-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #f8fafc;
+  vertical-align: middle;
+}
+
+.vnd-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.vnd-badge--pending { background: #fef3c7; color: #92400e; }
+.vnd-badge--accepted { background: #dbeafe; color: #1e40af; }
+.vnd-badge--preparing { background: #e0e7ff; color: #4338ca; }
+.vnd-badge--shipped { background: #cffafe; color: #0e7490; }
+.vnd-badge--delivered { background: #dcfce7; color: #166534; }
+.vnd-badge--rejected { background: #fee2e2; color: #991b1b; }
+.vnd-badge--approved { background: #dcfce7; color: #166534; }
+.vnd-badge--low { background: #fef3c7; color: #d97706; }
+.vnd-badge--out { background: #fee2e2; color: #dc2626; }
+
+.vnd-product-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.vnd-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.vnd-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.vnd-form-grid input,
+.vnd-form-grid select,
+.vnd-form-grid textarea {
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.vnd-form-grid textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.vnd-form-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vnd-empty {
+  text-align: center;
+  padding: 32px;
+  color: #94a3b8;
+}
+
+.vnd-demo-pill {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.vnd-msg-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+  min-height: 400px;
+}
+
+@media (max-width: 768px) {
+  .vnd-msg-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vnd-msg-list {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.vnd-msg-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+  background: white;
+  cursor: pointer;
+}
+
+.vnd-msg-item--active {
+  background: #f0fdfa;
+}
+
+.vnd-msg-item--unread strong::after {
+  content: ' •';
+  color: #0d9488;
+}
+
+.vnd-msg-chat {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+}
+
+.vnd-msg-bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+}
+
+.vnd-msg-bubble--client {
+  background: #f1f5f9;
+  align-self: flex-start;
+}
+
+.vnd-msg-bubble--vendor {
+  background: #ccfbf1;
+  align-self: flex-end;
+}
+
+.vnd-msg-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid #f1f5f9;
+  margin-top: auto;
+}
+
+.vnd-msg-input input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.vnd-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.vnd-kpi {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+
+.vnd-kpi strong {
+  display: block;
+  font-size: 1.4rem;
+  color: #0f766e;
+  margin-top: 4px;
+}
+
+.vnd-kpi small {
+  color: #64748b;
+  font-size: 0.75rem;
+}

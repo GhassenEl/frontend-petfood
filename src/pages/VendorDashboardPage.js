@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -52,20 +52,7 @@ const trendIcon = (t) => (t === 'up' ? '↑' : t === 'down' ? '↓' : '→');
 
 const priorityColor = (p) => (p === 'high' ? '#dc2626' : p === 'medium' ? '#d97706' : '#64748b');
 
-const VALID_TABS = ['overview', 'products', 'orders'];
-
-const VendorDashboardPage = ({ vendorId = null, adminPreview = false, defaultTab = 'overview' }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tabParam = searchParams.get('tab');
-  const fallbackTab = VALID_TABS.includes(defaultTab) ? defaultTab : 'overview';
-  const tab = VALID_TABS.includes(tabParam) ? tabParam : fallbackTab;
-  const setTab = (id) => {
-    if (id === 'overview') {
-      setSearchParams({}, { replace: true });
-    } else {
-      setSearchParams({ tab: id }, { replace: true });
-    }
-  };
+const VendorDashboardPage = ({ vendorId = null, adminPreview = false }) => {
   const [dash, setDash] = useState(null);
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(true);
@@ -325,27 +312,56 @@ const VendorDashboardPage = ({ vendorId = null, adminPreview = false, defaultTab
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         {[
-          { id: 'overview', label: 'Vue d\'ensemble' },
-          { id: 'products', label: 'Produits & perf.' },
-          { id: 'orders', label: 'Commandes' },
-        ].map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setTab(t.id)}
+          { to: '/vendor/products', label: '🏷️ Gérer produits' },
+          { to: '/vendor/orders', label: '📦 Commandes' },
+          { to: '/vendor/returns', label: '↩️ Retours' },
+          { to: '/vendor/communication', label: '💬 Communication' },
+        ].map((l) => (
+          <Link
+            key={l.to}
+            to={l.to}
             style={{
-              padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontWeight: 600,
-              background: tab === t.id ? '#0d9488' : '#f1f5f9',
-              color: tab === t.id ? '#fff' : '#475569',
+              padding: '8px 14px', borderRadius: 10, textDecoration: 'none', fontWeight: 600,
+              background: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', fontSize: 13,
             }}
           >
-            {t.label}
-          </button>
+            {l.label}
+          </Link>
         ))}
       </div>
 
-      {tab === 'overview' && (
-        <>
+      <>
+          {(dash.productPerformance?.length > 0) && (
+            <div style={card}>
+              <h3 style={h3}><Award size={18} style={{ verticalAlign: 'middle' }} /> Produits les plus vendus (30 j)</h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+                <thead>
+                  <tr style={{ textAlign: 'left', borderBottom: '2px solid #f1f5f9' }}>
+                    <th style={{ padding: 8 }}>#</th>
+                    <th style={{ padding: 8 }}>Produit</th>
+                    <th style={{ padding: 8 }}>Unités</th>
+                    <th style={{ padding: 8 }}>CA</th>
+                    <th style={{ padding: 8 }}>Tendance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dash.productPerformance.slice(0, 5).map((p, i) => (
+                    <tr key={p.productId} style={{ borderBottom: '1px solid #f8fafc' }}>
+                      <td style={{ padding: 8, fontWeight: 800, color: i === 0 ? '#d97706' : '#64748b' }}>{i + 1}</td>
+                      <td style={{ padding: 8 }}>{p.name}</td>
+                      <td style={{ padding: 8 }}>{p.unitsSold}</td>
+                      <td style={{ padding: 8 }}>{formatDT(p.revenue)}</td>
+                      <td style={{ padding: 8 }}>{trendIcon(p.trend)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p style={{ margin: '12px 0 0' }}>
+                <Link to="/vendor/products" style={{ color: '#0d9488', fontWeight: 600 }}>Gérer le catalogue →</Link>
+              </p>
+            </div>
+          )}
+
           <div style={card}>
             <h3 style={h3}>Tendance des ventes (6 mois)</h3>
             {chartData.length > 0 ? (
@@ -392,114 +408,36 @@ const VendorDashboardPage = ({ vendorId = null, adminPreview = false, defaultTab
               </div>
             </div>
           )}
-        </>
-      )}
 
-      {tab === 'products' && (
-        <>
           <div style={card}>
-            <h3 style={h3}>Catalogue & stocks</h3>
-            <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
-              {(dash.products || []).map((p) => {
-                const low = Number(p.stock) > 0 && Number(p.stock) < 5;
-                const out = Number(p.stock) <= 0;
-                return (
-                  <li
-                    key={p.id}
-                    style={{
-                      padding: '10px 0', borderBottom: '1px solid #f1f5f9',
-                      display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8,
-                    }}
-                  >
-                    <span>
-                      <strong>{p.name}</strong>
-                      {(low || out) && (
-                        <span style={{
-                          marginLeft: 8, fontSize: 11, color: out ? '#dc2626' : '#d97706', fontWeight: 700,
-                        }}
-                        >
-                          {out ? 'RUPTURE' : 'STOCK BAS'}
-                        </span>
-                      )}
-                    </span>
-                    <span style={{ color: '#64748b' }}>
-                      stock {p.stock} · {formatDT(p.price ?? 0, { decimals: 0 })}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-          {(dash.productPerformance?.length > 0) && (
-            <div style={card}>
-              <h3 style={h3}>Performance produits (30 j)</h3>
+            <h3 style={h3}><ShoppingCart size={18} style={{ verticalAlign: 'middle' }} /> Commandes récentes</h3>
+            <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                 <thead>
                   <tr style={{ textAlign: 'left', borderBottom: '2px solid #f1f5f9' }}>
-                    <th style={{ padding: 8 }}>Produit</th>
-                    <th style={{ padding: 8 }}>Unités</th>
-                    <th style={{ padding: 8 }}>CA</th>
-                    <th style={{ padding: 8 }}>Stock</th>
-                    <th style={{ padding: 8 }}>Tendance</th>
+                    <th style={{ padding: 8 }}>Commande</th>
+                    <th style={{ padding: 8 }}>Total</th>
+                    <th style={{ padding: 8 }}>Commission</th>
+                    <th style={{ padding: 8 }}>Statut</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {dash.productPerformance.map((p) => (
-                    <tr key={p.productId} style={{ borderBottom: '1px solid #f8fafc' }}>
-                      <td style={{ padding: 8 }}>{p.name}</td>
-                      <td style={{ padding: 8 }}>{p.unitsSold}</td>
-                      <td style={{ padding: 8 }}>{formatDT(p.revenue)}</td>
-                      <td style={{ padding: 8 }}>{p.stock}</td>
-                      <td style={{ padding: 8 }}>{trendIcon(p.trend)}</td>
+                  {(dash.recentOrders || []).slice(0, 5).map((c) => (
+                    <tr key={c.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                      <td style={{ padding: 8 }}>{c.orderId || c.id}</td>
+                      <td style={{ padding: 8 }}>{formatDT(c.total ?? 0)}</td>
+                      <td style={{ padding: 8 }}>{formatDT(c.commission ?? 0)}</td>
+                      <td style={{ padding: 8 }}>{c.status}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          )}
-        </>
-      )}
-
-      {tab === 'orders' && (
-        <div style={card}>
-          <h3 style={h3}>Commandes & commissions récentes</h3>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-              <thead>
-                <tr style={{ textAlign: 'left', borderBottom: '2px solid #f1f5f9' }}>
-                  <th style={{ padding: 8 }}>Date</th>
-                  <th style={{ padding: 8 }}>Commande</th>
-                  <th style={{ padding: 8 }}>Total</th>
-                  <th style={{ padding: 8 }}>Commission</th>
-                  <th style={{ padding: 8 }}>Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(dash.recentOrders?.length ? dash.recentOrders : (dash.commissions || []).slice(0, 15)).map((c) => (
-                  <tr key={c.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                    <td style={{ padding: 8 }}>
-                      {c.createdAt ? new Date(c.createdAt).toLocaleDateString('fr-FR') : '—'}
-                    </td>
-                    <td style={{ padding: 8 }}>{c.orderId || c.id}</td>
-                    <td style={{ padding: 8 }}>{formatDT(c.total ?? c.orderTotal ?? 0)}</td>
-                    <td style={{ padding: 8 }}>{formatDT(c.commission ?? 0)}</td>
-                    <td style={{ padding: 8 }}>
-                      <span style={{
-                        fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6,
-                        background: c.status === 'paid' ? '#dcfce7' : '#fef3c7',
-                        color: c.status === 'paid' ? '#166534' : '#92400e',
-                      }}
-                      >
-                        {c.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <p style={{ margin: '12px 0 0' }}>
+              <Link to="/vendor/orders" style={{ color: '#0d9488', fontWeight: 600 }}>Gérer toutes les commandes →</Link>
+            </p>
           </div>
-        </div>
-      )}
+      </>
     </div>
   );
 };

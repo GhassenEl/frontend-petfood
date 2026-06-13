@@ -24,3 +24,6 @@ export * as marketingService from './marketingService';
 export * as nlpModelService from './nlpModelService';
 export * as nlpAnalysisService from './nlpAnalysisService';
 export * as vetMedicationService from './vetMedicationService';
+export * as vendorService from './vendorService';
+export * as visitorService from './visitorService';
+export * as moderatorService from './moderatorService';

@@ -83,16 +83,16 @@ export const ADMIN_MOBILE_NAV = [
 
 export const MODERATOR_MOBILE_NAV = [
   { id: 'dash', to: '/moderator/dashboard', icon: '🛡️', label: 'Accueil' },
-  { id: 'reviews', to: '/moderator/reviews', icon: '⭐', label: 'Avis' },
-  { id: 'complaints', to: '/moderator/complaints', icon: '⚠️', label: 'Tickets' },
-  { id: 'events', to: '/moderator/events', icon: '🎪', label: 'Événements' },
+  { id: 'users', to: '/moderator/users', icon: '👤', label: 'Users' },
+  { id: 'content', to: '/moderator/content', icon: '🏷️', label: 'Contenu' },
+  { id: 'reports', to: '/moderator/reports', icon: '⚖️', label: 'Litiges' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
 export const VENDOR_MOBILE_NAV = [
-  { id: 'dash', to: '/vendor/dashboard', icon: '🏬', label: 'Boutique' },
-  { id: 'products', to: '/vendor/products', icon: '🏷️', label: 'Produits', match: '/vendor/products' },
-  { id: 'orders', to: '/vendor/orders', icon: '📦', label: 'Commandes', match: '/vendor/orders' },
+  { id: 'dash', to: '/vendor/dashboard', icon: '📊', label: 'Dashboard' },
+  { id: 'products', to: '/vendor/products', icon: '🏷️', label: 'Produits' },
+  { id: 'orders', to: '/vendor/orders', icon: '📦', label: 'Commandes' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
@@ -112,8 +112,8 @@ export const VENDOR_PUBLIC_MOBILE_NAV = [
 
 export const VISITOR_MOBILE_NAV = [
   { id: 'hub', to: '/visitor', icon: '👀', label: 'Découvrir' },
-  { id: 'vendor', to: '/vendor', icon: '🏬', label: 'Vendeur' },
-  { id: 'moderator', to: '/moderator', icon: '🛡️', label: 'Modération' },
+  { id: 'products', to: '/visitor/products', icon: '🏷️', label: 'Produits' },
+  { id: 'tools', to: '/visitor/tools', icon: '🧪', label: 'Outils' },
   { id: 'register', to: '/register', icon: '✨', label: 'Inscription' },
 ];
 

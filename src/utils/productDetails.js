@@ -53,7 +53,7 @@ export const getProductDetailFields = (product) => {
 };
 
 export const getEffectiveDiscount = (product) => {
-  const d = Number(product?.discount || 0);
+  const d = Number(product?.discount || product?.promotionPercent || 0);
   if (d > 0) return d;
   if (product?.isOnSale && product?.discountPrice > 0 && product?.price > 0) {
     return Math.round((1 - product.discountPrice / product.price) * 100);

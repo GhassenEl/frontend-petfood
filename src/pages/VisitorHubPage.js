@@ -79,10 +79,9 @@ const VisitorHubPage = () => {
           commander, réserver un soin ou participer aux compétitions.
         </p>
         <div className="visitor-hero__cta">
-          <Link to="/register" className="visitor-btn visitor-btn--primary">Commencer gratuitement</Link>
-          <VisitorRouteLink route="/#services" className="visitor-btn visitor-btn--ghost">
-            Voir tous les services
-          </VisitorRouteLink>
+          <Link to="/visitor/products" className="visitor-btn visitor-btn--primary">Parcourir les produits</Link>
+          <Link to="/visitor/tools" className="visitor-btn visitor-btn--ghost">Outils nutrition</Link>
+          <Link to="/register" className="visitor-btn visitor-btn--ghost">Créer un compte</Link>
         </div>
         <div className="visitor-quick" role="navigation" aria-label="Raccourcis visiteur">
           {VISITOR_QUICK_LINKS.map((item) => (
@@ -115,7 +114,7 @@ const VisitorHubPage = () => {
           {previewTestimonials.map((t) => (
             <VisitorRouteLink
               key={t.id}
-              route="/#temoignages"
+              route="/visitor/info"
               className="visitor-testimonial"
             >
               <div className="visitor-testimonial__head">
@@ -157,13 +156,13 @@ const VisitorHubPage = () => {
           ))}
         </div>
         <p className="visitor-faq__more">
-          <VisitorRouteLink route="/#faq">Voir toute la FAQ sur la page d&apos;accueil →</VisitorRouteLink>
+          <VisitorRouteLink route="/visitor/info">Voir toute la FAQ →</VisitorRouteLink>
         </p>
       </section>
 
       <div className="visitor-sticky-cta" aria-label="Actions rapides">
-        <VisitorRouteLink route="/#services" className="visitor-sticky-cta__btn visitor-sticky-cta__btn--ghost">
-          Services
+        <VisitorRouteLink route="/visitor/products" className="visitor-sticky-cta__btn visitor-sticky-cta__btn--ghost">
+          Produits
         </VisitorRouteLink>
         <Link to="/register" className="visitor-sticky-cta__btn visitor-sticky-cta__btn--primary">
           Créer un compte

@@ -20,28 +20,47 @@ const VendorSidebar = ({ onLogout, user, onNavigate }) => {
 
   const sections = [
     {
-      title: '🏬 Boutique',
+      title: '📊 Tableau de bord',
       items: [
         { id: 'dashboard', label: 'Vue d\'ensemble', icon: '📊' },
-        { to: '/vendor/products', label: 'Mes produits', icon: '🏷️' },
-        { to: '/vendor/orders', label: 'Commandes', icon: '📦' },
       ],
     },
     {
-      title: '🤖 Intelligence',
+      title: '🏷️ Gestion produits',
       items: [
-        { id: '__open-chat__', label: 'Assistant IA', icon: '🤖', action: 'open-chat' },
-        { id: 'platform-services', label: 'Catalogue services', icon: '📋' },
+        { to: '/vendor/products', label: 'Mes produits', icon: '🏷️' },
+        { to: '/vendor/products', label: 'Catégories & stocks', icon: '📁' },
+        { to: '/vendor/products', label: 'Promotions', icon: '🎯' },
       ],
     },
     {
-      title: '🔗 Espaces publics',
+      title: '📦 Commandes',
+      items: [
+        { to: '/vendor/orders', label: 'Commandes actives', icon: '📦' },
+        { to: '/vendor/orders', label: 'Livraisons', icon: '🚚' },
+        { to: '/vendor/orders', label: 'Historique ventes', icon: '📜' },
+      ],
+    },
+    {
+      title: '↩️ Après-vente',
+      items: [
+        { to: '/vendor/returns', label: 'Gestion des retours', icon: '↩️' },
+      ],
+    },
+    {
+      title: '💬 Communication',
+      items: [
+        { to: '/vendor/communication', label: 'Avis & messages', icon: '⭐' },
+        { id: '__open-chat__', label: 'Assistant IA', icon: '🤖', action: 'open-chat' },
+      ],
+    },
+    {
+      title: '🔗 Public',
       items: [
         { id: '__hub__', label: 'Hub vendeur public', icon: '👀', route: '/vendor' },
         { id: '__visitor__', label: 'Espace visiteur', icon: '🐾', route: '/visitor' },
         { id: '__moderator__', label: 'Espace modération', icon: '🛡️', route: '/moderator' },
-        { id: '__home__', label: 'Accueil marketing', icon: '🏠', route: '/' },
-        { to: '/vendor#commissions', label: 'Commissions (aperçu)', icon: '💰' },
+        { id: 'platform-services', label: 'Catalogue services', icon: '📋' },
       ],
     },
     {
@@ -54,14 +73,6 @@ const VendorSidebar = ({ onLogout, user, onNavigate }) => {
 
   const isTabActive = (to) => {
     if (!to) return false;
-    if (to.includes('?')) {
-      const [path, query] = to.split('?');
-      return location.pathname === path && location.search.includes(query);
-    }
-    if (to.includes('#')) {
-      const [path, hash] = to.split('#');
-      return location.pathname === path && location.hash === `#${hash}`;
-    }
     return location.pathname === to;
   };
 
@@ -101,7 +112,7 @@ const VendorSidebar = ({ onLogout, user, onNavigate }) => {
         {sections.map((section) => (
           <div key={section.title} className="admin-sidebar-section">
             <p className="admin-sidebar-section-title">{section.title}</p>
-            {section.items.map((item) => {
+            {section.items.map((item, idx) => {
               if (item.action === 'open-chat') {
                 return (
                   <button
@@ -137,7 +148,7 @@ const VendorSidebar = ({ onLogout, user, onNavigate }) => {
               if (item.to) {
                 return (
                   <NavLink
-                    key={item.id || item.to}
+                    key={`${item.to}-${item.label}-${idx}`}
                     to={item.to}
                     onClick={() => onNavigate?.()}
                     className={() => `admin-sidebar-item ${isTabActive(item.to) ? 'active' : ''}`}

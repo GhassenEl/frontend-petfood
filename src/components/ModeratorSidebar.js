@@ -23,7 +23,17 @@ const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
       title: '🛡️ Modération',
       items: [
         { id: 'dashboard', label: 'Tableau de bord', icon: '📊' },
-        { id: 'reviews', label: 'Avis produits', icon: '⭐' },
+        { id: 'users', label: 'Utilisateurs', icon: '👤' },
+        { id: 'vendors', label: 'Vendeurs', icon: '🏬' },
+        { id: 'content', label: 'Contenu & produits', icon: '🏷️' },
+        { id: 'reports', label: 'Signalements & litiges', icon: '⚖️' },
+        { id: 'analytics', label: 'Rapports', icon: '📈' },
+      ],
+    },
+    {
+      title: '⭐ Communauté',
+      items: [
+        { id: 'reviews', label: 'Modérer les avis', icon: '⭐' },
         { id: 'complaints', label: 'Réclamations', icon: '⚠️' },
         { id: 'events', label: 'Événements', icon: '🎪' },
         { id: 'messages', label: 'Messages signalés', icon: '💬' },
@@ -36,14 +46,6 @@ const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
         { id: '__visitor__', label: 'Hub visiteur', icon: '🐾', route: '/visitor' },
         { id: '__vendor__', label: 'Hub vendeur', icon: '🏬', route: '/vendor' },
         { id: '__home__', label: 'Accueil marketing', icon: '🏠', route: '/' },
-      ],
-    },
-    {
-      title: '🌐 Plateforme',
-      items: [
-        { id: '__acteurs__', label: 'Acteurs & rôles', icon: '👥', route: '/#acteurs' },
-        { id: '__services__', label: 'Catalogue services', icon: '📋', route: '/#services' },
-        { id: '__partners__', label: 'Partenaires', icon: '🤝', route: '/#partenaires' },
       ],
     },
     {

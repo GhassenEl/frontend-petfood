@@ -7,34 +7,46 @@ export const VISITOR_SIDEBAR_SECTIONS = [
       { id: 'hub', label: 'Hub visiteur', icon: '🏠', route: '/visitor' },
       { id: 'home', label: 'Accueil marketing', icon: '🌐', route: '/' },
       { id: 'services', label: 'Catalogue services', icon: '📋', route: '/#services' },
-      { id: 'acteurs', label: 'Tous les acteurs', icon: '👥', route: '/#acteurs' },
-      { id: 'how', label: 'Comment ça marche', icon: '📖', route: '/#comment-ca-marche' },
     ],
   },
   {
-    title: '⭐ Contenu & avis',
+    title: '🛒 Consultation',
     items: [
-      { id: 'testimonials', label: 'Avis clients', icon: '⭐', route: '/#temoignages' },
-      { id: 'tarifs', label: 'Tarifs soins', icon: '💰', route: '/#tarifs' },
-      { id: 'faq', label: 'FAQ', icon: '❓', href: '#faq-visiteur' },
-      { id: 'faq-home', label: 'FAQ accueil', icon: '📚', route: '/#faq' },
+      { id: 'products', label: 'Parcourir les produits', icon: '🏷️', route: '/visitor/products' },
+      { id: 'promos', label: 'Voir les promotions', icon: '🔥', route: '/visitor/products?tab=promos' },
+    ],
+  },
+  {
+    title: '📚 Informations',
+    items: [
+      { id: 'nutrition', label: 'Conseils nutritionnels', icon: '🥗', route: '/visitor/info?tab=nutrition' },
+      { id: 'vet', label: 'Services vétérinaires', icon: '🩺', route: '/visitor/info?tab=vet' },
+      { id: 'faq', label: 'FAQ', icon: '❓', route: '/visitor/info?tab=faq' },
+      { id: 'reviews', label: 'Avis clients', icon: '⭐', route: '/visitor/info?tab=reviews' },
+    ],
+  },
+  {
+    title: '🧪 Outils PetFoodTN',
+    items: [
+      { id: 'simulator', label: 'Simulateur nutrition', icon: '🔥', route: '/visitor/tools?tab=simulator' },
+      { id: 'packs', label: 'Packs alimentaires', icon: '📦', route: '/visitor/tools?tab=packs' },
+      { id: 'breeds', label: 'Races & besoins', icon: '🐾', route: '/visitor/tools?tab=breeds' },
     ],
   },
   {
     title: '📡 Écosystème',
     items: [
-      { id: 'iot', label: 'IoT & connecté', icon: '📡', route: '/#iot' },
-      { id: 'partners', label: 'Partenaires & refuges', icon: '🤝', route: '/#partenaires' },
       { id: 'vendor', label: 'Espace vendeur', icon: '🏬', route: '/vendor' },
       { id: 'moderator', label: 'Espace modération', icon: '🛡️', route: '/moderator' },
-      { id: 'events', label: 'Compétitions & cadeaux', icon: '🏆', route: '/login' },
+      { id: 'partners', label: 'Partenaires & refuges', icon: '🤝', route: '/#partenaires' },
     ],
   },
   {
     title: '🔑 Compte',
     items: [
       { id: 'register', label: 'Créer un compte', icon: '✨', route: '/register' },
-      { id: 'login', label: 'Connexion', icon: '🔑', route: '/login' },
+      { id: 'login', label: 'Se connecter', icon: '🔑', route: '/login' },
+      { id: 'forgot', label: 'Mot de passe oublié', icon: '🔐', route: '/forgot-password' },
     ],
   },
 ];
