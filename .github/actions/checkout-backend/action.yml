@@ -1,0 +1,10 @@
+name: Checkout backend
+description: Clone backend-petfood (repo séparé, ignoré localement par .gitignore)
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: GhassenEl/backend-petfood
+        path: backend

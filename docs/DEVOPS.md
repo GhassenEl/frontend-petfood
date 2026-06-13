@@ -4,6 +4,9 @@ Guide d'exploitation : CI/CD, Docker, santé des services et déploiement.
 
 ## Architecture runtime
 
+> **Note CI** : le dossier `backend/` est dans `.gitignore` (repo séparé [backend-petfood](https://github.com/GhassenEl/backend-petfood)).  
+> GitHub Actions clone automatiquement ce repo via `.github/actions/checkout-backend`.
+
 ```mermaid
 flowchart LR
   subgraph docker [Docker Compose]
