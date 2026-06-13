@@ -1,0 +1,82 @@
+name: Uptime & alerts
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  health-probe:
+    name: Sonde santé production
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Frontend / nginx-health
+        env:
+          URL: ${{ secrets.UPTIME_FRONTEND_URL }}
+        run: |
+          if [ -z "$URL" ]; then echo "UPTIME_FRONTEND_URL non défini — skip"; exit 0; fi
+          ENDPOINT="${URL%/}/nginx-health"
+          echo "GET $ENDPOINT"
+          curl -fsS --max-time 20 "$ENDPOINT"
+
+      - name: Backend /health
+        env:
+          URL: ${{ secrets.UPTIME_BACKEND_URL }}
+        run: |
+          if [ -z "$URL" ]; then echo "UPTIME_BACKEND_URL non défini — skip"; exit 0; fi
+          ENDPOINT="${URL%/}/health"
+          echo "GET $ENDPOINT"
+          curl -fsS --max-time 20 "$ENDPOINT"
+
+      - name: ML /health
+        env:
+          URL: ${{ secrets.UPTIME_ML_URL }}
+        run: |
+          if [ -z "$URL" ]; then echo "UPTIME_ML_URL non défini — skip"; exit 0; fi
+          ENDPOINT="${URL%/}/health"
+          echo "GET $ENDPOINT"
+          curl -fsS --max-time 20 "$ENDPOINT"
+
+  notify-on-failure:
+    name: Alerte incident
+    needs: health-probe
+    runs-on: ubuntu-latest
+    if: failure()
+
+    steps:
+      - name: Webhook alerte (Slack / Discord / n8n)
+        env:
+          WEBHOOK: ${{ secrets.ALERT_WEBHOOK_URL }}
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then echo "ALERT_WEBHOOK_URL non défini"; exit 0; fi
+          curl -fsS -X POST "$WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{\"text\":\"🚨 PetfoodTN — échec sonde uptime (${{ github.repository }} / run ${{ github.run_id }})\"}"
+
+      - name: Ouvrir issue GitHub (si pas de webhook)
+        uses: actions/github-script@v7
+        env:
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+        with:
+          script: |
+            if (process.env.ALERT_WEBHOOK_URL) return;
+            const title = `🚨 Uptime check failed — ${new Date().toISOString().slice(0, 16)}`;
+            const body = [
+              'La sonde planifiée a échoué.',
+              '',
+              `- Workflow: ${context.workflow}`,
+              `- Run: ${context.runId}`,
+              `- Repo: ${context.repo.owner}/${context.repo.repo}`,
+              '',
+              'Vérifiez les secrets `UPTIME_*_URL` et l’état du serveur.',
+            ].join('\n');
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              labels: ['incident', 'devops'],
+              body,
+            });

@@ -1,0 +1,40 @@
+name: Deploy Render
+
+on:
+  workflow_run:
+    workflows: [Publish Docker Images]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy-render:
+    name: Trigger Render deploy hooks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    environment: production
+
+    steps:
+      - name: Deploy frontend (Render)
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "RENDER_DEPLOY_HOOK_FRONTEND non défini — skip"; exit 0; fi
+          curl -fsS -X POST "$HOOK"
+
+      - name: Deploy backend (Render)
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "RENDER_DEPLOY_HOOK_BACKEND non défini — skip"; exit 0; fi
+          curl -fsS -X POST "$HOOK"
+
+      - name: Deploy ML service (Render)
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_ML }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "RENDER_DEPLOY_HOOK_ML non défini — skip"; exit 0; fi
+          curl -fsS -X POST "$HOOK"

@@ -1,0 +1,23 @@
+{
+	email {$ACME_EMAIL}
+}
+
+# Production : définir DOMAIN=app.petfoodtn.tn dans .env.docker
+{$DOMAIN} {
+	encode gzip zstd
+	reverse_proxy frontend:80
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+	}
+}
+
+# Fallback HTTP local (sans certificat) si DOMAIN=localhost
+:80 {
+	@notLocalHost not host localhost
+	handle @notLocalHost {
+		redir https://{host}{uri} permanent
+	}
+	reverse_proxy frontend:80
+}

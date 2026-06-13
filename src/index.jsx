@@ -8,6 +8,9 @@ import './styles/mobile.css';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import App from './App.js';
+import { initSentry } from './utils/sentry.js';
+
+initSentry();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

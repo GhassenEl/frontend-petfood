@@ -96,6 +96,8 @@ Comptes démo après seed : `admin@petfood.tn` / `PetfoodTN2024!`
 | `docker-compose.yml` | Base : db, backend, frontend |
 | `docker-compose.ml.yml` | Ajoute `ml` + lien backend → FastAPI |
 | `docker-compose.prod.yml` | `RUN_SEED=false`, logs rotatifs, restart always |
+| `docker-compose.ghcr.yml` | Images pré-buildées GHCR (CD) |
+| `docker-compose.caddy.yml` | HTTPS Let's Encrypt (Caddy) |
 | `docker-compose.vpn.yml` | WireGuard pour distributeurs IoT |
 
 Exemple manuel :
@@ -115,7 +117,13 @@ docker compose \
 |----------|-------------|------|
 | `.github/workflows/ci.yml` | push/PR `main` | build Vite, tests ML backend, smoke FastAPI, `docker compose build` |
 | `.github/workflows/e2e.yml` | push/PR `main` | Playwright E2E + tests API wallet |
+| `.github/workflows/publish-ghcr.yml` | push `main` / tags `v*` | Publication images Docker GHCR |
+| `.github/workflows/deploy-vps.yml` | après publish | CD SSH vers VPS |
+| `.github/workflows/deploy-render.yml` | après publish | Deploy hooks Render |
+| `.github/workflows/uptime.yml` | */15 min | Sonde santé + alertes |
 | `.github/dependabot.yml` | hebdo | npm (frontend/backend), pip (ML), GitHub Actions |
+
+Guide CD détaillé : [CD.md](./CD.md).
 
 ### CI locale (avant push)
 

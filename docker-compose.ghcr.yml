@@ -1,0 +1,17 @@
+# Images GHCR — usage avec CD :
+#   IMAGE_TAG=latest docker compose -f docker-compose.yml -f docker-compose.ghcr.yml pull
+#
+# Variables : GHCR_OWNER, IMAGE_TAG (défaut latest)
+
+services:
+  backend:
+    image: ${GHCR_REGISTRY:-ghcr.io}/${GHCR_OWNER:-ghassenel}/petfoodtn-backend:${IMAGE_TAG:-latest}
+    pull_policy: always
+
+  frontend:
+    image: ${GHCR_REGISTRY:-ghcr.io}/${GHCR_OWNER:-ghassenel}/petfoodtn-frontend:${IMAGE_TAG:-latest}
+    pull_policy: always
+
+  ml:
+    image: ${GHCR_REGISTRY:-ghcr.io}/${GHCR_OWNER:-ghassenel}/petfoodtn-ml:${IMAGE_TAG:-latest}
+    pull_policy: always

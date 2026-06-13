@@ -1,0 +1,38 @@
+# HTTPS Let's Encrypt via Caddy — usage :
+#   DOMAIN=app.petfoodtn.tn ACME_EMAIL=admin@petfoodtn.tn \
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.caddy.yml \
+#   --env-file .env.docker up -d
+#
+# Prérequis : DNS A/AAAA du domaine → IP du serveur, ports 80/443 ouverts.
+
+services:
+  caddy:
+    image: caddy:2.8-alpine
+    container_name: petfood-caddy
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      ACME_EMAIL: ${ACME_EMAIL:-internal@petfoodtn.tn}
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      frontend:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  frontend:
+    ports: !reset []
+
+volumes:
+  caddy_data:
+  caddy_config:

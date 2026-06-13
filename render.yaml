@@ -1,0 +1,66 @@
+# PetfoodTN — déploiement Render (Blueprint)
+# https://render.com/docs/blueprint-spec
+#
+# 1. Créer une base PostgreSQL sur Render
+# 2. Lier ce repo et appliquer le Blueprint
+# 3. Copier les Deploy Hooks dans les secrets GitHub (RENDER_DEPLOY_HOOK_*)
+
+databases:
+  - name: petfoodtn-db
+    plan: free
+    databaseName: petfood
+    user: petfood
+
+services:
+  - type: web
+    name: petfoodtn-backend
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5002
+      - key: DEMO_MODE
+        value: false
+      - key: RUN_SEED
+        value: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: petfoodtn-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+      - key: STRIPE_MOCK
+        value: 1
+
+  - type: web
+    name: petfoodtn-ml
+    runtime: docker
+    plan: starter
+    rootDir: fastapi_service
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: TZ
+        value: Africa/Tunis
+
+  - type: web
+    name: petfoodtn-frontend
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile.frontend
+    dockerContext: .
+    healthCheckPath: /nginx-health
+    envVars:
+      - key: VITE_API_BASE
+        value: /api
+      - key: VITE_SOCKET_URL
+        value: ''
+    buildCommand: ''
+    # Sur Render, configurer un rewrite /api → backend si nécessaire (Render proxy)

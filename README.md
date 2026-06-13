@@ -8,6 +8,8 @@ Architecture (MVC monolithe) : voir [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 **DevOps** (Docker, CI/CD, déploiement) : voir [docs/DEVOPS.md](./docs/DEVOPS.md).
 
+**CD production** (GHCR, VPS, Render, HTTPS, Sentry) : voir [docs/CD.md](./docs/CD.md).
+
 ## Stack
 
 - React 18 + React Router 7

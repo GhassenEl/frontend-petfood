@@ -1,0 +1,69 @@
+name: Deploy VPS
+
+on:
+  workflow_run:
+    workflows: [Publish Docker Images]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Tag image GHCR (ex. latest ou sha-abc1234)'
+        required: false
+        default: latest
+
+concurrency:
+  group: deploy-vps-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: SSH deploy → VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    environment: production
+
+    steps:
+      - name: Resolve image tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ inputs.image_tag || 'latest' }}" >> "$GITHUB_OUTPUT"
+          else
+            SHA="${{ github.event.workflow_run.head_sha }}"
+            SHORT="${SHA:0:7}"
+            echo "tag=sha-${SHORT}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy stack on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          GHCR_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+          GHCR_OWNER: ${{ github.repository_owner }}
+          IMAGE_TAG: ${{ steps.tag.outputs.tag }}
+          DEPLOY_PATH: ${{ secrets.VPS_DEPLOY_PATH }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          script_stop: true
+          envs: GHCR_TOKEN,GHCR_OWNER,IMAGE_TAG,DEPLOY_PATH
+          script: |
+            set -euo pipefail
+            cd "${DEPLOY_PATH}"
+            set -a && source .env.docker && set +a
+            OWNER_LC=$(echo "${GHCR_OWNER}" | tr '[:upper:]' '[:lower:]')
+            echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${OWNER_LC}" --password-stdin
+            export GHCR_OWNER="${OWNER_LC}"
+            export IMAGE_TAG="${IMAGE_TAG}"
+            export GHCR_REGISTRY=ghcr.io
+            COMPOSE="docker compose -f docker-compose.yml -f docker-compose.ghcr.yml -f docker-compose.ml.yml -f docker-compose.prod.yml -f docker-compose.caddy.yml --env-file .env.docker"
+            ${COMPOSE} pull
+            ${COMPOSE} up -d --remove-orphans
+            docker image prune -f
+            sleep 5
+            curl -fsS "http://127.0.0.1/nginx-health" || curl -fsS "https://${DOMAIN}/nginx-health"
