@@ -57,6 +57,7 @@
     "devops:render:health": "node scripts/devops/render-provision.mjs health",
     "devops:render:status": "node scripts/devops/render-provision.mjs status",
     "devops:render:hooks": "node scripts/devops/render-provision.mjs hooks",
+    "devops:render:github": "node scripts/devops/render-provision.mjs github",
     "demo:video": "node scripts/record-demo-video.js",
     "demo:video:5min": "cross-env DEMO_PACE=2.3 DEMO_HEADLESS=0 node scripts/record-demo-video.js",
     "test:e2e": "playwright test",

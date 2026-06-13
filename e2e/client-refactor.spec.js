@@ -88,8 +88,9 @@ test.describe('Réservation services avec portefeuille', () => {
     await modal.getByRole('button', { name: /confirmer le paiement/i }).click();
 
     await expect(modal).toBeHidden({ timeout: 15_000 });
-    await expect(page.locator('body')).toContainText(/confirmée|validée|payée/i, { timeout: 10_000 });
-    await expect(page.locator('body')).toContainText(petName);
+    await expect(
+      page.locator('.cc-list, .cc-page').filter({ hasText: petName }),
+    ).toBeVisible({ timeout: 15_000 });
   });
 
   test('créneaux toilettage disponibles', async ({ page }) => {

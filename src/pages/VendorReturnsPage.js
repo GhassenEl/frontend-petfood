@@ -9,7 +9,7 @@ import {
   vendorMarkRefunded,
   REFUND_STATUS_LABELS,
 } from '../services/refundService';
-import { REFUND_REASON_LABELS } from '../utils/refundDemoData';
+import { REFUND_REASON_LABELS, isNoReturnRefund } from '../utils/refundDemoData';
 import './VendorPages.css';
 
 const VendorReturnsPage = () => {
@@ -72,6 +72,16 @@ const VendorReturnsPage = () => {
                   <td>{r.amount} DT</td>
                   <td style={{ maxWidth: 180, fontSize: '0.82rem' }}>
                     {REFUND_REASON_LABELS[r.reasonCategory] || r.reasonCategory}
+                    {(r.noReturnRequired || isNoReturnRefund(r.reasonCategory)) && (
+                      <span style={{ display: 'inline-block', marginLeft: 6, fontSize: '0.7rem', color: '#b45309', fontWeight: 700 }}>
+                        sans retour
+                      </span>
+                    )}
+                    {r.delayDays > 0 && (
+                      <span style={{ display: 'block', fontSize: '0.72rem', color: '#94a3b8' }}>
+                        Retard : {r.delayDays} j
+                      </span>
+                    )}
                     <br /><small>{r.reason}</small>
                   </td>
                   <td>
@@ -96,6 +106,11 @@ const VendorReturnsPage = () => {
           <h2 style={{ margin: '0 0 12px', fontSize: '1rem' }}>{selected.orderId} — {selected.productName}</h2>
           <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 12px' }}>
             Client : {selected.clientName} · {selected.amount} DT
+            {(selected.noReturnRequired || isNoReturnRefund(selected.reasonCategory)) && (
+              <span style={{ color: '#b45309', marginLeft: 8, fontWeight: 600 }}>
+                · Livraison tardive — pas de retour physique
+              </span>
+            )}
             {selected.fraudScore > 0.7 && <span style={{ color: '#dc2626', marginLeft: 8 }}>⚠️ Score fraude {(selected.fraudScore * 100).toFixed(0)} %</span>}
           </p>
           <textarea
@@ -116,7 +131,9 @@ const VendorReturnsPage = () => {
                 </button>
               </>
             )}
-            {['awaiting_return', 'approved'].includes(selected.status) && !selected.returnReceived && (
+            {['awaiting_return', 'approved'].includes(selected.status)
+              && !selected.returnReceived
+              && !(selected.noReturnRequired || isNoReturnRefund(selected.reasonCategory)) && (
               <button type="button" className="vnd-btn vnd-btn--primary vnd-btn--sm" onClick={() => act(vendorConfirmReturnReceived, selected.id)}>
                 <Package size={14} /> Confirmer réception produit
               </button>

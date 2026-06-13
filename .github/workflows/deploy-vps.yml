@@ -38,7 +38,23 @@ jobs:
             echo "tag=sha-${SHORT}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Skip if VPS secrets missing
+        id: check
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_DEPLOY_PATH: ${{ secrets.VPS_DEPLOY_PATH }}
+        run: |
+          if [ -z "$VPS_HOST" ] || [ -z "$VPS_USER" ] || [ -z "$VPS_SSH_KEY" ] || [ -z "$VPS_DEPLOY_PATH" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Secrets VPS non configures — deploiement VPS ignore (utilisez Render ou renseignez VPS_*)."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Deploy stack on VPS
+        if: steps.check.outputs.skip != 'true'
         uses: appleboy/ssh-action@v1.2.0
         env:
           GHCR_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}

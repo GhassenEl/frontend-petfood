@@ -156,6 +156,25 @@ const AdminRefundsPage = () => {
               </label>
             </div>
           </div>
+          <div className="adm-card" style={{ marginTop: 16 }}>
+            <h2>Retards de livraison</h2>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: 0 }}>
+              Cas sans retour physique — remboursement direct après validation vendeur ou modération.
+            </p>
+            <div className="adm-form-grid">
+              <label>
+                Tolérance avant réclamation (jours)
+                <input type="number" min="0" max="14" value={policy.lateDeliveryGraceDays ?? 2} onChange={(e) => setPol('lateDeliveryGraceDays', Number(e.target.value))} />
+              </label>
+              <label>
+                Retard maximum pris en charge (jours)
+                <input type="number" min="3" max="90" value={policy.lateDeliveryMaxDays ?? 30} onChange={(e) => setPol('lateDeliveryMaxDays', Number(e.target.value))} />
+              </label>
+            </div>
+            <label className="adm-toggle">
+              <input type="checkbox" checked={policy.lateDeliveryAutoApprove !== false} onChange={(e) => setPol('lateDeliveryAutoApprove', e.target.checked)} />
+              Validation automatique du remboursement (sans étape retour) quand le vendeur accepte
+            </label>
           <button type="button" className="adm-btn adm-btn--primary" onClick={savePolicy}>
             <Save size={16} /> Appliquer la politique à toute la plateforme
           </button>

@@ -160,6 +160,7 @@ Commandes :
   status     Liste les services petfoodtn-* sur Render
   hooks      Affiche les Deploy Hooks pour secrets GitHub
   health     Teste les URLs publiques (sans cle API)
+  github     Liste les secrets GitHub a configurer
 
 Etapes manuelles (sans cle API) :
   1. https://dashboard.render.com/blueprints/new
@@ -169,6 +170,19 @@ Etapes manuelles (sans cle API) :
      ou ajouter credential "petfoodtn-ghcr" (username + PAT read:packages)
   5. npm run devops:render:hooks (avec RENDER_API_KEY) -> copier secrets GitHub
 `);
+}
+
+async function showGithubSecretsTemplate() {
+  console.log('\nSecrets GitHub (Settings -> Secrets -> Actions) :\n');
+  console.log('RENDER_DEPLOY_HOOK_FRONTEND = (Render petfoodtn-web -> Deploy Hook)');
+  console.log('RENDER_DEPLOY_HOOK_BACKEND  = (Render petfoodtn-api -> Deploy Hook)');
+  console.log('RENDER_DEPLOY_HOOK_ML       = (Render petfoodtn-ml -> Deploy Hook)');
+  console.log('UPTIME_FRONTEND_URL = https://petfoodtn-web.onrender.com');
+  console.log('UPTIME_BACKEND_URL  = https://petfoodtn-api.onrender.com');
+  console.log('UPTIME_ML_URL       = https://petfoodtn-ml.onrender.com');
+  console.log('\nEnvironnement : production (Settings -> Environments)\n');
+  console.log('Blueprint Render : https://dashboard.render.com/blueprints/new');
+  console.log('Repo : GhassenEl/frontend-petfood | render.yaml\n');
 }
 
 async function main() {
@@ -185,6 +199,9 @@ async function main() {
         break;
       case 'health':
         await checkHealth();
+        break;
+      case 'github':
+        await showGithubSecretsTemplate();
         break;
       default:
         showHelp();

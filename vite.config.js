@@ -82,6 +82,17 @@ export default defineConfig(({ mode }) => {
   css: {
     postcss: './postcss.config.js',
   },
+  preview: {
+    port: Number(env.PORT) || 3001,
+    host: true,
+    proxy: {
+      '/api': {
+        target: apiProxyTarget,
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   }
 });
 

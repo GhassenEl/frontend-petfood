@@ -7,7 +7,7 @@ import {
   moderatorFlagRefundFraud,
   REFUND_STATUS_LABELS,
 } from '../services/refundService';
-import { REFUND_REASON_LABELS } from '../utils/refundDemoData';
+import { REFUND_REASON_LABELS, isNoReturnRefund } from '../utils/refundDemoData';
 import './ModeratorPages.css';
 
 const ModeratorRefundsPage = () => {
@@ -71,7 +71,15 @@ const ModeratorRefundsPage = () => {
                 <tr key={r.id}>
                   <td>{r.orderId}</td>
                   <td>{r.clientName}<br /><small>{r.vendorName}</small></td>
-                  <td style={{ maxWidth: 160, fontSize: '0.82rem' }}>{REFUND_REASON_LABELS[r.reasonCategory] || r.reason}</td>
+                  <td style={{ maxWidth: 160, fontSize: '0.82rem' }}>
+                    {REFUND_REASON_LABELS[r.reasonCategory] || r.reason}
+                    {(r.noReturnRequired || isNoReturnRefund(r.reasonCategory)) && (
+                      <span style={{ display: 'block', fontSize: '0.72rem', color: '#b45309' }}>Retard — sans retour</span>
+                    )}
+                    {r.delayDays > 0 && (
+                      <span style={{ display: 'block', fontSize: '0.72rem', color: '#94a3b8' }}>{r.delayDays} j de retard</span>
+                    )}
+                  </td>
                   <td>{r.amount} DT</td>
                   <td style={{ color: r.fraudScore > 0.7 ? '#dc2626' : '#64748b' }}>
                     {(r.fraudScore * 100).toFixed(0)} %

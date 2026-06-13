@@ -28,6 +28,12 @@ export const REFUND_REASON_LABELS = {
   other: 'Autre',
 };
 
+/** Motifs sans retour physique (remboursement direct). */
+export const NO_RETURN_REASON_CATEGORIES = ['late_delivery'];
+
+export const isNoReturnRefund = (reasonCategory) =>
+  NO_RETURN_REASON_CATEGORIES.includes(reasonCategory);
+
 export const DEMO_REFUND_POLICY = {
   returnWindowDays: 14,
   refundProcessingDays: 5,
@@ -37,6 +43,9 @@ export const DEMO_REFUND_POLICY = {
   partialRefundEnabled: true,
   allowChangedMind: false,
   vendorMustConfirmReceipt: true,
+  lateDeliveryGraceDays: 2,
+  lateDeliveryAutoApprove: true,
+  lateDeliveryMaxDays: 30,
   updatedAt: daysAgo(3),
 };
 
@@ -136,8 +145,10 @@ export const DEMO_REFUNDS = [
     vendorName: 'Ridha Ben Ammar',
     productName: 'Litière agglomérante 10 L',
     amount: 35,
-    reason: 'Produit non reçu',
+    reason: 'Colis non reçu après 6 jours de retard',
     reasonCategory: 'late_delivery',
+    delayDays: 6,
+    noReturnRequired: true,
     status: 'refunded',
     returnReceived: false,
     fraudScore: 0.03,
@@ -146,10 +157,29 @@ export const DEMO_REFUNDS = [
     updatedAt: daysAgo(8),
     history: [
       hist('request_created', 'Karim M.', 'client'),
-      hist('vendor_approved', 'Ridha Ben Ammar', 'vendor'),
+      hist('vendor_approved_no_return', 'Ridha Ben Ammar', 'vendor', 'Retard confirmé — sans retour physique'),
       hist('refund_validated', 'Ridha Ben Ammar', 'vendor'),
       hist('refunded', 'Système', 'system', 'Virement 35 DT'),
     ],
+  },
+  {
+    id: 'ref-8',
+    orderId: 'CMD-8791',
+    clientName: 'Karim M.',
+    vendorName: 'Pets & Co Sfax',
+    productName: 'Croquettes chat 3 kg',
+    amount: 42,
+    reason: 'Livraison prévue sous 3 jours, reçue après 7 jours',
+    reasonCategory: 'late_delivery',
+    delayDays: 7,
+    noReturnRequired: true,
+    status: 'pending',
+    returnReceived: false,
+    fraudScore: 0.04,
+    disputed: false,
+    createdAt: daysAgo(1),
+    updatedAt: daysAgo(1),
+    history: [hist('request_created', 'Karim M.', 'client', 'Retard livraison > 5 jours')],
   },
   {
     id: 'ref-6',

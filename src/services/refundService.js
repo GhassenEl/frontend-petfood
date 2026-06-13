@@ -5,6 +5,7 @@ import {
   DEMO_REFUNDS,
   DEMO_REFUND_POLICY,
   REFUND_STATUS_LABELS,
+  isNoReturnRefund,
 } from '../utils/refundDemoData';
 import { logActivity } from './activityLogService';
 
@@ -140,8 +141,27 @@ export const updateRefundPolicy = (patch) =>
 // —— Vendeur ——
 export const vendorApproveRefund = (id, note = '') => {
   const { store, idx, refund } = findRefund(id);
-  refund.status = 'awaiting_return';
-  pushHistory(refund, 'vendor_approved', 'Vendeur', note || 'Demande acceptée — retour attendu');
+  const policy = loadPolicy();
+  const noReturn = refund.noReturnRequired || isNoReturnRefund(refund.reasonCategory);
+
+  if (noReturn) {
+    refund.noReturnRequired = true;
+    if (policy.lateDeliveryAutoApprove !== false && refund.reasonCategory === 'late_delivery') {
+      refund.status = 'refund_validated';
+      pushHistory(
+        refund,
+        'vendor_approved_no_return',
+        'Vendeur',
+        note || 'Retard de livraison confirmé — remboursement sans retour physique',
+      );
+    } else {
+      refund.status = 'refund_validated';
+      pushHistory(refund, 'vendor_approved_no_return', 'Vendeur', note || 'Demande acceptée — sans retour physique');
+    }
+  } else {
+    refund.status = 'awaiting_return';
+    pushHistory(refund, 'vendor_approved', 'Vendeur', note || 'Demande acceptée — retour attendu');
+  }
   store[idx] = refund;
   persist(store);
   logActivity({ actorRole: 'vendor', actorName: 'Vendeur', action: 'refund_approve', target: refund.orderId, module: 'vendor' });
@@ -193,10 +213,16 @@ export const vendorMarkRefunded = (id, note = '') => {
 // —— Modérateur ——
 export const moderatorResolveRefund = (id, decision, note = '') => {
   const { store, idx, refund } = findRefund(id);
+  const noReturn = refund.noReturnRequired || isNoReturnRefund(refund.reasonCategory);
   if (decision === 'approve') {
-    refund.status = 'moderator_resolved';
+    refund.status = noReturn ? 'refund_validated' : 'moderator_resolved';
     refund.disputed = false;
-    pushHistory(refund, 'moderator_approve_refund', 'Modérateur', note || 'Remboursement accordé après litige');
+    pushHistory(
+      refund,
+      noReturn ? 'moderator_approve_no_return' : 'moderator_approve_refund',
+      'Modérateur',
+      note || (noReturn ? 'Remboursement retard accordé — sans retour' : 'Remboursement accordé après litige'),
+    );
   } else if (decision === 'reject') {
     refund.status = 'rejected';
     refund.disputed = false;
@@ -248,6 +274,14 @@ export const createClientRefundRequest = (body) =>
     () => api.post('/refunds/request', body).then((r) => r.data),
     () => {
       const store = getStore();
+      const policy = loadPolicy();
+      const reasonCategory = body.reasonCategory || 'other';
+      const noReturn = isNoReturnRefund(reasonCategory);
+      const delayDays = Number(body.delayDays) || 0;
+      const eligibleLate =
+        reasonCategory !== 'late_delivery'
+        || (delayDays >= (policy.lateDeliveryGraceDays ?? 2) && delayDays <= (policy.lateDeliveryMaxDays ?? 30));
+
       const entry = {
         id: uid(),
         orderId: body.orderId,
@@ -256,7 +290,9 @@ export const createClientRefundRequest = (body) =>
         productName: body.productName || 'Produit',
         amount: body.amount || 0,
         reason: body.reason,
-        reasonCategory: body.reasonCategory || 'other',
+        reasonCategory,
+        delayDays: reasonCategory === 'late_delivery' ? delayDays : undefined,
+        noReturnRequired: noReturn,
         status: 'pending',
         returnReceived: false,
         fraudScore: 0.05,
@@ -271,6 +307,18 @@ export const createClientRefundRequest = (body) =>
           note: body.reason,
         }],
       };
+
+      if (reasonCategory === 'late_delivery' && !eligibleLate) {
+        entry.status = 'rejected';
+        entry.history.unshift({
+          at: new Date().toISOString(),
+          action: 'auto_reject_late_delivery',
+          actor: 'Système',
+          actorRole: 'system',
+          note: `Retard ${delayDays} j — hors politique (${policy.lateDeliveryGraceDays ?? 2}–${policy.lateDeliveryMaxDays ?? 30} j)`,
+        });
+      }
+
       store.unshift(entry);
       persist(store);
       logActivity({ actorRole: 'client', actorName: entry.clientName, action: 'refund_request', target: entry.orderId, module: 'boutique' });
@@ -278,4 +326,4 @@ export const createClientRefundRequest = (body) =>
     },
   );
 
-export { REFUND_STATUS_LABELS };
+export { REFUND_STATUS_LABELS, isNoReturnRefund };
