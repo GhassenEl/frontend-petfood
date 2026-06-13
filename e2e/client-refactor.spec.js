@@ -101,7 +101,9 @@ test.describe('Réservation services avec portefeuille', () => {
     await modal.getByRole('button', { name: /confirmer le paiement/i }).click();
 
     await expect(modal).toBeHidden({ timeout: 20_000 });
-    await expect(page.getByText(petName)).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page.locator('.cc-list').getByRole('heading', { name: new RegExp(petName) }),
+    ).toBeVisible({ timeout: 20_000 });
   });
 
   test('créneaux toilettage disponibles', async ({ page }) => {
