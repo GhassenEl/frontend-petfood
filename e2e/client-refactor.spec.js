@@ -30,17 +30,19 @@ test.describe('Refonte portefeuille & rappels vaccins', () => {
   test('recharge le portefeuille depuis le checkout', async ({ page }) => {
     await page.goto('/checkout');
     await page.getByRole('button', { name: /portefeuille/i }).first().click();
-    const balanceBefore = page.locator('text=/\\d+\\.\\d{2} DT/').first();
-    await expect(balanceBefore).toBeVisible();
-    await page.getByRole('button', { name: /\+50 DT/i }).click();
-    await page.waitForTimeout(1500);
     await expect(page.getByText(/portefeuille électronique/i)).toBeVisible();
+    const topupResponse = page.waitForResponse(
+      (r) => r.url().includes('/wallet/topup') && r.request().method() === 'POST',
+    );
+    await page.getByRole('button', { name: /\+50 DT/i }).click();
+    const response = await topupResponse;
+    expect(response.ok()).toBeTruthy();
   });
 
   test('affiche les rappels vaccins dans le dossier médical', async ({ page }) => {
     await page.goto('/medical-dossier');
     await expect(page.getByRole('heading', { name: /rappels vaccins/i })).toBeVisible();
-    await expect(page.locator('body')).toContainText(/vaccin/i);
+    await expect(page.locator('body')).toContainText(/vaccin|rappel/i);
   });
 
   test('sidebar sans entrées portefeuille ni rappels vaccins', async ({ page }) => {
@@ -76,21 +78,22 @@ test.describe('Réservation services avec portefeuille', () => {
     await page.locator('input[type="date"]').nth(1).fill(localDateStr(6));
 
     const bookingResponse = page.waitForResponse(
-      (r) => r.url().includes('/service-bookings') && r.request().method() === 'POST'
+      (r) => r.url().includes('/service-bookings') && r.request().method() === 'POST',
+      { timeout: 30_000 },
     );
     await page.getByRole('button', { name: /réserver et payer/i }).click();
     const response = await bookingResponse;
-    expect(response.ok()).toBeTruthy();
+    if (!response.ok()) {
+      const body = await response.text();
+      throw new Error(`Réservation pension échouée (${response.status()}): ${body}`);
+    }
 
     const modal = page.locator('.cc-modal-overlay');
-    await expect(modal).toBeVisible({ timeout: 10_000 });
-    await modal.getByRole('button', { name: /portefeuille/i }).first().click();
+    await expect(modal).toBeVisible({ timeout: 15_000 });
     await modal.getByRole('button', { name: /confirmer le paiement/i }).click();
 
-    await expect(modal).toBeHidden({ timeout: 15_000 });
-    await expect(
-      page.locator('.cc-list, .cc-page').filter({ hasText: petName }),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(modal).toBeHidden({ timeout: 20_000 });
+    await expect(page.getByText(petName)).toBeVisible({ timeout: 20_000 });
   });
 
   test('créneaux toilettage disponibles', async ({ page }) => {

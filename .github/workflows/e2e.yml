@@ -47,13 +47,11 @@ jobs:
           DEMO_MODE: 'true'
           PORT: 5002
 
-      - name: Build & start frontend
+      - name: Start frontend (Vite dev + proxy API)
         env:
-          VITE_API_BASE: http://localhost:5002/api
-          VITE_SOCKET_URL: http://localhost:5002
-        run: |
-          npm run build
-          npx vite preview --port 3001 --host &
+          PORT: 3001
+          VITE_API_PROXY_TARGET: http://127.0.0.1:5002
+        run: npx vite --host --port 3001 &
 
       - name: Wait for servers
         run: node scripts/wait-for-servers.js
