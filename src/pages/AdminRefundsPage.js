@@ -175,6 +175,7 @@ const AdminRefundsPage = () => {
               <input type="checkbox" checked={policy.lateDeliveryAutoApprove !== false} onChange={(e) => setPol('lateDeliveryAutoApprove', e.target.checked)} />
               Validation automatique du remboursement (sans étape retour) quand le vendeur accepte
             </label>
+          </div>
           <button type="button" className="adm-btn adm-btn--primary" onClick={savePolicy}>
             <Save size={16} /> Appliquer la politique à toute la plateforme
           </button>
