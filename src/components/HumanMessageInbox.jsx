@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Send, MessageCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import getSocket from '../utils/socketClient';
-import { getMessages, sendMessage, getMessagePartners } from '../services/messageService';
+import { getMessages, sendMessage, getMessagePartners, getModeratorMessagePartners } from '../services/messageService';
 import {
   buildDemoLivreurMessages,
   DEMO_LIVREUR_MESSAGE_PARTNERS,
@@ -14,7 +14,7 @@ import {
 } from '../utils/adminDemoData';
 import './HumanMessageInbox.css';
 
-const ROLE_EMOJI = { admin: '🛡️', livreur: '🚚', client: '🛒', vet: '🩺' };
+const ROLE_EMOJI = { admin: '🛡️', livreur: '🚚', client: '🛒', vet: '🩺', vendor: '🏬', moderator: '🛡️', support: '🎧' };
 
 const LIVREUR_QUICK = [
   'Commande livrée avec succès ✅',
@@ -42,6 +42,13 @@ const ADMIN_QUICK = [
   'Votre demande est prise en charge.',
   'Merci pour votre retour, nous revenons vers vous rapidement.',
   'Pouvez-vous préciser le numéro de commande ?',
+];
+
+const MODERATOR_QUICK = [
+  'Votre signalement est en cours d\'examen.',
+  'Merci — nous avons transmis au vendeur concerné.',
+  'Compte suspendu temporairement suite à violation des règles.',
+  'Litige clos — décision envoyée par email.',
 ];
 
 const idOf = (u) => u?.id || u?._id;
@@ -125,19 +132,19 @@ const buildConversations = (messages, myId, usersById) => {
     });
 };
 
-const HumanMessageInbox = ({ mode = 'admin' }) => {
+const HumanMessageInbox = ({ mode = 'admin', initialPartnerId = '', initialRoleFilter = 'all' }) => {
   const { user } = useAuth();
   const myId = idOf(user);
   const myRole = user?.role;
 
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
-  const [selectedId, setSelectedId] = useState(mode === 'livreur' ? 'demo_admin' : '');
+  const [selectedId, setSelectedId] = useState(mode === 'livreur' ? 'demo_admin' : initialPartnerId || '');
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
+  const [roleFilter, setRoleFilter] = useState(initialRoleFilter || 'all');
   const [connected, setConnected] = useState(false);
 
   const bottomRef = useRef(null);
@@ -211,7 +218,20 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
         })
         .catch(() => setUsers(DEMO_ADMIN_MESSAGE_PARTNERS));
     }
+    if (mode === 'moderator') {
+      getModeratorMessagePartners()
+        .then((partners) => setUsers(partners || []))
+        .catch(() => setUsers([]));
+    }
   }, [load, mode]);
+
+  useEffect(() => {
+    if (initialPartnerId) setSelectedId(initialPartnerId);
+  }, [initialPartnerId]);
+
+  useEffect(() => {
+    if (initialRoleFilter && initialRoleFilter !== 'all') setRoleFilter(initialRoleFilter);
+  }, [initialRoleFilter]);
 
   useEffect(() => {
     if (!myId) return;
@@ -297,6 +317,7 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
   const selectedConv = conversations.find((c) => c.partnerId === selectedId);
 
   const quickReplies = useMemo(() => {
+    if (mode === 'moderator') return MODERATOR_QUICK;
     if (mode !== 'livreur') return ADMIN_QUICK;
     const role = selectedConv?.role || usersById.get(selectedId)?.role;
     if (role === 'client') return LIVREUR_CLIENT_QUICK;
@@ -403,12 +424,14 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
         <p>
           {mode === 'livreur'
             ? 'Échangez avec l\'administration et vos clients — livraisons, retards et consignes d\'accès.'
-            : 'Conversations avec clients et livreurs — réponses en direct.'}
+            : mode === 'moderator'
+              ? 'Contactez clients, vendeurs et administration — modération et litiges.'
+              : 'Conversations avec livreurs, vétérinaires, vendeurs, modérateurs et clients — réponses en direct.'}
         </p>
       </div>
 
       <div className="hmi-layout">
-        {(mode === 'admin' || mode === 'livreur') && (
+        {(mode === 'admin' || mode === 'livreur' || mode === 'moderator') && (
           <aside className="hmi-sidebar">
             <div className="hmi-sidebar-tools">
               <input
@@ -424,7 +447,24 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
                 onChange={(e) => setRoleFilter(e.target.value)}
               >
                 <option value="all">Tous les contacts</option>
+                <option value="livreur">Livreurs</option>
+                <option value="vet">Vétérinaires</option>
+                <option value="vendor">Vendeurs</option>
+                <option value="moderator">Modérateurs</option>
                 <option value="client">Clients</option>
+                <option value="support">Support</option>
+              </select>
+              )}
+              {mode === 'moderator' && (
+              <select
+                className="hmi-filter"
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+              >
+                <option value="all">Tous</option>
+                <option value="client">Clients</option>
+                <option value="vendor">Vendeurs</option>
+                <option value="admin">Administration</option>
                 <option value="livreur">Livreurs</option>
               </select>
               )}
@@ -469,7 +509,7 @@ const HumanMessageInbox = ({ mode = 'admin' }) => {
                   <option value="">+ Nouveau contact</option>
                   {users.map((u) => (
                     <option key={idOf(u)} value={idOf(u)}>
-                      {u.name} ({u.role})
+                      {u.name} ({u.role}){u.region ? ` — ${u.region}` : ''}
                     </option>
                   ))}
                 </select>

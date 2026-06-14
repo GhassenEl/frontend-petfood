@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import VendorPublicLayout from '../layouts/VendorPublicLayout';
 import { getVendorPublicCatalog } from '../config/platformServicesCatalog';
 import { MARKETING_PARTNERS, VENDOR_QUICK_LINKS } from '../config/marketingContent';
 import { DEMO_VENDOR_DASHBOARD } from '../utils/vendorDemoData';
+import { DEMO_ADMIN_REGIONS } from '../utils/adminDemoData';
+import { registerVendor } from '../services/ecosystemService';
 import VisitorRouteLink from '../components/VisitorRouteLink';
 import './VendorHubPage.css';
 
@@ -40,6 +42,52 @@ const VendorHubPage = () => {
   const kpis = DEMO_VENDOR_DASHBOARD.kpis;
   const ml = DEMO_VENDOR_DASHBOARD.mlAgent;
   const previewPartners = MARKETING_PARTNERS.slice(0, 3);
+
+  const [partnerForm, setPartnerForm] = useState({
+    shopName: '',
+    ownerName: '',
+    email: '',
+    phone: '',
+    region: DEMO_ADMIN_REGIONS[0],
+    siret: '',
+    address: '',
+    category: 'Animalerie',
+  });
+  const [partnerStatus, setPartnerStatus] = useState({ type: '', text: '' });
+  const [partnerSending, setPartnerSending] = useState(false);
+
+  const submitPartner = async (e) => {
+    e.preventDefault();
+    setPartnerSending(true);
+    setPartnerStatus({ type: '', text: '' });
+    try {
+      await registerVendor({
+        ...partnerForm,
+        applicationStatus: 'pending',
+      });
+      setPartnerStatus({
+        type: 'success',
+        text: 'Demande envoyée ! Notre équipe vous contactera sous 48 h.',
+      });
+      setPartnerForm({
+        shopName: '',
+        ownerName: '',
+        email: '',
+        phone: '',
+        region: DEMO_ADMIN_REGIONS[0],
+        siret: '',
+        address: '',
+        category: 'Animalerie',
+      });
+    } catch (err) {
+      setPartnerStatus({
+        type: 'error',
+        text: err?.response?.data?.message || 'Envoi impossible — réessayez ou contactez partenaires@petfoodtn.tn',
+      });
+    } finally {
+      setPartnerSending(false);
+    }
+  };
 
   const vendorSteps = [
     {
@@ -151,7 +199,8 @@ const VendorHubPage = () => {
           </div>
         </div>
         <p className="vendor-ml-login">
-          <Link to="/login">Connectez-vous</Link> pour accéder au dashboard complet.
+          <Link to="/login">Connectez-vous</Link> pour accéder au dashboard complet et à l&apos;
+          <Link to="/vendor/ml">assistant ML</Link>.
         </p>
       </section>
 
@@ -171,6 +220,50 @@ const VendorHubPage = () => {
 
       <section id="devenir-partenaire" className="vendor-section">
         <h2>Devenir vendeur partenaire</h2>
+        <form className="vendor-partner-form" onSubmit={submitPartner}>
+          <div className="vendor-partner-form__grid">
+            <label>
+              Nom de la boutique
+              <input required value={partnerForm.shopName} onChange={(e) => setPartnerForm((f) => ({ ...f, shopName: e.target.value }))} />
+            </label>
+            <label>
+              Responsable
+              <input required value={partnerForm.ownerName} onChange={(e) => setPartnerForm((f) => ({ ...f, ownerName: e.target.value }))} />
+            </label>
+            <label>
+              Email pro
+              <input required type="email" value={partnerForm.email} onChange={(e) => setPartnerForm((f) => ({ ...f, email: e.target.value }))} />
+            </label>
+            <label>
+              Téléphone
+              <input required value={partnerForm.phone} onChange={(e) => setPartnerForm((f) => ({ ...f, phone: e.target.value }))} />
+            </label>
+            <label>
+              Région
+              <select value={partnerForm.region} onChange={(e) => setPartnerForm((f) => ({ ...f, region: e.target.value }))}>
+                {DEMO_ADMIN_REGIONS.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Matricule fiscal / SIRET
+              <input value={partnerForm.siret} onChange={(e) => setPartnerForm((f) => ({ ...f, siret: e.target.value }))} />
+            </label>
+            <label style={{ gridColumn: '1 / -1' }}>
+              Adresse
+              <input required value={partnerForm.address} onChange={(e) => setPartnerForm((f) => ({ ...f, address: e.target.value }))} />
+            </label>
+          </div>
+          {partnerStatus.text && (
+            <p className={`vendor-partner-form__status vendor-partner-form__status--${partnerStatus.type}`}>
+              {partnerStatus.text}
+            </p>
+          )}
+          <button type="submit" className="vendor-btn vendor-btn--primary" disabled={partnerSending}>
+            {partnerSending ? 'Envoi…' : 'Envoyer ma candidature'}
+          </button>
+        </form>
         <div className="vendor-steps">
           {vendorSteps.map((step) => (
             <VisitorRouteLink key={step.step} route={step.route} className="vendor-step vendor-step--clickable">

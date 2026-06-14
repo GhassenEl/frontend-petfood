@@ -1,16 +1,22 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Flame, Package, PawPrint } from 'lucide-react';
+import { Flame, Package, PawPrint, Scale, MapPin, Sparkles } from 'lucide-react';
 import VisitorLayout from '../layouts/VisitorLayout';
-import { fetchVisitorPacks } from '../services/visitorService';
+import { fetchVisitorPacks, fetchVisitorProducts, fetchVisitorReviewRecommendations } from '../services/visitorService';
 import { VISITOR_BREED_GUIDES } from '../utils/visitorDemoData';
+import { DEMO_ADMIN_REGIONS } from '../utils/adminDemoData';
 import {
   calculatePetCalories,
   PET_TYPE_LABELS,
 } from '../utils/petCalorieCalculator';
 import { buildPetNutritionRecommendation } from '../utils/petNutritionRecommender';
 import { formatDT } from '../utils/formatCurrency';
+import { getEffectiveDiscount, getPromoPrice, isOnPromotion } from '../utils/productDetails';
+import { resolveNaturalProductImage } from '../utils/productImages';
+import api from '../utils/api';
 import './VisitorPages.css';
+
+const TOOL_TABS = ['simulator', 'packs', 'breeds', 'compare', 'stores', 'recommendations'];
 
 const PET_TYPES = [
   { id: 'dog', label: '🐕 Chien' },
@@ -37,12 +43,12 @@ const defaultForm = {
 const VisitorToolsPage = () => {
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState(
-    ['simulator', 'packs', 'breeds'].includes(searchParams.get('tab')) ? searchParams.get('tab') : 'simulator',
+    TOOL_TABS.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'simulator',
   );
 
   useEffect(() => {
     const t = searchParams.get('tab');
-    if (t && ['simulator', 'packs', 'breeds'].includes(t)) setTab(t);
+    if (t && TOOL_TABS.includes(t)) setTab(t);
   }, [searchParams]);
 
   const [form, setForm] = useState(defaultForm);
@@ -51,6 +57,19 @@ const VisitorToolsPage = () => {
   const [packDemo, setPackDemo] = useState(false);
   const [packLoading, setPackLoading] = useState(false);
   const [breedFilter, setBreedFilter] = useState('all');
+  const [products, setProducts] = useState([]);
+  const [productsDemo, setProductsDemo] = useState(false);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [compareIds, setCompareIds] = useState([]);
+  const [compareSearch, setCompareSearch] = useState('');
+  const [stores, setStores] = useState([]);
+  const [storesLoading, setStoresLoading] = useState(false);
+  const [storeRegion, setStoreRegion] = useState('all');
+  const [recoQuery, setRecoQuery] = useState('croquettes');
+  const [recoProducts, setRecoProducts] = useState([]);
+  const [recoSummary, setRecoSummary] = useState('');
+  const [recoLoading, setRecoLoading] = useState(false);
+  const [recoDemo, setRecoDemo] = useState(false);
 
   const runSimulation = () => {
     const pet = {
@@ -84,6 +103,83 @@ const VisitorToolsPage = () => {
     if (tab === 'packs') loadPacks();
   }, [tab, loadPacks]);
 
+  const loadProducts = useCallback(async () => {
+    setProductsLoading(true);
+    const { data, demo } = await fetchVisitorProducts();
+    setProducts(data || []);
+    setProductsDemo(demo);
+    setProductsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (tab === 'compare') loadProducts();
+  }, [tab, loadProducts]);
+
+  const loadStores = useCallback(async () => {
+    setStoresLoading(true);
+    try {
+      const res = await api.get('/users/store-locations');
+      setStores(res.data || []);
+    } catch {
+      setStores([]);
+    }
+    setStoresLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (tab === 'stores') loadStores();
+  }, [tab, loadStores]);
+
+  const loadRecommendations = useCallback(async () => {
+    setRecoLoading(true);
+    const { data, summary, demo } = await fetchVisitorReviewRecommendations({
+      q: recoQuery,
+      limit: 8,
+    });
+    setRecoProducts(data || []);
+    setRecoSummary(summary || '');
+    setRecoDemo(demo);
+    setRecoLoading(false);
+  }, [recoQuery]);
+
+  useEffect(() => {
+    if (tab === 'recommendations') loadRecommendations();
+  }, [tab, loadRecommendations]);
+
+  const compareProducts = useMemo(
+    () => compareIds.map((id) => products.find((p) => String(p.id || p._id) === String(id))).filter(Boolean),
+    [compareIds, products],
+  );
+
+  const compareCandidates = useMemo(() => {
+    const q = compareSearch.trim().toLowerCase();
+    return products.filter((p) => {
+      if (compareIds.includes(String(p.id || p._id))) return false;
+      if (!q) return true;
+      return `${p.name} ${p.category || ''} ${p.animalType || ''}`.toLowerCase().includes(q);
+    }).slice(0, 12);
+  }, [products, compareIds, compareSearch]);
+
+  const storeRegions = useMemo(() => {
+    const fromStores = [...new Set(stores.map((s) => s.region || s.city).filter(Boolean))];
+    return fromStores.length ? fromStores : DEMO_ADMIN_REGIONS;
+  }, [stores]);
+
+  const filteredStores = useMemo(() => {
+    if (storeRegion === 'all') return stores;
+    return stores.filter((s) => (s.region || s.city) === storeRegion);
+  }, [stores, storeRegion]);
+
+  const addToCompare = (id) => {
+    const sid = String(id);
+    if (compareIds.includes(sid) || compareIds.length >= 3) return;
+    setCompareIds((prev) => [...prev, sid]);
+  };
+
+  const removeFromCompare = (id) => {
+    setCompareIds((prev) => prev.filter((x) => x !== String(id)));
+  };
+
   const filteredBreeds = useMemo(() => {
     if (breedFilter === 'all') return VISITOR_BREED_GUIDES;
     return VISITOR_BREED_GUIDES.filter((g) => g.type === breedFilter);
@@ -96,7 +192,7 @@ const VisitorToolsPage = () => {
       <div className="vis-page">
         <header className="vis-hero">
           <h1><Flame size={26} /> Outils PetFoodTN</h1>
-          <p>Simulateur nutritionnel, packs alimentaires et guide des races — sans inscription.</p>
+          <p>Simulateur nutritionnel, packs alimentaires, comparateur produits et points de vente — sans inscription.</p>
         </header>
 
         <div className="vis-tabs">
@@ -108,6 +204,15 @@ const VisitorToolsPage = () => {
           </button>
           <button type="button" className={`vis-tab${tab === 'breeds' ? ' vis-tab--active' : ''}`} onClick={() => setTab('breeds')}>
             <PawPrint size={14} /> Races & besoins
+          </button>
+          <button type="button" className={`vis-tab${tab === 'compare' ? ' vis-tab--active' : ''}`} onClick={() => setTab('compare')}>
+            <Scale size={14} /> Comparateur
+          </button>
+          <button type="button" className={`vis-tab${tab === 'stores' ? ' vis-tab--active' : ''}`} onClick={() => setTab('stores')}>
+            <MapPin size={14} /> Points de vente
+          </button>
+          <button type="button" className={`vis-tab${tab === 'recommendations' ? ' vis-tab--active' : ''}`} onClick={() => setTab('recommendations')}>
+            <Sparkles size={14} /> Recommandations IA
           </button>
         </div>
 
@@ -268,6 +373,170 @@ const VisitorToolsPage = () => {
             <Link to="/visitor/tools" className="vis-btn vis-btn--ghost" onClick={() => { setTab('simulator'); setField('breed', 'Sloughi'); }}>
               Tester avec le simulateur →
             </Link>
+          </div>
+        )}
+
+        {tab === 'compare' && (
+          <div className="vis-card">
+            <h2>Comparateur produits</h2>
+            <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: 16 }}>
+              Comparez jusqu&apos;à 3 produits côte à côte (prix, stock, promo).
+              {productsDemo && <span className="vis-badge vis-badge--demo" style={{ marginLeft: 8 }}>Mode démo</span>}
+            </p>
+            {productsLoading ? (
+              <p className="vis-empty">Chargement du catalogue…</p>
+            ) : (
+              <>
+                <input
+                  type="search"
+                  placeholder="Rechercher un produit à ajouter…"
+                  value={compareSearch}
+                  onChange={(e) => setCompareSearch(e.target.value)}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid #e2e8f0', marginBottom: 12 }}
+                />
+                {compareCandidates.length > 0 && compareIds.length < 3 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+                    {compareCandidates.map((p) => (
+                      <button
+                        key={p.id || p._id}
+                        type="button"
+                        className="vis-btn vis-btn--ghost vis-btn--sm"
+                        onClick={() => addToCompare(p.id || p._id)}
+                      >
+                        + {p.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {compareProducts.length === 0 ? (
+                  <p className="vis-empty">Ajoutez des produits pour lancer la comparaison.</p>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${compareProducts.length}, minmax(180px, 1fr))`, gap: 12, overflowX: 'auto' }}>
+                    {compareProducts.map((p) => {
+                      const onPromo = isOnPromotion(p);
+                      const price = onPromo ? getPromoPrice(p) : Number(p.price);
+                      return (
+                        <div key={p.id || p._id} className="vis-pack-card">
+                          <img
+                            src={resolveNaturalProductImage(p)}
+                            alt=""
+                            style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }}
+                          />
+                          <h3 style={{ fontSize: '0.95rem', margin: '0 0 8px' }}>{p.name}</h3>
+                          <p style={{ margin: '4px 0', fontSize: '0.85rem' }}><strong>Prix :</strong> {formatDT(price)}</p>
+                          {onPromo && (
+                            <p style={{ margin: '4px 0', fontSize: '0.85rem', color: '#dc2626' }}>
+                              Promo -{getEffectiveDiscount(p)} %
+                            </p>
+                          )}
+                          <p style={{ margin: '4px 0', fontSize: '0.85rem' }}><strong>Stock :</strong> {p.stock ?? '—'}</p>
+                          <p style={{ margin: '4px 0', fontSize: '0.85rem' }}><strong>Catégorie :</strong> {p.category || '—'}</p>
+                          <p style={{ margin: '4px 0', fontSize: '0.85rem' }}><strong>Espèce :</strong> {p.animalType || '—'}</p>
+                          <button type="button" className="vis-btn vis-btn--ghost vis-btn--sm" style={{ marginTop: 8 }} onClick={() => removeFromCompare(p.id || p._id)}>
+                            Retirer
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                <div className="vis-cta-banner" style={{ marginTop: 16 }}>
+                  <span>Commandez après création de compte client.</span>
+                  <Link to="/visitor/products" className="vis-btn vis-btn--primary">Voir le catalogue</Link>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {tab === 'stores' && (
+          <div className="vis-card">
+            <h2>Points de vente & animaleries</h2>
+            <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: 16 }}>
+              Trouvez une boutique partenaire près de chez vous.
+            </p>
+            <select
+              value={storeRegion}
+              onChange={(e) => setStoreRegion(e.target.value)}
+              style={{ marginBottom: 16, padding: '10px 12px', borderRadius: 10, border: '1px solid #e2e8f0' }}
+            >
+              <option value="all">Toutes les régions</option>
+              {storeRegions.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+            {storesLoading ? (
+              <p className="vis-empty">Chargement des points de vente…</p>
+            ) : filteredStores.length === 0 ? (
+              <p className="vis-empty">Aucun point de vente pour cette région.</p>
+            ) : (
+              filteredStores.map((s) => (
+                <div key={s.id || s._id || s.name} className="vis-breed-card" style={{ marginBottom: 12 }}>
+                  <h4 style={{ margin: '0 0 6px' }}>{s.name || s.shopName}</h4>
+                  <p style={{ margin: '4px 0', fontSize: '0.85rem', color: '#64748b' }}>
+                    <MapPin size={12} style={{ verticalAlign: 'middle' }} /> {s.address || s.region || s.city}
+                  </p>
+                  {s.phone && <p style={{ margin: '4px 0', fontSize: '0.85rem' }}>📞 {s.phone}</p>}
+                  {s.hours && <p style={{ margin: '4px 0', fontSize: '0.85rem' }}>🕐 {s.hours}</p>}
+                  {s.lat && s.lng && (
+                    <a
+                      href={`https://www.google.com/maps?q=${s.lat},${s.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="vis-btn vis-btn--ghost vis-btn--sm"
+                      style={{ marginTop: 8, display: 'inline-block' }}
+                    >
+                      Ouvrir dans Maps
+                    </a>
+                  )}
+                </div>
+              ))
+            )}
+            <Link to="/login" className="vis-btn vis-btn--ghost" style={{ marginTop: 12 }}>
+              Carte interactive (connexion client) →
+            </Link>
+          </div>
+        )}
+
+        {tab === 'recommendations' && (
+          <div className="vis-card">
+            <h2>Recommandations par avis clients</h2>
+            <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: 16 }}>
+              Classement NLP : notes **1 à 5**, volume d&apos;avis et similarité avec votre recherche + descriptions produits.
+              {recoDemo && <span className="vis-badge vis-badge--demo" style={{ marginLeft: 8 }}>Mode démo</span>}
+            </p>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+              <input
+                type="search"
+                value={recoQuery}
+                onChange={(e) => setRecoQuery(e.target.value)}
+                placeholder="ex. croquettes chat sans céréales"
+                style={{ flex: 1, minWidth: 200, padding: '10px 12px', borderRadius: 10, border: '1px solid #e2e8f0' }}
+              />
+              <button type="button" className="vis-btn vis-btn--primary" onClick={loadRecommendations} disabled={recoLoading}>
+                Rechercher
+              </button>
+            </div>
+            {recoSummary && <p style={{ fontSize: '0.85rem', color: '#0f766e', marginBottom: 12 }}>{recoSummary}</p>}
+            {recoLoading ? (
+              <p className="vis-empty">Analyse des avis en cours…</p>
+            ) : recoProducts.length === 0 ? (
+              <p className="vis-empty">Aucun produit — essayez « croquettes chien » ou « friandises chat ».</p>
+            ) : (
+              recoProducts.map((p) => (
+                <div key={p.id || p._id} className="vis-pack-card" style={{ marginBottom: 12 }}>
+                  <h3>{p.name}</h3>
+                  <p style={{ margin: '4px 0', color: '#0284c7', fontWeight: 700 }}>{formatDT(p.price)}</p>
+                  <p style={{ margin: '4px 0', fontSize: '0.85rem', color: '#475569' }}>{p.recommendedReason || p.reason}</p>
+                  {p.description && (
+                    <p style={{ margin: '6px 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>{p.description.slice(0, 120)}{p.description.length > 120 ? '…' : ''}</p>
+                  )}
+                </div>
+              ))
+            )}
+            <p style={{ marginTop: 12, fontSize: '0.85rem', color: '#64748b' }}>
+              Posez aussi vos questions au chatbot visiteur (bouton en bas à droite).
+            </p>
           </div>
         )}
       </div>

@@ -1,5 +1,6 @@
 /** Service visiteur — catalogue public sans authentification. */
 
+import api from '../utils/api';
 import { getProducts } from './productService';
 import {
   VISITOR_PUBLIC_PRODUCTS,
@@ -39,6 +40,26 @@ export async function fetchVisitorProducts() {
 export async function fetchVisitorProductById(id) {
   const { data } = await fetchVisitorProducts();
   return data.find((p) => String(p.id) === String(id) || String(p._id) === String(id)) || null;
+}
+
+export async function fetchVisitorReviewRecommendations(params = {}) {
+  try {
+    const { data } = await api.get('/ai/recommendations/public', { params });
+    if (data?.recommendations?.length) {
+      return { data: data.recommendations, summary: data.summary, demo: false };
+    }
+  } catch {
+    /* fallback catalogue */
+  }
+  const { data: products } = await fetchVisitorProducts();
+  const sorted = [...(products || [])]
+    .sort((a, b) => (b.rating_avg || 0) - (a.rating_avg || 0))
+    .slice(0, params.limit || 8)
+    .map((p) => ({
+      ...p,
+      recommendedReason: `⭐ ${(p.rating_avg || 0).toFixed(1)}/5 — ${p.description?.slice(0, 60) || p.name}`,
+    }));
+  return { data: sorted, summary: 'Classement par note moyenne (mode démo)', demo: true };
 }
 
 export async function fetchVisitorPacks(params = {}) {

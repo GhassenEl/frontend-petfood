@@ -42,6 +42,8 @@ const ModeratorDashboard = () => {
     { label: 'Avis en attente', value: stats.pendingReviews, icon: '⭐', to: '/moderator/reviews' },
     { label: 'Réclamations ouvertes', value: stats.pendingComplaints, icon: '⚠️', to: '/moderator/complaints' },
     { label: 'Litiges ouverts', value: stats.openDisputes, icon: '⚖️', to: '/moderator/reports' },
+    { label: 'Centre anti-fraude', value: stats.fraudCases ?? stats.fakeReviewsFlagged, icon: '🚨', to: '/moderator/fraud' },
+    { label: 'Vendeurs en attente', value: stats.pendingVendors ?? 0, icon: '🏬', to: '/moderator/vendors' },
     { label: 'Remboursements litige', value: stats.pendingRefunds ?? 2, icon: '💸', to: '/moderator/refunds' },
     { label: 'Faux avis détectés', value: stats.fakeReviewsFlagged, icon: '🤖', to: '/moderator/reports' },
     { label: 'Cas résolus aujourd\'hui', value: stats.resolvedToday, icon: '✅', to: '/moderator/analytics' },
@@ -93,6 +95,9 @@ const ModeratorDashboard = () => {
           <strong style={{ fontSize: '2rem', color: '#d97706' }}>{stats.avgResponseHours} h</strong>
           <div className="mod-quick-links">
             <Link to="/moderator/content">Contenu</Link>
+            <Link to="/moderator/vendors">Vendeurs</Link>
+            <Link to="/moderator/fraud">Anti-fraude</Link>
+            <Link to="/moderator/messages">Messagerie</Link>
             <Link to="/moderator/refunds">Remboursements</Link>
             <Link to="/moderator/reports">Signalements</Link>
             <Link to="/moderator/bi">Dashboard BI</Link>

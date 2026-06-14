@@ -19,5 +19,14 @@ export async function getUnreadCount() {
 
 export async function getMessagePartners() {
   const { data } = await api.get('/users');
-  return (data || []).filter((u) => ['client', 'livreur'].includes(u.role));
+  return (data || []).filter((u) =>
+    ['client', 'livreur', 'vet', 'vendor', 'moderator', 'support'].includes(u.role),
+  );
+}
+
+export async function getModeratorMessagePartners() {
+  const { data } = await api.get('/users');
+  return (data || []).filter((u) =>
+    ['client', 'vendor', 'admin', 'livreur', 'vet'].includes(u.role),
+  );
 }

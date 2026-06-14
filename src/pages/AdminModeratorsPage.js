@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, UserPlus, UserX, UserCheck } from 'lucide-react';
+import AdminRegionalStaffList from '../components/AdminRegionalStaffList';
+import { AdminMessageButton } from '../components/AdminMessageButton';
 import {
   fetchAdminModerators,
   createAdminModerator,
@@ -68,25 +70,33 @@ const AdminModeratorsPage = () => {
         <Link to="/admin/activity-logs?role=moderator" className="adm-btn adm-btn--ghost">
           Voir les logs modération →
         </Link>
-        <Link to="/admin/vendors" className="adm-btn adm-btn--ghost">
-          Gestion vendeurs →
+        <Link to="/admin/regional-contacts" className="adm-btn adm-btn--ghost">
+          Contacts par région →
         </Link>
       </div>
 
-      {showForm && (
-        <div className="adm-card">
-          <h2>Nouveau modérateur</h2>
-          <form onSubmit={create} className="adm-form-grid">
-            <label>Nom<input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></label>
-            <label>E-mail<input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></label>
-            <label>Téléphone<input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></label>
-            <label>Mot de passe<input required type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></label>
-          </form>
-          <button type="button" className="adm-btn adm-btn--primary adm-btn--sm" style={{ marginTop: 12 }} onClick={create}>Créer</button>
-        </div>
-      )}
+      <AdminRegionalStaffList
+        role="moderator"
+        title="Modérateurs par région"
+        subtitle="Filtrez par région et contactez directement chaque modérateur."
+      />
 
-      <div className="adm-card">
+      <div className="adm-card" style={{ marginTop: 8 }}>
+        <h2>Gestion des comptes</h2>
+
+        {showForm && (
+          <div style={{ marginBottom: 16 }}>
+            <h3 style={{ margin: '0 0 12px', fontSize: '1rem' }}>Nouveau modérateur</h3>
+            <form onSubmit={create} className="adm-form-grid">
+              <label>Nom<input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></label>
+              <label>E-mail<input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></label>
+              <label>Téléphone<input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></label>
+              <label>Mot de passe<input required type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></label>
+            </form>
+            <button type="button" className="adm-btn adm-btn--primary adm-btn--sm" style={{ marginTop: 12 }} onClick={create}>Créer</button>
+          </div>
+        )}
+
         {loading ? <p>Chargement…</p> : (
           <table className="adm-table">
             <thead>
@@ -104,23 +114,25 @@ const AdminModeratorsPage = () => {
                     </span>
                   </td>
                   <td>
-                    {m.isActive !== false ? (
-                      <button type="button" className="adm-btn adm-btn--ghost adm-btn--sm" onClick={() => toggleStatus(m)}>
-                        <UserX size={14} /> Suspendre
-                      </button>
-                    ) : (
-                      <button type="button" className="adm-btn adm-btn--primary adm-btn--sm" onClick={() => toggleStatus(m)}>
-                        <UserCheck size={14} /> Réactiver
-                      </button>
-                    )}
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <AdminMessageButton userId={m.id || m._id} label="Message" compact />
+                      {m.isActive !== false ? (
+                        <button type="button" className="adm-btn adm-btn--ghost adm-btn--sm" onClick={() => toggleStatus(m)}>
+                          <UserX size={14} /> Suspendre
+                        </button>
+                      ) : (
+                        <button type="button" className="adm-btn adm-btn--primary adm-btn--sm" onClick={() => toggleStatus(m)}>
+                          <UserCheck size={14} /> Réactiver
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
-      </div>
-    </div>
+      </div>    </div>
   );
 };
 

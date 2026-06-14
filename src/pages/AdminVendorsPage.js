@@ -18,6 +18,7 @@ import {
   updateAdminVendor,
 } from '../services/ecosystemService';
 import { formatDT } from '../utils/formatCurrency';
+import { AdminMessageButton } from '../components/AdminMessageButton';
 
 const emptyForm = {
   name: '',
@@ -394,6 +395,7 @@ const AdminVendorsPage = () => {
                   </td>
                   <td style={{ padding: 10 }}>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      <AdminMessageButton userId={v.userId || v.ownerId} label="Message" compact />
                       <Link
                         to={`/admin/vendors/${v.id}`}
                         style={{

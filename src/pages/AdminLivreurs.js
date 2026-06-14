@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import api from '../utils/api';
+import { AdminMessageButton } from '../components/AdminMessageButton';
 import {
   DEMO_ADMIN_ORDERS,
   DEMO_ADMIN_REGIONS,
@@ -233,7 +234,8 @@ const AdminLivreurs = () => {
                   </td>
                   <td style={styles.td}>{zoneOrders}</td>
                   <td style={styles.td}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <AdminMessageButton userId={livreur._id || livreur.id} label="Message" compact />
                       <button type="button" style={styles.editBtn} onClick={() => openEdit(livreur)}>✏️</button>
                       <button type="button" style={styles.deleteBtn} onClick={() => handleDelete(livreur._id)}>🗑️</button>
                     </div>

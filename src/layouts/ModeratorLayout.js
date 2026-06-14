@@ -17,7 +17,7 @@ const ModeratorLayout = ({ children }) => {
       sidebar={(onClose) => <ModeratorSidebar user={user} onLogout={logout} onNavigate={onClose} />}
     >
       {children}
-      <ChatAssistant key={chatKey} variant="admin" title="Assistant modération" />
+      <ChatAssistant key={chatKey} variant="moderator" />
     </ResponsiveShell>
   );
 };

@@ -1,11 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Store, Check, Shield, UserX } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Store, Check, Shield, UserX, MessageCircle } from 'lucide-react';
 import {
   fetchModeratorVendors,
   approveModeratorVendor,
   verifyModeratorVendor,
   suspendModeratorVendor,
 } from '../services/moderatorService';
+import { moderatorMessageUrl } from '../components/AdminMessageButton';
+import { DEMO_ADMIN_REGIONS } from '../utils/adminDemoData';
 import './ModeratorPages.css';
 
 const STATUS_LABELS = {
@@ -16,10 +19,12 @@ const STATUS_LABELS = {
 };
 
 const ModeratorVendorsPage = () => {
+  const navigate = useNavigate();
   const [vendors, setVendors] = useState([]);
   const [demo, setDemo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('pending');
+  const [regionFilter, setRegionFilter] = useState('all');
   const [msg, setMsg] = useState('');
 
   const load = useCallback(async () => {
@@ -32,7 +37,13 @@ const ModeratorVendorsPage = () => {
 
   useEffect(() => { load(); }, [load]);
 
+  const regions = useMemo(() => {
+    const fromVendors = [...new Set(vendors.map((v) => v.region).filter(Boolean))];
+    return fromVendors.length ? fromVendors : DEMO_ADMIN_REGIONS;
+  }, [vendors]);
+
   const filtered = vendors.filter((v) => {
+    if (regionFilter !== 'all' && v.region !== regionFilter) return false;
     if (tab === 'pending') return v.applicationStatus === 'pending';
     if (tab === 'active') return v.applicationStatus === 'approved' || v.status === 'active';
     if (tab === 'suspended') return v.applicationStatus === 'suspended' || v.status === 'suspended';
@@ -61,6 +72,17 @@ const ModeratorVendorsPage = () => {
         <button type="button" className={`mod-tab${tab === 'active' ? ' mod-tab--active' : ''}`} onClick={() => setTab('active')}>Actifs</button>
         <button type="button" className={`mod-tab${tab === 'suspended' ? ' mod-tab--active' : ''}`} onClick={() => setTab('suspended')}>Suspendus</button>
         <button type="button" className={`mod-tab${tab === 'all' ? ' mod-tab--active' : ''}`} onClick={() => setTab('all')}>Tous</button>
+        <select
+          value={regionFilter}
+          onChange={(e) => setRegionFilter(e.target.value)}
+          style={{ marginLeft: 'auto', padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0' }}
+          aria-label="Filtrer par région"
+        >
+          <option value="all">Toutes les régions</option>
+          {regions.map((r) => (
+            <option key={r} value={r}>{r}</option>
+          ))}
+        </select>
       </div>
 
       <div className="mod-card">
@@ -93,6 +115,17 @@ const ModeratorVendorsPage = () => {
                     </span>
                   </td>
                   <td style={{ whiteSpace: 'nowrap' }}>
+                    {(v.userId || v.ownerId) && (
+                      <button
+                        type="button"
+                        className="mod-btn mod-btn--ghost mod-btn--sm"
+                        onClick={() => navigate(moderatorMessageUrl(v.userId || v.ownerId, 'vendor'))}
+                        title="Message direct"
+                      >
+                        <MessageCircle size={14} /> Message
+                      </button>
+                    )}
+                    {' '}
                     {v.applicationStatus === 'pending' && (
                       <button type="button" className="mod-btn mod-btn--primary mod-btn--sm" onClick={() => act(approveModeratorVendor, v.id)}>
                         <Check size={14} /> Valider

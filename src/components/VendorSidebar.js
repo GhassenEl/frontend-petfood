@@ -52,6 +52,7 @@ const VendorSidebar = ({ onLogout, user, onNavigate }) => {
       title: '💬 Communication',
       items: [
         { to: '/vendor/communication', label: 'Avis & messages', icon: '⭐' },
+        { to: '/vendor/ml', label: 'Assistant ML', icon: '🧠' },
         { id: '__open-chat__', label: 'Assistant IA', icon: '🤖', action: 'open-chat' },
       ],
     },

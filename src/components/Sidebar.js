@@ -32,6 +32,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'vendors', label: 'Vendeurs', icon: '🏬' },
         { id: 'moderators', label: 'Modérateurs', icon: '🛡️' },
         { id: 'vets', label: 'Vétérinaires', icon: '🩺' },
+        { id: 'regional-contacts', label: 'Contacts par région', icon: '📍' },
       ],
     },
     {

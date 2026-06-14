@@ -17,7 +17,7 @@ const VendorLayout = ({ children }) => {
       sidebar={(onClose) => <VendorSidebar user={user} onLogout={logout} onNavigate={onClose} />}
     >
       {children}
-      <ChatAssistant key={chatKey} variant="admin" title="Assistant vendeur" />
+      <ChatAssistant key={chatKey} variant="vendor" />
     </ResponsiveShell>
   );
 };

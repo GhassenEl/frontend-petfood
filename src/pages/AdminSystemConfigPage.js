@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Settings, Save, Shield, Truck, Bell, Cpu, Store } from 'lucide-react';
 import { fetchSystemConfig, updateSystemConfig } from '../services/adminService';
+import SecurityThreatPanel from '../components/SecurityThreatPanel';
 import './AdminPages.css';
 
 const TABS = [
@@ -139,27 +140,39 @@ const AdminSystemConfigPage = () => {
       )}
 
       {tab === 'security' && (
-        <div className="adm-card">
-          <h2>Sécurité & sessions</h2>
-          <div className="adm-form-grid">
-            <label>
-              Timeout session (min)
-              <input type="number" min="5" max="480" value={config.sessionTimeoutMinutes || 60} onChange={(e) => set('sessionTimeoutMinutes', Number(e.target.value))} />
-            </label>
-            <label>
-              Tentatives login max
-              <input type="number" min="3" max="20" value={config.maxLoginAttempts || 5} onChange={(e) => set('maxLoginAttempts', Number(e.target.value))} />
-            </label>
-            <label>
-              Rétention logs (jours)
-              <input type="number" min="7" max="365" value={config.logRetentionDays || 90} onChange={(e) => set('logRetentionDays', Number(e.target.value))} />
-            </label>
+        <>
+          <div className="adm-card">
+            <h2>Sécurité & sessions</h2>
+            <div className="adm-form-grid">
+              <label>
+                Timeout session (min)
+                <input type="number" min="5" max="480" value={config.sessionTimeoutMinutes || 60} onChange={(e) => set('sessionTimeoutMinutes', Number(e.target.value))} />
+              </label>
+              <label>
+                Tentatives login max
+                <input type="number" min="3" max="20" value={config.maxLoginAttempts || 5} onChange={(e) => set('maxLoginAttempts', Number(e.target.value))} />
+              </label>
+              <label>
+                Rétention logs (jours)
+                <input type="number" min="7" max="365" value={config.logRetentionDays || 90} onChange={(e) => set('logRetentionDays', Number(e.target.value))} />
+              </label>
+            </div>
+            <div className="adm-toggle-group">
+              <Toggle checked={config.requireEmailVerification !== false} onChange={(v) => set('requireEmailVerification', v)} label="Vérification e-mail obligatoire à l'inscription" />
+              <Toggle checked={!!config.backupEnabled} onChange={(v) => set('backupEnabled', v)} label="Sauvegardes automatiques activées" />
+              <Toggle checked={config.cookieConsentRequired !== false} onChange={(v) => set('cookieConsentRequired', v)} label="Bannière consentement cookies (RGPD)" />
+              <Toggle checked={config.antivirusScanEnabled !== false} onChange={(v) => set('antivirusScanEnabled', v)} label="Scan anti-virus / anti-menaces actif" />
+              <Toggle checked={!!config.blockThreatsAutomatically} onChange={(v) => set('blockThreatsAutomatically', v)} label="Bloquer automatiquement les contenus dangereux" />
+            </div>
           </div>
-          <div className="adm-toggle-group">
-            <Toggle checked={config.requireEmailVerification !== false} onChange={(v) => set('requireEmailVerification', v)} label="Vérification e-mail obligatoire à l'inscription" />
-            <Toggle checked={!!config.backupEnabled} onChange={(v) => set('backupEnabled', v)} label="Sauvegardes automatiques activées" />
+          <div className="adm-card" style={{ marginTop: 16 }}>
+            <h2>Détection anti-virus & menaces</h2>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: 0 }}>
+              Analyse des messages, scripts, URLs suspectes et signatures malware (EICAR, exécutables, injections).
+            </p>
+            <SecurityThreatPanel />
           </div>
-        </div>
+        </>
       )}
 
       {tab === 'marketplace' && (

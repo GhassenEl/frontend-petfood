@@ -259,9 +259,14 @@ const VendorDashboardPage = ({ vendorId = null, adminPreview = false }) => {
 
       {ml && (
         <div style={{ ...card, border: '1px solid #99f6e4', background: 'linear-gradient(180deg, #f0fdfa 0%, #fff 40%)' }}>
-          <h3 style={{ ...h3, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Brain size={20} color="#0d9488" />
-            Agent BI / ML vendeur
+          <h3 style={{ ...h3, display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Brain size={20} color="#0d9488" />
+              Agent BI / ML vendeur
+            </span>
+            <Link to="/vendor/ml" style={{ fontSize: 13, color: '#0d9488', fontWeight: 600, textDecoration: 'none' }}>
+              Ouvrir l&apos;assistant ML →
+            </Link>
           </h3>
           {ml.summary && (
             <p style={{ margin: '0 0 12px', lineHeight: 1.65, whiteSpace: 'pre-wrap', color: '#134e4a' }}>

@@ -1,4 +1,5 @@
 import { getCookie, setCookie, removeCookie } from './cookies';
+import { isCategoryAllowed } from './cookieConsent';
 
 const TOKEN_SESSION_KEY = 'token';
 const TOKEN_LS_KEY = 'token';
@@ -49,7 +50,7 @@ export const clearAuthToken = () => {
 };
 
 export const persistRememberedEmail = (email, rememberMe) => {
-  if (rememberMe && email) {
+  if (rememberMe && email && isCategoryAllowed('preferences')) {
     setCookie(EMAIL_COOKIE, email.trim().toLowerCase(), 30);
   } else {
     removeCookie(EMAIL_COOKIE);

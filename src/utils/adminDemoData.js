@@ -720,6 +720,9 @@ export const DEMO_SYSTEM_CONFIG = {
   groqAssistantEnabled: true,
   nlpModelsEnabled: true,
   iotFeaturesEnabled: true,
+  cookieConsentRequired: true,
+  antivirusScanEnabled: true,
+  blockThreatsAutomatically: true,
   updatedAt: daysAgo(2),
 };
 

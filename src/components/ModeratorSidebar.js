@@ -25,7 +25,9 @@ const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
         { id: 'dashboard', label: 'Tableau de bord', icon: '📊' },
         { id: 'bi', label: 'Dashboard BI', icon: '📈' },
         { id: 'users', label: 'Comptes clients', icon: '👤' },
+        { id: 'vendors', label: 'Vendeurs partenaires', icon: '🏬' },
         { id: 'content', label: 'Contenu & produits', icon: '🏷️' },
+        { id: 'fraud', label: 'Centre anti-fraude', icon: '🚨' },
         { id: 'reports', label: 'Signalements & litiges', icon: '⚖️' },
         { id: 'refunds', label: 'Remboursements', icon: '💸' },
         { id: 'analytics', label: 'Rapports', icon: '📈' },
@@ -37,7 +39,7 @@ const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
         { id: 'reviews', label: 'Modérer les avis', icon: '⭐' },
         { id: 'complaints', label: 'Réclamations', icon: '⚠️' },
         { id: 'events', label: 'Événements', icon: '🎪' },
-        { id: 'messages', label: 'Messages signalés', icon: '💬' },
+        { id: 'messages', label: 'Messagerie directe', icon: '💬' },
       ],
     },
     {

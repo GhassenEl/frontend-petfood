@@ -31,6 +31,8 @@ export const VISITOR_SIDEBAR_SECTIONS = [
       { id: 'simulator', label: 'Simulateur nutrition', icon: '🔥', route: '/visitor/tools?tab=simulator' },
       { id: 'packs', label: 'Packs alimentaires', icon: '📦', route: '/visitor/tools?tab=packs' },
       { id: 'breeds', label: 'Races & besoins', icon: '🐾', route: '/visitor/tools?tab=breeds' },
+      { id: 'reco', label: 'Recommandations IA', icon: '✨', route: '/visitor/tools?tab=recommendations' },
+      { id: 'chat', label: 'Assistant NLP', icon: '🤖', action: 'open-chat' },
     ],
   },
   {
@@ -60,6 +62,7 @@ export const VENDOR_PUBLIC_SIDEBAR_SECTIONS = [
       { id: 'commissions', label: 'Commissions', icon: '💰', href: '#commissions' },
       { id: 'ml', label: 'Assistant ML', icon: '🤖', href: '#ml-vendeur' },
       { id: 'onboarding', label: 'Devenir partenaire', icon: '✨', href: '#devenir-partenaire' },
+      { id: 'chat', label: 'Assistant NLP', icon: '💬', action: 'open-chat' },
     ],
   },
   {

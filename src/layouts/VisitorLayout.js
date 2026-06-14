@@ -1,5 +1,6 @@
 import React from 'react';
 import VisitorSidebar from '../components/VisitorSidebar';
+import ChatAssistant from '../components/ChatAssistant';
 import ResponsiveShell from './ResponsiveShell';
 import MobileBottomNav, { VISITOR_MOBILE_NAV } from '../components/MobileBottomNav';
 
@@ -11,6 +12,7 @@ const VisitorLayout = ({ children }) => (
     sidebar={(onClose) => <VisitorSidebar onNavigate={onClose} />}
   >
     {children}
+    <ChatAssistant variant="visitor" />
   </ResponsiveShell>
 );
 

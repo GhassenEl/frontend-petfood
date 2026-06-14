@@ -92,6 +92,36 @@ const VARIANT_CONFIG = {
       products: [],
     }),
   },
+  moderator: {
+    title: 'Assistant modération NLP',
+    makeGreeting: () => ({
+      role: 'assistant',
+      content:
+        'Bonjour ! Assistant modération PetfoodTN — vendeurs, anti-fraude, contenu, litiges, remboursements et messagerie. Posez n\'importe quelle question.',
+      quickReplies: ['Vendeurs en attente', 'Centre anti-fraude', 'Produits à valider', 'Messagerie', 'Dashboard'],
+      products: [],
+    }),
+  },
+  vendor: {
+    title: 'Assistant vendeur NLP',
+    makeGreeting: () => ({
+      role: 'assistant',
+      content:
+        'Bonjour ! Assistant vendeur — commandes, stock, commissions, ML et recommandations basées sur les avis clients (notes 1–5).',
+      quickReplies: ['Dashboard', 'Assistant ML', 'Mes commandes', 'Recommandations produits'],
+      products: [],
+    }),
+  },
+  visitor: {
+    title: 'Assistant visiteur NLP',
+    makeGreeting: () => ({
+      role: 'assistant',
+      content:
+        'Bonjour ! 👋 Je réponds à toutes vos questions — catalogue, nutrition, comparateur, points de vente et produits recommandés selon les **avis clients**.',
+      quickReplies: ['Recommandations', 'Simulateur nutrition', 'Catalogue produits', 'Devenir vendeur'],
+      products: [],
+    }),
+  },
 };
 
 const AVATAR_CONFIG = {
@@ -99,6 +129,9 @@ const AVATAR_CONFIG = {
   admin: { emoji: '⚙️', gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)' },
   livreur: { emoji: '🚚', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)' },
   vet: { emoji: '🩺', gradient: 'linear-gradient(135deg, #0ea5e9, #0284c7)' },
+  moderator: { emoji: '🛡️', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)' },
+  vendor: { emoji: '🏬', gradient: 'linear-gradient(135deg, #14b8a6, #0d9488)' },
+  visitor: { emoji: '👀', gradient: 'linear-gradient(135deg, #38bdf8, #0284c7)' },
 };
 
 const AssistantAvatar = ({ variant = 'client', size = 40 }) => {
@@ -134,12 +167,13 @@ const mapHistoryRow = (m) => ({
 });
 
 /**
- * @param {{ variant?: 'client' | 'admin' | 'livreur' | 'vet', title?: string, embedded?: boolean }} props
+ * @param {{ variant?: 'client' | 'admin' | 'livreur' | 'vet' | 'moderator' | 'vendor' | 'visitor', title?: string, embedded?: boolean }} props
  */
 const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = false }) => {
   const cfg = VARIANT_CONFIG[variant] || VARIANT_CONFIG.client;
   const displayTitle = titleOverride || cfg.title;
   const { user } = useAuth();
+  const skipHistory = !user && ['visitor', 'vendor', 'moderator'].includes(variant);
 
   const makeGreetingMessage = useMemo(() => {
     const g = cfg.makeGreeting();
@@ -188,6 +222,11 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
     setHistoryLoading(true);
 
     (async () => {
+      if (skipHistory) {
+        setMessages([makeGreetingMessage]);
+        setHistoryLoading(false);
+        return;
+      }
       try {
         const { data } = await api.get('/chat/history');
         if (cancelled) return;
@@ -216,7 +255,7 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
     return () => {
       cancelled = true;
     };
-  }, [isOpen, messages.length, makeGreetingMessage, variant]);
+  }, [isOpen, messages.length, makeGreetingMessage, variant, skipHistory]);
 
   useEffect(() => {
     if (embedded) setIsOpen(true);
@@ -283,10 +322,17 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
     setLoading(true);
 
     try {
-      const chatEndpoint = variant === 'vet' ? '/vet/ai/chat' : '/chat/message';
+      const publicRoles = ['visitor', 'vendor', 'moderator'];
+      const usePublic = !user && publicRoles.includes(variant);
+      const chatEndpoint = variant === 'vet'
+        ? '/vet/ai/chat'
+        : usePublic
+          ? '/chat/public'
+          : '/chat/message';
       const res = await api.post(chatEndpoint, {
         message: text.trim(),
-        context: context || undefined,
+        role: variant,
+        context: { role: variant, ...(context || {}) },
       });
 
       const data = res.data || {};
@@ -392,6 +438,57 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
     if (variant === 'admin' && adminNav[cleanReply]) {
       setIsOpen(false);
       navigate(adminNav[cleanReply]);
+      return;
+    }
+
+    const moderatorNav = {
+      'Vendeurs en attente': '/moderator/vendors',
+      'Centre anti-fraude': '/moderator/fraud',
+      'Produits à valider': '/moderator/content',
+      Messagerie: '/moderator/messages',
+      Dashboard: '/moderator/dashboard',
+      Remboursements: '/moderator/refunds',
+      Signalements: '/moderator/reports',
+      Réclamations: '/moderator/complaints',
+      Rapports: '/moderator/analytics',
+    };
+    if (variant === 'moderator' && moderatorNav[cleanReply]) {
+      setIsOpen(false);
+      navigate(moderatorNav[cleanReply]);
+      return;
+    }
+
+    const vendorNav = {
+      Dashboard: '/vendor/dashboard',
+      'Assistant ML': '/vendor/ml',
+      'Mes commandes': '/vendor/orders',
+      'Mes produits': '/vendor/products',
+      'Alertes stock': '/vendor/ml',
+      Commissions: '/vendor/dashboard',
+      Retours: '/vendor/returns',
+      Messagerie: '/vendor/communication',
+      'Mes ventes': '/vendor/sales',
+    };
+    if (variant === 'vendor' && vendorNav[cleanReply]) {
+      setIsOpen(false);
+      navigate(vendorNav[cleanReply]);
+      return;
+    }
+
+    const visitorNav = {
+      'Simulateur nutrition': '/visitor/tools?tab=simulator',
+      'Comparer produits': '/visitor/tools?tab=compare',
+      'Catalogue produits': '/visitor/products',
+      'Devenir vendeur': '/vendor#devenir-partenaire',
+      'Hub vendeur': '/vendor',
+      Connexion: '/login',
+      'Hub visiteur': '/visitor',
+      'Packs alimentaires': '/visitor/tools?tab=packs',
+      'Races & besoins': '/visitor/tools?tab=breeds',
+    };
+    if (variant === 'visitor' && visitorNav[cleanReply]) {
+      setIsOpen(false);
+      navigate(visitorNav[cleanReply]);
       return;
     }
 

@@ -214,6 +214,72 @@
   color: #c2410c;
 }
 
+.adm-region-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.adm-region-card {
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: white;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.adm-region-card--active {
+  font-weight: 700;
+}
+
+.adm-region-card__name {
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.adm-region-card__meta {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.adm-search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.adm-search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  font-size: 0.9rem;
+}
+
+.adm-region-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.adm-empty {
+  text-align: center;
+  color: #94a3b8;
+  padding: 24px;
+}
+
 .adm-toggle-group {
   margin-top: 16px;
   display: flex;
