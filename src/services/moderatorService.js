@@ -269,6 +269,21 @@ export const fetchModeratorFakeReviews = () =>
     () => ({ reviews: [...ensureStore().fakeReviews] }),
   );
 
+export const fetchModeratorNlpInsights = () =>
+  withDemo(
+    () => api.get('/ecosystem/moderator/nlp/insights').then((r) => r.data),
+    () => ({
+      sentimentTrends: {
+        positivePct: 68,
+        negativePct: 12,
+        trending: 'stable',
+        summary: 'Sentiment stable (mode démo)',
+      },
+      stats: { flagged: 2, insults: 1, spam: 1, incoherent: 1 },
+      summary: '2 avis à contrôler (mode démo)',
+    }),
+  );
+
 export const rejectFakeReview = (id) =>
   withDemo(
     () => api.delete(`/ecosystem/moderator/reviews/fake/${id}`).then((r) => r.data),

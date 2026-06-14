@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Flame, Package, PawPrint, Scale, MapPin, Sparkles } from 'lucide-react';
 import VisitorLayout from '../layouts/VisitorLayout';
-import { fetchVisitorPacks, fetchVisitorProducts, fetchVisitorReviewRecommendations } from '../services/visitorService';
+import { fetchVisitorPacks, fetchVisitorProducts, fetchVisitorIntelligence } from '../services/visitorService';
 import { VISITOR_BREED_GUIDES } from '../utils/visitorDemoData';
 import { DEMO_ADMIN_REGIONS } from '../utils/adminDemoData';
 import {
@@ -68,6 +68,7 @@ const VisitorToolsPage = () => {
   const [recoQuery, setRecoQuery] = useState('croquettes');
   const [recoProducts, setRecoProducts] = useState([]);
   const [recoSummary, setRecoSummary] = useState('');
+  const [sentimentTrends, setSentimentTrends] = useState(null);
   const [recoLoading, setRecoLoading] = useState(false);
   const [recoDemo, setRecoDemo] = useState(false);
 
@@ -132,15 +133,20 @@ const VisitorToolsPage = () => {
 
   const loadRecommendations = useCallback(async () => {
     setRecoLoading(true);
-    const { data, summary, demo } = await fetchVisitorReviewRecommendations({
+    const result = await fetchVisitorIntelligence({
       q: recoQuery,
+      petType: form.type,
+      breed: form.breed,
+      ageYears: form.ageYears,
+      weightKg: form.weight,
       limit: 8,
     });
-    setRecoProducts(data || []);
-    setRecoSummary(summary || '');
-    setRecoDemo(demo);
+    setRecoProducts(result.recommendations || []);
+    setRecoSummary(result.profileSummary || '');
+    setSentimentTrends(result.sentimentTrends || null);
+    setRecoDemo(result.demo);
     setRecoLoading(false);
-  }, [recoQuery]);
+  }, [recoQuery, form.type, form.breed, form.ageYears, form.weight]);
 
   useEffect(() => {
     if (tab === 'recommendations') loadRecommendations();
@@ -500,11 +506,21 @@ const VisitorToolsPage = () => {
 
         {tab === 'recommendations' && (
           <div className="vis-card">
-            <h2>Recommandations par avis clients</h2>
+            <h2>Recommandations IA personnalisées</h2>
             <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: 16 }}>
-              Classement NLP : notes **1 à 5**, volume d&apos;avis et similarité avec votre recherche + descriptions produits.
+              Profil animal (simulateur), historique de navigation et analyse des avis clients — scores de pertinence et satisfaction.
               {recoDemo && <span className="vis-badge vis-badge--demo" style={{ marginLeft: 8 }}>Mode démo</span>}
             </p>
+            {sentimentTrends && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10, marginBottom: 16, padding: 14, background: '#f0fdf4', borderRadius: 12, border: '1px solid #bbf7d0' }}>
+                <div><small style={{ color: '#64748b' }}>Positifs 30j</small><p style={{ margin: '4px 0 0', fontWeight: 800, color: '#059669' }}>{sentimentTrends.positivePct}%</p></div>
+                <div><small style={{ color: '#64748b' }}>Négatifs 30j</small><p style={{ margin: '4px 0 0', fontWeight: 800, color: '#dc2626' }}>{sentimentTrends.negativePct}%</p></div>
+                <div><small style={{ color: '#64748b' }}>Tendance</small><p style={{ margin: '4px 0 0', fontWeight: 800 }}>{sentimentTrends.trending === 'positive' ? '📈 Positive' : sentimentTrends.trending === 'negative' ? '📉 Négative' : '➡️ Stable'}</p></div>
+              </div>
+            )}
+            {sentimentTrends?.summary && (
+              <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: 12 }}>{sentimentTrends.summary}</p>
+            )}
             <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
               <input
                 type="search"
@@ -527,6 +543,23 @@ const VisitorToolsPage = () => {
                 <div key={p.id || p._id} className="vis-pack-card" style={{ marginBottom: 12 }}>
                   <h3>{p.name}</h3>
                   <p style={{ margin: '4px 0', color: '#0284c7', fontWeight: 700 }}>{formatDT(p.price)}</p>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
+                    {p.relevanceScore != null && (
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: '#dbeafe', color: '#1d4ed8' }}>
+                        Pertinence {p.relevanceScore}%
+                      </span>
+                    )}
+                    {p.satisfactionScore != null && (
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: '#dcfce7', color: '#166534' }}>
+                        Satisfaction {p.satisfactionScore}%
+                      </span>
+                    )}
+                    {p.profileMatch && (
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: '#fef3c7', color: '#b45309' }}>
+                        Profil animal
+                      </span>
+                    )}
+                  </div>
                   <p style={{ margin: '4px 0', fontSize: '0.85rem', color: '#475569' }}>{p.recommendedReason || p.reason}</p>
                   {p.description && (
                     <p style={{ margin: '6px 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>{p.description.slice(0, 120)}{p.description.length > 120 ? '…' : ''}</p>

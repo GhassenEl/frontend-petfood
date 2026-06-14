@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { ShoppingBag, Tag, Eye } from 'lucide-react';
 import VisitorLayout from '../layouts/VisitorLayout';
 import ProductDetailModal from '../components/ProductDetailModal';
-import { fetchVisitorProducts } from '../services/visitorService';
+import { fetchVisitorProducts, trackVisitorBrowse } from '../services/visitorService';
 import { formatDT } from '../utils/formatCurrency';
 import {
   matchProductSearch,
@@ -119,8 +119,8 @@ const VisitorProductsPage = () => {
                 <article
                   key={p.id || p._id}
                   className="vis-product-card"
-                  onClick={() => setSelectedProduct(p)}
-                  onKeyDown={(e) => e.key === 'Enter' && setSelectedProduct(p)}
+                  onClick={() => { trackVisitorBrowse(p.id || p._id); setSelectedProduct(p); }}
+                  onKeyDown={(e) => e.key === 'Enter' && (trackVisitorBrowse(p.id || p._id), setSelectedProduct(p))}
                   role="button"
                   tabIndex={0}
                 >

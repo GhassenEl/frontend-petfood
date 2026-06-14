@@ -11,6 +11,9 @@ const VendorMlPage = () => {
   const alerts = agent.stockAlerts || agent.alerts || [];
   const promos = agent.promoSuggestions || agent.promotions || [];
   const forecast = agent.salesForecast || agent.forecast || [];
+  const priceSuggestions = agent.priceSuggestions || [];
+  const lowPerformers = agent.lowPerformers || [];
+  const demandAnomalies = agent.demandAnomalies || [];
 
   return (
     <div className="vnd-page">
@@ -110,6 +113,60 @@ const VendorMlPage = () => {
                 </ul>
               )}
               <Link to="/vendor/bi" className="vnd-btn vnd-btn--ghost vnd-btn--sm" style={{ marginTop: 12 }}>Dashboard BI →</Link>
+            </section>
+
+            <section className="vnd-card">
+              <h2>Ajustements prix IA</h2>
+              {priceSuggestions.length === 0 ? (
+                <p className="vnd-empty">Prix optimaux pour l&apos;instant.</p>
+              ) : (
+                <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                  {priceSuggestions.slice(0, 6).map((s, i) => (
+                    <li key={s.productId || i} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
+                      <strong>{s.productName}</strong>
+                      <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+                        {s.suggestedChange} · {s.reason}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            <section className="vnd-card">
+              <h2>Produits faible performance</h2>
+              {lowPerformers.length === 0 ? (
+                <p className="vnd-empty">Tous vos produits performent correctement.</p>
+              ) : (
+                <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                  {lowPerformers.map((p, i) => (
+                    <li key={p.productId || i} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
+                      <strong>{p.productName}</strong>
+                      <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+                        {p.unitsSold} ventes · {p.action}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            <section className="vnd-card">
+              <h2>Anomalies demande</h2>
+              {demandAnomalies.length === 0 ? (
+                <p className="vnd-empty">Demande stable sur vos références.</p>
+              ) : (
+                <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                  {demandAnomalies.map((a, i) => (
+                    <li key={a.productId || i} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
+                      <strong>{a.productName}</strong>
+                      <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: a.severity === 'warning' ? '#b45309' : '#64748b' }}>
+                        {a.message}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           </div>
         </>

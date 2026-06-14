@@ -5,6 +5,7 @@ import {
   fetchModeratorDisputes,
   resolveModeratorDispute,
   fetchModeratorFakeReviews,
+  fetchModeratorNlpInsights,
   rejectFakeReview,
   clearFakeReview,
 } from '../services/moderatorService';
@@ -14,19 +15,22 @@ const ModeratorReportsPage = () => {
   const [tab, setTab] = useState('disputes');
   const [disputes, setDisputes] = useState([]);
   const [fakeReviews, setFakeReviews] = useState([]);
+  const [nlpInsights, setNlpInsights] = useState(null);
   const [demo, setDemo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [dispRes, fakeRes] = await Promise.all([
+    const [dispRes, fakeRes, nlpRes] = await Promise.all([
       fetchModeratorDisputes(),
       fetchModeratorFakeReviews(),
+      fetchModeratorNlpInsights(),
     ]);
     setDisputes(dispRes.data.disputes || []);
     setFakeReviews(fakeRes.data.reviews || []);
-    setDemo(dispRes.demo || fakeRes.demo);
+    setNlpInsights(nlpRes.data);
+    setDemo(dispRes.demo || fakeRes.demo || nlpRes.demo);
     setLoading(false);
   }, []);
 
@@ -40,6 +44,20 @@ const ModeratorReportsPage = () => {
       </header>
 
       {msg && <p className="mod-badge mod-badge--approved" style={{ marginBottom: 12 }}>{msg}</p>}
+
+      {nlpInsights && (
+        <div className="mod-card" style={{ marginBottom: 16 }}>
+          <h2 style={{ margin: '0 0 10px', fontSize: '1rem' }}><Bot size={16} /> Filtrage IA & tendances sentiment</h2>
+          <p style={{ margin: '0 0 12px', fontSize: 13, color: '#64748b' }}>{nlpInsights.summary}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 10 }}>
+            <div><small>Positifs 30j</small><p style={{ margin: '4px 0 0', fontWeight: 800, color: '#059669' }}>{nlpInsights.sentimentTrends?.positivePct ?? '—'}%</p></div>
+            <div><small>Négatifs 30j</small><p style={{ margin: '4px 0 0', fontWeight: 800, color: '#dc2626' }}>{nlpInsights.sentimentTrends?.negativePct ?? '—'}%</p></div>
+            <div><small>Spam détecté</small><p style={{ margin: '4px 0 0', fontWeight: 800 }}>{nlpInsights.stats?.spam ?? 0}</p></div>
+            <div><small>Insultes</small><p style={{ margin: '4px 0 0', fontWeight: 800 }}>{nlpInsights.stats?.insults ?? 0}</p></div>
+            <div><small>Incohérences</small><p style={{ margin: '4px 0 0', fontWeight: 800 }}>{nlpInsights.stats?.incoherent ?? 0}</p></div>
+          </div>
+        </div>
+      )}
 
       <div className="mod-tabs">
         <Link to="/moderator/complaints" className="mod-btn mod-btn--ghost mod-btn--sm">Réclamations clients →</Link>
@@ -90,6 +108,15 @@ const ModeratorReportsPage = () => {
                     <span className={`mod-badge mod-badge--${r.status === 'flagged' ? 'flagged' : 'resolved'}`} style={{ marginLeft: 8 }}>{r.status}</span>
                     <p style={{ margin: '6px 0', fontStyle: 'italic', color: '#64748b' }}>&ldquo;{r.comment}&rdquo;</p>
                     <small>Auteur : {r.author}</small>
+                    <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {r.coherenceScore != null && (
+                        <span className="mod-badge mod-badge--open" style={{ fontSize: 11 }}>Cohérence {r.coherenceScore}%</span>
+                      )}
+                      {r.insultDetected && <span className="mod-badge mod-badge--flagged" style={{ fontSize: 11 }}>Insulte</span>}
+                      {(r.suspiciousFlags || []).map((f) => (
+                        <span key={f} className="mod-badge mod-badge--flagged" style={{ fontSize: 11 }}>{f}</span>
+                      ))}
+                    </div>
                     <div style={{ marginTop: 8, maxWidth: 200 }}>
                       <small>Probabilité spam : {Math.round((r.spamProbability || 0) * 100)}%</small>
                       <div className="mod-spam-bar">

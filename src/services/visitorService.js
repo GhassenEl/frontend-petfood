@@ -62,6 +62,67 @@ export async function fetchVisitorReviewRecommendations(params = {}) {
   return { data: sorted, summary: 'Classement par note moyenne (mode démo)', demo: true };
 }
 
+const BROWSE_KEY = 'petfoodtn_visitor_browse';
+
+export const trackVisitorBrowse = (productId) => {
+  try {
+    const raw = sessionStorage.getItem(BROWSE_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    const id = String(productId);
+    const next = [id, ...list.filter((x) => x !== id)].slice(0, 12);
+    sessionStorage.setItem(BROWSE_KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return [];
+  }
+};
+
+export const getVisitorBrowseHistory = () => {
+  try {
+    const raw = sessionStorage.getItem(BROWSE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+export async function fetchVisitorIntelligence(params = {}) {
+  try {
+    const browsedIds = getVisitorBrowseHistory().join(',');
+    const { data } = await api.get('/ai/visitor/intelligence', {
+      params: { ...params, browsedIds },
+    });
+    if (data?.recommendations?.length) {
+      return {
+        recommendations: data.recommendations,
+        sentimentTrends: data.sentimentTrends,
+        profileSummary: data.profileSummary,
+        engine: data.engine,
+        demo: false,
+      };
+    }
+  } catch {
+    /* fallback */
+  }
+  const fallback = await fetchVisitorReviewRecommendations(params);
+  return {
+    recommendations: fallback.data.map((p) => ({
+      ...p,
+      relevanceScore: 70,
+      satisfactionScore: Math.round((p.rating_avg || 4) * 20),
+    })),
+    sentimentTrends: {
+      positivePct: 72,
+      negativePct: 8,
+      trending: 'positive',
+      summary: 'Tendance positive (mode démo)',
+    },
+    profileSummary: 'Recommandations par avis clients (mode démo)',
+    engine: 'demo',
+    demo: true,
+  };
+}
+
 export async function fetchVisitorPacks(params = {}) {
   try {
     const { fetchProductPacks } = await import('./ecosystemService');
