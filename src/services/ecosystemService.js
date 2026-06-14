@@ -97,6 +97,12 @@ export const logWaterConsumption = (petId, body) =>
 export const recordWaterRefill = (petId, body) =>
   api.post(`/ecosystem/water-monitor/${petId}/refill`, body).then((r) => r.data);
 
+export const fetchWaterAlerts = () =>
+  api.get('/ecosystem/water-monitor/alerts').then((r) => r.data);
+
+export const pushWaterIotReading = (petId, body) =>
+  api.post(`/ecosystem/water-monitor/${petId}/iot`, body).then((r) => r.data);
+
 export const fetchPetCareCatalog = () => api.get('/ecosystem/pet-care/catalog').then((r) => r.data);
 
 export const fetchPetCareProviders = (type) =>

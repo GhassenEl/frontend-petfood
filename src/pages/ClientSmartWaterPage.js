@@ -11,7 +11,9 @@ import {
   fetchWaterMonitorTracking,
   logWaterConsumption,
   recordWaterRefill,
+  fetchWaterAlerts,
 } from '../services/ecosystemService';
+import WaterIoTAlertsPanel from '../components/WaterIoTAlertsPanel';
 import {
   getDemoWaterOverview,
   getDemoWaterTracking,
@@ -59,6 +61,30 @@ const ClientSmartWaterPage = () => {
   const [volumeInput, setVolumeInput] = useState('150');
   const [msg, setMsg] = useState('');
   const [demoMode, setDemoMode] = useState(false);
+  const [allAlerts, setAllAlerts] = useState([]);
+  const [alertSummary, setAlertSummary] = useState(null);
+
+  const loadAlerts = useCallback(async () => {
+    if (demoMode) {
+      const demoAlerts = (overview.length ? overview : DEMO_WATER_PETS).flatMap((p) => {
+        const t = getDemoWaterTracking(p.petId);
+        return (t.alerts || []).map((a) => ({ ...a, petId: p.petId, petName: p.name }));
+      });
+      setAllAlerts(demoAlerts);
+      setAlertSummary({
+        count: demoAlerts.length,
+        criticalCount: demoAlerts.filter((a) => a.severity === 'high').length,
+      });
+      return;
+    }
+    try {
+      const data = await fetchWaterAlerts();
+      setAllAlerts(data?.alerts || []);
+      setAlertSummary({ count: data?.count, criticalCount: data?.criticalCount });
+    } catch {
+      setAllAlerts([]);
+    }
+  }, [demoMode, overview]);
 
   const applyDemoForPet = useCallback((id) => {
     const pid = id || 'demo-pet-1';
@@ -118,6 +144,18 @@ const ClientSmartWaterPage = () => {
     if (petId) loadTracking(petId, true);
   }, [petId, loadTracking]);
 
+  useEffect(() => {
+    loadAlerts();
+  }, [loadAlerts, tracking]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (petId) loadTracking(petId, true);
+      loadAlerts();
+    }, 45000);
+    return () => clearInterval(timer);
+  }, [petId, loadTracking, loadAlerts]);
+
   const submitLog = async (e) => {
     e.preventDefault();
     const vol = Number(volumeInput);
@@ -125,12 +163,14 @@ const ClientSmartWaterPage = () => {
     if (demoMode) {
       setTracking((prev) => applyDemoWaterLog(prev, vol));
       setMsg('Consommation enregistrée (mode démo)');
+      loadAlerts();
       return;
     }
     try {
       const r = await logWaterConsumption(petId, { volumeMl: vol });
       setTracking(r.tracking);
       setMsg('Consommation enregistrée');
+      loadAlerts();
     } catch (err) {
       setTracking((prev) => applyDemoWaterLog(prev, vol));
       setDemoMode(true);
@@ -244,6 +284,16 @@ const ClientSmartWaterPage = () => {
           </button>
         </div>
       )}
+
+      <WaterIoTAlertsPanel
+        alerts={allAlerts.length ? allAlerts : (tracking?.alerts || []).map((a) => ({
+          ...a,
+          petId,
+          petName: tracking?.petName,
+        }))}
+        summary={alertSummary}
+        onSelectPet={(id) => setPetId(id)}
+      />
 
       {tracking && (
         <>

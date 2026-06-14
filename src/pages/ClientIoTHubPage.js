@@ -9,11 +9,15 @@ import {
   fetchWaterMonitorOverview,
   fetchLiveDeliveries,
   fetchTraceabilityList,
+  fetchWaterAlerts,
 } from '../services/ecosystemService';
+import WaterIoTAlertsPanel from '../components/WaterIoTAlertsPanel';
 import {
   getDemoFeederList,
   getDemoFeederBundle,
   getDemoWaterOverview,
+  getDemoWaterTracking,
+  DEMO_WATER_PETS,
 } from '../utils/clientDemoData';
 import './ClientComplaintsPage.css';
 
@@ -63,6 +67,8 @@ const ClientIoTHubPage = () => {
   const [feeders, setFeeders] = useState([]);
   const [feederAlerts, setFeederAlerts] = useState([]);
   const [waterPets, setWaterPets] = useState([]);
+  const [waterAlerts, setWaterAlerts] = useState([]);
+  const [waterAlertSummary, setWaterAlertSummary] = useState(null);
   const [liveDeliveries, setLiveDeliveries] = useState(0);
   const [traceCount, setTraceCount] = useState(0);
 
@@ -114,6 +120,21 @@ const ClientIoTHubPage = () => {
       }
 
       if (usedDemo) setDemoMode(true);
+
+      try {
+        const alertData = await fetchWaterAlerts();
+        setWaterAlerts(alertData?.alerts || []);
+        setWaterAlertSummary({ count: alertData?.count, criticalCount: alertData?.criticalCount });
+      } catch {
+        const demoAlerts = DEMO_WATER_PETS.flatMap((p) =>
+          (getDemoWaterTracking(p.petId).alerts || []).map((a) => ({ ...a, petId: p.petId, petName: p.name })),
+        );
+        setWaterAlerts(demoAlerts);
+        setWaterAlertSummary({
+          count: demoAlerts.length,
+          criticalCount: demoAlerts.filter((a) => a.severity === 'high').length,
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -125,7 +146,6 @@ const ClientIoTHubPage = () => {
 
   const onlineFeeders = feeders.filter((f) => f.status === 'online').length;
   const lowFood = feeders.some((f) => f.isLowFood);
-  const waterLow = waterPets.some((p) => (p.percentOfTarget || p.hydrationPercent || 100) < 60);
 
   return (
     <div className="cc-page" style={{ maxWidth: 1100, margin: '0 auto' }}>
@@ -195,16 +215,24 @@ const ClientIoTHubPage = () => {
             </div>
           </div>
 
-          {(lowFood || waterLow || feederAlerts.length > 0) && (
+          {(lowFood || waterAlerts.length > 0 || feederAlerts.length > 0) && (
             <div style={{ ...card, marginBottom: 20, background: '#fffbeb', borderColor: '#fde68a' }}>
               <h3 style={{ margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: 8, color: '#92400e', fontSize: 15 }}>
                 <AlertTriangle size={18} /> Alertes IoT
               </h3>
               {lowFood && <p style={{ margin: '4px 0', fontSize: 13, color: '#b45309' }}>🍽️ Niveau croquettes bas sur un distributeur</p>}
-              {waterLow && <p style={{ margin: '4px 0', fontSize: 13, color: '#b45309' }}>💧 Hydratation sous l&apos;objectif pour un animal</p>}
               {feederAlerts.slice(0, 3).map((a, i) => (
                 <p key={i} style={{ margin: '4px 0', fontSize: 13, color: '#b45309' }}>{a.message || a.title || a.label}</p>
               ))}
+            </div>
+          )}
+
+          {waterAlerts.length > 0 && (
+            <div style={{ marginBottom: 20 }}>
+              <WaterIoTAlertsPanel alerts={waterAlerts} summary={waterAlertSummary} compact />
+              <Link to="/client-smart-water" style={{ fontSize: 13, fontWeight: 700, color: '#0284c7' }}>
+                Voir la fontaine connectée →
+              </Link>
             </div>
           )}
 

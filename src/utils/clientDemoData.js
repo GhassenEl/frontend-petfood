@@ -628,7 +628,61 @@ export const applyDemoWaterLog = (tracking, volumeMl) => {
     next.monitor.flowRateMlMin = 18;
     next.monitor.pumpActive = true;
   }
+  next.alerts = recomputeDemoWaterAlerts(next);
   return next;
+};
+
+export const recomputeDemoWaterAlerts = (tracking) => {
+  const alerts = [];
+  const pct = tracking.percentOfTarget ?? 0;
+  const todayMl = tracking.todayMl ?? 0;
+  const targetMl = tracking.targetMl ?? 0;
+  const monitor = tracking.monitor || {};
+
+  if (pct < 50) {
+    alerts.push({
+      type: 'critical_hydration',
+      severity: 'high',
+      message: `Alerte critique : consommation très faible (${pct} % de l'objectif)`,
+      action: 'Contactez votre vétérinaire si la situation persiste 24 h.',
+    });
+  } else if (pct < 70) {
+    alerts.push({
+      type: 'low_hydration',
+      severity: 'medium',
+      message: `Hydratation basse — ${todayMl} ml / objectif ${targetMl} ml (${pct} %)`,
+      action: 'Encouragez votre animal à boire ou vérifiez la fontaine.',
+    });
+  }
+
+  if (monitor.reservoirMl != null && monitor.reservoirMl < 250) {
+    alerts.push({
+      type: 'low_reservoir',
+      severity: monitor.reservoirMl < 120 ? 'high' : 'medium',
+      message: `Réservoir bas — ${monitor.reservoirMl} ml restants`,
+      action: 'Rechargez la fontaine.',
+    });
+  }
+
+  if (monitor.filterDaysLeft != null && monitor.filterDaysLeft <= 7) {
+    alerts.push({
+      type: 'filter_expiry',
+      severity: monitor.filterDaysLeft <= 3 ? 'high' : 'medium',
+      message: `Filtre à remplacer dans ${monitor.filterDaysLeft} jour(s)`,
+      action: 'Un filtre encrassé réduit l\'attrait de l\'eau.',
+    });
+  }
+
+  if (monitor.online === false) {
+    alerts.push({
+      type: 'device_offline',
+      severity: 'high',
+      message: 'Fontaine IoT hors ligne',
+      action: 'Vérifiez alimentation Wi-Fi et capteur ESP32.',
+    });
+  }
+
+  return alerts;
 };
 
 export const applyDemoWaterRefill = (tracking, volumeMl = 1500) => {
@@ -640,7 +694,7 @@ export const applyDemoWaterRefill = (tracking, volumeMl = 1500) => {
     );
     next.monitor.filterDaysLeft = Math.min(30, (next.monitor.filterDaysLeft || 0) + 1);
   }
-  next.alerts = (next.alerts || []).filter((a) => a.severity !== 'high');
+  next.alerts = recomputeDemoWaterAlerts(next);
   return next;
 };
 
