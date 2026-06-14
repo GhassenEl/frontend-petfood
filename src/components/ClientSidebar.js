@@ -83,7 +83,7 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         { id: 'client-pets', label: 'Mes animaux', icon: '🐾' },
         { id: 'client-events', label: 'Compétitions & cadeaux', icon: '🏆' },
         { id: 'platform-services', label: 'Catalogue services', icon: '📋' },
-        { id: 'client-services', label: 'Mes services', icon: '✂️' },
+        { id: 'client-services', label: 'Mes services & SAV', icon: '✂️' },
         { id: 'client-pet-passport', label: 'Passeport numérique', icon: '🛂' },
         { id: 'pet-calories', label: 'Nutrition par animal', icon: '🥗' },
         { id: 'pet-advice', label: 'Conseils pour pets', icon: '💡' },

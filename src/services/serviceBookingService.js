@@ -36,3 +36,13 @@ export async function estimateServicePrice(type, date, endDate) {
   });
   return data;
 }
+
+export async function getMyServiceAfterSales() {
+  const { data } = await api.get('/service-bookings/after-sales');
+  return data;
+}
+
+export async function createServiceAfterSale(payload) {
+  const { data } = await api.post('/service-bookings/after-sales', payload);
+  return data;
+}

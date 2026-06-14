@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Calendar, Send, Trash2, CreditCard, Heart, ChevronRight } from 'lucide-react';
 import PaymentMethodPicker from '../components/PaymentMethodPicker';
 import PaymentMethodDetails from '../components/PaymentMethodDetails';
 import ClientServiceRatingsPanel from '../components/ClientServiceRatingsPanel';
+import ClientAfterSalePanel from '../components/ClientAfterSalePanel';
 import { isWalletPayment } from '../constants/paymentMethods';
 import { getWallet } from '../services/walletService';
 import {
@@ -35,7 +37,24 @@ const STATUS_LABELS = {
   cancelled: 'Annulée',
 };
 
+const PAGE_TABS = [
+  { id: 'book', label: 'Réserver', icon: '📅' },
+  { id: 'bookings', label: 'Mes réservations', icon: '📋' },
+  { id: 'aftersale', label: 'Après-vente', icon: '🎧' },
+];
+
 const ClientServicesPage = () => {
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab');
+  const [pageTab, setPageTab] = useState(
+    PAGE_TABS.some((t) => t.id === initialTab) ? initialTab : 'book',
+  );
+  const [afterSaleBookingId, setAfterSaleBookingId] = useState('');
+  useEffect(() => {
+    const t = searchParams.get('tab');
+    if (t && PAGE_TABS.some((tab) => tab.id === t)) setPageTab(t);
+  }, [searchParams]);
+
   const [catalog, setCatalog] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [serviceType, setServiceType] = useState('grooming');
@@ -256,7 +275,7 @@ const ClientServicesPage = () => {
         <h1>🐾 Mes services PetfoodTN</h1>
         <p>
           Toilettage, coupe griffes, nettoyage dentaire, forfait bien-être (-10 %), garde à domicile,
-          pension et dressage — réservez en ligne et consultez les tarifs & avis clients.
+          pension et dressage — réservez en ligne, suivez vos réservations et contactez l&apos;après-vente.
         </p>
         {walletBalance != null && (
           <p style={{ marginTop: 8, fontSize: '0.85rem' }}>
@@ -265,6 +284,23 @@ const ClientServicesPage = () => {
         )}
       </header>
 
+      <div className="cc-services-tabs" role="tablist">
+        {PAGE_TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={pageTab === t.id}
+            className={`cc-services-tab ${pageTab === t.id ? 'active' : ''}`}
+            onClick={() => setPageTab(t.id)}
+          >
+            <span>{t.icon}</span> {t.label}
+          </button>
+        ))}
+      </div>
+
+      {pageTab === 'book' && (
+      <>
       <section style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: 12 }}>Tarifs & avis par service</h2>
         <ClientServiceRatingsPanel showToast={showToast} />
@@ -396,7 +432,11 @@ const ClientServicesPage = () => {
           </button>
         </form>
       </section>
+      </>
+      )}
 
+      {pageTab === 'bookings' && (
+      <>
       <div className="cc-toolbar">
         <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Mes réservations</h2>
       </div>
@@ -442,6 +482,18 @@ const ClientServicesPage = () => {
                   <button type="button" className="cc-btn-danger" onClick={() => handleCancel(b)}>
                     <Trash2 size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
                     Annuler
+                  </button>
+                )}
+                {b.paymentStatus === 'paid' && b.status !== 'cancelled' && (
+                  <button
+                    type="button"
+                    className="cc-btn-ghost"
+                    onClick={() => {
+                      setAfterSaleBookingId(bookingId(b));
+                      setPageTab('aftersale');
+                    }}
+                  >
+                    🎧 Après-vente
                   </button>
                 )}
               </div>
@@ -515,6 +567,16 @@ const ClientServicesPage = () => {
           </div>
         )}
       </section>
+      </>
+      )}
+
+      {pageTab === 'aftersale' && (
+        <ClientAfterSalePanel
+          bookings={bookings}
+          showToast={showToast}
+          initialBookingId={afterSaleBookingId}
+        />
+      )}
 
       {payModal && (
         <div className="cc-modal-overlay" onClick={() => setPayModal(null)}>
