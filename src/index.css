@@ -475,6 +475,39 @@ body.dark textarea {
   border-color: #555;
 }
 
+/* ========== MODE NOIR & BLANC ========== */
+
+html.monochrome {
+  filter: grayscale(100%);
+  -webkit-filter: grayscale(100%);
+}
+
+html.monochrome img,
+html.monochrome video {
+  filter: grayscale(100%);
+  -webkit-filter: grayscale(100%);
+}
+
+body.monochrome:not(.dark) {
+  background: #f0f0f0;
+  color: #0a0a0a;
+}
+
+body.monochrome.dark {
+  background: #0d0d0d;
+  color: #f0f0f0;
+}
+
+body.monochrome.animal-theme {
+  background: #ebebeb;
+  background-image: none;
+}
+
+body.monochrome.animal-theme::before {
+  opacity: 0.15;
+  filter: grayscale(100%);
+}
+
 button,
 input,
 textarea,
