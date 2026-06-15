@@ -157,7 +157,7 @@ const AdminDashboard = () => {
     { label: 'Config. globale', icon: <TrendingUp size={18} />, color: '#ea580c', link: '/admin/system' },
     { label: 'Espace visiteur', icon: <Users size={18} />, color: '#0284c7', link: '/admin/visitors' },
     { label: 'Utilisateurs', icon: <Users size={18} />, color: '#3498db', link: '/admin/users' },
-    { label: 'Fournisseurs', icon: <Store size={18} />, color: '#0d9488', link: '/admin/vendors' },
+    { label: 'Fournisseurs & partenariats', icon: <Store size={18} />, color: '#0d9488', link: '/admin/partners' },
     { label: 'Modérateurs', icon: <Users size={18} />, color: '#d97706', link: '/admin/moderators' },
     { label: 'Remboursements', icon: <TrendingUp size={18} />, color: '#7c3aed', link: '/admin/refunds' },
     { label: 'Réclamations', icon: <AlertTriangle size={18} />, color: '#e74c3c', link: '/admin/complaints' },

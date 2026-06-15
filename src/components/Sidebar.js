@@ -36,7 +36,8 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       title: '👥 Acteurs plateforme',
       items: [
         { id: 'visitors', label: 'Espace visiteur', icon: '👀' },
-        { id: 'vendors', label: 'Vendeurs', icon: '🏬' },
+        { id: 'partners', label: 'Fournisseurs & partenariats', icon: '🤝' },
+        { id: 'vendors', label: 'Vendeurs marketplace', icon: '🏬' },
         { id: 'moderators', label: 'Modérateurs', icon: '🛡️' },
         { id: 'vets', label: 'Vétérinaires', icon: '🩺' },
         { id: 'regional-contacts', label: 'Contacts par région', icon: '📍' },

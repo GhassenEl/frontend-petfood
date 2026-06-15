@@ -423,6 +423,42 @@ export const DEMO_MARKETPLACE_STATS = {
   topRegion: 'Tunis',
 };
 
+export const DEMO_PARTNERS_OVERVIEW = {
+  mode: 'demo',
+  counts: {
+    supplySuppliers: 3,
+    marketplaceVendors: 4,
+    shelters: 2,
+    relayPoints: 5,
+    vetPartners: 8,
+    petCareProviders: 3,
+    pendingApplications: 1,
+  },
+  supplySuppliers: [
+    { id: 'sup-1', name: 'NutriPet Distribution', category: 'alimentation', region: 'Tunis', leadTimeDays: 5, minOrderDt: 500, rating: 4.8, isActive: true },
+    { id: 'sup-2', name: 'MediVet Grossiste', category: 'pharmacie', region: 'Sfax', leadTimeDays: 3, minOrderDt: 200, rating: 4.6, isActive: true },
+    { id: 'sup-3', name: 'Accessoires Plus', category: 'accessoires', region: 'Sousse', leadTimeDays: 7, minOrderDt: 150, rating: 4.2, isActive: true },
+  ],
+  shelters: [
+    { id: 'sh1', name: 'Refuge Les Amis à Quatre Pattes', region: 'Tunis', animalsCount: 12, isActive: true },
+    { id: 'sh2', name: 'Association Bien-être Animal Sfax', region: 'Sfax', animalsCount: 8, isActive: true },
+  ],
+  relayPoints: [
+    { id: 'relay_anim_1', name: 'Animalerie Les Pattes Heureuses', type: 'pet_shop', region: 'Tunis', isActive: true },
+    { id: 'relay_vet_1', name: 'Clinique Vétérinaire Carthage', type: 'vet_clinic', region: 'Tunis', isActive: true },
+    { id: 'relay_anim_3', name: 'Animalerie Sfax Centre', type: 'pet_shop', region: 'Sfax', isActive: true },
+  ],
+  vetPartners: [
+    { id: 'demo-vet-1', name: 'Dr. Amira Khelifi', region: 'Tunis', clinic: 'Clinique VetCare', isActive: true },
+    { id: 'demo-vet-2', name: 'Dr. Hichem Sassi', region: 'Sousse', clinic: 'Carthage Vétérinaire', isActive: true },
+  ],
+  petCareProviders: [
+    { id: 'pc-1', displayName: 'Toilettage Royal', types: 'grooming', region: 'Tunis', certified: true, isActive: true },
+    { id: 'pc-2', displayName: 'Promenade & Co', types: 'walking', region: 'Ariana', certified: false, isActive: true },
+  ],
+  marketplaceVendors: DEMO_ADMIN_VENDORS,
+};
+
 export const DEMO_ADMIN_ANALYTICS = {
   alertCounts: { total: 4, high: 1, pharmacy: 2, incident: 0 },
   alerts: [

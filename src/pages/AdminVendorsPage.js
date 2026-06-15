@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Store, TrendingUp, Percent, Package, Plus, RefreshCw } from 'lucide-react';
@@ -19,6 +19,7 @@ import {
 } from '../services/ecosystemService';
 import { formatDT } from '../utils/formatCurrency';
 import { AdminMessageButton } from '../components/AdminMessageButton';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const emptyForm = {
   name: '',
@@ -78,7 +79,7 @@ const AdminVendorsPage = () => {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setMsg('');
     try {
@@ -112,11 +113,13 @@ const AdminVendorsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
+
+  usePlatformRefresh(load, [load]);
 
   const filteredVendors = useMemo(() => vendors.filter((v) => {
     const matchesRegion = regionFilter === 'all' || v.region === regionFilter;
@@ -240,6 +243,16 @@ const AdminVendorsPage = () => {
                 Mode démo
               </span>
             )}
+            <Link
+              to="/admin/partners"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '10px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.25)',
+                background: 'rgba(255,255,255,0.12)', color: '#fff', fontWeight: 600, textDecoration: 'none',
+              }}
+            >
+              Hub partenariats
+            </Link>
             <button
               type="button"
               onClick={load}
