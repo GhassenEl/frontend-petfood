@@ -43,3 +43,9 @@ export const bulkUpdatePrices = (body) =>
 
 export const verifyAllPrices = () =>
   api.post('/admin/prices/verify-all').then((r) => r.data);
+
+export const exportPrices = () =>
+  api.get('/admin/prices/export').then((r) => r.data);
+
+export const importPrices = (rows) =>
+  api.post('/admin/prices/import', { rows }).then((r) => r.data);

@@ -24,3 +24,9 @@ export const updatePlatformCity = (id, body) =>
 
 export const createPlatformCity = (body) =>
   api.post('/platform/cities', body).then((r) => r.data);
+
+export const exportCities = () =>
+  api.get('/platform/cities/export').then((r) => r.data);
+
+export const importCities = (rows) =>
+  api.post('/platform/cities/import', { rows }).then((r) => r.data);

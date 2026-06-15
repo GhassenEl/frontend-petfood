@@ -11,11 +11,18 @@ import {
   rejectPriceChange,
   bulkUpdatePrices,
   verifyAllPrices,
+  importPrices,
 } from '../services/priceGovernanceService';
 import { DEMO_PRICE_GOVERNANCE_PACK } from '../utils/adminDemoData';
 import DemoModePill from '../components/DemoModePill';
+import AdminImportExportBar from '../components/AdminImportExportBar';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import {
+  downloadCsv, downloadJson, parseCsv, readFileText, boolFromCsv, numFromCsv,
+} from '../utils/dataImportExport';
 import './AdminPages.css';
+
+const PRICE_CSV_HEADERS = ['productId', 'productName', 'price', 'discount', 'category', 'animalType', 'priceVerified', 'priceStatus'];
 
 const TABS = [
   { id: 'overview', label: 'Vue d\'ensemble', icon: TrendingUp },
@@ -210,6 +217,73 @@ const AdminPriceGovernancePage = () => {
     }
   };
 
+  const exportPriceJson = () => {
+    downloadJson(`petfoodtn-prix-${new Date().toISOString().slice(0, 10)}.json`, {
+      exportedAt: new Date().toISOString(),
+      policy: d.policy,
+      products: d.products,
+      history: d.history,
+    });
+    flash('Export JSON téléchargé.');
+  };
+
+  const exportPriceCsv = () => {
+    const rows = (d.products || []).map((p) => ({
+      productId: p.id,
+      productName: p.name,
+      price: p.price,
+      discount: p.discount,
+      category: p.category,
+      animalType: p.animalType,
+      priceVerified: p.priceVerified,
+      priceStatus: p.priceStatus,
+    }));
+    downloadCsv(`petfoodtn-prix-${new Date().toISOString().slice(0, 10)}.csv`, PRICE_CSV_HEADERS, rows);
+    flash('Export CSV téléchargé.');
+  };
+
+  const handlePriceImport = async (file) => {
+    setBusy(true);
+    try {
+      const text = await readFileText(file);
+      let rows;
+      if (file.name.toLowerCase().endsWith('.json')) {
+        const parsed = JSON.parse(text);
+        rows = parsed.products || parsed.rows || parsed;
+      } else {
+        rows = parseCsv(text).map((r) => ({
+          productId: r.productid || r.product_id || r.id,
+          price: numFromCsv(r.price),
+          discount: r.discount !== '' ? numFromCsv(r.discount) : undefined,
+          reason: r.reason || 'Import CSV admin',
+        }));
+      }
+      if (!rows?.length) {
+        flash('Fichier vide ou format invalide.');
+        return;
+      }
+      if (isDemo) {
+        setPack((prev) => ({
+          ...prev,
+          products: prev.products.map((p) => {
+            const row = rows.find((r) => (r.productId || r.productid) === p.id);
+            if (!row) return p;
+            return { ...p, price: Number(row.price), discount: row.discount ?? p.discount, priceVerified: true, priceVerifiedAt: new Date().toISOString() };
+          }),
+        }));
+        flash(`${rows.length} prix importés (démo).`);
+      } else {
+        const result = await importPrices(rows);
+        await load();
+        flash(`${result.imported} prix importés${result.errors ? `, ${result.errors} erreurs` : ''}.`);
+      }
+    } catch (err) {
+      flash(err?.response?.data?.error || 'Erreur import prix.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const handleVerifyAll = async () => {
     setBusy(true);
     try {
@@ -262,6 +336,13 @@ const AdminPriceGovernancePage = () => {
             Catalogue produits →
           </Link>
         </div>
+        <AdminImportExportBar
+          label="Catalogue prix"
+          disabled={busy}
+          onExportJson={exportPriceJson}
+          onExportCsv={exportPriceCsv}
+          onImport={handlePriceImport}
+        />
       </header>
 
       {msg && <p className="adm-msg">{msg}</p>}

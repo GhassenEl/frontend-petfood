@@ -4,11 +4,21 @@ import { Building2, MapPin, RefreshCw, Save, Truck, Store, Stethoscope } from 'l
 import {
   fetchCitiesPack,
   updatePlatformCity,
+  importCities,
 } from '../services/platformCitiesService';
 import { DEMO_CITIES_PACK } from '../utils/adminDemoData';
 import DemoModePill from '../components/DemoModePill';
+import AdminImportExportBar from '../components/AdminImportExportBar';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import {
+  downloadCsv, downloadJson, parseCsv, readFileText, boolFromCsv, numFromCsv,
+} from '../utils/dataImportExport';
 import './AdminPages.css';
+
+const CITY_CSV_HEADERS = [
+  'name', 'governorate', 'lat', 'lng', 'isActive', 'deliveryEnabled', 'pickupEnabled',
+  'priority', 'storeAddress', 'storePhone', 'storeHours',
+];
 
 const Kpi = ({ icon: Icon, label, value, color = '#0f172a' }) => (
   <div className="adm-card" style={{ borderTop: `3px solid ${color}`, textAlign: 'center' }}>
@@ -72,6 +82,90 @@ const AdminCitiesHubPage = () => {
     }
   };
 
+  const exportCitiesJson = () => {
+    downloadJson(`petfoodtn-villes-${new Date().toISOString().slice(0, 10)}.json`, {
+      exportedAt: new Date().toISOString(),
+      stats: d.stats,
+      cities: d.cities,
+    });
+    setMsg('Export JSON téléchargé.');
+    setTimeout(() => setMsg(''), 3000);
+  };
+
+  const exportCitiesCsv = () => {
+    const rows = (d.cities || []).map((c) => ({
+      name: c.name,
+      governorate: c.governorate,
+      lat: c.lat,
+      lng: c.lng,
+      isActive: c.isActive,
+      deliveryEnabled: c.deliveryEnabled,
+      pickupEnabled: c.pickupEnabled,
+      priority: c.priority,
+      storeAddress: c.storeAddress,
+      storePhone: c.storePhone,
+      storeHours: c.storeHours,
+    }));
+    downloadCsv(`petfoodtn-villes-${new Date().toISOString().slice(0, 10)}.csv`, CITY_CSV_HEADERS, rows);
+    setMsg('Export CSV téléchargé.');
+    setTimeout(() => setMsg(''), 3000);
+  };
+
+  const handleCitiesImport = async (file) => {
+    setBusy(true);
+    try {
+      const text = await readFileText(file);
+      let rows;
+      if (file.name.toLowerCase().endsWith('.json')) {
+        const parsed = JSON.parse(text);
+        rows = parsed.cities || parsed.rows || parsed;
+      } else {
+        rows = parseCsv(text).map((r) => ({
+          name: r.name,
+          governorate: r.governorate || r.gouvernorat,
+          lat: numFromCsv(r.lat),
+          lng: numFromCsv(r.lng),
+          isActive: boolFromCsv(r.isactive ?? r.is_active),
+          deliveryEnabled: boolFromCsv(r.deliveryenabled ?? r.delivery_enabled),
+          pickupEnabled: boolFromCsv(r.pickupenabled ?? r.pickup_enabled),
+          priority: numFromCsv(r.priority),
+          storeAddress: r.storeaddress || r.store_address,
+          storePhone: r.storephone || r.store_phone,
+          storeHours: r.storehours || r.store_hours,
+        }));
+      }
+      if (!rows?.length) {
+        setMsg('Fichier vide ou format invalide.');
+        return;
+      }
+      if (isDemo) {
+        setPack((prev) => ({
+          ...prev,
+          cities: [
+            ...prev.cities,
+            ...rows.map((r, i) => ({
+              ...r,
+              id: `city-import-${Date.now()}-${i}`,
+              slug: r.name?.toLowerCase().replace(/\s+/g, '-'),
+              stats: { livreurs: 0, vendors: 0, vets: 0, relayPoints: 0, coverageScore: 0 },
+            })),
+          ],
+          stats: { ...prev.stats, totalCities: prev.cities.length + rows.length, activeCities: prev.cities.length + rows.length },
+        }));
+        setMsg(`${rows.length} villes importées (démo).`);
+      } else {
+        const result = await importCities(rows);
+        await load();
+        setMsg(`${result.imported} villes importées${result.errors ? `, ${result.errors} erreurs` : ''}.`);
+      }
+    } catch (err) {
+      setMsg(err?.response?.data?.error || 'Erreur import villes.');
+    } finally {
+      setBusy(false);
+      setTimeout(() => setMsg(''), 4000);
+    }
+  };
+
   if (loading) {
     return <div className="adm-page"><p>Chargement du réseau villes…</p></div>;
   }
@@ -99,6 +193,13 @@ const AdminCitiesHubPage = () => {
             Carte magasins →
           </Link>
         </div>
+        <AdminImportExportBar
+          label="Réseau villes"
+          disabled={busy}
+          onExportJson={exportCitiesJson}
+          onExportCsv={exportCitiesCsv}
+          onImport={handleCitiesImport}
+        />
       </header>
 
       {msg && <p className="adm-msg">{msg}</p>}
