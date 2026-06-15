@@ -500,6 +500,71 @@ export const DEMO_FEEDER_HISTORY_LOGS = [
 
 export const getDemoFeederList = () => [DEMO_FEEDER_DEVICE];
 
+export const DEMO_IOT_PACK = {
+  mode: 'demo',
+  healthScore: 76,
+  counts: {
+    feeders: 1,
+    feedersOnline: 1,
+    waterMonitors: 2,
+    waterOnline: 2,
+    alerts: 4,
+    criticalAlerts: 1,
+    routinesToday: 5,
+  },
+  devices: [
+    {
+      id: 'demo-feeder-1',
+      type: 'feeder',
+      name: 'Distributeur Max — Salon',
+      status: 'online',
+      petName: 'Max',
+      route: '/pet-feeder',
+      metrics: { reservoirPercent: 42, temperature: 24.2, todayGrams: 65, isLowFood: true },
+    },
+    {
+      id: 'demo-water-1',
+      type: 'water',
+      name: 'Fontaine Max — Salon',
+      status: 'online',
+      petName: 'Max',
+      route: '/client-smart-water',
+      metrics: { todayMl: 420, targetMl: 550, reservoirMl: 890, filterDaysLeft: 18 },
+    },
+    {
+      id: 'demo-water-2',
+      type: 'water',
+      name: 'Fontaine Luna — Cuisine',
+      status: 'online',
+      petName: 'Luna',
+      route: '/client-smart-water',
+      metrics: { todayMl: 165, targetMl: 250, reservoirMl: 320, filterDaysLeft: 5 },
+    },
+  ],
+  alerts: [
+    { id: 'a1', source: 'feeder', severity: 'medium', title: 'Niveau croquettes bas', message: 'Réservoir à 42 % — recharge sous 48 h.', deviceId: 'demo-feeder-1', link: '/pet-feeder' },
+    { id: 'a2', source: 'water', severity: 'high', title: 'Hydratation Luna', message: '66 % de l\'objectif journalier.', deviceId: 'demo-water-2', link: '/client-smart-water' },
+    { id: 'a3', source: 'water', severity: 'medium', title: 'Filtre fontaine Luna', message: 'Filtre à changer dans 5 jours.', deviceId: 'demo-water-2', link: '/client-smart-water' },
+    { id: 'a4', source: 'feeder', severity: 'low', title: 'Prochain repas Max', message: 'Distribution à 19:30 (30 g).', deviceId: 'demo-feeder-1', link: '/pet-feeder' },
+  ],
+  automations: [
+    { id: 'auto-1', label: 'Réappro croquettes', description: 'Commander quand réservoir < 30 %', trigger: 'feeder.low_food', enabled: true, link: '/client-subscriptions' },
+    { id: 'auto-2', label: 'Rappel hydratation', description: 'Notification si < 70 % objectif eau', trigger: 'water.low_hydration', enabled: true, link: '/client-smart-water' },
+    { id: 'auto-3', label: 'Sync livraison', description: 'Créneau lié au stock distributeur', trigger: 'delivery.predictive', enabled: true, link: '/client-smart-delivery' },
+  ],
+  routines: [
+    { time: '07:30', label: 'Petit-déjeuner Max', device: 'Distributeur', action: '30 g', type: 'feeder' },
+    { time: '12:30', label: 'Déjeuner Max', device: 'Distributeur', action: '35 g', type: 'feeder' },
+    { time: '19:30', label: 'Dîner Max', device: 'Distributeur', action: '30 g', type: 'feeder' },
+    { time: '08:00', label: 'Remplissage fontaine', device: 'Fontaine Max', action: 'Check réservoir', type: 'water' },
+    { time: '21:00', label: 'Contrôle Luna', device: 'Fontaine Luna', action: 'Rappel eau', type: 'water' },
+  ],
+  telemetry: {
+    feederGrams7d: [52, 58, 61, 55, 68, 72, 65],
+    waterMl7d: [480, 510, 445, 520, 490, 505, 420],
+  },
+};
+
 export const getDemoFeederBundle = () => ({
   feeder: { ...DEMO_FEEDER_DEVICE, schedules: [...DEMO_FEEDER_SCHEDULE] },
   stats: { ...DEMO_FEEDER_STATS, consumptionByDay: DEMO_FEEDER_STATS.consumptionByDay.map((d) => ({ ...d })) },
