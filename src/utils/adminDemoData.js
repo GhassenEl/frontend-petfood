@@ -493,6 +493,78 @@ export const DEMO_ADMIN_DATASETS = {
   ],
 };
 
+export const DEMO_PLATFORM_PERFORMANCE = {
+  collectedAt: new Date().toISOString(),
+  mode: 'demo',
+  health: 'healthy',
+  score: 92,
+  uptime: { seconds: 86400, formatted: '1j 0h 12m', startedAt: daysAgo(1) },
+  server: {
+    nodeVersion: 'v20.x',
+    platform: 'win32',
+    cpus: 8,
+    loadAvg: [0.42, 0.38, 0.35],
+    memory: {
+      heapUsedMb: 128,
+      heapTotalMb: 192,
+      rssMb: 210,
+      systemFreeMb: 4096,
+      systemTotalMb: 16384,
+      usagePercent: 42,
+    },
+  },
+  api: {
+    totalRequests: 1842,
+    avgMs: 48,
+    p95Ms: 124,
+    errorRate: 0.8,
+    errors4xx: 12,
+    errors5xx: 2,
+    requestsLast5m: 34,
+    requestSeries: [
+      { label: '09:00', count: 28 },
+      { label: '09:05', count: 31 },
+      { label: '09:10', count: 36 },
+      { label: '09:15', count: 34 },
+      { label: '09:20', count: 42 },
+    ],
+    latencySeries: [
+      { label: '1', ms: 42 },
+      { label: '2', ms: 55 },
+      { label: '3', ms: 38 },
+      { label: '4', ms: 61 },
+      { label: '5', ms: 47 },
+    ],
+    slowest: [
+      { method: 'GET', path: '/api/analytics/hub', status: 200, ms: 186 },
+      { method: 'GET', path: '/api/orders', status: 200, ms: 142 },
+    ],
+  },
+  database: { ok: true, mode: 'demo', latencyMs: 3 },
+  realtime: {
+    socketConnections: 6,
+    ordersToday: 8,
+    pendingOrders: 3,
+    activeDeliveries: 2,
+    lowStockProducts: 4,
+    pendingComplaints: 2,
+  },
+  security: {
+    idsEnabled: true,
+    eventsLast24h: 4,
+    bySeverity: { medium: 2, low: 2 },
+    monitoredIps: 12,
+  },
+  ml: { ok: true, service: 'python_ml' },
+  entities: {
+    users: 142,
+    orders: 318,
+    products: 86,
+    complaints: 12,
+    activeUsers24h: 38,
+  },
+};
+
 export const DEMO_ADMIN_MESSAGE_PARTNERS = DEMO_ADMIN_USERS.filter((u) => u.role !== 'admin');
 
 export const buildDemoAdminMessages = (adminId = 'demo-admin-1') => [

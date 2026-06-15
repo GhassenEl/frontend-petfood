@@ -22,6 +22,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'dashboard', label: 'Dashboard', icon: '📈' },
         { id: 'powerbi', label: 'Power BI', icon: '📊' },
         { id: 'stock-bi', label: 'Stock BI', icon: '📦' },
+        { id: 'performance', label: 'Performance plateforme', icon: '⚡' },
         { id: 'crm', label: 'CRM clients', icon: '🤝' },
         { id: 'ml-agent', label: 'Agent ML', icon: '🤖' },
         { id: 'incidents-ml', label: 'Incidents ML', icon: '🚨' },

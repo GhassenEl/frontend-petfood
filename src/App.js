@@ -130,6 +130,7 @@ import AdminIncidentsMlPage from './pages/AdminIncidentsMlPage';
 import AdminBlogArticles from './pages/AdminBlogArticles';
 import AdminRehabilitationPage from './pages/AdminRehabilitationPage';
 import AdminStockBiPage from './pages/AdminStockBiPage';
+import AdminPlatformPerformancePage from './pages/AdminPlatformPerformancePage';
 import ClientEcosystemHubPage from './pages/ClientEcosystemHubPage';
 import ClientAIAgentPage from './pages/ClientAIAgentPage';
 import ClientMlAgentPage from './pages/ClientMlAgentPage';
@@ -259,6 +260,7 @@ const App = () => {
       <Route path="/admin/ml-agent" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminMlAgentPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/incidents-ml" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminIncidentsMlPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/stock-bi" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminStockBiPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/performance" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPlatformPerformancePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/profile" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminProfilePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/platform-services" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><PlatformServicesPage /></AdminLayout></RoleRoute>} />
 
