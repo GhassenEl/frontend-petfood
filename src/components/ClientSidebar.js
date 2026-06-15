@@ -103,6 +103,19 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
       ]
     },
     {
+      title: '🤖 IA & Premium',
+      items: [
+        { id: '__open-chat__', label: 'Assistant IA', icon: '💬', action: 'open-chat' },
+        { id: 'client-ecosystem', label: 'Hub écosystème', icon: '🌐' },
+        { id: 'client-ai', label: 'Agent IA', icon: '🤖' },
+        { id: 'client-ml-agent', label: 'Agent ML', icon: '🧠' },
+        { id: 'client-wellness', label: 'Bien-être', icon: '💚' },
+        { id: 'client-product-packs', label: 'Packs produits', icon: '📦' },
+        { id: 'client-relay-points', label: 'Points relais', icon: '📍' },
+        { id: 'client-rehabilitation', label: 'Réhabilitation', icon: '🏥' },
+      ],
+    },
+    {
       title: '⚙️ Compte',
       items: [
         { id: 'client-profile', label: 'Mon profil', icon: '👤' },

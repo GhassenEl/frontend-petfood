@@ -124,6 +124,26 @@ import ClientReturnsPage from './pages/ClientReturnsPage';
 import ClientDashboardPage from './pages/ClientDashboardPage';
 import ClientFamilyPage from './pages/ClientFamilyPage';
 import ClientSubscriptionsPage from './pages/ClientSubscriptionsPage';
+import AdminCrmPage from './pages/AdminCrmPage';
+import AdminMlAgentPage from './pages/AdminMlAgentPage';
+import AdminIncidentsMlPage from './pages/AdminIncidentsMlPage';
+import AdminBlogArticles from './pages/AdminBlogArticles';
+import AdminRehabilitationPage from './pages/AdminRehabilitationPage';
+import AdminStockBiPage from './pages/AdminStockBiPage';
+import ClientEcosystemHubPage from './pages/ClientEcosystemHubPage';
+import ClientAIAgentPage from './pages/ClientAIAgentPage';
+import ClientMlAgentPage from './pages/ClientMlAgentPage';
+import ClientWellnessPage from './pages/ClientWellnessPage';
+import SmartFoodAgentPage from './pages/SmartFoodAgentPage';
+import NutriProHistory from './pages/NutriProHistory';
+import ClientRehabilitationPage from './pages/ClientRehabilitationPage';
+import ClientRelayPointsPage from './pages/ClientRelayPointsPage';
+import ClientProductPacksPage from './pages/ClientProductPacksPage';
+import ClientOwnerEmotionsPage from './pages/ClientOwnerEmotionsPage';
+import LivreurMlPage from './pages/LivreurMlPage';
+import VetMlAgentPage from './pages/VetMlAgentPage';
+import SupportDashboardPage from './pages/SupportDashboardPage';
+import NotFoundPage from './pages/NotFoundPage';
 import VendorSalesPage from './pages/VendorSalesPage';
 import VetTeleconsultPage from './pages/VetTeleconsultPage';
 import VetNutritionAdvicePage from './pages/VetNutritionAdvicePage';
@@ -144,7 +164,7 @@ const homeByRole = {
   vet: '/vet/dashboard',
   vendor: '/vendor/dashboard',
   moderator: '/moderator/dashboard',
-  support: '/support/complaints',
+  support: '/support/dashboard',
 };
 
 const RoleRoute = ({ user, roles, children }) => {
@@ -233,12 +253,12 @@ const App = () => {
       <Route path="/admin/vets" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVetsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/regional-contacts" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRegionalContactsPage /></AdminLayout></RoleRoute>} />
       <Route path="/capabilities" element={<CapabilitiesRoute user={user} />} />
-      <Route path="/admin/blog-articles" element={<Navigate to="/admin/dashboard" replace />} />
-      <Route path="/admin/crm" element={<Navigate to="/admin/dashboard" replace />} />
-      <Route path="/admin/rehabilitation" element={<Navigate to="/admin/dashboard" replace />} />
-      <Route path="/admin/ml-agent" element={<Navigate to="/admin/dashboard" replace />} />
-      <Route path="/admin/incidents-ml" element={<Navigate to="/admin/dashboard" replace />} />
-      <Route path="/admin/stock-bi" element={<Navigate to="/admin/powerbi" replace />} />
+      <Route path="/admin/blog-articles" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminBlogArticles /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/crm" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminCrmPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/rehabilitation" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRehabilitationPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/ml-agent" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminMlAgentPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/incidents-ml" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminIncidentsMlPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/stock-bi" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminStockBiPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/profile" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminProfilePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/platform-services" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><PlatformServicesPage /></AdminLayout></RoleRoute>} />
 
@@ -266,16 +286,16 @@ const App = () => {
       <Route path="/client-vaccines" element={<Navigate to="/medical-dossier" replace />} />
       <Route path="/pet-advice" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetAdvicePage /></ClientLayout></RoleRoute>} />
       <Route path="/pet-calories" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetCaloriesPage /></ClientLayout></RoleRoute>} />
-      <Route path="/client-ecosystem" element={<Navigate to="/client-products" replace />} />
-      <Route path="/client-wellness" element={<Navigate to="/pet-calories" replace />} />
-      <Route path="/client-emotions" element={<Navigate to="/client-reviews?tab=services" replace />} />
-      <Route path="/client-ai" element={<Navigate to="/client-products" replace />} />
-      <Route path="/client-ml-agent" element={<Navigate to="/client-products" replace />} />
-      <Route path="/smart-food-agent" element={<Navigate to="/pet-calories" replace />} />
-      <Route path="/nutripro-history" element={<Navigate to="/pet-calories" replace />} />
-      <Route path="/client-rehabilitation" element={<Navigate to="/client-services" replace />} />
-      <Route path="/client-relay-points" element={<Navigate to="/veterinary" replace />} />
-      <Route path="/client-product-packs" element={<Navigate to="/client-products" replace />} />
+      <Route path="/client-ecosystem" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientEcosystemHubPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-wellness" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientWellnessPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-emotions" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientOwnerEmotionsPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAIAgentPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-ml-agent" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientMlAgentPage /></ClientLayout></RoleRoute>} />
+      <Route path="/smart-food-agent" element={<RoleRoute user={user} roles={['client']}><ClientLayout><SmartFoodAgentPage /></ClientLayout></RoleRoute>} />
+      <Route path="/nutripro-history" element={<RoleRoute user={user} roles={['client']}><ClientLayout><NutriProHistory /></ClientLayout></RoleRoute>} />
+      <Route path="/client-rehabilitation" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientRehabilitationPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-relay-points" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientRelayPointsPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-product-packs" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientProductPacksPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-traceability" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientTraceabilityPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-iot" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientIoTHubPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-smart-water" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSmartWaterPage /></ClientLayout></RoleRoute>} />
@@ -294,7 +314,7 @@ const App = () => {
       <Route path="/livreur/map" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMapPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/availability" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurAvailabilityPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/leave-requests" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><StaffLeavePage roleLabel="Livreur" demoFallback /></LivreurLayout></RoleRoute>} />
-      <Route path="/livreur/ml" element={<Navigate to="/livreur/stats" replace />} />
+      <Route path="/livreur/ml" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMlPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/stats" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurStatsPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/bi" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><RoleBiDashboardPage role="livreur" /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/messages" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMessagesPage /></LivreurLayout></RoleRoute>} />
@@ -325,8 +345,8 @@ const App = () => {
       <Route path="/vet/platform-services" element={<RoleRoute user={user} roles={['vet']}><VetLayout><PlatformServicesPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/teleconsult" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetTeleconsultPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/nutrition" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetNutritionAdvicePage /></VetLayout></RoleRoute>} />
-      <Route path="/vet/ml-agent" element={<Navigate to="/vet/dashboard" replace />} />
-      <Route path="/vet/rehabilitation" element={<Navigate to="/vet/dashboard" replace />} />
+      <Route path="/vet/ml-agent" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetMlAgentPage /></VetLayout></RoleRoute>} />
+      <Route path="/vet/rehabilitation" element={<RoleRoute user={user} roles={['vet']}><VetLayout><AdminRehabilitationPage /></VetLayout></RoleRoute>} />
 
       <Route path="/visitor" element={<VisitorHubPage />} />
       <Route path="/visitor/products" element={<VisitorProductsPage />} />
@@ -362,15 +382,15 @@ const App = () => {
       <Route path="/moderator/platform-services" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><PlatformServicesPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/profile" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><AdminProfilePage /></ModeratorLayout></RoleRoute>} />
 
-      <Route path="/support" element={<Navigate to="/support/complaints" replace />} />
+      <Route path="/support" element={<Navigate to="/support/dashboard" replace />} />
       <Route path="/support/complaints" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportComplaintsPage /></ServiceClientLayout></RoleRoute>} />
       <Route path="/support/tickets" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportTicketsPage /></ServiceClientLayout></RoleRoute>} />
       <Route path="/support/assist" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportAssistPage /></ServiceClientLayout></RoleRoute>} />
       <Route path="/support/returns" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportReturnsPage /></ServiceClientLayout></RoleRoute>} />
       <Route path="/support/profile" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><AdminProfilePage /></ServiceClientLayout></RoleRoute>} />
-      <Route path="/support/dashboard" element={<Navigate to="/support/complaints" replace />} />
+      <Route path="/support/dashboard" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportDashboardPage /></ServiceClientLayout></RoleRoute>} />
 
-      <Route path="*" element={<Navigate to={userHome} replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
     </>
   );

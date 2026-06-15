@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Ticket } from 'lucide-react';
 import { fetchSupportTickets, updateSupportTicket } from '../services/supportService';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import './SupportPages.css';
 
 const STATUS_OPTIONS = ['open', 'in_progress', 'resolved'];
@@ -19,6 +20,7 @@ const SupportTicketsPage = () => {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+  usePlatformRefresh(load, [load]);
 
   const changeStatus = async (id, status) => {
     await updateSupportTicket(id, { status });
@@ -32,7 +34,9 @@ const SupportTicketsPage = () => {
         <p>Suivre et mettre à jour les tickets d&apos;assistance.</p>
       </header>
       <div className="sup-card">
-        {loading ? <p className="sup-empty">Chargement…</p> : (
+        {loading ? <p className="sup-empty">Chargement…</p> : tickets.length === 0 ? (
+          <p className="sup-empty">Aucun ticket ouvert.</p>
+        ) : (
           <table className="sup-table">
             <thead><tr><th>Sujet</th><th>Client</th><th>Canal</th><th>Priorité</th><th>Statut</th><th>Action</th></tr></thead>
             <tbody>

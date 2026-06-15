@@ -52,10 +52,10 @@ const MobileBottomNav = ({ items = [] }) => {
 };
 
 export const CLIENT_MOBILE_NAV = [
+  { id: 'home', to: '/client-dashboard', icon: '🏠', label: 'Accueil' },
   { id: 'products', to: '/client-products', icon: '🏷️', label: 'Boutique' },
   { id: 'orders', to: '/client-orders', icon: '📦', label: 'Commandes' },
   { id: 'vet', to: '/veterinary', icon: '🩺', label: 'Veto' },
-  { id: 'profile', to: '/client-profile', icon: '👤', label: 'Profil' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
@@ -98,10 +98,10 @@ export const VENDOR_MOBILE_NAV = [
 ];
 
 export const SUPPORT_MOBILE_NAV = [
+  { id: 'dash', to: '/support/dashboard', icon: '📊', label: 'Accueil' },
   { id: 'complaints', to: '/support/complaints', icon: '⚠️', label: 'Réclam.' },
   { id: 'tickets', to: '/support/tickets', icon: '🎫', label: 'Tickets' },
   { id: 'assist', to: '/support/assist', icon: '🎧', label: 'Assist.' },
-  { id: 'returns', to: '/support/returns', icon: '↩️', label: 'Retours' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 

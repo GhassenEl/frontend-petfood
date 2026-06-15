@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { DEMO_ADMIN_ORDERS, withDemoFallback } from '../utils/adminDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const emptyForm = {
   userId: '',
@@ -36,6 +37,12 @@ const AdminOrders = () => {
     fetchUsers();
     fetchProducts();
   }, []);
+
+  usePlatformRefresh(() => {
+    fetchOrders();
+    fetchUsers();
+    fetchProducts();
+  });
 
   const fetchUsers = async () => {
     try {

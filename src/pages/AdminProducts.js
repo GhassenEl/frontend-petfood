@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import api from '../utils/api';
 import { PRODUCT_CATEGORIES } from '../constants/productCategories';
 
@@ -29,6 +30,8 @@ const AdminProducts = () => {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  usePlatformRefresh(fetchProducts);
 
   const fetchProducts = async () => {
     try {

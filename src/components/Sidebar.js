@@ -21,7 +21,13 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: '📈' },
         { id: 'powerbi', label: 'Power BI', icon: '📊' },
+        { id: 'stock-bi', label: 'Stock BI', icon: '📦' },
+        { id: 'crm', label: 'CRM clients', icon: '🤝' },
+        { id: 'ml-agent', label: 'Agent ML', icon: '🤖' },
+        { id: 'incidents-ml', label: 'Incidents ML', icon: '🚨' },
         { id: 'nlp-models', label: 'Modèles NLP', icon: '🧠' },
+        { id: 'rehabilitation', label: 'Réhabilitation', icon: '💚' },
+        { id: 'blog-articles', label: 'Blog & articles', icon: '📝' },
         { id: 'history', label: 'Historique', icon: '📜' },
       ]
     },

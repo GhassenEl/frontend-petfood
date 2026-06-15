@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, RefreshCw } from 'lucide-react';
 import {
@@ -40,6 +41,8 @@ const ClientFavoritesPage = () => {
   useEffect(() => {
     load();
   }, []);
+
+  usePlatformRefresh(load);
 
   const toggleCart = (product) => {
     const price = getPromoPrice(product);

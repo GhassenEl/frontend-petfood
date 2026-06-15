@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import { useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 import { DEMO_INVOICES, withDemoFallback } from '../utils/clientDemoData';
@@ -38,6 +39,8 @@ const ClientInvoicesPage = () => {
       setLoading(false);
     }
   };
+
+  usePlatformRefresh(fetchInvoices);
 
   const downloadPDF = (invoice) => downloadInvoicePdf(invoice);
 

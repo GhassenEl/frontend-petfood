@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { fetchSupportComplaints } from '../services/supportService';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import './SupportPages.css';
 
 const SupportComplaintsPage = () => {
@@ -17,6 +18,7 @@ const SupportComplaintsPage = () => {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+  usePlatformRefresh(load, [load]);
 
   return (
     <div className="sup-page">
@@ -25,7 +27,9 @@ const SupportComplaintsPage = () => {
         <p>Gérer les réclamations clients en attente de traitement.</p>
       </header>
       <div className="sup-card">
-        {loading ? <p className="sup-empty">Chargement…</p> : (
+        {loading ? <p className="sup-empty">Chargement…</p> : complaints.length === 0 ? (
+          <p className="sup-empty">Aucune réclamation en attente.</p>
+        ) : (
           <table className="sup-table">
             <thead><tr><th>Client</th><th>Sujet</th><th>Priorité</th><th>Statut</th><th>Date</th></tr></thead>
             <tbody>

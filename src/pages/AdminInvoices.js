@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import api from '../utils/api';
 import { DEMO_ADMIN_INVOICES, withDemoFallback } from '../utils/adminDemoData';
 import { PAYMENT_METHODS, getPaymentLabel } from '../constants/paymentMethods';
@@ -27,6 +28,12 @@ const AdminInvoices = () => {
     fetchUsers();
     fetchOrders();
   }, []);
+
+  usePlatformRefresh(() => {
+    fetchInvoices();
+    fetchUsers();
+    fetchOrders();
+  });
 
   const fetchInvoices = async () => {
     try {

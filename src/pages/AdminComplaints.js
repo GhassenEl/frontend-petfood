@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import { AlertCircle, Plus, Trash2, Edit3, Search, Send, MessageSquare, Clock } from 'lucide-react';
 import api from '../utils/api';
 import {
@@ -62,6 +63,8 @@ const AdminComplaints = () => {
   useEffect(() => {
     load();
   }, []);
+
+  usePlatformRefresh(load);
 
   const stats = useMemo(() => ({
     total: complaints.length,

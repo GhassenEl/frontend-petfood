@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import { Link } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import { getLoyaltyAccount, getPersonalizedOffers } from '../services/loyaltyService';
@@ -35,6 +36,8 @@ const ClientLoyaltyPage = () => {
   useEffect(() => {
     load();
   }, []);
+
+  usePlatformRefresh(load);
 
   if (loading) return <div style={{ padding: 48, textAlign: 'center' }}>Chargement…</div>;
 

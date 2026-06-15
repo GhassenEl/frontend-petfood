@@ -7,6 +7,7 @@ const ServiceClientSidebar = ({ onLogout, user, onNavigate }) => {
   const [sidebarImageError, setSidebarImageError] = useState(false);
 
   const items = [
+    { to: '/support/dashboard', label: 'Tableau de bord', icon: '📊' },
     { to: '/support/complaints', label: 'Réclamations', icon: '⚠️' },
     { to: '/support/tickets', label: 'Tickets', icon: '🎫' },
     { to: '/support/assist', label: 'Assistance', icon: '🎧' },

@@ -35,7 +35,7 @@ const PlatformServicesPage = () => {
   const handleServiceClick = (service, e) => {
     if (service.route === '#chat') {
       e.preventDefault();
-      window.dispatchEvent(new CustomEvent('open-chat-assistant'));
+      window.dispatchEvent(new CustomEvent('petfood:open-chat'));
       return;
     }
     if (service.route.startsWith('/')) {

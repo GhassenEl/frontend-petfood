@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import api from '../utils/api';
 import { AdminMessageButton } from './AdminMessageButton';
 import { DEMO_ADMIN_REGIONS, DEMO_ADMIN_USERS, withDemoFallback } from '../utils/adminDemoData';
-import './AdminPages.css';
+import '../pages/AdminPages.css';
 
 const ROLE_META = {
   livreur: { label: 'Livreur', emoji: '🚚', accent: '#10b981' },

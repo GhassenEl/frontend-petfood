@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, Flame, Sparkles, ShoppingCart, Search, Eye } from 'lucide-react';
@@ -106,6 +107,8 @@ const ClientProductsPage = () => {
 
     setLoading(false);
   };
+
+  usePlatformRefresh(fetchData);
 
   const normalizeProduct = (p) => {
     if (!p) return p;
