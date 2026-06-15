@@ -108,6 +108,7 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         { id: '__open-chat__', label: 'Assistant IA', icon: '💬', action: 'open-chat' },
         { id: 'client-ecosystem', label: 'Hub écosystème', icon: '🌐' },
         { id: 'client-ai', label: 'Agent IA', icon: '🤖' },
+        { id: 'client-advanced-ai', label: 'IA avancée', icon: '✨' },
         { id: 'client-ml-agent', label: 'Agent ML', icon: '🧠' },
         { id: 'client-wellness', label: 'Bien-être', icon: '💚' },
         { id: 'client-product-packs', label: 'Packs produits', icon: '📦' },

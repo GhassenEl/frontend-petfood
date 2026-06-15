@@ -459,6 +459,42 @@ export const DEMO_PARTNERS_OVERVIEW = {
   marketplaceVendors: DEMO_ADMIN_VENDORS,
 };
 
+export const DEMO_ADMIN_ADVANCED_AI = {
+  mode: 'demo',
+  groqPowered: true,
+  pythonPowered: false,
+  capabilities: [
+    { id: 'forecast', label: 'Prévision CA XGBoost', status: 'active' },
+    { id: 'churn', label: 'Classification churn', status: 'active' },
+    { id: 'nlp', label: 'Analyse NLP avis', status: 'active' },
+    { id: 'copilot', label: 'Copilote Groq admin', status: 'active' },
+    { id: 'anomaly', label: 'Détection anomalies', status: 'active' },
+    { id: 'auto-actions', label: 'Actions automatiques', status: 'active' },
+  ],
+  kpis: {
+    ordersToday: 18,
+    pendingOrders: 4,
+    churnRiskClients: 3,
+    nlpAlerts: 2,
+    stockAlerts: 5,
+    complaintQueue: 2,
+  },
+  autoActions: [
+    { id: 'a1', priority: 'high', label: 'Relancer 3 clients à risque churn', link: '/admin/crm', type: 'crm' },
+    { id: 'a2', priority: 'high', label: 'Traiter 2 réclamations NLP prioritaires', link: '/admin/incidents-ml', type: 'incidents' },
+    { id: 'a3', priority: 'medium', label: 'Réapprovisionner croquettes Premium Chien', link: '/admin/stock', type: 'stock' },
+    { id: 'a4', priority: 'medium', label: 'Valider candidature vendeur Sousse', link: '/admin/vendors', type: 'vendors' },
+    { id: 'a5', priority: 'low', label: 'Lancer promo croquettes chat (-15%)', link: '/admin/promotions', type: 'promo' },
+  ],
+  nlpSummary: {
+    positiveRate: 0.78,
+    negativeThemes: ['livraison retard', 'emballage abîmé'],
+    fraudSignals: 1,
+    samplesAnalyzed: 142,
+  },
+  insight: 'La demande croquettes chien senior augmente (+12 %). 3 clients à risque churn — action CRM recommandée cette semaine.',
+};
+
 export const DEMO_ADMIN_ANALYTICS = {
   alertCounts: { total: 4, high: 1, pharmacy: 2, incident: 0 },
   alerts: [

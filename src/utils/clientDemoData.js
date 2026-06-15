@@ -890,3 +890,63 @@ export const buildDemoHistory = () => [
     description: '+55 points — commande croquettes premium',
   },
 ];
+
+export const DEMO_CLIENT_ADVANCED_AI = {
+  mode: 'demo',
+  groqPowered: true,
+  pets: [
+    {
+      id: 'pet-demo-1',
+      name: 'Rex',
+      type: 'dog',
+      breed: 'Berger allemand',
+      ageYears: 4,
+      weightKg: 32,
+      healthScore: 82,
+      healthLabel: 'Bon état général',
+      nutritionTip: 'Croquettes riches en protéines (26-28 %) pour chien actif de grande taille.',
+      vetReminder: 'Vaccin rappel dans 45 jours',
+      riskFlags: [],
+    },
+    {
+      id: 'pet-demo-2',
+      name: 'Misty',
+      type: 'cat',
+      breed: 'Européen',
+      ageYears: 2,
+      weightKg: 4.2,
+      healthScore: 75,
+      healthLabel: 'Surveillance poids',
+      nutritionTip: 'Chat d\'intérieur : portions contrôlées, croquettes stérilisé recommandées.',
+      vetReminder: 'Déparasitage trimestriel à prévoir',
+      riskFlags: ['prise de poids légère'],
+    },
+  ],
+  smartReorder: [
+    {
+      productId: 'prod-1',
+      productName: 'Croquettes Premium Chien Adulte 12 kg',
+      petName: 'Rex',
+      daysUntilEmpty: 8,
+      urgency: 'soon',
+      suggestedDate: new Date(Date.now() + 8 * 86400000).toISOString().slice(0, 10),
+      avgCycleDays: 30,
+      confidence: 0.87,
+    },
+    {
+      productId: 'prod-2',
+      productName: 'Pâtée chat saumon 400 g',
+      petName: 'Misty',
+      daysUntilEmpty: 14,
+      urgency: 'normal',
+      suggestedDate: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+      avgCycleDays: 21,
+      confidence: 0.72,
+    },
+  ],
+  healthSummary: 'Rex est en excellente forme — pensez au rappel vaccinal dans 6 semaines. Misty présente une légère prise de poids : adaptez les portions et privilégiez une alimentation « light » ou stérilisé.',
+  recommendations: [
+    { name: 'Croquettes Senior Chien 10 kg', reason: 'Alternative si Rex vieillit', score: 0.82 },
+    { name: 'Croquettes Stérilisé Chat 3 kg', reason: 'Adapté au profil Misty', score: 0.79 },
+  ],
+};

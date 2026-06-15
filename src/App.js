@@ -132,7 +132,9 @@ import AdminRehabilitationPage from './pages/AdminRehabilitationPage';
 import AdminStockBiPage from './pages/AdminStockBiPage';
 import AdminPlatformPerformancePage from './pages/AdminPlatformPerformancePage';
 import AdminPartnersHubPage from './pages/AdminPartnersHubPage';
+import AdminAdvancedAiPage from './pages/AdminAdvancedAiPage';
 import ClientEcosystemHubPage from './pages/ClientEcosystemHubPage';
+import ClientAdvancedAiPage from './pages/ClientAdvancedAiPage';
 import ClientAIAgentPage from './pages/ClientAIAgentPage';
 import ClientMlAgentPage from './pages/ClientMlAgentPage';
 import ClientWellnessPage from './pages/ClientWellnessPage';
@@ -259,6 +261,7 @@ const App = () => {
       <Route path="/admin/crm" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminCrmPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/rehabilitation" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRehabilitationPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/ml-agent" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminMlAgentPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/advanced-ai" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAdvancedAiPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/incidents-ml" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminIncidentsMlPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/stock-bi" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminStockBiPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/performance" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPlatformPerformancePage /></AdminLayout></RoleRoute>} />
@@ -294,6 +297,7 @@ const App = () => {
       <Route path="/client-wellness" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientWellnessPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-emotions" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientOwnerEmotionsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAIAgentPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-advanced-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAdvancedAiPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-ml-agent" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientMlAgentPage /></ClientLayout></RoleRoute>} />
       <Route path="/smart-food-agent" element={<RoleRoute user={user} roles={['client']}><ClientLayout><SmartFoodAgentPage /></ClientLayout></RoleRoute>} />
       <Route path="/nutripro-history" element={<RoleRoute user={user} roles={['client']}><ClientLayout><NutriProHistory /></ClientLayout></RoleRoute>} />

@@ -39,6 +39,9 @@ const AdminMlAgentPage = () => {
           <button type="button" onClick={reload} style={btnLight}>
             Actualiser
           </button>
+          <Link to="/admin/advanced-ai" style={{ ...btnLight, textDecoration: 'none' }}>
+            IA avancée
+          </Link>
         </div>
       </motion.div>
 

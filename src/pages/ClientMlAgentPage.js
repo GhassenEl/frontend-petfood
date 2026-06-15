@@ -55,6 +55,9 @@ const ClientMlAgentPage = () => {
           <Link to="/client-ai" style={{ ...btnPrimary, textDecoration: 'none' }}>
             <MessageCircle size={16} /> Chat catalogue
           </Link>
+          <Link to="/client-advanced-ai" style={{ ...btnOutline, textDecoration: 'none' }}>
+            IA avancée
+          </Link>
         </div>
       </motion.div>
 

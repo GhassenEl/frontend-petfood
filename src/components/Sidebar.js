@@ -25,6 +25,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'performance', label: 'Performance plateforme', icon: '⚡' },
         { id: 'crm', label: 'CRM clients', icon: '🤝' },
         { id: 'ml-agent', label: 'Agent ML', icon: '🤖' },
+        { id: 'advanced-ai', label: 'IA avancée', icon: '🧠' },
         { id: 'incidents-ml', label: 'Incidents ML', icon: '🚨' },
         { id: 'nlp-models', label: 'Modèles NLP', icon: '🧠' },
         { id: 'rehabilitation', label: 'Réhabilitation', icon: '💚' },
