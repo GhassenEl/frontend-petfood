@@ -49,6 +49,14 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
 
   const sections = [
     {
+      title: '🏠 Accueil',
+      items: [
+        { id: 'client-dashboard', label: 'Tableau de bord', icon: '🏠' },
+        { id: 'client-family', label: 'Mode famille', icon: '👨‍👩‍👧' },
+        { id: 'client-subscriptions', label: 'Auto-réappro', icon: '🔄' },
+      ],
+    },
+    {
       title: '🛒 Boutique',
       items: [
         { id: 'client-products', label: 'Produits', icon: '🏷️' },

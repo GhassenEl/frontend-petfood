@@ -121,6 +121,9 @@ import AdminCategoriesPage from './pages/AdminCategoriesPage';
 import AdminVetsPage from './pages/AdminVetsPage';
 import AdminRegionalContactsPage from './pages/AdminRegionalContactsPage';
 import ClientReturnsPage from './pages/ClientReturnsPage';
+import ClientDashboardPage from './pages/ClientDashboardPage';
+import ClientFamilyPage from './pages/ClientFamilyPage';
+import ClientSubscriptionsPage from './pages/ClientSubscriptionsPage';
 import VendorSalesPage from './pages/VendorSalesPage';
 import VetTeleconsultPage from './pages/VetTeleconsultPage';
 import VetNutritionAdvicePage from './pages/VetNutritionAdvicePage';
@@ -136,7 +139,7 @@ import CapabilitiesRoute from './components/CapabilitiesRoute';
 
 const homeByRole = {
   admin: '/admin/dashboard',
-  client: '/client-products',
+  client: '/client-dashboard',
   livreur: '/livreur/dashboard',
   vet: '/vet/dashboard',
   vendor: '/vendor/dashboard',
@@ -239,6 +242,9 @@ const App = () => {
       <Route path="/admin/profile" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminProfilePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/platform-services" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><PlatformServicesPage /></AdminLayout></RoleRoute>} />
 
+      <Route path="/client-dashboard" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientDashboardPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-family" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientFamilyPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-subscriptions" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSubscriptionsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-products" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientProductsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-favorites" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientFavoritesPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-loyalty" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientLoyaltyPage /></ClientLayout></RoleRoute>} />

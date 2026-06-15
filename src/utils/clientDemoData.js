@@ -766,6 +766,93 @@ export const DEMO_NEAREST_STORE = {
   openUntil: '19h00',
 };
 
+const daysAhead = (n) => new Date(Date.now() + n * 86400000).toISOString();
+
+export const DEMO_DASHBOARD = {
+  activeOrder: {
+    id: 'demo-order-002',
+    status: 'shipped',
+    total: 42,
+    createdAt: daysAgo(2),
+    items: [{ quantity: 2, productId: { name: 'Pâtée chat saumon 400 g' } }],
+  },
+  nextAppointment: {
+    id: 'demo-appt-1',
+    petName: 'Max',
+    type: 'Consultation',
+    date: daysAhead(3),
+    status: 'scheduled',
+    visitMode: 'cabinet',
+  },
+  loyalty: { points: 142, tier: 'standard' },
+  iotAlerts: [
+    { id: 'iot-1', type: 'feeder', level: 'warning', message: 'Distributeur : niveau bas (18 %)', petName: 'Max' },
+    { id: 'iot-2', type: 'water', level: 'info', message: 'Hydratation sous l\'objectif — Luna', petName: 'Luna' },
+  ],
+  subscriptions: [
+    {
+      id: 'demo-sub-1',
+      productId: 'demo-prod-croq',
+      product: { name: 'Croquettes Premium Chien Adulte 12 kg', price: 54.9 },
+      quantity: 1,
+      frequencyDays: 30,
+      nextDeliveryAt: daysAhead(12),
+      status: 'active',
+      discountPercent: 10,
+    },
+  ],
+  household: {
+    id: 'demo-hh',
+    name: 'Foyer démo',
+    inviteCode: 'PET-DEMO01',
+    myRole: 'owner',
+    members: [
+      { userId: 'demo_client', name: 'Client Test', email: 'client@petfood.tn', role: 'owner' },
+      { userId: 'demo_member', name: 'Conjoint(e)', email: 'conjoint@petfood.tn', role: 'member' },
+    ],
+  },
+  stats: {
+    ordersActive: 1,
+    appointmentsUpcoming: 1,
+    iotAlertCount: 2,
+    subscriptionCount: 1,
+    familyMembers: 2,
+  },
+};
+
+export const DEMO_FAMILY = {
+  household: DEMO_DASHBOARD.household,
+  pets: [
+    { id: 'demo-pet-1', name: 'Max', type: 'dog', breed: 'Labrador', ownerId: 'demo_client' },
+    { id: 'demo-pet-2', name: 'Luna', type: 'cat', breed: 'Européen', ownerId: 'demo_member' },
+  ],
+};
+
+export const DEMO_SUBSCRIPTIONS = [
+  {
+    id: 'demo-sub-1',
+    productId: 'demo-prod-croq',
+    product: { id: 'demo-prod-croq', name: 'Croquettes Premium Chien Adulte 12 kg', price: 54.9, imageUrl: null },
+    quantity: 1,
+    frequencyDays: 30,
+    nextDeliveryAt: daysAhead(12),
+    status: 'active',
+    discountPercent: 10,
+    petName: 'Max',
+  },
+  {
+    id: 'demo-sub-2',
+    productId: 'demo-prod-patee',
+    product: { id: 'demo-prod-patee', name: 'Pâtée chat saumon 400 g', price: 21.0, imageUrl: null },
+    quantity: 2,
+    frequencyDays: 30,
+    nextDeliveryAt: daysAhead(22),
+    status: 'paused',
+    discountPercent: 10,
+    petName: 'Luna',
+  },
+];
+
 export const withDemoFallback = (data, demo) => {
   if (Array.isArray(data) && data.length > 0) return data;
   return demo;
