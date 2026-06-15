@@ -138,10 +138,16 @@ export const updateAdminModeratorStatus = async (id, isActive) => {
 export const fetchAdminActivityLogs = async (filters = {}) => {
   try {
     const data = await api.get('/admin/activity-logs', { params: filters }).then((r) => r.data);
-    return { data: data.logs || data, demo: false };
+    return {
+      data: data.logs || data,
+      total: data.total ?? (data.logs || data).length,
+      demo: false,
+      source: data.source || 'server',
+    };
   } catch {
     seedActivityLogs(DEMO_ACTIVITY_LOGS);
-    return { data: fetchActivityLogs(filters), demo: true };
+    const local = fetchActivityLogs(filters);
+    return { data: local, total: local.length, demo: true, source: 'local' };
   }
 };
 

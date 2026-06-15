@@ -1,4 +1,6 @@
-/** Journal d'activité centralisé — toutes actions plateforme (persistant session + localStorage). */
+/** Journal d'activité — persistance serveur + cache local de secours. */
+
+import api from '../utils/api';
 
 const STORAGE_KEY = 'petfood_activity_logs';
 const MAX_LOGS = 2000;
@@ -42,7 +44,15 @@ export const getLogStore = () => {
   return memoryLogs;
 };
 
-/** Enregistre une action (appelé par vendor, modérateur, admin…). */
+const appendLocal = (entry) => {
+  const store = getLogStore();
+  store.unshift(entry);
+  if (store.length > MAX_LOGS) store.length = MAX_LOGS;
+  saveToStorage(store);
+  return entry;
+};
+
+/** Enregistre une action — serveur en priorité, localStorage en secours. */
 export const logActivity = ({
   actorRole = 'system',
   actorId = null,
@@ -53,6 +63,7 @@ export const logActivity = ({
   module = 'platform',
 }) => {
   if (!action) return null;
+
   const entry = {
     id: uid(),
     at: new Date().toISOString(),
@@ -64,10 +75,22 @@ export const logActivity = ({
     details,
     module,
   };
-  const store = getLogStore();
-  store.unshift(entry);
-  if (store.length > MAX_LOGS) store.length = MAX_LOGS;
-  saveToStorage(store);
+
+  appendLocal(entry);
+
+  api
+    .post('/activity-logs', {
+      action,
+      target,
+      details,
+      module,
+      actorRole,
+      actorName,
+    })
+    .catch(() => {
+      /* backend indisponible — entrée locale conservée */
+    });
+
   return entry;
 };
 
@@ -79,9 +102,9 @@ export const seedActivityLogs = (entries) => {
     at: e.at || new Date().toISOString(),
     ...e,
   }));
-  memoryLogs = seeded.sort((a, b) => new Date(b.at) - new Date(a.at));
-  saveToStorage(memoryLogs);
-  return memoryLogs;
+  memoryLogs = seeded;
+  saveToStorage(seeded);
+  return seeded;
 };
 
 export const fetchActivityLogs = (filters = {}) => {
@@ -106,41 +129,64 @@ export const fetchActivityLogs = (filters = {}) => {
   return logs.slice(0, limit);
 };
 
-export const exportLogsJson = (filters = {}) => {
-  const logs = fetchActivityLogs(filters);
-  const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+const downloadBlob = (blob, filename) => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `petfoodtn-logs-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
 };
 
-export const exportLogsCsv = (filters = {}) => {
-  const logs = fetchActivityLogs(filters);
-  const header = ['date', 'role', 'acteur', 'action', 'cible', 'module', 'details'];
-  const rows = logs.map((l) =>
-    [
-      l.at,
-      ROLE_LABELS[l.actorRole] || l.actorRole,
-      l.actorName,
-      l.action,
-      l.target,
-      l.module,
-      (l.details || '').replace(/"/g, '""'),
-    ]
-      .map((c) => `"${c}"`)
-      .join(','),
-  );
-  const csv = [header.join(','), ...rows].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `petfoodtn-logs-${new Date().toISOString().slice(0, 10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+export const exportLogsJson = async (filters = {}) => {
+  try {
+    const res = await api.get('/admin/activity-logs/export.json', {
+      params: filters,
+      responseType: 'blob',
+    });
+    const name = `petfoodtn-audit-${new Date().toISOString().slice(0, 10)}.json`;
+    downloadBlob(new Blob([res.data], { type: 'application/json' }), name);
+    return;
+  } catch {
+    const logs = fetchActivityLogs(filters);
+    downloadBlob(
+      new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' }),
+      `petfoodtn-logs-${new Date().toISOString().slice(0, 10)}.json`,
+    );
+  }
+};
+
+export const exportLogsCsv = async (filters = {}) => {
+  try {
+    const res = await api.get('/admin/activity-logs/export.csv', {
+      params: filters,
+      responseType: 'blob',
+    });
+    const name = `petfoodtn-audit-${new Date().toISOString().slice(0, 10)}.csv`;
+    downloadBlob(new Blob([res.data], { type: 'text/csv' }), name);
+    return;
+  } catch {
+    const logs = fetchActivityLogs(filters);
+    const header = ['date', 'role', 'acteur', 'action', 'cible', 'module', 'details'];
+    const rows = logs.map((l) =>
+      [
+        l.at,
+        ROLE_LABELS[l.actorRole] || l.actorRole,
+        l.actorName,
+        l.action,
+        l.target,
+        l.module,
+        (l.details || '').replace(/"/g, '""'),
+      ]
+        .map((c) => `"${c}"`)
+        .join(','),
+    );
+    const csv = [header.join(','), ...rows].join('\n');
+    downloadBlob(
+      new Blob([csv], { type: 'text/csv;charset=utf-8' }),
+      `petfoodtn-logs-${new Date().toISOString().slice(0, 10)}.csv`,
+    );
+  }
 };
 
 export { ROLE_LABELS };

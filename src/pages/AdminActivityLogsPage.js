@@ -20,6 +20,12 @@ const ACTION_LABELS = {
   approve_product: 'Produit validé',
   reject_product: 'Produit refusé',
   create_product: 'Produit créé',
+  update_product: 'Produit modifié',
+  delete_product: 'Produit supprimé',
+  upload_image: 'Image uploadée',
+  login_success: 'Connexion réussie',
+  login_failed: 'Échec connexion',
+  price_policy_update: 'Politique prix mise à jour',
   update_stock: 'Stock mis à jour',
   accept_order: 'Commande acceptée',
   suspend_user: 'Utilisateur suspendu',
@@ -61,6 +67,8 @@ const MODULE_OPTIONS = [
 const AdminActivityLogsPage = () => {
   const [searchParams] = useSearchParams();
   const [logs, setLogs] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [source, setSource] = useState('server');
   const [demo, setDemo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState(searchParams.get('role') || 'all');
@@ -69,12 +77,14 @@ const AdminActivityLogsPage = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, demo: isDemo } = await fetchAdminActivityLogs({
+    const { data, demo: isDemo, total: t, source: src } = await fetchAdminActivityLogs({
       role: roleFilter,
       module: moduleFilter,
       search,
     });
     setLogs(data);
+    setTotal(t ?? data.length);
+    setSource(src || (isDemo ? 'local' : 'server'));
     setDemo(isDemo);
     setLoading(false);
   }, [roleFilter, moduleFilter, search]);
@@ -86,8 +96,11 @@ const AdminActivityLogsPage = () => {
   return (
     <div className="adm-page">
       <header className="adm-hero">
-        <h1><FileText size={24} /> Journal d&apos;activité {demo && <span className="adm-demo-pill">Mode démo</span>}</h1>
-        <p>Historique des actions — admin, vendeurs, modérateurs, clients, livreurs et vétérinaires. Exportable en fichier.</p>
+        <h1><FileText size={24} /> Journal d&apos;activité {demo && <span className="adm-demo-pill">Cache local</span>}</h1>
+        <p>
+          Audit persistant serveur — admin, vendeurs, modérateurs, clients, livreurs et vétérinaires.
+          {source === 'server' && !demo && ' · Source : base de données'}
+        </p>
       </header>
 
       <div className="adm-export-row">
@@ -98,7 +111,7 @@ const AdminActivityLogsPage = () => {
           <Download size={14} /> Export CSV
         </button>
         <span style={{ fontSize: '0.8rem', color: '#64748b', alignSelf: 'center' }}>
-          {logs.length} entrée(s) affichée(s)
+          {logs.length} affichée(s) · {total} au total
         </span>
       </div>
 
