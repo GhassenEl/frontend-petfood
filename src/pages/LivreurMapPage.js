@@ -4,14 +4,11 @@ import { MapPin, Navigation } from 'lucide-react';
 import api from '../utils/api';
 import { DEMO_LIVREUR_ORDERS, withDemoFallback } from '../utils/livreurDemoData';
 import LivreurDeliveryMap, { getOrderCoords } from '../components/LivreurDeliveryMap';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const LivreurMapPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
 
   const fetchOrders = async () => {
     try {
@@ -27,6 +24,12 @@ const LivreurMapPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  usePlatformRefresh(fetchOrders);
 
   const withGps = orders.filter((o) => getOrderCoords(o));
   const withoutGps = orders.filter((o) => !getOrderCoords(o));

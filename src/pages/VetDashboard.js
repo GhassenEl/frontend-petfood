@@ -20,6 +20,7 @@ import { visitModeBadge } from '../constants/visitModes';
 import VetDashboardCharts from '../components/VetDashboardCharts';
 import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
 import { DEMO_VET_BI, withDemoDashboard, buildDemoVetWeekChart } from '../utils/vetDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const STATUS_LABELS = {
   scheduled: 'Planifié',
@@ -62,6 +63,8 @@ const VetDashboard = () => {
     const id = window.setInterval(() => fetchData(true), 12000);
     return () => window.clearInterval(id);
   }, [fetchData]);
+
+  usePlatformRefresh(() => fetchData(true));
 
   if (loading) {
     return (

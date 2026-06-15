@@ -5,6 +5,7 @@ import { isHomeVisit, isOnlineVisit, visitModeLabel } from '../constants/visitMo
 import TeleconsultMeetPanel from '../components/TeleconsultMeetPanel';
 import MedicationFormFields from '../components/MedicationFormFields';
 import { emptyMedicationRow, serializeMedications, validateMedications } from '../utils/medications';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const emptyConsultation = {
   symptoms: '',
@@ -87,6 +88,8 @@ const VetAppointmentDetailPage = () => {
   useEffect(() => {
     fetchData();
   }, [id]);
+
+  usePlatformRefresh(fetchData);
 
   const claimAppt = async () => {
     try {

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import api from '../utils/api';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const DAYS = [
   { key: 'mon', label: 'Lundi' },
@@ -26,7 +27,7 @@ const VetClinicPage = () => {
   const [saving, setSaving] = useState(false);
   const [servicesText, setServicesText] = useState('');
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const [pRes, sRes] = await Promise.all([
         api.get('/vet/clinic'),
@@ -40,11 +41,13 @@ const VetClinicPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
+
+  usePlatformRefresh(load);
 
   const handleSave = async (e) => {
     e.preventDefault();

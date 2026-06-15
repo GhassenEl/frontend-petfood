@@ -6,6 +6,7 @@ import {
   mergeVetClients,
   saveExtraVetClient,
 } from '../utils/vetDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const animalEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', rabbit: '🐰', other: '🐾' };
 
@@ -30,10 +31,6 @@ const VetClientsPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
-  useEffect(() => {
-    fetchClients();
-  }, []);
-
   const fetchClients = async () => {
     try {
       const { data } = await api.get('/vet/clients');
@@ -45,6 +42,12 @@ const VetClientsPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  usePlatformRefresh(fetchClients);
 
   const handleAddClient = async (e) => {
     e.preventDefault();

@@ -4,6 +4,7 @@ import api from '../utils/api';
 import TeleconsultMeetPanel from '../components/TeleconsultMeetPanel';
 import { isOnlineVisit } from '../constants/visitModes';
 import './ModeratorPages.css';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const VetTeleconsultPage = () => {
   const [sessions, setSessions] = useState([]);
@@ -27,6 +28,8 @@ const VetTeleconsultPage = () => {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  usePlatformRefresh(load);
 
   const startCall = async (session) => {
     setBusyId(session.id);

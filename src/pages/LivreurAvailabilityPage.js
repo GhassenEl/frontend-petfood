@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const LivreurAvailabilityPage = () => {
   const { user } = useAuth();
@@ -11,28 +12,31 @@ const LivreurAvailabilityPage = () => {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
+  const load = useCallback(async () => {
+    try {
+      const { data } = await api.get('/users/profile');
+      let availability = null;
       try {
-        const { data } = await api.get('/users/profile');
-        let availability = null;
-        try {
-          const prefs = data?.preferences ? JSON.parse(data.preferences) : {};
-          availability = prefs.availability;
-        } catch {
-          availability = null;
-        }
-        if (availability) {
-          setIsAvailable(availability.isAvailable ?? true);
-          setStatusNote(availability.statusNote ?? 'Prêt à prendre des commandes.');
-          setUpdatedAt(availability.updatedAt ? new Date(availability.updatedAt) : null);
-        }
-      } catch (error) {
-        console.warn('Impossible de charger le statut livreur', error);
+        const prefs = data?.preferences ? JSON.parse(data.preferences) : {};
+        availability = prefs.availability;
+      } catch {
+        availability = null;
       }
-    };
-    load();
+      if (availability) {
+        setIsAvailable(availability.isAvailable ?? true);
+        setStatusNote(availability.statusNote ?? 'Prêt à prendre des commandes.');
+        setUpdatedAt(availability.updatedAt ? new Date(availability.updatedAt) : null);
+      }
+    } catch (error) {
+      console.warn('Impossible de charger le statut livreur', error);
+    }
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  usePlatformRefresh(load);
 
   const persist = async (nextAvailable, nextNote) => {
     setSaving(true);

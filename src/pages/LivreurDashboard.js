@@ -9,6 +9,7 @@ import LivreurDashboardCharts from '../components/LivreurDashboardCharts';
 import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
 import DeliveryProofModal from '../components/DeliveryProofModal';
 import useLivreurGps from '../hooks/useLivreurGps';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const oid = (o) => o?.id || o?._id;
 
@@ -37,6 +38,10 @@ const LivreurDashboard = () => {
     }, 12000);
     return () => window.clearInterval(poll);
   }, []);
+
+  usePlatformRefresh(() => {
+    fetchData();
+  });
 
   const fetchData = async () => {
     try {

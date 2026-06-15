@@ -7,6 +7,7 @@ import {
 import api from '../utils/api';
 import { formatDT } from '../utils/formatCurrency';
 import { mergeVetBiData } from '../utils/vetDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899', '#84cc16'];
 
@@ -53,6 +54,8 @@ const VetBiDashboard = () => {
   useEffect(() => {
     fetchBi();
   }, [fetchBi]);
+
+  usePlatformRefresh(fetchBi);
 
   const pieData = useMemo(() => {
     if (!data?.diseaseByAnimal) return [];

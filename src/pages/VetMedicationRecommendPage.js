@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import VetMedicationRecommender from '../components/VetMedicationRecommender';
@@ -9,6 +9,7 @@ import {
   validateMedications,
 } from '../utils/medications';
 import { DEMO_VET_BI } from '../utils/vetDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const VetMedicationRecommendPage = () => {
   const [clients, setClients] = useState([]);
@@ -20,9 +21,20 @@ const VetMedicationRecommendPage = () => {
   const [instructions, setInstructions] = useState('');
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    api.get('/vet/clients').then(({ data }) => setClients(data || [])).catch(() => setClients([]));
+  const loadClients = useCallback(async () => {
+    try {
+      const { data } = await api.get('/vet/clients');
+      setClients(data || []);
+    } catch {
+      setClients([]);
+    }
   }, []);
+
+  useEffect(() => {
+    loadClients();
+  }, [loadClients]);
+
+  usePlatformRefresh(loadClients);
 
   const selectedClient = clients.find((c) => (c.id || c._id) === ownerId);
   const selectedPet = selectedClient?.pets?.find((p) => p.name === petName);

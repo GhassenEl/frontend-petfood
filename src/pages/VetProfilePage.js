@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const VetProfilePage = () => {
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
 
   const fetchProfile = async () => {
     try {
@@ -25,6 +22,12 @@ const VetProfilePage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  usePlatformRefresh(fetchProfile);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

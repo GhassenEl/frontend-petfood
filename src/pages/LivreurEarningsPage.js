@@ -3,15 +3,12 @@ import { motion } from 'framer-motion';
 import { DollarSign, TrendingUp, Calendar, Package, CreditCard, BarChart3 } from 'lucide-react';
 import api from '../utils/api';
 import { DEMO_LIVREUR_ORDERS, getLivreurCommission, withDemoFallback } from '../utils/livreurDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const LivreurEarningsPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('all');
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
 
   const fetchOrders = async () => {
     try {
@@ -23,6 +20,12 @@ const LivreurEarningsPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  usePlatformRefresh(fetchOrders);
 
   const getFilteredOrders = () => {
     const delivered = orders.filter(o => o.status === 'delivered');

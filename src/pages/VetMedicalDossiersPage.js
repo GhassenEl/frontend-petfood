@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { FileDown } from 'lucide-react';
 import api from '../utils/api';
@@ -8,6 +8,7 @@ import {
   mergeVetClients,
   withDemoFallback,
 } from '../utils/vetDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const animalEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', other: '🐾' };
 
@@ -20,6 +21,28 @@ const VetMedicalDossiersPage = () => {
   const [creating, setCreating] = useState(false);
   const [exportingId, setExportingId] = useState(null);
   const [form, setForm] = useState({ ownerId: '', petId: '', petName: '' });
+
+  const load = useCallback(async () => {
+    try {
+      const [dRes, cRes] = await Promise.all([
+        api.get('/vet/medical-dossiers'),
+        api.get('/vet/clients'),
+      ]);
+      setDossiers(withDemoFallback(dRes.data, DEMO_VET_MEDICAL_DOSSIERS));
+      setClients(mergeVetClients(cRes.data));
+    } catch {
+      setDossiers(DEMO_VET_MEDICAL_DOSSIERS);
+      setClients(mergeVetClients([]));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  usePlatformRefresh(load);
 
   const handleExportPdf = async (dossierId, e) => {
     e.preventDefault();
@@ -34,19 +57,6 @@ const VetMedicalDossiersPage = () => {
       setExportingId(null);
     }
   };
-
-  useEffect(() => {
-    Promise.all([api.get('/vet/medical-dossiers'), api.get('/vet/clients')])
-      .then(([dRes, cRes]) => {
-        setDossiers(withDemoFallback(dRes.data, DEMO_VET_MEDICAL_DOSSIERS));
-        setClients(mergeVetClients(cRes.data));
-      })
-      .catch(() => {
-        setDossiers(DEMO_VET_MEDICAL_DOSSIERS);
-        setClients(mergeVetClients([]));
-      })
-      .finally(() => setLoading(false));
-  }, []);
 
   const selectedClient = clients.find((c) => (c.id || c._id) === form.ownerId);
   const pets = selectedClient?.pets || [];

@@ -4,6 +4,7 @@ import { getOrders, cancelOrder } from '../services/orderService';
 import { getPaymentLabel } from '../constants/paymentMethods';
 import { DEMO_ORDERS, withDemoFallback } from '../utils/clientDemoData';
 import OrderTrackingPanel from '../components/OrderTrackingPanel';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const orderIdOf = (order) => order?.id || order?._id;
 
@@ -17,6 +18,17 @@ const ClientOrdersPage = () => {
   const navigate = useNavigate();
 
   const canClientCancel = (status) => ['pending', 'paid'].includes(status);
+
+  const fetchOrders = async () => {
+    try {
+      const list = await getOrders();
+      setOrders(withDemoFallback(Array.isArray(list) ? list : [], DEMO_ORDERS));
+    } catch (err) {
+      setOrders(DEMO_ORDERS);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCancelOrder = async (order) => {
     const id = orderIdOf(order);
@@ -41,16 +53,7 @@ const ClientOrdersPage = () => {
     fetchOrders();
   }, []);
 
-  const fetchOrders = async () => {
-    try {
-      const list = await getOrders();
-      setOrders(withDemoFallback(Array.isArray(list) ? list : [], DEMO_ORDERS));
-    } catch (err) {
-      setOrders(DEMO_ORDERS);
-    } finally {
-      setLoading(false);
-    }
-  };
+  usePlatformRefresh(fetchOrders);
 
   if (loading) return <div style={{ textAlign: 'center', padding: '50px' }}>Chargement...</div>;
   if (error) return <div style={{ textAlign: 'center', padding: '50px', color: 'red' }}>{error}</div>;

@@ -13,6 +13,7 @@ import {
   withDemoFallback,
 } from '../utils/adminDemoData';
 import './HumanMessageInbox.css';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const ROLE_EMOJI = { admin: '🛡️', livreur: '🚚', client: '🛒', vet: '🩺', vendor: '🏬', moderator: '🛡️', support: '🎧' };
 
@@ -224,6 +225,8 @@ const HumanMessageInbox = ({ mode = 'admin', initialPartnerId = '', initialRoleF
         .catch(() => setUsers([]));
     }
   }, [load, mode]);
+
+  usePlatformRefresh(load);
 
   useEffect(() => {
     if (initialPartnerId) setSelectedId(initialPartnerId);

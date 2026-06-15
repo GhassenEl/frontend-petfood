@@ -2,14 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
 import { DEMO_LIVREUR_ORDERS, getLivreurCommission, withDemoFallback } from '../utils/livreurDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const LivreurHistoryPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchHistory();
-  }, []);
 
   const fetchHistory = async () => {
     try {
@@ -22,6 +19,12 @@ const LivreurHistoryPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  usePlatformRefresh(fetchHistory);
 
   if (loading) {
     return (

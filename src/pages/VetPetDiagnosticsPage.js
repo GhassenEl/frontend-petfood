@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 import {
@@ -12,6 +12,7 @@ import {
   DEMO_PATIENT_CONTEXT,
   mergeVetClients,
 } from '../utils/vetDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const animalEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', other: '🐾' };
 
@@ -124,13 +125,22 @@ const VetPetDiagnosticsPage = () => {
   const [symptoms, setSymptoms] = useState('');
   const [vitals, setVitals] = useState({ temperature: '', weight: '', heartRate: '' });
 
-  useEffect(() => {
-    api
-      .get('/vet/clients')
-      .then(({ data }) => setClients(mergeVetClients(data)))
-      .catch(() => setClients(mergeVetClients([])))
-      .finally(() => setLoadingClients(false));
+  const loadClients = useCallback(async () => {
+    try {
+      const { data } = await api.get('/vet/clients');
+      setClients(mergeVetClients(data));
+    } catch {
+      setClients(mergeVetClients([]));
+    } finally {
+      setLoadingClients(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadClients();
+  }, [loadClients]);
+
+  usePlatformRefresh(loadClients);
 
   useEffect(() => {
     const oid = searchParams.get('ownerId');

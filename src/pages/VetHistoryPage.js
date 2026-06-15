@@ -13,6 +13,7 @@ import {
 import { getVetClinicalReport, getVetNutritionRecommendation } from '../services/vetService';
 import { exportVetClinicalReportPdf, exportDossierFromReport } from '../utils/vetClinicalReportPdf';
 import { exportMedicalDossierPdf } from '../utils/medicalDossierPdf';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const typeIcon = {
   appointment: '📅',
@@ -102,6 +103,11 @@ const VetHistoryPage = () => {
     fetchNutrition({ petName: pet, ownerId: owner });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
+  usePlatformRefresh(() => {
+    fetchHistory();
+    fetchNutrition();
+  });
 
   const selectedClient = useMemo(
     () => clients.find((c) => (c.id || c._id) === ownerId),

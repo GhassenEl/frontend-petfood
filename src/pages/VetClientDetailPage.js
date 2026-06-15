@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api from '../utils/api';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import {
   DEMO_VET_HISTORY,
   getDemoVetClient,
@@ -17,35 +18,39 @@ const VetClientDetailPage = () => {
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data } = await api.get(`/vet/clients/${id}`);
+      if (data?.name) {
+        setClient(data);
+        return;
+      }
+    } catch {
+      /* fallback démo */
+    }
+    const fromDemo =
+      getDemoVetClient(id) ||
+      loadExtraVetClients().find((c) => clientId(c) === id);
+    if (fromDemo) {
+      setClient(fromDemo);
+    } else {
       try {
-        const { data } = await api.get(`/vet/clients/${id}`);
-        if (data?.name) {
-          setClient(data);
-          return;
-        }
+        const { data: list } = await api.get('/vet/clients');
+        const merged = mergeVetClients(list);
+        setClient(merged.find((c) => clientId(c) === id) || null);
       } catch {
-        /* fallback démo */
+        setClient(getDemoVetClient(id) || null);
       }
-      const fromDemo =
-        getDemoVetClient(id) ||
-        loadExtraVetClients().find((c) => clientId(c) === id);
-      if (fromDemo) {
-        setClient(fromDemo);
-      } else {
-        try {
-          const { data: list } = await api.get('/vet/clients');
-          const merged = mergeVetClients(list);
-          setClient(merged.find((c) => clientId(c) === id) || null);
-        } catch {
-          setClient(getDemoVetClient(id) || null);
-        }
-      }
-    };
-    load().finally(() => setLoading(false));
+    }
+    setLoading(false);
   }, [id]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  usePlatformRefresh(load);
 
   const recentConsultations = useMemo(() => {
     return (DEMO_VET_HISTORY.consultations || [])

@@ -6,6 +6,7 @@ import { withDemoRoute } from '../utils/livreurDemoData';
 import LivreurDeliveryMap from '../components/LivreurDeliveryMap';
 import LivreurMissionPanel from '../components/LivreurMissionPanel';
 import useLivreurGps from '../hooks/useLivreurGps';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const LivreurRoutePage = () => {
   const [route, setRoute] = useState(null);
@@ -28,6 +29,8 @@ const LivreurRoutePage = () => {
   useEffect(() => {
     loadRoute();
   }, [loadRoute]);
+
+  usePlatformRefresh(() => loadRoute(gps));
 
   const useMyPosition = () => {
     if (!navigator.geolocation) {

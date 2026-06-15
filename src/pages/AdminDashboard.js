@@ -19,6 +19,7 @@ import {
   withDemoFallback,
   withDemoStats,
 } from '../utils/adminDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -41,6 +42,12 @@ const AdminDashboard = () => {
     }, 15000);
     return () => window.clearInterval(id);
   }, []);
+
+  usePlatformRefresh(() => {
+    fetchStats();
+    fetchChartData();
+    fetchRecentActivity();
+  });
 
   const fetchStats = async () => {
     try {

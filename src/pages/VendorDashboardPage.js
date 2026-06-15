@@ -12,6 +12,7 @@ import { fetchAdminVendor, fetchVendorDashboard, registerVendor } from '../servi
 import { formatDT } from '../utils/formatCurrency';
 import { getDemoAdminVendorDetail, getDemoVendorDashboard } from '../utils/vendorDemoData';
 import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const card = {
   background: '#fff',
@@ -91,7 +92,11 @@ const VendorDashboardPage = ({ vendorId = null, adminPreview = false }) => {
 
   useEffect(() => {
     load();
+    const id = window.setInterval(load, 20000);
+    return () => window.clearInterval(id);
   }, [vendorId, adminPreview]);
+
+  usePlatformRefresh(load);
 
   const chartData = useMemo(
     () => (dash?.salesTrend || []).map((s) => ({

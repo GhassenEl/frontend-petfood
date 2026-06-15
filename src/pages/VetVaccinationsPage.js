@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import { DEMO_VET_VACCINATIONS, withDemoFallback } from '../utils/vetDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const statusStyle = (status, nextDue) => {
   const overdue = nextDue && new Date(nextDue) < new Date();
@@ -15,12 +16,22 @@ const VetVaccinationsPage = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
 
-  useEffect(() => {
-    api.get('/vet/vaccinations')
-      .then(({ data }) => setVaccines(withDemoFallback(data, DEMO_VET_VACCINATIONS)))
-      .catch(() => setVaccines(DEMO_VET_VACCINATIONS))
-      .finally(() => setLoading(false));
+  const load = useCallback(async () => {
+    try {
+      const { data } = await api.get('/vet/vaccinations');
+      setVaccines(withDemoFallback(data, DEMO_VET_VACCINATIONS));
+    } catch {
+      setVaccines(DEMO_VET_VACCINATIONS);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  usePlatformRefresh(load);
 
   const filtered = useMemo(() => {
     const now = new Date();

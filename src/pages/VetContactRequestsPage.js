@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { DEMO_VET_CONTACT_REQUESTS, isDemoVetId, withDemoFallback } from '../utils/vetDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const STATUS_LABELS = {
   pending: 'En attente',
@@ -15,10 +16,6 @@ const VetContactRequestsPage = () => {
   const [responseText, setResponseText] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchRequests();
-  }, []);
-
   const fetchRequests = async () => {
     try {
       const { data } = await api.get('/vet/contact-requests');
@@ -30,6 +27,12 @@ const VetContactRequestsPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
+  usePlatformRefresh(fetchRequests);
 
   const openModal = (req, status) => {
     setModal({ id: req.id || req._id, status, subject: req.subject });

@@ -10,6 +10,7 @@ import {
   formatMedicationLine,
   validateMedications,
 } from '../utils/medications';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const VetPrescriptionsPage = () => {
   const [prescriptions, setPrescriptions] = useState([]);
@@ -22,10 +23,6 @@ const VetPrescriptionsPage = () => {
     instructions: '',
   });
   const [clients, setClients] = useState([]);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const fetchData = async () => {
     try {
@@ -41,6 +38,12 @@ const VetPrescriptionsPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  usePlatformRefresh(fetchData);
 
   const handleCreate = async (e) => {
     e.preventDefault();

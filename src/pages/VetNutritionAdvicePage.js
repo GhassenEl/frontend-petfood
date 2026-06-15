@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Utensils, Sparkles } from 'lucide-react';
 import api from '../utils/api';
 import { mergeVetClients } from '../utils/vetDemoData';
 import { getVetNutritionRecommendation } from '../services/vetService';
 import { DEMO_VET_NUTRITION } from '../utils/vetDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const VetNutritionAdvicePage = () => {
   const [clients, setClients] = useState([]);
@@ -12,11 +13,20 @@ const VetNutritionAdvicePage = () => {
   const [advice, setAdvice] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    api.get('/vet/clients')
-      .then(({ data }) => setClients(mergeVetClients(data)))
-      .catch(() => setClients(mergeVetClients([])));
+  const loadClients = useCallback(async () => {
+    try {
+      const { data } = await api.get('/vet/clients');
+      setClients(mergeVetClients(data));
+    } catch {
+      setClients(mergeVetClients([]));
+    }
   }, []);
+
+  useEffect(() => {
+    loadClients();
+  }, [loadClients]);
+
+  usePlatformRefresh(loadClients);
 
   const generate = async (e) => {
     e.preventDefault();

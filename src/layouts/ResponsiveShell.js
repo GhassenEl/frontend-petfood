@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import PlatformLiveBadge from '../components/PlatformLiveBadge';
 
 /**
  * En-tête mobile + panneau latéral coulissant pour les trois plateformes (client / admin / livreur).
@@ -46,6 +47,7 @@ const ResponsiveShell = ({ children, sidebar, roleBadge, className = '', bottomN
             {roleBadge}
           </span>
         ) : null}
+        <PlatformLiveBadge />
       </header>
 
       {mobileNavOpen ? (
@@ -62,6 +64,9 @@ const ResponsiveShell = ({ children, sidebar, roleBadge, className = '', bottomN
       </div>
 
       <main id="contenu-principal" className="main-area main-area--platform" tabIndex={-1}>
+        <div className="platform-live-bar">
+          <PlatformLiveBadge />
+        </div>
         <div className="page-content-shell">{children}</div>
       </main>
       {bottomNav}

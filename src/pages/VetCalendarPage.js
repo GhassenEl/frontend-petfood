@@ -7,6 +7,7 @@ import {
   DEMO_VET_UNASSIGNED,
   withDemoFallback,
 } from '../utils/vetDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const statusLabel = {
   scheduled: 'Planifié',
@@ -53,10 +54,6 @@ const VetCalendarPage = () => {
     setTimeout(() => setToast(null), 3500);
   };
 
-  useEffect(() => {
-    fetchAppointments();
-  }, []);
-
   const fetchAppointments = async () => {
     try {
       const [apptRes, unassignedRes] = await Promise.all([
@@ -74,6 +71,12 @@ const VetCalendarPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  usePlatformRefresh(fetchAppointments);
 
   const claimAppt = async (id) => {
     if (!id) return;

@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const LivreurProfilePage = () => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', region: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
 
   const fetchProfile = async () => {
     try {
@@ -28,6 +25,12 @@ const LivreurProfilePage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  usePlatformRefresh(fetchProfile);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

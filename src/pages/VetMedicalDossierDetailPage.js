@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import api from '../utils/api';
 import SignaturePad from '../components/SignaturePad';
 import { exportMedicalDossierPdf } from '../utils/medicalDossierPdf';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const card = {
   background: 'white',
@@ -62,6 +63,8 @@ const VetMedicalDossierDetailPage = () => {
   useEffect(() => {
     load();
   }, [load]);
+
+  usePlatformRefresh(load);
 
   const handleIdentitySave = async (e) => {
     e.preventDefault();

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { fetchModeratorDashboard } from '../services/moderatorService';
 import { DEMO_MODERATOR_QUEUE } from '../utils/moderatorDemoData';
 import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import './ModeratorPages.css';
 
 const TYPE_ICONS = {
@@ -25,13 +26,22 @@ const ModeratorDashboard = () => {
   const [demo, setDemo] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const load = () => {
+    setLoading(true);
     fetchModeratorDashboard().then(({ data, demo: isDemo }) => {
       setStats(data);
       setDemo(isDemo);
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    load();
+    const id = window.setInterval(load, 20000);
+    return () => window.clearInterval(id);
   }, []);
+
+  usePlatformRefresh(load);
 
   if (loading) {
     return <div className="mod-page"><p className="mod-empty">Chargement du tableau de bord…</p></div>;

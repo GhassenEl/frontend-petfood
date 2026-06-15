@@ -7,6 +7,7 @@ import { DEMO_LIVREUR_ORDERS, withDemoFallback } from '../utils/livreurDemoData'
 import { getPaymentLabel } from '../constants/paymentMethods';
 import DeliveryProofModal from '../components/DeliveryProofModal';
 import useLivreurGps from '../hooks/useLivreurGps';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const oid = (o) => o?.id || o?._id;
 
@@ -33,9 +34,26 @@ const LivreurOrdersPage = () => {
   const hasActive = orders.some((o) => o.status === 'shipped');
   useLivreurGps(hasActive);
 
+  const fetchOrders = async () => {
+    try {
+      const res = await api.get('/orders');
+      const data = withDemoFallback(res.data || [], DEMO_LIVREUR_ORDERS);
+      setOrders(data);
+      setFilteredOrders(data);
+    } catch (error) {
+      console.error('Orders error:', error);
+      setOrders(DEMO_LIVREUR_ORDERS);
+      setFilteredOrders(DEMO_LIVREUR_ORDERS);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  usePlatformRefresh(fetchOrders);
 
   useEffect(() => {
     let result = [...orders];
@@ -68,21 +86,6 @@ const LivreurOrdersPage = () => {
 
     setFilteredOrders(result);
   }, [orders, searchTerm, statusFilter, sortBy]);
-
-  const fetchOrders = async () => {
-    try {
-      const res = await api.get('/orders');
-      const data = withDemoFallback(res.data || [], DEMO_LIVREUR_ORDERS);
-      setOrders(data);
-      setFilteredOrders(data);
-    } catch (error) {
-      console.error('Orders error:', error);
-      setOrders(DEMO_LIVREUR_ORDERS);
-      setFilteredOrders(DEMO_LIVREUR_ORDERS);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const claimOrder = async (orderId) => {
     setClaiming(orderId);

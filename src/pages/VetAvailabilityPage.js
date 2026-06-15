@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const DAYS = [
   { key: 'mon', label: 'Lundi' },
@@ -48,7 +49,7 @@ const VetAvailabilityPage = () => {
   const [saved, setSaved] = useState(false);
   const [updatedAt, setUpdatedAt] = useState(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const { data } = await api.get('/vet/availability');
@@ -63,11 +64,13 @@ const VetAvailabilityPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
+
+  usePlatformRefresh(load);
 
   const persist = async (patch = {}) => {
     setSaving(true);

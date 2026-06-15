@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import useVetMlAgents from '../hooks/useVetMlAgents';
 import useVetClinicalMlAgent from '../hooks/useVetClinicalMlAgent';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const TABS = [
   { id: 'clinical', label: 'Anomalies & maladie', icon: Activity },
@@ -21,6 +22,8 @@ const VetMlAgentPage = () => {
   const pack =
     tab === 'clinical' ? clinicalPack : tab === 'clinic' ? clinic : tab === 'pharmacy' ? pharmacy : vet;
   const isLoading = tab === 'clinical' ? clinicalLoading : loading;
+
+  usePlatformRefresh(reload);
 
   return (
     <div style={{ padding: 24, maxWidth: 1100, margin: '0 auto' }}>

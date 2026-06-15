@@ -4,18 +4,13 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import api from '../utils/api';
 import { withDemoStats, DEMO_LIVREUR_STATS } from '../utils/livreurDemoData';
 import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const COLORS = ['#27ae60', '#f39c12', '#3498db', '#e74c3c', '#9b59b6'];
 
 const LivreurStatsPage = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchStats();
-    const id = window.setInterval(fetchStats, 12000);
-    return () => window.clearInterval(id);
-  }, []);
 
   const fetchStats = async () => {
     try {
@@ -28,6 +23,14 @@ const LivreurStatsPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchStats();
+    const id = window.setInterval(fetchStats, 12000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  usePlatformRefresh(fetchStats);
 
   if (loading) {
     return (

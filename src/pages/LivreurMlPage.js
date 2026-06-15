@@ -2,9 +2,12 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Brain, TrendingUp, AlertTriangle, Package, Route } from 'lucide-react';
 import useLivreurMlRisk from '../hooks/useLivreurMlRisk';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const LivreurMlPage = () => {
-  const { data, loading, pythonPowered, poolPriority } = useLivreurMlRisk();
+  const { data, loading, pythonPowered, poolPriority, reload } = useLivreurMlRisk();
+
+  usePlatformRefresh(reload);
 
   return (
     <div style={{ padding: 24, maxWidth: 1000, margin: '0 auto' }}>
