@@ -60,6 +60,7 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
       title: '🛒 Boutique',
       items: [
         { id: 'client-products', label: 'Produits', icon: '🏷️' },
+        { id: 'client-purchase-needs', label: 'Besoins d\'achat', icon: '📢' },
         { id: 'client-favorites', label: 'Mes favoris', icon: '❤️' },
         { id: 'client-orders', label: 'Mes commandes', icon: '📦' },
         { id: 'client-invoices', label: 'Mes factures', icon: '🧾' },

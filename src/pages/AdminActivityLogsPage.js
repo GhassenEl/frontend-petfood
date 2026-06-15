@@ -25,6 +25,8 @@ const ACTION_LABELS = {
   upload_image: 'Image uploadée',
   login_success: 'Connexion réussie',
   login_failed: 'Échec connexion',
+  publish_purchase_need: 'Besoin d\'achat publié',
+  respond_purchase_need: 'Réponse besoin d\'achat',
   price_policy_update: 'Politique prix mise à jour',
   update_stock: 'Stock mis à jour',
   accept_order: 'Commande acceptée',

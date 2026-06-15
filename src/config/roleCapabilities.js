@@ -23,6 +23,7 @@ export const ROLE_CAPABILITIES = [
       { label: 'Gérer son profil', route: '/client-profile' },
       { label: 'Gérer ses animaux', route: '/client-pets' },
       { label: 'Commander des produits', route: '/client-products' },
+      { label: 'Publier un besoin d\'achat', route: '/client-purchase-needs' },
       { label: 'Payer en ligne', route: '/checkout' },
       { label: 'Suivre les commandes', route: '/client-orders' },
       { label: 'Recommandations nutrition', route: '/pet-calories' },

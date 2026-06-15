@@ -51,6 +51,7 @@ import ClientIoTHubPage from './pages/ClientIoTHubPage';
 import ClientSmartDeliveryPage from './pages/ClientSmartDeliveryPage';
 import EventsPage from './pages/EventsPage';
 import FoundMePage from './pages/FoundMePage';
+import ClientPurchaseNeedsPage from './pages/ClientPurchaseNeedsPage';
 import ContactPage from './pages/ContactPage';
 import StoreLocatorPage from './pages/StoreLocatorPage';
 import VeterinaryPage from './pages/VeterinaryPage';
@@ -106,6 +107,7 @@ import VendorProductsPage from './pages/VendorProductsPage';
 import VendorOrdersPage from './pages/VendorOrdersPage';
 import VendorReturnsPage from './pages/VendorReturnsPage';
 import VendorCommunicationPage from './pages/VendorCommunicationPage';
+import VendorPurchaseNeedsPage from './pages/VendorPurchaseNeedsPage';
 import ModeratorLayout from './layouts/ModeratorLayout';
 import ModeratorDashboard from './pages/ModeratorDashboard';
 import ModeratorContentPage from './pages/ModeratorContentPage';
@@ -292,6 +294,7 @@ const App = () => {
       <Route path="/client-history" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientHistoryPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-events" element={<RoleRoute user={user} roles={['client']}><ClientLayout><EventsPage /></ClientLayout></RoleRoute>} />
       <Route path="/found-me" element={<RoleRoute user={user} roles={['client']}><ClientLayout><FoundMePage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-purchase-needs" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPurchaseNeedsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-services" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientServicesPage /></ClientLayout></RoleRoute>} />
       <Route path="/platform-services" element={<RoleRoute user={user} roles={['client']}><ClientLayout><PlatformServicesPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-wallet" element={<Navigate to="/checkout" replace />} />
@@ -375,6 +378,7 @@ const App = () => {
       <Route path="/vendor/sales" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorSalesPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/returns" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorReturnsPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/communication" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorCommunicationPage /></VendorLayout></RoleRoute>} />
+      <Route path="/vendor/purchase-needs" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorPurchaseNeedsPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/ml" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorMlPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/bi" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RoleBiDashboardPage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/platform-services" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><PlatformServicesPage /></VendorLayout></RoleRoute>} />
