@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import api from '../utils/api';
 import { AdminMessageButton } from './AdminMessageButton';
+import { fetchPlatformRegions } from '../services/platformCitiesService';
 import { DEMO_ADMIN_REGIONS, DEMO_ADMIN_USERS, withDemoFallback } from '../utils/adminDemoData';
 import '../pages/AdminPages.css';
 
@@ -35,11 +36,11 @@ const AdminRegionalStaffList = ({ role, title, subtitle }) => {
       try {
         const [usersRes, regionsRes] = await Promise.all([
           api.get('/users'),
-          api.get('/users/regions').catch(() => ({ data: [] })),
+          fetchPlatformRegions(),
         ]);
         const all = withDemoFallback(usersRes.data || [], DEMO_ADMIN_USERS);
         setPeople(all.filter((u) => u.role === role));
-        setRegions((regionsRes.data || []).length ? regionsRes.data : DEMO_ADMIN_REGIONS);
+        setRegions((regionsRes.regions || []).length ? regionsRes.regions : DEMO_ADMIN_REGIONS);
       } catch {
         setPeople(DEMO_ADMIN_USERS.filter((u) => u.role === role));
         setRegions(DEMO_ADMIN_REGIONS);

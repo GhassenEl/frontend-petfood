@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Navigation, Phone, Stethoscope, LocateFixed } from 'lucide-react';
 import api from '../utils/api';
+import { fetchPlatformRegions } from '../services/platformCitiesService';
 import VetNearbyMap from './VetNearbyMap';
 
 const DEFAULT_CENTER = { lat: 36.8065, lng: 10.1815 };
@@ -52,12 +53,12 @@ const NearestVetCard = ({ compact = false }) => {
       try {
         const [profileRes, regionsRes] = await Promise.all([
           api.get('/users/profile').catch(() => ({ data: {} })),
-          api.get('/users/regions').catch(() => ({ data: [] })),
+          fetchPlatformRegions(),
         ]);
         initialRegion = profileRes.data?.region || '';
         setProfileRegion(initialRegion);
         setSelectedRegion(initialRegion);
-        if (regionsRes.data?.length) setRegions(regionsRes.data);
+        if (regionsRes.regions?.length) setRegions(regionsRes.regions);
       } catch {
         /* ignore */
       }

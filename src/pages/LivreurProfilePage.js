@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import RegionSelect from '../components/RegionSelect';
 
 const LivreurProfilePage = () => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', region: '' });
@@ -41,6 +42,7 @@ const LivreurProfilePage = () => {
         name: form.name,
         phone: form.phone,
         address: form.address,
+        region: form.region || null,
       });
       setMessage('✅ Profil mis à jour');
     } catch (error) {
@@ -94,10 +96,13 @@ const LivreurProfilePage = () => {
               style={inputStyle}
             />
           </label>
-          <div style={{ padding: '14px', background: '#ecfdf5', borderRadius: '12px' }}>
-            <p style={{ margin: 0, fontSize: '0.8rem', color: '#047857' }}>Région assignée (admin)</p>
-            <p style={{ margin: '4px 0 0', fontWeight: 800, color: '#065f46' }}>{form.region || 'Non assignée'}</p>
-          </div>
+          <RegionSelect
+            label="Zone de livraison"
+            value={form.region}
+            onChange={(region) => setForm({ ...form, region })}
+            hint="Région où vous effectuez vos livraisons — visible par l'administration."
+            showIcon
+          />
           {message && <p style={{ margin: 0, fontWeight: 600 }}>{message}</p>}
           <button type="submit" disabled={saving} style={saveBtnStyle}>
             {saving ? 'Enregistrement...' : '💾 Enregistrer'}

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { validatePassword, getPasswordStrength } from '../utils/loginValidation';
 import { mapAuthError } from '../utils/authErrors';
+import RegionSelect from '../components/RegionSelect';
 
 const TABS = [
   { id: 'profile', label: 'Profil', icon: '👤' },
@@ -14,7 +15,7 @@ const AdminProfilePage = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [tab, setTab] = useState('profile');
-  const [profile, setProfile] = useState({ name: '', email: '', phone: '', address: '' });
+  const [profile, setProfile] = useState({ name: '', email: '', phone: '', address: '', region: '' });
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
     newPassword: '',
@@ -37,6 +38,7 @@ const AdminProfilePage = () => {
         email: res.data.email || '',
         phone: res.data.phone || '',
         address: res.data.address || '',
+        region: res.data.region || '',
       });
     } catch (error) {
       setMessage({ type: 'error', text: 'Impossible de charger le profil.' });
@@ -169,6 +171,15 @@ const AdminProfilePage = () => {
                   placeholder="+216 …"
                 />
               </div>
+            </div>
+            <div style={s.field}>
+              <RegionSelect
+                label="Région / ville"
+                value={profile.region}
+                onChange={(region) => setProfile({ ...profile, region })}
+                hint="Utilisée pour le filtrage régional et les statistiques par zone."
+                showIcon
+              />
             </div>
             <div style={s.field}>
               <label style={s.label}>Adresse</label>

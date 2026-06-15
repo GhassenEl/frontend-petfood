@@ -12,6 +12,8 @@ import {
   validatePassword,
   validateRegisterForm,
 } from '../utils/loginValidation';
+import RegionSelect from '../components/RegionSelect';
+import { getStoredCity } from '../hooks/usePlatformCity';
 
 const RegisterPage = () => {
   const { register } = useAuth();
@@ -19,6 +21,7 @@ const RegisterPage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [region, setRegion] = useState(() => getStoredCity() || '');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -91,7 +94,7 @@ const RegisterPage = () => {
     }
 
     setLoading(true);
-    const result = await register({ name: trimmedName, email: trimmedEmail, password }, rememberMe);
+    const result = await register({ name: trimmedName, email: trimmedEmail, password, region: region || undefined }, rememberMe);
     setLoading(false);
 
     if (result.success) {
@@ -282,6 +285,17 @@ const RegisterPage = () => {
                 ⚠ {fieldErrors.email}
               </p>
             )}
+          </div>
+
+          <div style={styles.fieldGroup}>
+            <RegionSelect
+              label="Votre ville / région"
+              value={region}
+              onChange={setRegion}
+              allowEmpty
+              emptyLabel="— Optionnel —"
+              hint="Pré-rempli si vous avez déjà choisi une ville sur le site."
+            />
           </div>
 
           <div style={styles.fieldGroup}>

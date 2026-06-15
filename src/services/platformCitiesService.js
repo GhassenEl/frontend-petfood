@@ -10,6 +10,26 @@ export const fetchPublicCities = async () => {
   }
 };
 
+/** Noms de régions/villes — source unique (public, tous acteurs). */
+export const fetchPlatformRegions = async () => {
+  try {
+    const res = await api.get('/platform/regions');
+    const regions = res.data?.regions || [];
+    if (regions.length) return { regions, demo: false };
+  } catch {
+    /* fallback */
+  }
+  try {
+    const res = await api.get('/users/regions');
+    const regions = Array.isArray(res.data) ? res.data : [];
+    if (regions.length) return { regions, demo: false };
+  } catch {
+    /* fallback */
+  }
+  const fallback = (DEMO_CITIES_PACK.cities || []).map((c) => c.name).filter(Boolean);
+  return { regions: fallback.length ? fallback : [], demo: true };
+};
+
 export const fetchCitiesPack = async () => {
   try {
     const data = await api.get('/platform/cities/pack').then((r) => r.data);

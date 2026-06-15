@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import api from '../utils/api';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import RegionSelect from '../components/RegionSelect';
 
 const DAYS = [
   { key: 'mon', label: 'Lundi' },
@@ -26,6 +27,7 @@ const VetClinicPage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [servicesText, setServicesText] = useState('');
+  const [clinicRegion, setClinicRegion] = useState('');
 
   const load = useCallback(async () => {
     try {
@@ -36,6 +38,7 @@ const VetClinicPage = () => {
       setProfile(pRes.data);
       setStats(sRes.data);
       setServicesText((pRes.data?.services || []).join(', '));
+      setClinicRegion(pRes.data?.region || '');
     } catch (e) {
       console.error(e);
     } finally {
@@ -121,10 +124,13 @@ const VetClinicPage = () => {
             Urgences 24h
             <input name="emergencyPhone" defaultValue={profile?.emergencyPhone || ''} style={inputStyle} />
           </label>
-          <label style={labelStyle}>
-            Région
-            <input name="region" defaultValue={profile?.region || ''} style={inputStyle} />
-          </label>
+          <RegionSelect
+            name="region"
+            label="Région"
+            value={clinicRegion}
+            onChange={setClinicRegion}
+            showIcon
+          />
         </div>
         <label style={{ ...labelStyle, marginTop: 14 }}>
           Adresse

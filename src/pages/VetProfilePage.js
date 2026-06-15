@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import RegionSelect from '../components/RegionSelect';
 
 const VetProfilePage = () => {
-  const [form, setForm] = useState({ name: '', email: '', phone: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', region: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -15,6 +16,8 @@ const VetProfilePage = () => {
         name: res.data?.name || '',
         email: res.data?.email || '',
         phone: res.data?.phone || '',
+        address: res.data?.address || '',
+        region: res.data?.region || '',
       });
     } catch (error) {
       console.error('Profile error:', error);
@@ -34,7 +37,12 @@ const VetProfilePage = () => {
     setSaving(true);
     setMessage('');
     try {
-      await api.put('/users/profile', { name: form.name, phone: form.phone });
+      await api.put('/users/profile', {
+        name: form.name,
+        phone: form.phone,
+        address: form.address,
+        region: form.region || null,
+      });
       setMessage('✅ Profil mis à jour');
     } catch (error) {
       setMessage('❌ ' + (error.response?.data?.error || 'Erreur'));
@@ -62,6 +70,17 @@ const VetProfilePage = () => {
           <label style={{ fontWeight: 600, fontSize: '0.85rem' }}>
             Téléphone
             <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} style={inputStyle} />
+          </label>
+          <RegionSelect
+            label="Région d'exercice"
+            value={form.region}
+            onChange={(region) => setForm({ ...form, region })}
+            hint="Zone où vous consultez — visible pour les clients à la recherche d'un vétérinaire."
+            showIcon
+          />
+          <label style={{ fontWeight: 600, fontSize: '0.85rem' }}>
+            Adresse cabinet
+            <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} style={inputStyle} />
           </label>
           {message && <p style={{ margin: 0, fontWeight: 600 }}>{message}</p>}
           <button type="submit" disabled={saving} style={saveBtnStyle}>

@@ -5,7 +5,6 @@ import ClientSidebar from '../components/ClientSidebar';
 import ChatAssistant from '../components/ChatAssistant';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
-import CitySelector from '../components/CitySelector';
 import MobileBottomNav, { CLIENT_MOBILE_NAV } from '../components/MobileBottomNav';
 
 const CART_STORAGE_KEY = 'petfood_cart';
@@ -94,9 +93,6 @@ const ClientLayout = ({ children }) => {
       bottomNav={<MobileBottomNav items={CLIENT_MOBILE_NAV} />}
       sidebar={(onClose) => <ClientSidebar onLogout={logout} onNavigate={onClose} />}
     >
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
-        <CitySelector compact />
-      </div>
       {children}
       <button
         type="button"

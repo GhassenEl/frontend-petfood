@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import PlatformLiveBadge from '../components/PlatformLiveBadge';
+import CitySelector from '../components/CitySelector';
 
 /**
  * En-tête mobile + panneau latéral coulissant pour les trois plateformes (client / admin / livreur).
  */
-const ResponsiveShell = ({ children, sidebar, roleBadge, className = '', bottomNav = null }) => {
+const ResponsiveShell = ({ children, sidebar, roleBadge, className = '', bottomNav = null, showCitySelector = true }) => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const location = useLocation();
 
@@ -64,8 +64,9 @@ const ResponsiveShell = ({ children, sidebar, roleBadge, className = '', bottomN
       </div>
 
       <main id="contenu-principal" className="main-area main-area--platform" tabIndex={-1}>
-        <div className="platform-live-bar">
+        <div className="platform-live-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
           <PlatformLiveBadge />
+          {showCitySelector ? <CitySelector compact /> : null}
         </div>
         <div className="page-content-shell">{children}</div>
       </main>

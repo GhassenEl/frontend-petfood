@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import api from '../utils/api';
+import { getStoredToken } from '../utils/authStorage';
 import { DEMO_CITIES_PACK } from '../utils/adminDemoData';
 
 const STORAGE_KEY = 'petfood_selected_city';
@@ -59,6 +60,7 @@ const usePlatformCity = () => {
   const setSelectedCity = useCallback(async (city) => {
     setStoredCity(city);
     setSelectedCityState(city);
+    if (!getStoredToken()) return;
     try {
       await api.put('/users/profile', { region: city });
     } catch {
