@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingCart, Star, Package, Tag, Beaker, BookOpen, Sparkles } from 'lucide-react';
 import { getProductDetailFields, getEffectiveDiscount, getPromoPrice } from '../utils/productDetails';
+import VerifiedPriceBadge from './VerifiedPriceBadge';
 
 const ANIMAL_LABELS = { dog: 'Chien', cat: 'Chat', bird: 'Oiseau', fish: 'Poisson', other: 'Autre' };
 
@@ -117,6 +118,7 @@ const ProductDetailModal = ({ product, onClose, onAddToCart, getPrice, getImage,
                   </span>
                 </>
               )}
+              <VerifiedPriceBadge product={product} />
               {product.rating_avg > 0 && (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 14, color: '#f59e0b', fontWeight: 700 }}>
                   <Star size={16} fill="#f59e0b" /> {Number(product.rating_avg).toFixed(1)} ({product.rating_count || 0})

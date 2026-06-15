@@ -70,3 +70,14 @@ export const getPromoPrice = (product) => {
 };
 
 export const isOnPromotion = (product) => getEffectiveDiscount(product) > 0 || product?.isOnSale;
+
+export const formatPriceVerifiedDate = (iso) => {
+  if (!iso) return null;
+  try {
+    return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch {
+    return null;
+  }
+};
+
+export const isPriceVerified = (product) => Boolean(product?.priceVerified || product?.priceVerifiedAt);

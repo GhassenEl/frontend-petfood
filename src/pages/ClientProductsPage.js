@@ -11,6 +11,7 @@ import {
 import { getProfile } from '../services/userService';
 import { getFavoriteIds, addFavorite, removeFavorite, getFrequentProducts } from '../services/favoriteService';
 import ProductDetailModal from '../components/ProductDetailModal';
+import VerifiedPriceBadge from '../components/VerifiedPriceBadge';
 import {
   matchProductSearch,
   CATEGORY_FILTERS,
@@ -627,11 +628,12 @@ const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearb
           {product.description || 'Nourriture premium pour animaux'}
         </p>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
           <span style={{ fontSize: '20px', fontWeight: 800, color: '#059669' }}>{finalPrice} DT</span>
           {discount > 0 && (
             <span style={{ fontSize: '14px', color: '#9ca3af', textDecoration: 'line-through' }}>{product.price} DT</span>
           )}
+          <VerifiedPriceBadge product={product} compact />
         </div>
 
         {product.recommendedReason && (

@@ -133,6 +133,7 @@ import AdminStockBiPage from './pages/AdminStockBiPage';
 import AdminPlatformPerformancePage from './pages/AdminPlatformPerformancePage';
 import AdminPartnersHubPage from './pages/AdminPartnersHubPage';
 import AdminAdvancedAiPage from './pages/AdminAdvancedAiPage';
+import AdminPriceGovernancePage from './pages/AdminPriceGovernancePage';
 import ClientEcosystemHubPage from './pages/ClientEcosystemHubPage';
 import ClientAdvancedAiPage from './pages/ClientAdvancedAiPage';
 import ClientAIAgentPage from './pages/ClientAIAgentPage';
@@ -266,6 +267,7 @@ const App = () => {
       <Route path="/admin/stock-bi" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminStockBiPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/performance" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPlatformPerformancePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/partners" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPartnersHubPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/prices" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPriceGovernancePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/profile" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminProfilePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/platform-services" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><PlatformServicesPage /></AdminLayout></RoleRoute>} />
 
