@@ -52,6 +52,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'invoices', label: 'Factures', icon: '🧾' },
         { id: 'products', label: 'Produits', icon: '🏷️' },
         { id: 'prices', label: 'Gouvernance prix', icon: '💲' },
+        { id: 'cities', label: 'Réseau villes', icon: '🏙️' },
         { id: 'categories', label: 'Catégories', icon: '📁' },
         { id: 'stock', label: 'Stock avancé', icon: '📦' },
         { id: 'promotions', label: 'Promotions & coupons', icon: '🎟️' },

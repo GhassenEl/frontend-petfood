@@ -134,6 +134,8 @@ import AdminPlatformPerformancePage from './pages/AdminPlatformPerformancePage';
 import AdminPartnersHubPage from './pages/AdminPartnersHubPage';
 import AdminAdvancedAiPage from './pages/AdminAdvancedAiPage';
 import AdminPriceGovernancePage from './pages/AdminPriceGovernancePage';
+import AdminCitiesHubPage from './pages/AdminCitiesHubPage';
+import PlatformCitiesPage from './pages/PlatformCitiesPage';
 import ClientEcosystemHubPage from './pages/ClientEcosystemHubPage';
 import ClientAdvancedAiPage from './pages/ClientAdvancedAiPage';
 import ClientAIAgentPage from './pages/ClientAIAgentPage';
@@ -268,6 +270,7 @@ const App = () => {
       <Route path="/admin/performance" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPlatformPerformancePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/partners" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPartnersHubPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/prices" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPriceGovernancePage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/cities" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminCitiesHubPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/profile" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminProfilePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/platform-services" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><PlatformServicesPage /></AdminLayout></RoleRoute>} />
 
@@ -312,6 +315,7 @@ const App = () => {
       <Route path="/client-smart-delivery" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSmartDeliveryPage /></ClientLayout></RoleRoute>} />
       <Route path="/contact" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ContactPage /></ClientLayout></RoleRoute>} />
       <Route path="/store-locator" element={<RoleRoute user={user} roles={['client']}><ClientLayout><StoreLocatorPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-cities" element={<RoleRoute user={user} roles={['client']}><ClientLayout><PlatformCitiesPage /></ClientLayout></RoleRoute>} />
       <Route path="/pet-feeder" element={<RoleRoute user={user} roles={['client']}><ClientLayout><PetFeederPage /></ClientLayout></RoleRoute>} />
       <Route path="/veterinary" element={<RoleRoute user={user} roles={['client']}><ClientLayout><VeterinaryPage /></ClientLayout></RoleRoute>} />
       <Route path="/medical-dossier" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientMedicalDossierPage /></ClientLayout></RoleRoute>} />

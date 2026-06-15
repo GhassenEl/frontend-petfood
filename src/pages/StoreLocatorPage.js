@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Clock, Navigation, Store } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import api from '../utils/api';
+import usePlatformCity from '../hooks/usePlatformCity';
 
 const StoreLocatorPage = () => {
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(null);
   const [nearbyStores, setNearbyStores] = useState([]);
+  const { selectedCity } = usePlatformCity();
 
   useEffect(() => {
     const fetchStores = async () => {
       try {
-        const res = await api.get('/users/store-locations');
+        const params = selectedCity ? { city: selectedCity } : {};
+        const res = await api.get('/users/store-locations', { params });
         setStores(res.data || []);
       } catch (error) {
         console.error('Stores error', error);
@@ -24,7 +28,9 @@ const StoreLocatorPage = () => {
 
     const fetchNearbyStores = async (lat, lng) => {
       try {
-        const res = await api.get(`/users/store-locations?lat=${lat}&lng=${lng}&radius=50`);
+        const q = new URLSearchParams({ lat, lng, radius: 80 });
+        if (selectedCity) q.set('city', selectedCity);
+        const res = await api.get(`/users/store-locations?${q}`);
         setNearbyStores(res.data || []);
       } catch (error) {
         console.error('Nearby stores error', error);
@@ -63,7 +69,7 @@ const StoreLocatorPage = () => {
 
     fetchStores();
     getUserLocation();
-  }, []);
+  }, [selectedCity]);
 
   const openInMaps = (lat, lng, name) => {
     window.open(`https://www.google.com/maps?q=${lat},${lng}(${encodeURIComponent(name)})`, '_blank');
@@ -108,12 +114,15 @@ const StoreLocatorPage = () => {
           Nos Magasins PetfoodTN
         </h1>
         <p style={{ margin: '8px 0 0', color: '#777', fontSize: '0.95rem' }}>
-          Trouvez le magasin le plus proche de chez vous 🐕🐈
+          {selectedCity ? `Magasins et services à ${selectedCity}` : 'Trouvez le magasin le plus proche de chez vous'} 🐕🐈
         </p>
         <p style={{ margin: '12px 0 0', fontSize: '0.9rem' }}>
-          <a href="/client-relay-points" style={{ color: '#1d4ed8', fontWeight: 700 }}>
-            Points relais partenaires (animaleries & cliniques) →
-          </a>
+          <Link to="/client-cities" style={{ color: '#0d9488', fontWeight: 700, marginRight: 12 }}>
+            Voir toutes nos villes →
+          </Link>
+          <Link to="/client-relay-points" style={{ color: '#1d4ed8', fontWeight: 700 }}>
+            Points relais partenaires →
+          </Link>
         </p>
         {userLocation && (
           <span style={{

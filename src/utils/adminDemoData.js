@@ -334,7 +334,10 @@ export const DEMO_ADMIN_LEAVE_REQUESTS = [
   },
 ];
 
-export const DEMO_ADMIN_REGIONS = ['Grand Tunis', 'Ariana', 'La Marsa', 'Lac 1', 'Carthage', 'Manouba', 'Tunis', 'Sfax', 'Sousse', 'Nabeul'];
+export const DEMO_ADMIN_REGIONS = [
+  'Tunis', 'Ariana', 'La Marsa', 'Lac 1', 'Sfax', 'Sousse', 'Nabeul', 'Hammamet',
+  'Bizerte', 'Monastir', 'Mahdia', 'Gabès', 'Kairouan', 'Gafsa', 'Djerba', 'Tozeur',
+];
 
 export const DEMO_ADMIN_VENDORS = [
   {
@@ -1010,6 +1013,68 @@ export const DEMO_PRICE_GOVERNANCE_PACK = {
     { id: 'prd_cat_1', name: 'Pâtée chat saumon x12', price: 26.5, discount: 0, category: 'nourriture', animalType: 'cat', stock: 120, priceVerified: true, priceVerifiedAt: daysAgo(2), priceStatus: 'ok' },
     { id: 'prd_cat_3', name: 'Croquettes chat saumon 3 kg', price: 42.5, discount: 55, category: 'nourriture', animalType: 'cat', stock: 18, priceVerified: false, priceVerifiedAt: null, priceStatus: 'high_discount' },
     { id: 'prd_dog_3', name: 'Pâtée chien bœuf 400 g', price: 8.9, discount: 0, category: 'nourriture', animalType: 'dog', stock: 200, priceVerified: true, priceVerifiedAt: daysAgo(2), priceStatus: 'ok' },
+  ],
+};
+
+const demoCity = (name, governorate, lat, lng, stats) => ({
+  id: `city-${slug(name)}`,
+  name,
+  slug: slug(name),
+  governorate,
+  lat,
+  lng,
+  isActive: true,
+  deliveryEnabled: true,
+  pickupEnabled: true,
+  storeAddress: `Point PetfoodTN ${name}`,
+  storePhone: '+216 71 000 000',
+  storeHours: '09:00 - 20:00',
+  stats,
+  store: {
+    id: slug(name),
+    name: `PetfoodTN ${name}`,
+    city: name,
+    governorate,
+    address: `Point PetfoodTN ${name}`,
+    lat,
+    lng,
+    phone: '+216 71 000 000',
+    hours: '09:00 - 20:00',
+    deliveryEnabled: true,
+    pickupEnabled: true,
+  },
+});
+
+const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+/** Réseau multi-villes PetfoodTN (démo). */
+export const DEMO_CITIES_PACK = {
+  mode: 'demo',
+  stats: {
+    totalCities: 16,
+    activeCities: 16,
+    governorates: 12,
+    deliveryZones: 16,
+    pickupPoints: 16,
+  },
+  governorates: ['Ariana', 'Bizerte', 'Gabès', 'Gafsa', 'Kairouan', 'Mahdia', 'Médenine', 'Monastir', 'Nabeul', 'Sfax', 'Sousse', 'Tozeur', 'Tunis'],
+  cities: [
+    demoCity('Tunis', 'Tunis', 36.8065, 10.1815, { livreurs: 3, vendors: 2, vets: 4, relayPoints: 3, coverageScore: 100 }),
+    demoCity('Ariana', 'Ariana', 36.8625, 10.1956, { livreurs: 2, vendors: 1, vets: 2, relayPoints: 2, coverageScore: 100 }),
+    demoCity('La Marsa', 'Tunis', 36.878, 10.3247, { livreurs: 1, vendors: 1, vets: 2, relayPoints: 1, coverageScore: 100 }),
+    demoCity('Lac 1', 'Tunis', 36.837, 10.242, { livreurs: 2, vendors: 1, vets: 1, relayPoints: 2, coverageScore: 100 }),
+    demoCity('Sfax', 'Sfax', 34.7406, 10.7603, { livreurs: 2, vendors: 1, vets: 2, relayPoints: 2, coverageScore: 100 }),
+    demoCity('Sousse', 'Sousse', 35.8256, 10.637, { livreurs: 2, vendors: 1, vets: 2, relayPoints: 2, coverageScore: 100 }),
+    demoCity('Nabeul', 'Nabeul', 36.4513, 10.7357, { livreurs: 1, vendors: 1, vets: 1, relayPoints: 1, coverageScore: 100 }),
+    demoCity('Hammamet', 'Nabeul', 36.4, 10.6167, { livreurs: 1, vendors: 0, vets: 1, relayPoints: 1, coverageScore: 75 }),
+    demoCity('Bizerte', 'Bizerte', 37.2744, 9.8739, { livreurs: 1, vendors: 0, vets: 1, relayPoints: 1, coverageScore: 75 }),
+    demoCity('Monastir', 'Monastir', 35.7643, 10.8113, { livreurs: 1, vendors: 0, vets: 1, relayPoints: 1, coverageScore: 75 }),
+    demoCity('Mahdia', 'Mahdia', 35.5028, 11.0627, { livreurs: 1, vendors: 0, vets: 1, relayPoints: 0, coverageScore: 50 }),
+    demoCity('Gabès', 'Gabès', 33.8815, 10.0982, { livreurs: 1, vendors: 0, vets: 1, relayPoints: 1, coverageScore: 75 }),
+    demoCity('Kairouan', 'Kairouan', 35.6781, 10.0963, { livreurs: 1, vendors: 0, vets: 1, relayPoints: 0, coverageScore: 50 }),
+    demoCity('Gafsa', 'Gafsa', 34.425, 8.7842, { livreurs: 1, vendors: 0, vets: 0, relayPoints: 0, coverageScore: 25 }),
+    demoCity('Djerba', 'Médenine', 33.875, 10.8575, { livreurs: 1, vendors: 0, vets: 1, relayPoints: 1, coverageScore: 75 }),
+    demoCity('Tozeur', 'Tozeur', 33.9197, 8.1335, { livreurs: 1, vendors: 0, vets: 0, relayPoints: 0, coverageScore: 25 }),
   ],
 };
 

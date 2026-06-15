@@ -99,6 +99,7 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         { id: 'veterinary', label: 'Santé & Vétérinaire', icon: '🩺' },
         { id: 'medical-dossier', label: 'Dossier médical', icon: '📁' },
         { id: 'store-locator', label: 'Magasin le plus proche', icon: '📍' },
+        { id: 'client-cities', label: 'Nos villes', icon: '🏙️' },
         { id: 'contact', label: 'Contact', icon: '📧' },
       ]
     },
