@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import api from '../utils/api';
 import { PRODUCT_CATEGORIES } from '../constants/productCategories';
+import AdminImageUpload from '../components/AdminImageUpload';
+import { resolveUploadPreviewUrl } from '../services/uploadService';
 
 const emptyForm = {
   name: '',
@@ -246,7 +248,7 @@ const AdminProducts = () => {
                   </td>
                   <td style={styles.td}>
                     <img
-                      src={product.imageUrl || product.image || 'https://via.placeholder.com/50?text=🐕'}
+                      src={resolveUploadPreviewUrl(product.imageUrl || product.image) || 'https://via.placeholder.com/50?text=🐕'}
                       alt={product.name}
                       style={styles.productImg}
                       onError={(e) => { e.target.src = 'https://via.placeholder.com/50?text=🐕'; }}
@@ -380,7 +382,12 @@ const AdminProducts = () => {
                 </select>
               </div>
               <input type="number" step="1" placeholder="Stock" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} style={styles.input} />
-              <input placeholder="URL de l'image" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} style={styles.input} />
+              <AdminImageUpload
+                label="Image produit"
+                folder="products"
+                value={formData.imageUrl}
+                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+              />
               <textarea placeholder="Description" rows="3" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} style={styles.input} />
               <div style={styles.modalActions}>
                 <button type="button" style={styles.cancelBtn} onClick={closeModal}>Annuler</button>

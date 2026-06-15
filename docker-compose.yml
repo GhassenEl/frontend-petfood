@@ -37,6 +37,8 @@ services:
         condition: service_healthy
     ports:
       - '${BACKEND_PORT:-5002}:5002'
+    volumes:
+      - backend_uploads:/app/uploads
     healthcheck:
       test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:5002/health']
       interval: 15s
@@ -67,3 +69,4 @@ services:
 
 volumes:
   pgdata:
+  backend_uploads:

@@ -12,6 +12,7 @@ import {
   updateVendorCategory,
   deleteVendorCategory,
 } from '../services/vendorService';
+import AdminImageUpload from '../components/AdminImageUpload';
 import './VendorPages.css';
 
 const emptyProduct = {
@@ -166,9 +167,12 @@ const VendorProductsPage = () => {
                 <label>Promotion (%)
                   <input type="number" min="0" max="90" value={form.promotionPercent} onChange={(e) => setForm({ ...form, promotionPercent: e.target.value })} />
                 </label>
-                <label>URL photo
-                  <input placeholder="https://..." value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
-                </label>
+                <AdminImageUpload
+                  label="Photo produit"
+                  folder="products"
+                  value={form.imageUrl}
+                  onChange={(url) => setForm({ ...form, imageUrl: url })}
+                />
               </div>
               <label style={{ display: 'block', marginBottom: 12, fontSize: '0.8rem', fontWeight: 600, color: '#475569' }}>
                 Description
