@@ -712,21 +712,47 @@ export const getDemoProductTraceability = (productId, productName = 'Croquettes 
     { certId: 'CERT-ISO22000', type: 'ISO 22000', issuer: 'TUNAC', standard: 'Sécurité alimentaire', verified: true },
     { certId: 'CERT-BIO-TN', type: 'Bio Tunisie', issuer: 'ONAB', standard: 'Agriculture biologique', verified: true },
   ],
-  supplyChain: [
-    { label: 'Production', location: 'Béja, Tunisie', actor: 'NutriPet SARL', timestamp: daysAgo(40), hash: 'a3f8c2e1b9d04f6a8e7c5d3b2a1f0e9d8c7b6a5' },
-    { label: 'Conditionnement', location: 'Béja, Tunisie', actor: 'PetfoodTN Logistique', timestamp: daysAgo(35), hash: 'b4e9d3f2c0a15e7b9d8f6e4c3b2a1f0e9d8c7b6a5f4' },
-    { label: 'Expédition', location: 'Tunis', actor: 'Hub PetfoodTN', timestamp: daysAgo(20), hash: 'c5f0e4a3b1c26f8d0b9a7e5d4c3b2a1f0e9d8c7b6a5f4e3' },
-  ],
   blockchain: {
     network: 'PetfoodTN Chain (SHA-256)',
-    blockCount: 3,
+    algorithm: 'SHA-256',
+    blockCount: 5,
     rootHash: 'a3f8c2e1b9d04f6a8e7c5d3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6',
-    lastBlockHash: 'c5f0e4a3b1c26f8d0b9a7e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6',
+    lastBlockHash: 'e6f1a5b4c3d26f8e0d9b7a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8',
     isVerified: true,
-    verification: { valid: true, reason: 'Chaîne intacte — aucune altération détectée (démo).' },
+    trustScore: 94,
+    verification: { valid: true, reason: 'Chaîne intacte — aucune altération détectée (démo).', blockCount: 5 },
   },
+  nutrition: { protein: '26%', fat: '12%', fiber: '4%', moisture: '9%', ash: '7%', kcalPer100g: 360 },
+  allergens: ['Volaille'],
+  ingredients: ['Viande déshydratée de poulet', 'Riz complet', 'Huile de poisson', 'Légumes déshydratés', 'Vitamines & minéraux'],
+  qrPayload: { batchCode: 'PF-TN-2026-A042', productId: productId, verifyUrl: '/client-traceability?batch=PF-TN-2026-A042', rootHash: 'a3f8c2e1b9d04f6a' },
+  supplyChain: [
+    { step: 'origine', label: 'Origine matières premières', location: 'Béja, Tunisie', actor: 'NutriPet SARL', timestamp: daysAgo(90), hash: 'a3f8c2e1b9d04f6a8e7c5d3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6' },
+    { step: 'transformation', label: 'Fabrication / conditionnement', location: 'Usine de conditionnement Béja Nord', actor: 'NutriPet SARL', timestamp: daysAgo(45), hash: 'b4e9d3f2c0a15e7b9d8f6e4c3b2a1f0e9d8c7b6a5f4e3' },
+    { step: 'certification', label: 'Contrôle & certification', location: 'Laboratoire partenaire', actor: 'PetfoodTN Quality Lab', timestamp: daysAgo(30), hash: 'c5f0e4a3b1c26f8d0b9a7e5d4c3b2a1f0e9d8c7b6a5f4e3d2' },
+    { step: 'distribution', label: 'Entrepôt & distribution', location: 'Hub PetfoodTN Tunis', actor: 'PetfoodTN Logistics', timestamp: daysAgo(20), hash: 'd6a1f5b4c3e27g9e1c0b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2' },
+    { step: 'retail', label: 'Mise en vente marketplace', location: 'PetfoodTN Marketplace', actor: 'PetfoodTN', timestamp: daysAgo(5), hash: 'e6f1a5b4c3d26f8e0d9b7a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8' },
+  ],
   demoMode: true,
 });
+
+export const DEMO_MY_ORDER_TRACES = {
+  orders: [
+    {
+      orderId: 'demo-order-001',
+      date: daysAgo(12),
+      status: 'delivered',
+      traces: [getDemoProductTraceability('demo-order-prod-1', 'Croquettes Premium Chien Adulte 12 kg')],
+    },
+    {
+      orderId: 'demo-order-002',
+      date: daysAgo(2),
+      status: 'shipped',
+      traces: [getDemoProductTraceability('demo-order-prod-2', 'Pâtée chat saumon 400 g')],
+    },
+  ],
+  total: 2,
+};
 
 export const DEMO_RELAY_POINTS = [
   {
