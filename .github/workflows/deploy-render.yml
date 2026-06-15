@@ -19,22 +19,64 @@ jobs:
 
     steps:
       - name: Deploy frontend (Render)
+        id: fe
         env:
           HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}
         run: |
-          if [ -z "$HOOK" ]; then echo "RENDER_DEPLOY_HOOK_FRONTEND non défini — skip"; exit 0; fi
+          if [ -z "$HOOK" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "RENDER_DEPLOY_HOOK_FRONTEND non défini — skip"
+            exit 0
+          fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
           curl -fsS -X POST "$HOOK"
+          echo "Frontend deploy déclenché"
 
       - name: Deploy backend (Render)
+        id: api
         env:
           HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}
         run: |
-          if [ -z "$HOOK" ]; then echo "RENDER_DEPLOY_HOOK_BACKEND non défini — skip"; exit 0; fi
+          if [ -z "$HOOK" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "RENDER_DEPLOY_HOOK_BACKEND non défini — skip"
+            exit 0
+          fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
           curl -fsS -X POST "$HOOK"
+          echo "Backend deploy déclenché"
 
       - name: Deploy ML service (Render)
+        id: ml
         env:
           HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_ML }}
         run: |
-          if [ -z "$HOOK" ]; then echo "RENDER_DEPLOY_HOOK_ML non défini — skip"; exit 0; fi
+          if [ -z "$HOOK" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "RENDER_DEPLOY_HOOK_ML non défini — skip"
+            exit 0
+          fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
           curl -fsS -X POST "$HOOK"
+          echo "ML deploy déclenché"
+
+      - name: Résumé déploiement
+        run: |
+          echo "### Deploy Render" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.fe.outputs.configured }}" = "true" ]; then
+            echo "- ✅ Frontend — hook appelé" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- ⚠️ Frontend — secret manquant" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ "${{ steps.api.outputs.configured }}" = "true" ]; then
+            echo "- ✅ Backend — hook appelé" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- ⚠️ Backend — secret manquant" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ "${{ steps.ml.outputs.configured }}" = "true" ]; then
+            echo "- ✅ ML — hook appelé" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- ⚠️ ML — secret manquant" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Configurer : Blueprint Render + \`npm run devops:prod:sync -- --render\`" >> "$GITHUB_STEP_SUMMARY"

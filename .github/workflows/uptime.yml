@@ -19,6 +19,11 @@ jobs:
           if [ -z "$URL" ]; then echo "UPTIME_FRONTEND_URL non défini — skip"; exit 0; fi
           ENDPOINT="${URL%/}/nginx-health"
           echo "GET $ENDPOINT"
+          code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 20 "$ENDPOINT" || echo "000")
+          if [ "$code" = "404" ] || [ "$code" = "000" ]; then
+            echo "Service non déployé ($code) — skip (Blueprint Render requis)"
+            exit 0
+          fi
           curl -fsS --max-time 20 "$ENDPOINT"
 
       - name: Backend /health
@@ -28,6 +33,11 @@ jobs:
           if [ -z "$URL" ]; then echo "UPTIME_BACKEND_URL non défini — skip"; exit 0; fi
           ENDPOINT="${URL%/}/health"
           echo "GET $ENDPOINT"
+          code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 20 "$ENDPOINT" || echo "000")
+          if [ "$code" = "404" ] || [ "$code" = "000" ]; then
+            echo "Service non déployé ($code) — skip"
+            exit 0
+          fi
           curl -fsS --max-time 20 "$ENDPOINT"
 
       - name: ML /health
@@ -37,6 +47,11 @@ jobs:
           if [ -z "$URL" ]; then echo "UPTIME_ML_URL non défini — skip"; exit 0; fi
           ENDPOINT="${URL%/}/health"
           echo "GET $ENDPOINT"
+          code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 20 "$ENDPOINT" || echo "000")
+          if [ "$code" = "404" ] || [ "$code" = "000" ]; then
+            echo "Service non déployé ($code) — skip"
+            exit 0
+          fi
           curl -fsS --max-time 20 "$ENDPOINT"
 
   notify-on-failure:

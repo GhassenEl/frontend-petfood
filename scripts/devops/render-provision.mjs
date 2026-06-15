@@ -15,6 +15,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { setRepoSecret } from './github-token.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../..');
@@ -109,34 +110,74 @@ async function showStatus() {
   }
 }
 
-async function showDeployHooks() {
+function hookSecretName(serviceName) {
+  if (serviceName === 'petfoodtn-web') return 'RENDER_DEPLOY_HOOK_FRONTEND';
+  if (serviceName === 'petfoodtn-api') return 'RENDER_DEPLOY_HOOK_BACKEND';
+  return 'RENDER_DEPLOY_HOOK_ML';
+}
+
+async function getOrCreateDeployHook(service) {
+  const hooks = await renderFetch(`/services/${service.id}/deploy-hooks`);
+  const list = Array.isArray(hooks) ? hooks : hooks?.items || [];
+  const existing = list[0]?.deployHook || list[0];
+  if (existing?.url) return existing.url;
+
+  const created = await renderFetch(`/services/${service.id}/deploy-hooks`, {
+    method: 'POST',
+    body: JSON.stringify({ name: 'github-cd' }),
+  });
+  const hook = created?.deployHook || created;
+  if (!hook?.url) throw new Error(`Deploy hook introuvable pour ${service.name}`);
+  return hook.url;
+}
+
+async function collectDeployHooks() {
   const all = await listServices();
   const ours = all.filter((s) => SERVICES.includes(s.name));
   if (!ours.length) {
-    console.log('Cree d abord les services via Blueprint.');
-    return;
+    throw new Error('Aucun service PetfoodTN sur Render. Appliquez le Blueprint render.yaml d abord.');
   }
-  console.log('\nDeploy Hooks (secrets GitHub) :\n');
+  const mapping = {};
   for (const s of ours) {
-    const hooks = await renderFetch(`/services/${s.id}/deploy-hooks`);
-    const list = Array.isArray(hooks) ? hooks : hooks?.items || [];
-    const hook = list[0]?.deployHook || list[0];
-    const secretName =
-      s.name === 'petfoodtn-web'
-        ? 'RENDER_DEPLOY_HOOK_FRONTEND'
-        : s.name === 'petfoodtn-api'
-          ? 'RENDER_DEPLOY_HOOK_BACKEND'
-          : 'RENDER_DEPLOY_HOOK_ML';
-    if (hook?.url) {
-      console.log(`${secretName}=${hook.url}`);
-    } else {
-      console.log(`${secretName} -> Service ${s.name} -> Settings -> Deploy Hook (a creer)`);
+    mapping[hookSecretName(s.name)] = await getOrCreateDeployHook(s);
+  }
+  return mapping;
+}
+
+async function showDeployHooks() {
+  try {
+    const mapping = await collectDeployHooks();
+    console.log('\nDeploy Hooks (secrets GitHub) :\n');
+    for (const [secretName, url] of Object.entries(mapping)) {
+      console.log(`${secretName}=${url}`);
     }
+  } catch (err) {
+    console.log(err.message);
+    return;
   }
   console.log('\nUptime secrets :');
   console.log('UPTIME_FRONTEND_URL=https://petfoodtn-web.onrender.com');
   console.log('UPTIME_BACKEND_URL=https://petfoodtn-api.onrender.com');
   console.log('UPTIME_ML_URL=https://petfoodtn-ml.onrender.com');
+}
+
+async function syncGithubSecrets() {
+  const mapping = await collectDeployHooks();
+  console.log('\nSync secrets GitHub...\n');
+  for (const [name, value] of Object.entries(mapping)) {
+    await setRepoSecret(name, value);
+    console.log(`  OK ${name}`);
+  }
+  const uptime = {
+    UPTIME_FRONTEND_URL: HEALTH_URLS.web,
+    UPTIME_BACKEND_URL: 'https://petfoodtn-api.onrender.com',
+    UPTIME_ML_URL: 'https://petfoodtn-ml.onrender.com',
+  };
+  for (const [name, value] of Object.entries(uptime)) {
+    await setRepoSecret(name, value);
+    console.log(`  OK ${name}`);
+  }
+  console.log('\nDeploy hooks synchronises. Lancez : gh workflow run "Deploy Render" -R GhassenEl/frontend-petfood');
 }
 
 async function checkHealth() {
@@ -158,9 +199,10 @@ PetfoodTN - Render provision
 Commandes :
   validate   Valide render.yaml (requiert RENDER_API_KEY)
   status     Liste les services petfoodtn-* sur Render
-  hooks      Affiche les Deploy Hooks pour secrets GitHub
-  health     Teste les URLs publiques (sans cle API)
-  github     Liste les secrets GitHub a configurer
+  hooks        Affiche les Deploy Hooks pour secrets GitHub
+  sync-github  Cree les hooks Render et les pousse en secrets GitHub
+  health       Teste les URLs publiques (sans cle API)
+  github       Liste les secrets GitHub a configurer
 
 Etapes manuelles (sans cle API) :
   1. https://dashboard.render.com/blueprints/new
@@ -196,6 +238,9 @@ async function main() {
         break;
       case 'hooks':
         await showDeployHooks();
+        break;
+      case 'sync-github':
+        await syncGithubSecrets();
         break;
       case 'health':
         await checkHealth();
