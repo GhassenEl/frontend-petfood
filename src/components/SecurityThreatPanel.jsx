@@ -5,6 +5,7 @@ import {
   fetchThreatLog,
   scanTextForThreats,
 } from '../services/securityService';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const SEVERITY_CLASS = {
   critical: 'adm-pill adm-pill--danger',
@@ -42,6 +43,8 @@ const SecurityThreatPanel = () => {
   useEffect(() => {
     load();
   }, [load]);
+
+  usePlatformRefresh(load);
 
   const runScan = async () => {
     if (!sample.trim()) return;

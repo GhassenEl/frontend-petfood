@@ -64,6 +64,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
     {
       title: '⚙️ Paramètres',
       items: [
+        { id: 'security', label: 'Sécurité & IDS', icon: '🛡️' },
         { id: 'system', label: 'Configuration globale', icon: '🔧' },
         { id: 'activity-logs', label: 'Journaux d\'activité', icon: '📋' },
         { id: 'profile', label: 'Mon Profil', icon: '👤' },

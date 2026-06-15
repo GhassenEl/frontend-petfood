@@ -30,6 +30,7 @@ import AdminNlpModelsPage from './pages/AdminNlpModelsPage';
 import AdminVendorsPage from './pages/AdminVendorsPage';
 import AdminVendorDetailPage from './pages/AdminVendorDetailPage';
 import AdminSystemConfigPage from './pages/AdminSystemConfigPage';
+import AdminSecurityPage from './pages/AdminSecurityPage';
 import AdminModeratorsPage from './pages/AdminModeratorsPage';
 import AdminVisitorsPage from './pages/AdminVisitorsPage';
 import AdminRefundsPage from './pages/AdminRefundsPage';
@@ -214,6 +215,7 @@ const App = () => {
       <Route path="/admin/visitors" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVisitorsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/refunds" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRefundsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/system" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminSystemConfigPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/security" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminSecurityPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/moderators" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminModeratorsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/activity-logs" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminActivityLogsPage /></AdminLayout></RoleRoute>} />
       <Route path="/vendor-dashboard" element={<RoleRoute user={user} roles={['admin']}><Navigate to="/admin/vendors" replace /></RoleRoute>} />

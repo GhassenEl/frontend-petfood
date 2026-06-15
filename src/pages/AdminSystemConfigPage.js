@@ -168,7 +168,8 @@ const AdminSystemConfigPage = () => {
           <div className="adm-card" style={{ marginTop: 16 }}>
             <h2>Détection anti-virus & menaces</h2>
             <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: 0 }}>
-              Analyse des messages, scripts, URLs suspectes et signatures malware (EICAR, exécutables, injections).
+              Analyse des messages, scripts, URLs suspectes et signatures malware (EICAR, exécutables, injections).{' '}
+              <Link to="/admin/security" style={{ color: '#0ea5e9' }}>Centre de sécurité complet →</Link>
             </p>
             <SecurityThreatPanel />
           </div>

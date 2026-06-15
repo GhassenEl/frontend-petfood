@@ -19,3 +19,13 @@ export const fetchSecurityStatus = async () => {
   const response = await api.get('/security/status');
   return response.data;
 };
+
+export const fetchIntrusionEvents = async (limit = 50) => {
+  const response = await api.get('/security/intrusions', { params: { limit } });
+  return response.data;
+};
+
+export const scanFileForThreats = async (fileMeta) => {
+  const response = await api.post('/security/scan/file', fileMeta);
+  return response.data;
+};
