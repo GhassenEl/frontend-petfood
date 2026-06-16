@@ -5,6 +5,7 @@ import { getProducts } from '../services/productService';
 import { getMyReviews, createReview, updateReview, deleteReview } from '../services/reviewService';
 import { postAnalyzeComment } from '../services/mlService';
 import { detectReviewAnomalies } from '../utils/contentAnomalyDetector';
+import { assertContentSafe } from '../services/contentSecurityService';
 import { DEMO_REVIEWS, withDemoFallback } from '../utils/clientDemoData';
 import { productId, dedupeProducts, withProductIds } from '../utils/productId';
 import { emotionFromRating, ratingLabel } from '../utils/ratingHelpers';
@@ -183,6 +184,15 @@ const ClientReviewsPage = () => {
         `Avis suspect détecté : ${anomaly.summary}\n\nPublier quand même ? (Un modérateur pourra le retirer.)`,
       );
       if (!ok) return;
+    }
+
+    const { allowed, scan } = await assertContentSafe(submitData.comment, {
+      rating: submitData.rating,
+      type: 'review',
+    });
+    if (!allowed) {
+      showToast(`Contenu bloqué : ${scan.summary}`, 'error');
+      return;
     }
 
     setLoading(true);

@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import CookieConsentBanner from './components/CookieConsentBanner';
+import SessionExpiryBanner from './components/SessionExpiryBanner';
 import LoginPage from './pages/LoginPage.js';
 import RegisterPage from './pages/RegisterPage.jsx';
 import ForgotPasswordPage from './pages/ForgotPasswordPage.js';
@@ -216,6 +217,7 @@ const App = () => {
     return (
       <>
       <CookieConsentBanner />
+      <SessionExpiryBanner />
       <Routes>
         <Route path="/" element={<MarketingLandingPage />} />
         <Route path="/marketing" element={<MarketingLandingPage />} />
@@ -241,6 +243,7 @@ const App = () => {
   return (
     <>
     <CookieConsentBanner />
+    <SessionExpiryBanner />
     <Routes>
       <Route path="/" element={<Navigate to={userHome} replace />} />
       <Route path="/login" element={<Navigate to={userHome} replace />} />

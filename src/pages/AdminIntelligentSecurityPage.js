@@ -1,27 +1,32 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Shield, CreditCard, Key, MessageSquareOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Shield, CreditCard, Key, MessageSquareOff, LayoutDashboard, Users } from 'lucide-react';
 import FraudDetectionPanel from '../components/FraudDetectionPanel';
 import JwtAuthSecurityPanel from '../components/JwtAuthSecurityPanel';
 import AutoModerationPanel from '../components/AutoModerationPanel';
-import { loadIntelligentSecurityPack } from '../services/intelligentSecurityService';
+import PlatformSecurityOverviewPanel from '../components/PlatformSecurityOverviewPanel';
+import AdminActiveSessionsPanel from '../components/AdminActiveSessionsPanel';
+import { loadPlatformSecurityPack } from '../services/platformSecurityService';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import './AdminIntelligentSecurity.css';
 
 const TABS = [
-  { id: 'fraud', label: 'Détection de fraude', icon: CreditCard },
+  { id: 'overview', label: 'Posture sécurité', icon: LayoutDashboard },
+  { id: 'sessions', label: 'Sessions actives', icon: Users },
+  { id: 'fraud', label: 'Détection fraude', icon: CreditCard },
   { id: 'jwt', label: 'Authentification JWT', icon: Key },
-  { id: 'moderation', label: 'Modération automatique', icon: MessageSquareOff },
+  { id: 'moderation', label: 'Modération auto', icon: MessageSquareOff },
 ];
 
 const AdminIntelligentSecurityPage = () => {
-  const [tab, setTab] = useState('fraud');
+  const [tab, setTab] = useState('overview');
   const [pack, setPack] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setPack(await loadIntelligentSecurityPack());
+      setPack(await loadPlatformSecurityPack());
     } catch (e) {
       console.error(e);
       setPack(null);
@@ -36,6 +41,8 @@ const AdminIntelligentSecurityPage = () => {
 
   usePlatformRefresh(load, [load]);
 
+  const intel = pack?.intelligent;
+
   return (
     <div className="ais-page">
       <h1>
@@ -43,7 +50,11 @@ const AdminIntelligentSecurityPage = () => {
         Sécurité intelligente
       </h1>
       <p className="ais-lead">
-        Fraude, authentification JWT multi-rôles et filtrage automatique des contenus offensants ou spam.
+        Posture sécurité, sessions actives, fraude, JWT multi-rôles et filtrage automatique des contenus.
+        {' '}
+        <Link to="/admin/security" style={{ color: '#7c3aed', fontWeight: 700 }}>
+          Centre IDS / anti-virus →
+        </Link>
       </p>
 
       <div className="ais-tabs" role="tablist" aria-label="Sécurité intelligente">
@@ -63,12 +74,26 @@ const AdminIntelligentSecurityPage = () => {
       </div>
 
       <div className="ais-panel-wrap" role="tabpanel">
+        {tab === 'overview' && (
+          <PlatformSecurityOverviewPanel pack={pack} loading={loading} />
+        )}
+
+        {tab === 'sessions' && (
+          <>
+            <h2 style={{ marginTop: 0, fontSize: 18 }}>Sessions actives</h2>
+            <p className="ais-lead" style={{ marginBottom: 12 }}>
+              Surveillance des connexions — révoquez les sessions suspectes.
+            </p>
+            <AdminActiveSessionsPanel sessions={pack?.activeSessions} loading={loading} />
+          </>
+        )}
+
         {tab === 'fraud' && (
           <>
             <h2 style={{ marginTop: 0, fontSize: 18 }}>Transactions suspectes</h2>
             <FraudDetectionPanel
-              alerts={pack?.fraudAlerts}
-              behavior={pack?.behavior}
+              alerts={intel?.fraudAlerts}
+              behavior={intel?.behavior}
               loading={loading}
             />
           </>
@@ -77,7 +102,7 @@ const AdminIntelligentSecurityPage = () => {
         {tab === 'jwt' && (
           <>
             <h2 style={{ marginTop: 0, fontSize: 18 }}>Authentification sécurisée</h2>
-            <JwtAuthSecurityPanel jwt={pack?.jwt} loading={loading} />
+            <JwtAuthSecurityPanel jwt={intel?.jwt} loading={loading} />
           </>
         )}
 
@@ -87,7 +112,7 @@ const AdminIntelligentSecurityPage = () => {
             <p className="ais-lead" style={{ marginBottom: 12 }}>
               Commentaires offensants, spam et contenus inappropriés — file d&apos;attente IA.
             </p>
-            <AutoModerationPanel queue={pack?.moderationQueue} loading={loading} />
+            <AutoModerationPanel queue={intel?.moderationQueue} loading={loading} />
           </>
         )}
       </div>

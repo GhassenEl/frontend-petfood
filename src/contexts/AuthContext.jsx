@@ -78,7 +78,16 @@ export const AuthProvider = ({ children }) => {
         const storedToken = getStoredToken();
         if (storedToken) {
           const result = applySession(storedToken);
-          if (!result.ok) {
+          if (result.ok) {
+            try {
+              const meRes = await api.get('/auth/me', { _skipAuthRefresh: false });
+              if (meRes.data?.user) {
+                applySession(storedToken, meRes.data.user);
+              }
+            } catch {
+              /* token local suffit si /auth/me indisponible */
+            }
+          } else {
             console.warn('Session JWT invalide au démarrage:', result.reason);
           }
         }

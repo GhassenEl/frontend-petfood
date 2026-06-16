@@ -83,6 +83,10 @@ const resolveRequestToken = async (config) => {
 };
 
 api.interceptors.request.use(async (config) => {
+  config.headers = config.headers || {};
+  config.headers['X-Client-Platform'] = 'petfoodtn-web';
+  config.headers['X-Requested-With'] = 'XMLHttpRequest';
+
   const token = await resolveRequestToken(config);
 
   if (token && isValidToken(token)) {

@@ -11,6 +11,13 @@ import {
   validatePassword,
   validateLoginForm,
 } from '../utils/loginValidation';
+import {
+  clearLoginAttempts,
+  recordLoginFailure,
+  getLoginAttemptState,
+  getLoginDelayMs,
+  formatLockoutRemaining,
+} from '../utils/loginAttemptGuard';
 import LoginPetsLogo from '../components/LoginPetsLogo';
 import PetfoodLogo from '../components/PetfoodLogo';
 
@@ -29,6 +36,7 @@ const LoginPage = () => {
   const [capsLockOn, setCapsLockOn] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [signOutDone, setSignOutDone] = useState(false);
+  const [loginGuard, setLoginGuard] = useState(() => getLoginAttemptState());
 
   useEffect(() => {
     setMounted(true);
@@ -78,12 +86,33 @@ const LoginPage = () => {
       return;
     }
 
+    const guard = getLoginAttemptState();
+    setLoginGuard(guard);
+    if (guard.locked) {
+      setError(`Compte temporairement verrouillé. Réessayez dans ${formatLockoutRemaining(guard.remainingMs)}.`);
+      return;
+    }
+
+    const delay = getLoginDelayMs();
+    if (delay > 0) {
+      await new Promise((r) => setTimeout(r, delay));
+    }
+
     setLoading(true);
     const result = await login(trimmedEmail, password, rememberMe);
     if (result.success) {
+      clearLoginAttempts();
+      setLoginGuard(getLoginAttemptState());
       persistRememberedEmail(trimmedEmail, rememberMe);
     } else {
-      setError(result.error || 'Erreur de connexion');
+      const fail = recordLoginFailure();
+      setLoginGuard(getLoginAttemptState());
+      const base = result.error || 'Erreur de connexion';
+      setError(
+        fail.requiresCaptcha
+          ? `${base} — ${fail.count} tentative(s) échouée(s). Vérifiez vos identifiants.`
+          : base,
+      );
     }
     setLoading(false);
   };
@@ -378,6 +407,12 @@ const LoginPage = () => {
         {signOutDone && !error && (
           <div style={{ ...styles.errorBox, background: 'rgba(209, 250, 229, 0.9)', borderColor: '#6ee7b7', color: '#065f46' }} role="status">
             <span>✓</span> Session fermée — vous pouvez vous reconnecter.
+          </div>
+        )}
+
+        {loginGuard.requiresCaptcha && !loginGuard.locked && (
+          <div style={{ ...styles.errorBox, background: 'rgba(254, 243, 199, 0.95)', borderColor: '#fcd34d', color: '#92400e' }} role="status">
+            <span>🛡️</span> Plusieurs tentatives échouées — connexion surveillée pour protéger votre compte.
           </div>
         )}
 
