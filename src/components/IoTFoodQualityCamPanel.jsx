@@ -1,13 +1,20 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Camera, Thermometer, Droplets, RefreshCw, Play, Square } from 'lucide-react';
+import { Camera, Thermometer, Droplets, RefreshCw, Play, Square, Clock, Calendar } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts';
 import {
   fetchFoodQualityState,
   runEsp32CamSimulation,
+  saveFoodQualitySchedules,
 } from '../services/iotFoodQualityService';
-import { QUALITY_LABELS } from '../utils/foodQualityEngine';
+import { QUALITY_LABELS, formatTimeFr, formatTimeShort, buildScheduleStatuses, getNextScheduledCheck } from '../utils/foodQualityEngine';
+
+const STATUS_META = {
+  done: { label: 'Effectué', className: 'iot-fq-slot--done', icon: '✅' },
+  missed: { label: 'Manqué', className: 'iot-fq-slot--missed', icon: '⚠️' },
+  upcoming: { label: 'À venir', className: 'iot-fq-slot--upcoming', icon: '⏳' },
+};
 
 const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
   const [state, setState] = useState(null);
@@ -32,12 +39,18 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
     if (!simulating) return undefined;
     const id = setInterval(async () => {
       const reading = await runEsp32CamSimulation();
-      setState((prev) => ({
-        ...prev,
-        current: reading,
-        history: [reading, ...(prev?.history || []).slice(0, 19)],
-        mode: 'demo',
-      }));
+      setState((prev) => {
+        const history = [reading, ...(prev?.history || []).slice(0, 19)];
+        return {
+          ...prev,
+          current: reading,
+          history,
+          mode: 'demo',
+          scheduleStatuses: prev?.schedules
+            ? buildScheduleStatuses(prev.schedules, history)
+            : prev?.scheduleStatuses,
+        };
+      });
     }, 4000);
     return () => clearInterval(id);
   }, [simulating]);
@@ -46,14 +59,31 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
     setBusy(true);
     try {
       const reading = await runEsp32CamSimulation(scenario);
-      setState((prev) => ({
-        ...prev,
-        current: reading,
-        history: [reading, ...(prev?.history || []).slice(0, 19)],
-      }));
+      setState((prev) => {
+        const history = [reading, ...(prev?.history || []).slice(0, 19)];
+        return {
+          ...prev,
+          current: reading,
+          history,
+          scheduleStatuses: buildScheduleStatuses(prev?.schedules || [], history),
+        };
+      });
     } finally {
       setBusy(false);
     }
+  };
+
+  const toggleSchedule = async (id) => {
+    const schedules = (state?.schedules || []).map((s) => (
+      s.id === id ? { ...s, enabled: !s.enabled } : s
+    ));
+    const saved = await saveFoodQualitySchedules(schedules);
+    setState((prev) => ({
+      ...prev,
+      schedules: saved,
+      nextCheck: getNextScheduledCheck(saved),
+      scheduleStatuses: buildScheduleStatuses(saved, prev?.history || []),
+    }));
   };
 
   if (packLoading || loading) {
@@ -62,10 +92,11 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
 
   const cur = state?.current || {};
   const meta = QUALITY_LABELS[cur.quality] || QUALITY_LABELS.good;
-  const chartData = (state?.history || []).slice(0, 12).reverse().map((r, i) => ({
-    t: new Date(r.analyzedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+  const chartData = (state?.history || []).slice(0, 12).reverse().map((r) => ({
+    t: formatTimeShort(r.analyzedAt),
     score: r.qualityScore,
   }));
+  const nextCheck = state?.nextCheck;
 
   return (
     <div className="iot-food-quality">
@@ -79,6 +110,28 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
         <span>📷 {state?.device?.name || 'ESP32-CAM'}</span>
         <span className="iot-fq-status">🟢 {state?.device?.status || 'online'}</span>
         {state?.mode === 'demo' && <span className="iot-fq-demo">Mode simulation</span>}
+      </div>
+
+      <div className="iot-fq-times">
+        <div className="iot-fq-time-card">
+          <Clock size={16} />
+          <div>
+            <span>Dernière analyse</span>
+            <strong>{formatTimeFr(cur.analyzedAt)}</strong>
+          </div>
+        </div>
+        {nextCheck && (
+          <div className="iot-fq-time-card iot-fq-time-card--next">
+            <Calendar size={16} />
+            <div>
+              <span>Prochain contrôle</span>
+              <strong>
+                {nextCheck.time} — {nextCheck.label}
+                {!nextCheck.isToday && ' (demain)'}
+              </strong>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className={`iot-fq-badge iot-fq-badge--${cur.quality || 'good'}`}>
@@ -97,6 +150,43 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
         <div>RGB {cur.avgR}/{cur.avgG}/{cur.avgB}</div>
         <div>Moisissure ~{((cur.moldPixelRatio ?? 0) * 100).toFixed(1)} %</div>
       </div>
+
+      {(state?.scheduleStatuses || []).length > 0 && (
+        <section className="iot-fq-schedules">
+          <h4><Clock size={16} /> Horaires de contrôle ESP32-CAM</h4>
+          <p className="iot-fq-schedules-hint">
+            Analyses automatiques avant chaque repas et la nuit — synchronisées avec le distributeur Max.
+          </p>
+          <ul className="iot-fq-schedule-list">
+            {state.scheduleStatuses.map((slot) => {
+              const st = STATUS_META[slot.status] || STATUS_META.upcoming;
+              const qMeta = slot.quality ? QUALITY_LABELS[slot.quality] : null;
+              return (
+                <li key={slot.id} className={`iot-fq-slot ${st.className}`}>
+                  <span className="iot-fq-slot-time">{slot.time}</span>
+                  <span className="iot-fq-slot-label">{slot.label}</span>
+                  <span className="iot-fq-slot-status">
+                    {st.icon} {st.label}
+                    {qMeta && slot.reading && (
+                      <span style={{ color: qMeta.color, marginLeft: 6 }}>
+                        · {qMeta.label} ({slot.qualityScore}/100)
+                      </span>
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    className="iot-fq-slot-toggle"
+                    title={slot.enabled !== false ? 'Désactiver' : 'Activer'}
+                    onClick={() => toggleSchedule(slot.id)}
+                  >
+                    {slot.enabled !== false ? 'ON' : 'OFF'}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       <div className="iot-fq-actions">
         <button type="button" className="iot-fq-btn" disabled={busy} onClick={() => simulateOnce('good')}>
@@ -123,7 +213,7 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
 
       {chartData.length > 1 && (
         <div className="iot-fq-chart">
-          <h4>Historique score qualité (ESP32-CAM)</h4>
+          <h4>Historique score qualité (par horaire)</h4>
           <ResponsiveContainer width="100%" height={160}>
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -134,6 +224,39 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
             </LineChart>
           </ResponsiveContainer>
         </div>
+      )}
+
+      {(state?.history || []).length > 0 && (
+        <section className="iot-fq-history">
+          <h4>Journal des analyses</h4>
+          <div className="iot-fq-history-table-wrap">
+            <table className="iot-fq-history-table">
+              <thead>
+                <tr>
+                  <th>Horaire</th>
+                  <th>Qualité</th>
+                  <th>Score</th>
+                  <th>Temp.</th>
+                  <th>HR</th>
+                </tr>
+              </thead>
+              <tbody>
+                {state.history.slice(0, 8).map((r, i) => {
+                  const q = QUALITY_LABELS[r.quality] || QUALITY_LABELS.good;
+                  return (
+                    <tr key={`${r.analyzedAt}-${i}`}>
+                      <td>{formatTimeFr(r.analyzedAt)}</td>
+                      <td><span style={{ color: q.color }}>{q.icon} {q.label}</span></td>
+                      <td>{r.qualityScore}/100</td>
+                      <td>{r.temperatureC} °C</td>
+                      <td>{r.humidityPct} %</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
 
       <details className="iot-fq-firmware">

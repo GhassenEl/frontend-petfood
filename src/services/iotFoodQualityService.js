@@ -6,20 +6,27 @@ import {
   getStoredQualityReadings,
   storeQualityReading,
   getLatestQualityReading,
+  getStoredQualitySchedules,
+  storeQualitySchedules,
+  DEFAULT_FOOD_QUALITY_SCHEDULES,
+  getNextScheduledCheck,
+  buildScheduleStatuses,
 } from '../utils/foodQualityEngine';
 
 export async function fetchFoodQualityState() {
   let mode = 'demo';
   let current = null;
   let history = [];
+  let schedules = getStoredQualitySchedules();
 
   try {
     const { data } = await api.get('/client/iot/food-quality');
     if (data?.current) {
       current = data.current;
       history = data.history || [];
+      schedules = data.schedules?.length ? data.schedules : schedules;
       mode = data.mode || 'live';
-      return { mode, current, history, device: data.device };
+      return enrichFoodQualityState({ mode, current, history, device: data.device, schedules });
     }
   } catch {
     /* fallback */
@@ -29,10 +36,11 @@ export async function fetchFoodQualityState() {
   history = stored.length ? stored : buildDemoQualityHistory();
   current = getLatestQualityReading(history[0]);
 
-  return {
+  return enrichFoodQualityState({
     mode: 'demo',
     current,
     history,
+    schedules,
     device: {
       id: 'demo-esp32cam-1',
       name: 'ESP32-CAM — Bac croquettes Max',
@@ -40,7 +48,28 @@ export async function fetchFoodQualityState() {
       model: 'ESP32-CAM + DHT11',
       status: 'online',
     },
+  });
+}
+
+function enrichFoodQualityState(state) {
+  const schedules = state.schedules?.length ? state.schedules : DEFAULT_FOOD_QUALITY_SCHEDULES;
+  const nextCheck = getNextScheduledCheck(schedules);
+  const scheduleStatuses = buildScheduleStatuses(schedules, state.history || []);
+  return {
+    ...state,
+    schedules,
+    nextCheck,
+    scheduleStatuses,
   };
+}
+
+export async function saveFoodQualitySchedules(schedules) {
+  try {
+    const { data } = await api.put('/client/iot/food-quality/schedules', { schedules });
+    return data?.schedules || schedules;
+  } catch {
+    return storeQualitySchedules(schedules);
+  }
 }
 
 export async function postFoodQualityReading(reading) {

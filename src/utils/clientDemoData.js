@@ -844,7 +844,7 @@ export const DEMO_IOT_PACK = {
     waterOnline: 2,
     alerts: 5,
     criticalAlerts: 1,
-    routinesToday: 5,
+    routinesToday: 8,
   },
   devices: [
     {
@@ -916,11 +916,20 @@ export const DEMO_IOT_PACK = {
     { id: 'auto-3', label: 'Sync livraison', description: 'Créneau lié au stock distributeur', trigger: 'delivery.predictive', enabled: true, link: '/client-smart-delivery' },
   ],
   routines: [
+    { time: '07:15', label: 'Contrôle qualité — matin', device: 'ESP32-CAM Max', action: 'Scan bac', type: 'feeder-cam' },
     { time: '07:30', label: 'Petit-déjeuner Max', device: 'Distributeur', action: '30 g', type: 'feeder' },
+    { time: '12:15', label: 'Contrôle qualité — midi', device: 'ESP32-CAM Max', action: 'Scan bac', type: 'feeder-cam' },
     { time: '12:30', label: 'Déjeuner Max', device: 'Distributeur', action: '35 g', type: 'feeder' },
+    { time: '19:15', label: 'Contrôle qualité — soir', device: 'ESP32-CAM Max', action: 'Scan bac', type: 'feeder-cam' },
     { time: '19:30', label: 'Dîner Max', device: 'Distributeur', action: '30 g', type: 'feeder' },
     { time: '08:00', label: 'Remplissage fontaine', device: 'Fontaine Max', action: 'Check réservoir', type: 'water' },
     { time: '21:00', label: 'Contrôle Luna', device: 'Fontaine Luna', action: 'Rappel eau', type: 'water' },
+  ],
+  foodQualitySchedules: [
+    { id: 'sq-1', time: '07:15', label: 'Avant petit-déjeuner Max', enabled: true },
+    { id: 'sq-2', time: '12:15', label: 'Avant déjeuner Max', enabled: true },
+    { id: 'sq-3', time: '19:15', label: 'Avant dîner Max', enabled: true },
+    { id: 'sq-4', time: '02:00', label: 'Contrôle nocturne bac', enabled: true },
   ],
   telemetry: {
     feederGrams7d: [52, 58, 61, 55, 68, 72, 65],

@@ -508,3 +508,142 @@
   font-size: 12px;
   overflow-x: auto;
 }
+
+.iot-fq-times {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.iot-fq-time-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.iot-fq-time-card strong {
+  display: block;
+  margin-top: 2px;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.iot-fq-time-card--next {
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+}
+
+.iot-fq-schedules h4,
+.iot-fq-history h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.iot-fq-schedules-hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.iot-fq-schedule-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.iot-fq-slot {
+  display: grid;
+  grid-template-columns: 56px 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .iot-fq-slot {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+.iot-fq-slot-time {
+  font-weight: 800;
+  color: #1e40af;
+  font-variant-numeric: tabular-nums;
+}
+
+.iot-fq-slot-label {
+  color: #334155;
+}
+
+.iot-fq-slot-status {
+  font-size: 12px;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.iot-fq-slot--done {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.iot-fq-slot--missed {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.iot-fq-slot--upcoming {
+  background: #f8fafc;
+}
+
+.iot-fq-slot-toggle {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  color: #059669;
+}
+
+.iot-fq-history-table-wrap {
+  overflow-x: auto;
+}
+
+.iot-fq-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.iot-fq-history-table th,
+.iot-fq-history-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.iot-fq-history-table th {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+}
