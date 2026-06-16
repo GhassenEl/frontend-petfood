@@ -468,6 +468,7 @@ export const DEMO_NUTRITION_PETS = [
     birthDate: daysAgo(Math.round(8 * 365.25)),
     sex: 'M',
     isNeutered: true,
+    chronicDiseases: 'Arthrose légère',
   },
   {
     id: 'demo-nut-4',
@@ -620,6 +621,40 @@ export const DEMO_PET_WEIGHT_HISTORY = {
     { date: daysAgo(45), weightKg: 33 },
     { date: daysAgo(14), weightKg: 32 },
   ],
+};
+
+/** Journal alimentaire démo par animal */
+export const DEMO_PET_FOOD_JOURNAL = {
+  'demo-nut-1': [
+    { date: daysAgo(0), meal: 'Matin', product: 'Croquettes Premium Chien', grams: 140, reaction: 'good' },
+    { date: daysAgo(0), meal: 'Soir', product: 'Croquettes Premium Chien', grams: 135, reaction: 'good' },
+    { date: daysAgo(1), meal: 'Matin', product: 'Croquettes Premium Chien', grams: 140, reaction: 'good' },
+    { date: daysAgo(1), meal: 'Soir', product: 'Friandise dentaire', grams: 15, reaction: 'good' },
+    { date: daysAgo(2), meal: 'Matin', product: 'Croquettes Light', grams: 130, reaction: 'soft_stool' },
+    { date: daysAgo(2), meal: 'Soir', product: 'Croquettes Premium Chien', grams: 140, reaction: 'good' },
+  ],
+  'demo-nut-2': [
+    { date: daysAgo(0), meal: 'Matin', product: 'Croquettes Chat Stérilisé', grams: 30, reaction: 'good' },
+    { date: daysAgo(0), meal: 'Soir', product: 'Pâtée saumon', grams: 40, reaction: 'good' },
+    { date: daysAgo(1), meal: 'Matin', product: 'Croquettes Chat Stérilisé', grams: 28, reaction: 'good' },
+  ],
+  'demo-nut-3': [
+    { date: daysAgo(0), meal: 'Matin', product: 'Croquettes Senior Mobilité', grams: 180, reaction: 'good' },
+    { date: daysAgo(0), meal: 'Soir', product: 'Croquettes Senior Mobilité', grams: 175, reaction: 'good' },
+  ],
+};
+
+/** Préférences alimentaires démo */
+export const DEMO_PET_FOOD_PREFERENCES = {
+  'demo-nut-1': ['Croquettes premium', 'Friandises dentaires'],
+  'demo-nut-2': ['Croquettes stérilisé', 'Pâtée saumon'],
+  'demo-nut-3': ['Croquettes senior', 'Oméga-3'],
+};
+
+/** Recommandations vétérinaires démo */
+export const DEMO_PET_VET_NUTRITION_RECS = {
+  'demo-nut-1': [{ source: 'Dr. Ben Ali', text: 'Formule light — objectif 26 kg sous 3 mois.', date: daysAgo(30) }],
+  'demo-nut-3': [{ source: 'Dr. Karim', text: 'Régime mobilité + oméga-3 pour arthrose légère.', date: daysAgo(20) }],
 };
 
 /** Données jumeau numérique démo (médical, alimentation, activité, véto) */

@@ -98,7 +98,7 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         { id: 'client-pet-passport', label: 'Passeport numérique', icon: '🛂' },
         { id: 'client-digital-twin', label: 'Jumeau numérique', icon: '🧬' },
         { id: 'pet-calories', label: 'Nutrition par animal', icon: '🥗' },
-        { id: 'pet-adaptive-nutrition', label: 'Nutrition IA adaptative', icon: '🤖' },
+        { id: 'pet-adaptive-nutrition', label: 'Profil nutritionnel IA', icon: '🧬' },
         { id: 'pet-advice', label: 'Conseils pour pets', icon: '💡' },
         { id: 'found-me', label: 'Retrouvé Moi', icon: '🔍' },
         { id: 'veterinary', label: 'Santé & Vétérinaire', icon: '🩺' },

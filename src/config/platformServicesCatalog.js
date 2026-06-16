@@ -183,6 +183,18 @@ export const PLATFORM_SERVICES = [
     badge: 'Multi-espèces',
   },
   {
+    id: 'pet-intelligent-nutrition',
+    category: 'nutrition',
+    roles: ['client'],
+    label: 'Profil nutritionnel IA',
+    description: 'Profil dynamique, score PetFoodTN, analyse ingrédients, menus, journal, transition, thérapeutique et prédictions.',
+    route: '/pet-adaptive-nutrition',
+    icon: '🧬',
+    api: 'GET /api/pets/nutrition/adaptive',
+    serviceKey: 'adaptiveNutritionService',
+    badge: 'IA',
+  },
+  {
     id: 'pet-advice',
     category: 'nutrition',
     roles: ['client'],

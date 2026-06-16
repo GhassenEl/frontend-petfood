@@ -102,6 +102,31 @@ export const predictFutureNutritionNeeds = (pet = {}, horizons = [3, 6, 12]) => 
       });
     }
 
+    const packKg = 12;
+    const dailyGramsNum = dailyGrams || 200;
+    const daysUntilReorder = Math.max(7, Math.round((packKg * 1000) / dailyGramsNum));
+    const purchasePredictions = [
+      {
+        icon: '🛒',
+        label: 'Réapprovisionnement',
+        detail: `Sac ${packKg} kg épuisé dans ~${daysUntilReorder} jours au rythme actuel.`,
+      },
+    ];
+    if (stageTransition) {
+      purchasePredictions.push({
+        icon: '🔄',
+        label: 'Changement de formule',
+        detail: `Passage ${STAGE_LABELS[futureStage]} recommandé — prévoir nouvelle formule d'ici ${months} mois.`,
+      });
+    }
+    if (futureAge >= 7 && type === 'dog') {
+      purchasePredictions.push({
+        icon: '🦴',
+        label: 'Besoins senior',
+        detail: 'Anticiper croquettes senior + compléments articulaires.',
+      });
+    }
+
     return {
       months,
       futureAge,
@@ -112,6 +137,7 @@ export const predictFutureNutritionNeeds = (pet = {}, horizons = [3, 6, 12]) => 
       dailyGrams,
       kcalDelta,
       predictions,
+      purchasePredictions,
       recommendedFormula:
         futureStage === 'senior'
           ? `Croquettes senior ${type === 'cat' ? 'chat' : 'chien'}`
