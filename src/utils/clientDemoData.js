@@ -852,7 +852,9 @@ export const DEMO_IOT_PACK = {
       status: 'online',
       petName: 'Max',
       route: '/pet-feeder',
-      metrics: { reservoirPercent: 42, temperature: 24.2, todayGrams: 65, isLowFood: true },
+      metrics: { reservoirPercent: 42, temperature: 24.2, todayGrams: 65, avgDailyGrams: 65, capacityGrams: 1200, isLowFood: true },
+      signalStrength: 82,
+      lastSeen: new Date(Date.now() - 120000).toISOString(),
     },
     {
       id: 'demo-water-1',
@@ -861,7 +863,10 @@ export const DEMO_IOT_PACK = {
       status: 'online',
       petName: 'Max',
       route: '/client-smart-water',
-      metrics: { todayMl: 420, targetMl: 550, reservoirMl: 890, filterDaysLeft: 18 },
+      metrics: { todayMl: 420, targetMl: 550, reservoirMl: 890, filterDaysLeft: 18, percentOfTarget: 76 },
+      signalStrength: 91,
+      batteryPercent: 88,
+      lastSeen: new Date(Date.now() - 45000).toISOString(),
     },
     {
       id: 'demo-water-2',
@@ -870,7 +875,10 @@ export const DEMO_IOT_PACK = {
       status: 'online',
       petName: 'Luna',
       route: '/client-smart-water',
-      metrics: { todayMl: 165, targetMl: 250, reservoirMl: 320, filterDaysLeft: 5 },
+      metrics: { todayMl: 165, targetMl: 250, reservoirMl: 320, filterDaysLeft: 5, percentOfTarget: 66 },
+      signalStrength: 74,
+      batteryPercent: 62,
+      lastSeen: new Date(Date.now() - 180000).toISOString(),
     },
   ],
   alerts: [
@@ -895,6 +903,11 @@ export const DEMO_IOT_PACK = {
     feederGrams7d: [52, 58, 61, 55, 68, 72, 65],
     waterMl7d: [480, 510, 445, 520, 490, 505, 420],
   },
+  sensorEvents: [
+    { id: 'ev1', deviceId: 'demo-feeder-1', deviceName: 'Distributeur Max', type: 'level', icon: '📊', message: 'Distribution 30 g — repas matin', at: new Date(Date.now() - 900000).toISOString() },
+    { id: 'ev2', deviceId: 'demo-water-2', deviceName: 'Fontaine Luna', type: 'hydration', icon: '💧', message: '165 ml aujourd\'hui (66 % objectif)', at: new Date(Date.now() - 600000).toISOString() },
+    { id: 'ev3', deviceId: 'demo-feeder-1', deviceName: 'Distributeur Max', type: 'temperature', icon: '🌡️', message: 'Température bac 24.2 °C', at: new Date(Date.now() - 1800000).toISOString() },
+  ],
 };
 
 export const getDemoFeederBundle = () => ({

@@ -1,10 +1,29 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Wifi, WifiOff, ChevronRight } from 'lucide-react';
+import { Wifi, WifiOff, ChevronRight, Battery, BatteryLow } from 'lucide-react';
 
 const TYPE_META = {
   feeder: { icon: '🍽️', color: '#059669', label: 'Distributeur' },
   water: { icon: '💧', color: '#0ea5e9', label: 'Fontaine' },
+};
+
+const formatLastSeen = (iso) => {
+  if (!iso) return '—';
+  const diff = Date.now() - new Date(iso).getTime();
+  if (diff < 60000) return 'À l\'instant';
+  if (diff < 3600000) return `Il y a ${Math.round(diff / 60000)} min`;
+  return `Il y a ${Math.round(diff / 3600000)} h`;
+};
+
+const SignalBars = ({ strength = 0 }) => {
+  const level = strength >= 75 ? 4 : strength >= 50 ? 3 : strength >= 25 ? 2 : strength > 0 ? 1 : 0;
+  return (
+    <span className="iot-signal-bar" title={`Signal ${strength}%`} aria-label={`Signal ${strength}%`}>
+      {[1, 2, 3, 4].map((n) => (
+        <span key={n} className={n <= level ? 'is-on' : ''} style={{ height: 4 + n * 2 }} />
+      ))}
+    </span>
+  );
 };
 
 const IoTDeviceCard = ({ device }) => {
@@ -15,16 +34,7 @@ const IoTDeviceCard = ({ device }) => {
   return (
     <Link
       to={device.route || '/client-iot'}
-      style={{
-        display: 'block',
-        textDecoration: 'none',
-        color: 'inherit',
-        background: '#fff',
-        borderRadius: 14,
-        padding: 16,
-        border: `1px solid ${online ? '#e2e8f0' : '#fecaca'}`,
-        boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
-      }}
+      className={`iot-device-card${online ? '' : ' is-offline'}`}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
@@ -55,6 +65,22 @@ const IoTDeviceCard = ({ device }) => {
         )}
         {device.type === 'water' && m.filterDaysLeft != null && (
           <MetricChip label="Filtre" value={`${m.filterDaysLeft} j`} warn={m.filterDaysLeft < 7} />
+        )}
+      </div>
+      <div className="iot-device-meta-row">
+        {device.signalStrength != null && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <SignalBars strength={device.signalStrength} /> {device.signalStrength}%
+          </span>
+        )}
+        {device.batteryPercent != null && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            {device.batteryPercent < 25 ? <BatteryLow size={12} color="#dc2626" /> : <Battery size={12} />}
+            {device.batteryPercent}%
+          </span>
+        )}
+        {device.lastSeen && (
+          <span>Vu {formatLastSeen(device.lastSeen)}</span>
         )}
       </div>
       <p style={{ margin: '10px 0 0', fontSize: 12, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>

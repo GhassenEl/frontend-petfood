@@ -3,17 +3,20 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Wifi, AlertTriangle, ChevronRight, Cpu, RefreshCw, Activity,
-  Zap, Calendar, Bell,
+  Calendar, Bell,
 } from 'lucide-react';
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts';
 import { fetchIoTPack } from '../services/iotService';
 import IoTDeviceCard from '../components/IoTDeviceCard';
+import IoTInsightsPanel from '../components/IoTInsightsPanel';
+import IoTSensorTimelinePanel from '../components/IoTSensorTimelinePanel';
+import IoTAutomationRulesPanel from '../components/IoTAutomationRulesPanel';
 import DemoModePill from '../components/DemoModePill';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
-import { DEMO_IOT_PACK } from '../utils/clientDemoData';
 import './ClientComplaintsPage.css';
+import './ClientIoTHub.css';
 
 const card = {
   background: '#fff',
@@ -25,6 +28,7 @@ const card = {
 
 const TABS = [
   { id: 'dashboard', label: 'Tableau de bord' },
+  { id: 'intelligence', label: 'Intelligence IA' },
   { id: 'devices', label: 'Appareils' },
   { id: 'alerts', label: 'Alertes' },
   { id: 'automations', label: 'Automatisations' },
@@ -80,10 +84,7 @@ const ClientIoTHubPage = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchIoTPack();
-      setPack(data?.devices ? data : DEMO_IOT_PACK);
-    } catch {
-      setPack(DEMO_IOT_PACK);
+      setPack(await fetchIoTPack());
     } finally {
       setLoading(false);
     }
@@ -92,7 +93,7 @@ const ClientIoTHubPage = () => {
   useEffect(() => { load(); }, [load]);
   usePlatformRefresh(load, [load]);
 
-  const d = pack || DEMO_IOT_PACK;
+  const d = pack || {};
   const c = d.counts || {};
 
   const feederChart = (d.telemetry?.feederGrams7d || []).map((g, i) => ({
@@ -106,7 +107,7 @@ const ClientIoTHubPage = () => {
   }));
 
   return (
-    <div className="cc-page" style={{ maxWidth: 1100, margin: '0 auto' }}>
+    <div className="cc-page iot-hub">
       <header className="cc-hero" style={{
         background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #0ea5e9 100%)',
         color: 'white', borderRadius: 20, marginBottom: 24,
@@ -129,22 +130,20 @@ const ClientIoTHubPage = () => {
         </div>
       </header>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div className="iot-tabs">
         {TABS.map((t) => (
           <button
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            style={{
-              padding: '10px 16px', borderRadius: 10, fontWeight: 700, cursor: 'pointer',
-              border: tab === t.id ? '2px solid #1e40af' : '1px solid #e2e8f0',
-              background: tab === t.id ? '#eff6ff' : '#fff',
-              color: tab === t.id ? '#1e40af' : '#475569',
-            }}
+            className={`iot-tab${tab === t.id ? ' is-active' : ''}`}
           >
             {t.label}
             {t.id === 'alerts' && c.alerts > 0 && (
-              <span style={{ marginLeft: 6, fontSize: 11, background: '#fef2f2', color: '#dc2626', padding: '2px 6px', borderRadius: 999 }}>{c.alerts}</span>
+              <span className="iot-tab-badge">{c.alerts}</span>
+            )}
+            {t.id === 'intelligence' && (d.intelligence?.insightCount || 0) > 0 && (
+              <span className="iot-tab-badge">{d.intelligence.insightCount}</span>
             )}
           </button>
         ))}
@@ -234,6 +233,29 @@ const ClientIoTHubPage = () => {
             </>
           )}
 
+          {tab === 'intelligence' && (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
+                <Stat value={d.healthScore ?? '—'} label="Score santé IoT" color="#059669" />
+                <Stat value={d.intelligence?.insightCount ?? 0} label="Insights IA" color="#7c3aed" />
+                <Stat value={d.intelligence?.criticalPredictions ?? 0} label="Prédictions critiques" color="#dc2626" />
+                <Stat value={(d.sensorTimeline || []).length} label="Événements capteurs" color="#0ea5e9" />
+              </div>
+              <div className="iot-intel-grid">
+                <div className="iot-card">
+                  <IoTInsightsPanel
+                    insights={d.insights}
+                    predictions={d.predictions}
+                    loading={loading}
+                  />
+                </div>
+                <div className="iot-card">
+                  <IoTSensorTimelinePanel events={d.sensorTimeline} loading={loading} />
+                </div>
+              </div>
+            </>
+          )}
+
           {tab === 'devices' && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
               {(d.devices || []).map((device) => (
@@ -284,26 +306,7 @@ const ClientIoTHubPage = () => {
               <p style={{ margin: '0 0 16px', fontSize: 14, color: '#64748b' }}>
                 Règles intelligentes qui réagissent aux capteurs IoT (stock bas, hydratation, livraison).
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
-                {(d.automations || []).map((auto) => (
-                  <div key={auto.id} style={card}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                      <Zap size={18} color="#d97706" />
-                      <h4 style={{ margin: 0, fontWeight: 800 }}>{auto.label}</h4>
-                      <span style={{
-                        marginLeft: 'auto', fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6,
-                        background: auto.enabled ? '#ecfdf5' : '#f1f5f9',
-                        color: auto.enabled ? '#059669' : '#94a3b8',
-                      }}
-                      >
-                        {auto.enabled ? 'Actif' : 'Inactif'}
-                      </span>
-                    </div>
-                    <p style={{ margin: '0 0 12px', fontSize: 13, color: '#64748b' }}>{auto.description}</p>
-                    <Link to={auto.link} style={{ fontSize: 13, fontWeight: 700, color: '#2563eb' }}>Configurer →</Link>
-                  </div>
-                ))}
-              </div>
+              <IoTAutomationRulesPanel automations={d.automations} />
               {(c.criticalAlerts || 0) > 0 && (
                 <div style={{ ...card, marginTop: 16, background: '#fffbeb', borderColor: '#fde68a' }}>
                   <p style={{ margin: 0, fontSize: 13, color: '#92400e', display: 'flex', alignItems: 'center', gap: 8 }}>
