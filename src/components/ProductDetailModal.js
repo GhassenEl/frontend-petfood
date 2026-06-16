@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingCart, Star, Package, Tag, Beaker, BookOpen, Sparkles } from 'lucide-react';
 import { getProductDetailFields, getEffectiveDiscount, getPromoPrice } from '../utils/productDetails';
 import VerifiedPriceBadge from './VerifiedPriceBadge';
+import ProductReviewAiPanel from './ProductReviewAiPanel';
 
 const ANIMAL_LABELS = { dog: 'Chien', cat: 'Chat', bird: 'Oiseau', fish: 'Poisson', other: 'Autre' };
 
@@ -164,7 +165,9 @@ const ProductDetailModal = ({ product, onClose, onAddToCart, getPrice, getImage,
               </div>
             )}
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            <ProductReviewAiPanel productId={id} productName={product.name} />
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 20 }}>
               <button
                 type="button"
                 onClick={() => onAddToCart?.(product)}

@@ -1,0 +1,497 @@
+.vetintel-page {
+  padding: 24px;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.vetintel-page h1 {
+  margin: 0 0 8px;
+  font-weight: 800;
+}
+
+.vetintel-lead {
+  color: #64748b;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.vetintel-loading {
+  text-align: center;
+  color: #64748b;
+  padding: 40px;
+}
+
+.vetintel-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.vetintel-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vetintel-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.vetintel-tab--active {
+  background: #0ea5e9;
+  border-color: #0ea5e9;
+  color: #fff;
+}
+
+.vetintel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.vetintel-btn--primary {
+  background: #0f766e;
+  color: #fff;
+}
+
+.vetintel-btn--ghost {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+.vetintel-link {
+  color: #0f766e;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.vetintel-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+}
+
+.vetintel-muted {
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
+}
+
+.vetintel-summary {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  background: #f0f9ff;
+  border-radius: 12px;
+  color: #0369a1;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Chat */
+.vetintel-chat {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.vetintel-chat__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #f1f5f9;
+  align-items: center;
+}
+
+.vetintel-select {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.vetintel-select select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-weight: 600;
+}
+
+.vetintel-pet-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.vetintel-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.vetintel-quick-btn {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #bae6fd;
+  background: #f0f9ff;
+  color: #0369a1;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.vetintel-messages {
+  min-height: 280px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vetintel-msg {
+  max-width: 88%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.vetintel-msg p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.vetintel-msg--user {
+  align-self: flex-end;
+  background: #0ea5e9;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.vetintel-msg--assistant {
+  align-self: flex-start;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-bottom-left-radius: 4px;
+}
+
+.vetintel-urgent {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #dc2626;
+  margin-bottom: 6px;
+}
+
+.vetintel-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.vetintel-cta-row a {
+  color: #0f766e;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.vetintel-input-row {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.vetintel-input-row input {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+}
+
+.vetintel-input-row button {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #0ea5e9;
+  color: #fff;
+  cursor: pointer;
+}
+
+.vetintel-input-row button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vetintel-disclaimer {
+  margin: 0;
+  padding: 10px 16px;
+  font-size: 11px;
+  color: #94a3b8;
+  background: #f8fafc;
+}
+
+/* Marketplace */
+.vetintel-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.vetintel-filter {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.vetintel-filter--active {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #fff;
+}
+
+.vetintel-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+
+.vetintel-badge--top {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.vetintel-vet-hero h3 {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+}
+
+.vetintel-vet-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.vetintel-vet-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vetintel-avail {
+  color: #059669;
+  font-weight: 700;
+}
+
+.vetintel-score {
+  font-weight: 800;
+  color: #0f766e;
+}
+
+.vetintel-reasons {
+  font-size: 13px;
+  color: #6366f1;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+
+.vetintel-spec-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.vetintel-spec-tags span {
+  font-size: 11px;
+  padding: 4px 10px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.vetintel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.vetintel-vet-list h4 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.vetintel-vet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+  background: #fff;
+  margin-bottom: 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.vetintel-vet-row--active {
+  outline: 2px solid #0f766e;
+  background: #f0fdfa;
+}
+
+.vetintel-mini-top {
+  color: #b45309;
+  font-size: 12px;
+}
+
+.vetintel-dot-ok {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+/* Future predictions */
+.vetintel-future-kpi {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.vetintel-kpi-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.vetintel-future-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vetintel-future-head {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.vetintel-urgency-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.vetintel-urgency--critical {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.vetintel-urgency--soon {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.vetintel-urgency--upcoming {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.vetintel-urgency--ok {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.vetintel-cat-badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.vetintel-future-item h4 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.vetintel-future-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 8px 0;
+}
+
+.vetintel-footer-link {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.vetintel-footer-link a {
+  color: #0f766e;
+  font-weight: 600;
+  text-decoration: none;
+}

@@ -45,6 +45,10 @@ const AdminSecurityPage = () => {
         </h1>
         <p>
           Détection d&apos;intrusions (IDS), anti-virus applicatif et journal des menaces —{' '}
+          <Link to="/admin/intelligent-security" style={{ color: '#7c3aed', fontWeight: 700 }}>
+            Sécurité intelligente (fraude, JWT, modération) →
+          </Link>
+          {' · '}
           <Link to="/admin/system" style={{ color: '#0ea5e9' }}>Configuration globale →</Link>
         </p>
       </header>

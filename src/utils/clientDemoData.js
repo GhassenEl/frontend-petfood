@@ -2,6 +2,7 @@
 
 const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString();
 const hoursAgo = (n) => new Date(Date.now() - n * 3600000).toISOString();
+const daysAhead = (n) => new Date(Date.now() + n * 86400000).toISOString();
 
 export const DEMO_ORDERS = [
   {
@@ -12,8 +13,8 @@ export const DEMO_ORDERS = [
     createdAt: daysAgo(12),
     paymentMethod: 'wallet',
     items: [
-      { quantity: 1, price: 54.9, productId: { name: 'Croquettes Premium Chien Adulte 12 kg' } },
-      { quantity: 1, price: 34.6, productId: { name: 'Manteau chien taille M' } },
+      { quantity: 1, price: 54.9, productId: { _id: 'demo-prod-croq', id: 'demo-prod-croq', name: 'Croquettes Premium Chien Adulte 12 kg', category: 'nourriture', animalType: 'dog' } },
+      { quantity: 1, price: 34.6, productId: { _id: 'demo-prod-manteau', id: 'demo-prod-manteau', name: 'Manteau chien taille M', category: 'accessoire', animalType: 'dog' } },
     ],
   },
   {
@@ -76,6 +77,60 @@ export const DEMO_REVIEWS = [
     createdAt: daysAgo(8),
     productId: { _id: 'demo-prod-croq', name: 'Croquettes Premium Chien Adulte 12 kg' },
   },
+  {
+    _id: 'demo-rev-003',
+    id: 'demo-rev-003',
+    rating: 5,
+    emotion: 'happy',
+    comment: 'Excellente digestibilité, selles normales et pelage brillant après 3 semaines. Rapport qualité-prix top.',
+    createdAt: daysAgo(14),
+    productId: { _id: 'demo-prod-croq', name: 'Croquettes Premium Chien Adulte 12 kg' },
+  },
+  {
+    _id: 'demo-rev-004',
+    id: 'demo-rev-004',
+    rating: 2,
+    emotion: 'disappointed',
+    comment: 'Mon chien refuse parfois le goût. Emballage un peu fragile à réception.',
+    createdAt: daysAgo(5),
+    productId: { _id: 'demo-prod-croq', name: 'Croquettes Premium Chien Adulte 12 kg' },
+  },
+  {
+    _id: 'demo-rev-005',
+    id: 'demo-rev-005',
+    rating: 4,
+    emotion: 'satisfied',
+    comment: 'Bonne énergie et appétence au quotidien. Un peu cher mais qualité premium.',
+    createdAt: daysAgo(2),
+    productId: { _id: 'demo-prod-croq', name: 'Croquettes Premium Chien Adulte 12 kg' },
+  },
+  {
+    _id: 'demo-rev-006',
+    id: 'demo-rev-006',
+    rating: 1,
+    emotion: 'angry',
+    comment: 'Litière qui sent très fort, mon chat refuse parfois. Emballage arrivé déchiré.',
+    createdAt: daysAgo(4),
+    productId: { _id: 'demo-prod-litiere-budget', name: 'Litière budget chat 5 L' },
+  },
+  {
+    _id: 'demo-rev-007',
+    id: 'demo-rev-007',
+    rating: 2,
+    emotion: 'disappointed',
+    comment: 'Mauvaise agglomération, poussière et odeur désagréable. Je ne rachèterai pas.',
+    createdAt: daysAgo(3),
+    productId: { _id: 'demo-prod-litiere-budget', name: 'Litière budget chat 5 L' },
+  },
+  {
+    _id: 'demo-rev-spam-001',
+    id: 'demo-rev-spam-001',
+    rating: 5,
+    emotion: 'neutral',
+    comment: 'CLIQUEZ ICI www.promo-gratuit.tn — gagnez un iPhone!!! Meilleur produit du monde 5 etoiles',
+    createdAt: daysAgo(1),
+    productId: { _id: 'demo-prod-croq', name: 'Croquettes Premium Chien Adulte 12 kg' },
+  },
 ];
 
 export const DEMO_COMPLAINTS = [
@@ -116,6 +171,118 @@ export const DEMO_LOYALTY_OFFERS = {
     { _id: 'demo-off-2', name: 'Shampoing doux chat', price: 12.5, discount: 10 },
   ],
 };
+
+export const DEMO_COMMUNITY_POSTS = [
+  {
+    id: 'cp-1',
+    type: 'photo',
+    authorId: 'u-sarra',
+    authorName: 'Sarra B.',
+    authorAvatar: '🐕',
+    content: 'Max après sa promenade du matin — toujours aussi énergique à 8 ans !',
+    productName: null,
+    likes: 24,
+    comments: 5,
+    createdAt: hoursAgo(3),
+  },
+  {
+    id: 'cp-2',
+    type: 'tip',
+    authorId: 'u-karim',
+    authorName: 'Karim M.',
+    authorAvatar: '🐈',
+    content: 'Conseil : introduisez une nouvelle croquette sur 10 jours (75 % ancienne / 25 % nouvelle la première semaine) pour éviter les troubles digestifs.',
+    productName: null,
+    likes: 41,
+    comments: 12,
+    createdAt: hoursAgo(8),
+  },
+  {
+    id: 'cp-3',
+    type: 'experience',
+    authorId: 'u-leila',
+    authorName: 'Leila H.',
+    authorAvatar: '🐾',
+    content: 'Après 3 semaines avec la fontaine connectée PetfoodTN, mon chat boit 30 % plus d\'eau. Le rappel mobile est très pratique quand je suis au bureau.',
+    productName: 'Fontaine connectée',
+    likes: 18,
+    comments: 4,
+    createdAt: daysAgo(1),
+  },
+  {
+    id: 'cp-4',
+    type: 'review',
+    authorId: 'u-me',
+    authorName: 'Vous',
+    authorAvatar: '👤',
+    content: 'Excellent rapport qualité-prix, croquettes bien tolérées par mon berger malinois actif. Livraison rapide.',
+    productName: 'Croquettes Premium Chien Adulte 12 kg',
+    rating: 5,
+    likes: 9,
+    comments: 2,
+    createdAt: daysAgo(5),
+  },
+  {
+    id: 'cp-5',
+    type: 'tip',
+    authorId: 'u-amine',
+    authorName: 'Amine T.',
+    authorAvatar: '🦴',
+    content: 'Pour les friandises d\'éducation : morceaux de 5 mm max, comptez 10 % max des calories journalières pour ne pas déséquilibrer le régime.',
+    productName: null,
+    likes: 33,
+    comments: 7,
+    createdAt: daysAgo(2),
+  },
+];
+
+export const DEMO_COMMUNITY_MEMBERS = [
+  {
+    id: 'u-me',
+    name: 'Vous',
+    avatar: '👤',
+    posts: DEMO_COMMUNITY_POSTS.filter((p) => p.authorId === 'u-me'),
+    reviews: [{ rating: 5, text: 'Excellent rapport qualité-prix…' }],
+    likesReceived: 9,
+    helpfulVotes: 3,
+  },
+  {
+    id: 'u-karim',
+    name: 'Karim M.',
+    avatar: '🐈',
+    posts: DEMO_COMMUNITY_POSTS.filter((p) => p.authorId === 'u-karim'),
+    reviews: [],
+    likesReceived: 41,
+    helpfulVotes: 15,
+  },
+  {
+    id: 'u-sarra',
+    name: 'Sarra B.',
+    avatar: '🐕',
+    posts: DEMO_COMMUNITY_POSTS.filter((p) => p.authorId === 'u-sarra'),
+    reviews: [{ rating: 4, text: 'Très bon produit' }],
+    likesReceived: 24,
+    helpfulVotes: 8,
+  },
+  {
+    id: 'u-leila',
+    name: 'Leila H.',
+    avatar: '🐾',
+    posts: DEMO_COMMUNITY_POSTS.filter((p) => p.authorId === 'u-leila'),
+    reviews: [],
+    likesReceived: 18,
+    helpfulVotes: 6,
+  },
+  {
+    id: 'u-amine',
+    name: 'Amine T.',
+    avatar: '🦴',
+    posts: DEMO_COMMUNITY_POSTS.filter((p) => p.authorId === 'u-amine'),
+    reviews: [{ rating: 5, text: 'Parfait pour l\'éducation' }],
+    likesReceived: 33,
+    helpfulVotes: 11,
+  },
+];
 
 export const DEMO_FAVORITES = [
   {
@@ -267,6 +434,7 @@ export const DEMO_NUTRITION_PETS = [
     birthDate: daysAgo(Math.round(5 * 365.25)),
     sex: 'M',
     isNeutered: true,
+    allergies: 'Poulet',
   },
   {
     id: 'demo-nut-2',
@@ -426,6 +594,161 @@ export const DEMO_NUTRITION_PETS = [
   },
 ];
 
+/** Historique poids démo pour nutrition adaptative IA */
+export const DEMO_PET_WEIGHT_HISTORY = {
+  'demo-nut-1': [
+    { date: daysAgo(90), weightKg: 26.2 },
+    { date: daysAgo(60), weightKg: 26.8 },
+    { date: daysAgo(30), weightKg: 27.5 },
+    { date: daysAgo(7), weightKg: 28 },
+  ],
+  'demo-nut-2': [
+    { date: daysAgo(60), weightKg: 4.3 },
+    { date: daysAgo(30), weightKg: 4.2 },
+    { date: daysAgo(7), weightKg: 4.2 },
+  ],
+  'demo-nut-3': [
+    { date: daysAgo(45), weightKg: 33 },
+    { date: daysAgo(14), weightKg: 32 },
+  ],
+};
+
+/** Données jumeau numérique démo (médical, alimentation, activité, véto) */
+export const DEMO_DIGITAL_TWIN_SNAPSHOTS = {
+  'demo-nut-1': {
+    feeding: {
+      currentDiet: 'Croquettes Premium Chien Adulte 12 kg',
+      dailyKcal: 890,
+      gramsPerDay: 280,
+      mealCount: 2,
+      adherence: 0.88,
+      consistency: 0.82,
+      history: [
+        { date: daysAgo(1), meal: 'Matin', product: 'Croquettes Premium', grams: 140, kcal: 445 },
+        { date: daysAgo(1), meal: 'Soir', product: 'Croquettes Premium', grams: 140, kcal: 445 },
+        { date: daysAgo(2), meal: 'Matin', product: 'Croquettes Premium', grams: 135, kcal: 428 },
+      ],
+      logs: [
+        { date: daysAgo(0), grams: 65, source: 'distributeur IoT' },
+        { date: daysAgo(1), grams: 280, source: 'manuel' },
+      ],
+    },
+    activity: {
+      weeklyMinutes: 210,
+      dailyGoalMin: 30,
+      dailyGoalMetPct: 0.85,
+      source: 'IoT + manuel',
+      sessions: [
+        { date: daysAgo(0), type: 'Promenade', minutes: 35, intensity: 'modérée' },
+        { date: daysAgo(1), type: 'Jeu', minutes: 25, intensity: 'élevée' },
+        { date: daysAgo(2), type: 'Promenade', minutes: 40, intensity: 'modérée' },
+        { date: daysAgo(3), type: 'Agility', minutes: 30, intensity: 'élevée' },
+      ],
+    },
+    veterinary: {
+      lastConsultDaysAgo: 45,
+      lastCheckup: daysAgo(45),
+      vaccinesUpToDate: true,
+      upcomingAppointment: true,
+      vetReferent: 'Dr. Ben Ali — VetCare',
+    },
+    medical: {
+      followUpComplete: true,
+      noOverdueVaccines: true,
+      chronicManaged: false,
+      vaccines: [
+        { name: 'Rage', status: 'up_to_date', date: daysAgo(200), nextDue: daysAhead(165) },
+        { name: 'CHPPi', status: 'up_to_date', date: daysAgo(180), nextDue: daysAhead(185) },
+      ],
+      consultations: [
+        { date: daysAgo(45), type: 'Bilan annuel', vet: 'Dr. Ben Ali', notes: 'Poids stable, articulations OK.' },
+        { date: daysAgo(120), type: 'Vaccination rappel', vet: 'Dr. Ben Ali', notes: 'CHPPi administré.' },
+      ],
+      prescriptions: [],
+      chronicConditions: [],
+    },
+  },
+  'demo-nut-2': {
+    feeding: {
+      currentDiet: 'Pâtée chat saumon + croquettes stérilisé',
+      dailyKcal: 240,
+      gramsPerDay: 55,
+      mealCount: 3,
+      adherence: 0.72,
+      consistency: 0.68,
+      history: [
+        { date: daysAgo(1), meal: 'Matin', product: 'Pâtée saumon', grams: 20, kcal: 35 },
+        { date: daysAgo(1), meal: 'Midi', product: 'Croquettes stérilisé', grams: 18, kcal: 70 },
+      ],
+      logs: [{ date: daysAgo(0), grams: 55, source: 'fontaine + gamelle' }],
+    },
+    activity: {
+      weeklyMinutes: 95,
+      dailyGoalMin: 20,
+      dailyGoalMetPct: 0.62,
+      source: 'capteur fontaine',
+      sessions: [
+        { date: daysAgo(0), type: 'Jeu interactif', minutes: 15, intensity: 'modérée' },
+        { date: daysAgo(1), type: 'Grimpeur', minutes: 20, intensity: 'modérée' },
+      ],
+    },
+    veterinary: {
+      lastConsultDaysAgo: 95,
+      lastCheckup: daysAgo(95),
+      vaccinesUpToDate: true,
+      upcomingAppointment: false,
+      vetReferent: 'Clinique Carthage',
+    },
+    medical: {
+      followUpComplete: true,
+      noOverdueVaccines: true,
+      chronicConditions: [],
+      vaccines: [
+        { name: 'Typhus / Coryza', status: 'due_soon', date: daysAgo(360), nextDue: daysAhead(14) },
+      ],
+      consultations: [
+        { date: daysAgo(95), type: 'Stérilisation suivi', vet: 'Dr. Leila', notes: 'Cicatrisation OK.' },
+      ],
+      prescriptions: [],
+    },
+  },
+  'demo-nut-3': {
+    feeding: {
+      currentDiet: 'Croquettes Senior Berger',
+      dailyKcal: 1100,
+      gramsPerDay: 320,
+      mealCount: 2,
+      adherence: 0.65,
+      consistency: 0.7,
+      history: [],
+      logs: [],
+    },
+    activity: {
+      weeklyMinutes: 140,
+      dailyGoalMin: 45,
+      dailyGoalMetPct: 0.55,
+      sessions: [
+        { date: daysAgo(0), type: 'Promenade', minutes: 25, intensity: 'légère' },
+      ],
+    },
+    veterinary: {
+      lastConsultDaysAgo: 200,
+      vaccinesUpToDate: false,
+      upcomingAppointment: false,
+      vetReferent: 'Urgences Vet Lac',
+    },
+    medical: {
+      followUpComplete: false,
+      noOverdueVaccines: false,
+      chronicManaged: true,
+      chronicConditions: ['Arthrose légère'],
+      vaccines: [{ name: 'Rage', status: 'overdue', date: daysAgo(400) }],
+      consultations: [{ date: daysAgo(200), type: 'Douleur articulaire', vet: 'Dr. Amine', notes: 'Glucosamine prescrite.' }],
+      prescriptions: [{ name: 'Glucosamine', since: daysAgo(200), active: true }],
+    },
+  },
+};
+
 export const DEMO_FEEDER_DEVICE = {
   id: 'demo-feeder-1',
   name: 'Distributeur Max — Salon',
@@ -460,9 +783,9 @@ export const DEMO_FEEDER_STATS = {
 };
 
 export const DEMO_FEEDER_ALERTS = [
-  { level: 'warning', title: 'Niveau croquettes bas', message: 'Réservoir à 42 % — recharge recommandée sous 48 h.' },
+  { id: 'low-food', level: 'warning', type: 'low_food', title: 'Niveau de nourriture faible', message: 'Réservoir à 42 % — recharge recommandée sous 48 h.' },
+  { id: 'missed-meal', level: 'warning', type: 'abnormal_eating', title: 'Repas programmé non consommé', message: 'Créneau 12:30 sans distribution détectée aujourd\'hui.' },
   { level: 'info', title: 'Prochain repas', message: 'Distribution programmée à 19:30 (30 g).' },
-  { level: 'info', title: 'Capteur IR', message: 'Aucun animal détecté devant la gamelle.' },
 ];
 
 export const DEMO_FEEDER_INSIGHTS = [
@@ -857,7 +1180,189 @@ export const DEMO_NEAREST_STORE = {
   openUntil: '19h00',
 };
 
-const daysAhead = (n) => new Date(Date.now() + n * 86400000).toISOString();
+export const DEMO_NEARBY_VETS = [
+  {
+    id: 'vet-demo-1',
+    name: 'Dr. Ben Ali — Clinique VetCare',
+    region: 'La Marsa',
+    address: 'Av. Taieb Mhiri, La Marsa',
+    phone: '+216 71 000 101',
+    lat: 36.878,
+    lng: 10.325,
+    distance: 1.4,
+    sameRegion: true,
+    availableNow: true,
+    teleconsult: true,
+    openUntil: '18h30',
+    specialties: ['vaccination', 'chirurgie'],
+    rating_avg: 4.8,
+    rating_count: 124,
+  },
+  {
+    id: 'vet-demo-2',
+    name: 'Clinique Vétérinaire Carthage',
+    region: 'Carthage',
+    address: 'Rue de la République, Carthage',
+    phone: '+216 71 000 002',
+    lat: 36.852,
+    lng: 10.331,
+    distance: 2.8,
+    sameRegion: false,
+    availableNow: true,
+    teleconsult: false,
+    openUntil: '18h00',
+    specialties: ['vaccination', 'dentaire'],
+    rating_avg: 4.6,
+    rating_count: 89,
+  },
+  {
+    id: 'vet-demo-3',
+    name: 'Centre Vet Sidi Bou Said',
+    region: 'Sidi Bou Said',
+    address: 'Rue Habib Thameur, Sidi Bou Said',
+    phone: '+216 71 000 103',
+    lat: 36.871,
+    lng: 10.341,
+    distance: 3.5,
+    sameRegion: false,
+    availableNow: false,
+    teleconsult: true,
+    openUntil: '17h00',
+    specialties: ['dermatologie'],
+    rating_avg: 4.9,
+    rating_count: 56,
+  },
+  {
+    id: 'vet-demo-4',
+    name: 'Urgences Vet Tunis Lac',
+    region: 'Lac',
+    address: 'Les Berges du Lac, Tunis',
+    phone: '+216 71 000 104',
+    lat: 36.838,
+    lng: 10.241,
+    distance: 8.2,
+    sameRegion: false,
+    availableNow: true,
+    teleconsult: true,
+    openUntil: '22h00',
+    specialties: ['urgence', 'chirurgie'],
+    rating_avg: 4.4,
+    rating_count: 210,
+  },
+];
+
+export const DEMO_PARTNER_STORES = [
+  ...DEMO_RELAY_POINTS,
+  {
+    id: 'store-demo-3',
+    name: 'Animalerie PetfoodTN Lac 2',
+    type: 'pet_shop',
+    typeLabel: 'Animalerie partenaire',
+    typeIcon: '🏪',
+    address: 'Centre commercial Lac 2, Tunis',
+    distanceKm: 6.5,
+    phone: '+216 71 000 003',
+    hours: 'Lun–Dim 10h–20h',
+    partnerCode: 'LAC-003',
+    lat: 36.838,
+    lng: 10.241,
+  },
+  {
+    id: 'store-demo-4',
+    name: 'PetShop Ariana',
+    type: 'pet_shop',
+    typeLabel: 'Animalerie partenaire',
+    typeIcon: '🏪',
+    address: 'Centre Ariana, Ariana',
+    distanceKm: 9.1,
+    phone: '+216 71 000 004',
+    hours: 'Lun–Sam 9h–19h',
+    partnerCode: 'ARI-004',
+    lat: 36.862,
+    lng: 10.195,
+  },
+  {
+    id: 'store-demo-5',
+    name: 'Point relais PetfoodTN Manouba',
+    type: 'relay',
+    typeLabel: 'Point relais',
+    typeIcon: '📦',
+    address: 'Av. de la République, Manouba',
+    distanceKm: 12.3,
+    phone: '+216 71 000 005',
+    hours: 'Lun–Ven 8h–17h',
+    partnerCode: 'MAN-005',
+    lat: 36.81,
+    lng: 10.097,
+  },
+];
+
+export const DEMO_LOCAL_ALERTS = [
+  {
+    id: 'alert-vac-1',
+    type: 'vaccination',
+    title: 'Campagne antirabique — La Marsa',
+    description: 'Vaccination gratuite pour chiens et chats. Apportez le carnet de santé. Samedi 9h–14h, place centrale.',
+    region: 'La Marsa',
+    date: daysAhead(5),
+    urgency: 'high',
+    distanceKm: 1.2,
+    lat: 36.878,
+    lng: 10.325,
+  },
+  {
+    id: 'alert-vac-2',
+    type: 'vaccination',
+    title: 'Rappel vaccin CHPPi — Carthage',
+    description: 'Clinique VetCarthage : rappels CHPPi chiens à tarif réduit (−30 %) jusqu\'à fin du mois.',
+    region: 'Carthage',
+    date: daysAhead(12),
+    urgency: 'medium',
+    distanceKm: 2.8,
+  },
+  {
+    id: 'alert-promo-1',
+    type: 'promotion',
+    title: '−20 % croquettes premium chien',
+    description: 'Offre exclusive animalerie La Marsa — croquettes 12 kg adulte. Valable 7 jours.',
+    region: 'La Marsa',
+    date: daysAhead(7),
+    urgency: 'medium',
+    distanceKm: 1.2,
+  },
+  {
+    id: 'alert-promo-2',
+    type: 'promotion',
+    title: 'Pack toilettage + shampoing offert',
+    description: 'PetShop Ariana : shampoing offert pour toute prestation toilettage ce week-end.',
+    region: 'Ariana',
+    date: daysAhead(3),
+    urgency: 'low',
+    distanceKm: 9.1,
+  },
+  {
+    id: 'alert-event-1',
+    type: 'event',
+    title: 'Salon animalier Tunis 2026',
+    description: 'Rencontrez des éleveurs, démonstrations éducation canine, stands PetfoodTN. Entrée gratuite.',
+    region: 'Toute la Tunisie',
+    date: daysAhead(21),
+    urgency: 'medium',
+    distanceKm: 8,
+    lat: 36.8065,
+    lng: 10.1815,
+  },
+  {
+    id: 'alert-event-2',
+    type: 'event',
+    title: 'Concours agility — Sidi Bou Said',
+    description: 'Inscriptions ouvertes pour le concours d\'agility du 28 juin. Catégories chien S/M/L.',
+    region: 'Sidi Bou Said',
+    date: daysAhead(14),
+    urgency: 'low',
+    distanceKm: 3.5,
+  },
+];
 
 export const DEMO_DASHBOARD = {
   activeOrder: {

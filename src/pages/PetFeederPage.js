@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Wifi, WifiOff, Droplets, Thermometer, Scale, PawPrint,
-  Plus, Trash2, Play, Calendar, AlertTriangle, Copy, Check,
+  Plus, Trash2, Play, Calendar, Copy, Check,
   RefreshCw, Package, TrendingUp, Lightbulb, ToggleLeft, ToggleRight, Edit2,
 } from 'lucide-react';
 import {
@@ -20,17 +20,14 @@ import {
   getDemoFeederBundle,
   DEMO_FEEDER_PETS,
 } from '../utils/clientDemoData';
+import FeederRealtimeAlerts from '../components/FeederRealtimeAlerts';
+import FeederHabitMonitor from '../components/FeederHabitMonitor';
+import { analyzeFeederHabits } from '../utils/feederHabitAnalyzer';
 
 const DEMO_FEEDER_ID = 'demo-feeder-1';
 const isDemoFeederId = (id) => id === DEMO_FEEDER_ID || String(id || '').startsWith('demo-');
 
 const statusColor = (s) => (s === 'online' ? '#059669' : '#9ca3af');
-
-const alertStyle = (level) => {
-  if (level === 'critical') return { bg: '#fef2f2', border: '#fecaca', color: '#b91c1c' };
-  if (level === 'warning') return { bg: '#fffbeb', border: '#fde68a', color: '#b45309' };
-  return { bg: '#eff6ff', border: '#bfdbfe', color: '#1d4ed8' };
-};
 
 const PetFeederPage = () => {
   const [feeders, setFeeders] = useState([]);
@@ -163,10 +160,30 @@ const PetFeederPage = () => {
   }, [selectedId, loadFeederDetail]);
 
   useEffect(() => {
-    if (!selectedId || demoMode) return undefined;
-    pollRef.current = setInterval(() => loadFeederDetail(selectedId, true), 12000);
+    if (!selectedId) return undefined;
+    pollRef.current = setInterval(() => loadFeederDetail(selectedId, true), demoMode ? 8000 : 12000);
     return () => clearInterval(pollRef.current);
   }, [selectedId, loadFeederDetail, demoMode]);
+
+  const habitAnalysis = useMemo(
+    () => analyzeFeederHabits({
+      feeder,
+      stats,
+      plan,
+      history,
+      schedules: feeder?.schedules,
+    }),
+    [feeder, stats, plan, history],
+  );
+
+  const realtimeAlerts = useMemo(() => {
+    const map = new Map();
+    [...alerts, ...habitAnalysis.alerts].forEach((a) => {
+      const key = a.id || a.type || a.title;
+      if (!map.has(key)) map.set(key, { ...a, id: a.id || key });
+    });
+    return [...map.values()];
+  }, [alerts, habitAnalysis]);
 
   const registerFeeder = async () => {
     if (demoMode) {
@@ -479,23 +496,9 @@ const PetFeederPage = () => {
             <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Chargement du distributeur…</div>
           ) : feeder && (
             <>
-              {/* Alertes */}
-              {alerts.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-                  {alerts.map((a, i) => {
-                    const s = alertStyle(a.level);
-                    return (
-                      <div key={i} style={{ ...alertBox, background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
-                        <AlertTriangle size={16} />
-                        <div>
-                          <strong>{a.title}</strong>
-                          <div style={{ fontSize: 12, fontWeight: 400, marginTop: 2 }}>{a.message}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              <FeederRealtimeAlerts alerts={realtimeAlerts} realtime />
+
+              <FeederHabitMonitor analysis={habitAnalysis} petName={plan?.pet?.name} />
 
               {speciesGuide && (
                 <div style={{
@@ -853,6 +856,5 @@ const btnSmall = { padding: 8, background: '#e2e8f0', border: 'none', borderRadi
 const btnDanger = { padding: 8, background: '#fef2f2', color: '#b91c1c', border: 'none', borderRadius: 8, cursor: 'pointer' };
 const inputStyle = { padding: '10px 12px', borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 14, width: '100%' };
 const labelStyle = { display: 'block', fontSize: 13, fontWeight: 600, color: '#475569' };
-const alertBox = { display: 'flex', alignItems: 'flex-start', gap: 8, padding: 12, borderRadius: 12, marginBottom: 0, fontSize: 13, fontWeight: 600 };
 
 export default PetFeederPage;

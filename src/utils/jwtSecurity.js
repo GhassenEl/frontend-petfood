@@ -1,5 +1,14 @@
 import { jwtDecode } from 'jwt-decode';
 
+export const ROLE_LABELS = {
+  admin: 'Administrateur',
+  vendor: 'Vendeur',
+  vet: 'Vétérinaire',
+  client: 'Client',
+  livreur: 'Livreur',
+  moderator: 'Modérateur',
+};
+
 export const AUTH_EVENTS = {
   LOGOUT: 'petfoodtn:auth:logout',
   TOKEN_REFRESHED: 'petfoodtn:auth:token-refreshed',

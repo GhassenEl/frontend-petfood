@@ -4,6 +4,7 @@ import {
   buildPetNutritionRecommendation,
   matchProductsForPet,
 } from '../utils/petNutritionRecommender';
+import { scoreProductCompatibility } from '../utils/productCompatibilityScore';
 import { DEMO_NUTRITION_PETS } from '../utils/clientDemoData';
 
 export const getPetNutritionRecommendations = async (options = {}) => {
@@ -34,10 +35,18 @@ export const getPetNutritionWithProducts = async (options = {}) => {
   ]);
 
   const products = productsRes.data || [];
-  const pets = (nutrition.pets || []).map((rec) => ({
-    ...rec,
-    suggestedProducts: matchProductsForPet(products, rec, options.productLimit || 3),
-  }));
+  const pets = (nutrition.pets || []).map((rec) => {
+    const petRef = { type: rec.type, allergies: rec.allergies, name: rec.name };
+    const suggestedProducts = matchProductsForPet(products, rec, options.productLimit || 3).map((p) => {
+      const compat = scoreProductCompatibility(p, rec, petRef);
+      return {
+        ...p,
+        compatibilityScore: compat?.score,
+        compatibilityLevel: compat?.level,
+      };
+    });
+    return { ...rec, suggestedProducts };
+  });
 
   return { ...nutrition, pets };
 };

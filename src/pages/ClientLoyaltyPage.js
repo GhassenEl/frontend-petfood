@@ -50,6 +50,12 @@ const ClientLoyaltyPage = () => {
         <p style={{ margin: 0, color: '#92400e' }}>
           1 point = 1 DT dépensé (commande livrée). Cumulez des points à chaque achat.
         </p>
+        <Link
+          to="/client-community"
+          style={{ display: 'inline-block', marginTop: 12, fontWeight: 700, color: '#0f766e', fontSize: 14 }}
+        >
+          Récompenses IA & communauté →
+        </Link>
         <div style={{ marginTop: 20, fontSize: 42, fontWeight: 900, color: '#b45309' }}>{points} pts</div>
       </div>
 

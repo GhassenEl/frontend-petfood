@@ -1,0 +1,298 @@
+.ais-page {
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.ais-page h1 {
+  margin: 0 0 8px;
+  font-weight: 800;
+}
+
+.ais-lead {
+  color: #64748b;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.ais-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.ais-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  color: #334155;
+}
+
+.ais-tab.is-active {
+  border-color: #7c3aed;
+  background: #f5f3ff;
+  color: #5b21b6;
+}
+
+.ais-panel-wrap {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 14px rgba(15, 23, 42, 0.06);
+}
+
+.ais-loading,
+.ais-empty {
+  color: #64748b;
+  text-align: center;
+  padding: 24px 0;
+}
+
+.ais-empty-ok {
+  color: #047857;
+}
+
+.ais-link-btn {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: #7c3aed;
+  color: #fff;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.ais-alert-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ais-alert-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.ais-sev-critical {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.ais-sev-high {
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+
+.ais-sev-medium {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.ais-alert-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.ais-alert-type {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-left: 8px;
+}
+
+.ais-score {
+  font-weight: 800;
+  color: #b91c1c;
+}
+
+.ais-action {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f766e;
+  margin-top: 8px;
+}
+
+.ais-card-link {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2563eb;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.ais-behavior-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #fef3c7;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #92400e;
+}
+
+.ais-jwt-status {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.ais-role-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.ais-role-grid li {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.ais-role-grid li.ais-role-active {
+  border-color: #7c3aed;
+  background: #f5f3ff;
+}
+
+.ais-role-grid code {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.ais-jwt-rules ul {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.ais-mod-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ais-filter-btn {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.ais-filter-btn.is-active {
+  border-color: #7c3aed;
+  background: #f5f3ff;
+  color: #5b21b6;
+}
+
+.ais-mod-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ais-mod-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.ais-mod-reject {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.ais-mod-hide {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.ais-mod-flag {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.ais-mod-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ais-mod-score {
+  margin-left: auto;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.ais-mod-text {
+  font-size: 14px;
+  color: #334155;
+  font-style: italic;
+  margin: 0 0 8px;
+}
+
+.ais-mod-summary {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.ais-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.ais-tag {
+  font-size: 10px;
+  font-weight: 700;
+  background: #e2e8f0;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+@media (max-width: 640px) {
+  .ais-page {
+    padding: 16px;
+  }
+}

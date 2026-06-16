@@ -148,7 +148,10 @@ const PetCalorieCalculator = ({ compact = false }) => {
           <p style={{ margin: 0, color: '#64748b', fontSize: 14, maxWidth: 620 }}>
             Recommandations basées sur le <strong>poids</strong>, la <strong>race</strong> et l&apos;<strong>âge</strong>
             {' '}
-            de chaque compagnon : calories, plan de repas et produits adaptés.
+            de chaque compagnon : calories, plan de repas et produits adaptés.{' '}
+            <Link to="/pet-adaptive-nutrition" style={{ color: '#ea580c', fontWeight: 700 }}>
+              Nutrition IA adaptative →
+            </Link>
           </p>
         </div>
       )}
@@ -388,6 +391,15 @@ const PetCalorieCalculator = ({ compact = false }) => {
                           }}
                         >
                           <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: 13 }}>{product.name}</p>
+                          {product.compatibilityScore != null && (
+                            <span style={{
+                              fontSize: 10, fontWeight: 800, background: '#dcfce7', color: '#166534',
+                              padding: '2px 8px', borderRadius: 999, display: 'inline-block', marginBottom: 6,
+                            }}
+                            >
+                              Compatibilité {product.compatibilityScore}/100
+                            </span>
+                          )}
                           <p style={{ margin: '0 0 8px', fontSize: 11, color: '#64748b' }}>{product.recommendedReason}</p>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontWeight: 800, color: '#059669' }}>{getDiscountedPrice(product)} DT</span>

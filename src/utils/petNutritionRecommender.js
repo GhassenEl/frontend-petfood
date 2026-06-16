@@ -16,6 +16,69 @@ const normalize = (s) =>
     .replace(/[\u0300-\u036f]/g, '')
     .trim();
 
+const ALLERGEN_ALIASES = {
+  poulet: ['poulet', 'chicken', 'volaille', 'aviaire', 'poultry'],
+  boeuf: ['boeuf', 'beef', 'bovin', 'bœuf'],
+  agneau: ['agneau', 'lamb', 'mouton'],
+  poisson: ['poisson', 'fish', 'saumon', 'salmon'],
+  gluten: ['gluten', 'ble', 'blé', 'cereales', 'céréales', 'wheat'],
+  lactose: ['lactose', 'lait', 'dairy', 'fromage'],
+  oeuf: ['oeuf', 'œuf', 'egg', 'eggs'],
+  soja: ['soja', 'soy', 'soya'],
+  maïs: ['mais', 'maïs', 'corn'],
+};
+
+const HEALTH_KEYWORDS = [
+  { key: 'diabete', label: 'Diabète — privilégier faible glycémie et portions stables.', patterns: ['diabete', 'diabète', 'glycemie'] },
+  { key: 'renal', label: 'Insuffisance rénale — protéines et phosphore modérés.', patterns: ['renal', 'rénal', 'rein', 'kidney'] },
+  { key: 'digestif', label: 'Sensibilité digestive — formule haute digestibilité.', patterns: ['digestif', 'digestion', 'colite', 'vomissement'] },
+  { key: 'articulation', label: 'Articulations — glucosamine / oméga-3 utiles.', patterns: ['articulation', 'arthrose', 'hanche', 'dysplasie'] },
+  { key: 'obesite', label: 'Surpoids — formule light et ration mesurée.', patterns: ['obesite', 'obésité', 'surpoids', 'overweight'] },
+];
+
+export const parsePetAllergies = (pet) => {
+  const raw = pet?.allergies ?? pet?.allergy ?? '';
+  if (!raw) return [];
+  if (Array.isArray(raw)) {
+    return raw.map((a) => normalize(a)).filter((a) => a && !/aucune|none/i.test(a));
+  }
+  const str = String(raw).trim();
+  if (!str || /aucune|none|non/i.test(str)) return [];
+  return str.split(/[,;|/]/).map((s) => normalize(s)).filter(Boolean);
+};
+
+export const expandAllergenTerms = (allergies) => {
+  const terms = new Set();
+  (allergies || []).forEach((a) => {
+    const key = normalize(a);
+    terms.add(key);
+    (ALLERGEN_ALIASES[key] || []).forEach((t) => terms.add(normalize(t)));
+  });
+  return [...terms];
+};
+
+export const parsePetHealthFlags = (pet) => {
+  const flags = [];
+  const sources = [
+    pet?.chronicDiseases,
+    pet?.chronicDisease,
+    pet?.healthConditions,
+    pet?.healthStatus,
+    pet?.notes,
+    pet?.healthNotes,
+  ].filter(Boolean);
+
+  const hay = normalize(sources.join(' '));
+  if (!hay) return flags;
+
+  HEALTH_KEYWORDS.forEach(({ key, label, patterns }) => {
+    if (patterns.some((p) => hay.includes(normalize(p)))) {
+      flags.push({ key, label });
+    }
+  });
+  return flags;
+};
+
 const DOG_BREEDS = {
   labrador: {
     label: 'Labrador',
@@ -1477,6 +1540,33 @@ export const buildPetNutritionRecommendation = (pet, options = {}) => {
     });
   }
 
+  const allergies = parsePetAllergies(pet);
+  const healthFlags = parsePetHealthFlags(pet);
+
+  if (allergies.length) {
+    recommendations.push({
+      id: 'allergies',
+      category: 'health',
+      priority: 'high',
+      title: 'Allergies alimentaires',
+      text: `Éviter : ${allergies.join(', ')}. Privilégier formules hypoallergéniques ou mono-protéine.`,
+    });
+  }
+
+  healthFlags.forEach((flag, i) => {
+    recommendations.push({
+      id: `health-${flag.key || i}`,
+      category: 'health',
+      priority: 'high',
+      title: 'État de santé',
+      text: flag.label,
+    });
+  });
+
+  const allergyKeywords = allergies.length
+    ? ['hypoallergenique', 'hypoallergénique', 'sensible', 'mono-proteine', 'limited']
+    : [];
+
   const mealPlanByType = {
     dog: {
       split: { croquettes: 90, patée: 10 },
@@ -1544,8 +1634,11 @@ export const buildPetNutritionRecommendation = (pet, options = {}) => {
     breedProfile,
     recommendations,
     mealPlan,
+    allergies,
+    healthFlags,
     productKeywords: [
       ...(breedProfile.productKeywords || []),
+      ...allergyKeywords,
       lifeStage.stage === 'chiot' || lifeStage.stage === 'chiot_junior' ? 'chiot' : '',
       lifeStage.stage === 'chaton' ? 'chaton' : '',
       lifeStage.stage === 'senior' ? 'senior' : '',
@@ -1553,7 +1646,9 @@ export const buildPetNutritionRecommendation = (pet, options = {}) => {
       type,
     ].filter(Boolean),
     disclaimer:
-      'Recommandations indicatives basées sur poids, race et âge. Validation vétérinaire recommandée avant changement alimentaire.',
+      allergies.length || healthFlags.length
+        ? 'Recommandations indicatives basées sur poids, race, âge, allergies et santé. Validation vétérinaire obligatoire avant changement alimentaire.'
+        : 'Recommandations indicatives basées sur poids, race et âge. Validation vétérinaire recommandée avant changement alimentaire.',
   };
 };
 
@@ -1562,11 +1657,12 @@ export const matchProductsForPet = (products, recommendation, limit = 4) => {
 
   const keywords = (recommendation.productKeywords || []).map(normalize);
   const type = recommendation.type;
+  const allergenTerms = expandAllergenTerms(recommendation.allergies || []);
 
   const scored = products
     .filter((p) => Number(p.stock ?? p.quantity ?? 0) > 0)
     .map((p) => {
-      const hay = normalize(`${p.name} ${p.description || ''} ${p.category || ''} ${p.animalType || ''}`);
+      const hay = normalize(`${p.name} ${p.description || ''} ${p.category || ''} ${p.animalType || ''} ${(p.tags || []).join(' ')} ${p.composition || ''}`);
       let score = 0;
       if (p.animalType === type || p.petType === type) score += 3;
       keywords.forEach((kw) => {
@@ -1582,15 +1678,28 @@ export const matchProductsForPet = (products, recommendation, limit = 4) => {
       if (type === 'hamster' && (hay.includes('hamster') || hay.includes('rongeurs'))) score += 3;
       if (type === 'reptile' && (hay.includes('reptile') || hay.includes('tortue') || hay.includes('gecko'))) score += 3;
       if (type === 'other' && (hay.includes('nac') || hay.includes('cochon') || hay.includes('furet'))) score += 2;
-      return { product: p, score };
+
+      if (allergenTerms.length) {
+        const hit = allergenTerms.filter((term) => term && hay.includes(term));
+        if (hit.length) score -= hit.length * 8;
+        if (hay.includes('hypoallerg') || hay.includes('sans cereales') || hay.includes('mono-proteine') || hay.includes('limited ingredient')) {
+          score += 5;
+        }
+      }
+
+      return { product: p, score, allergenConflict: allergenTerms.some((term) => term && hay.includes(term)) };
     })
-    .filter((x) => x.score > 0)
+    .filter((x) => x.score > 0 && !x.allergenConflict)
     .sort((a, b) => b.score - a.score);
+
+  const reasonParts = [recommendation.name];
+  if (recommendation.breed) reasonParts.push(recommendation.breed);
+  if (allergenTerms.length) reasonParts.push('sans allergènes déclarés');
 
   return scored.slice(0, limit).map(({ product, score }) => ({
     ...product,
     nutritionMatchScore: score,
-    recommendedReason: `Adapté au profil ${recommendation.name}${recommendation.breed ? ` (${recommendation.breed})` : ''}`,
+    recommendedReason: `Adapté au profil ${reasonParts.join(' · ')}`,
   }));
 };
 

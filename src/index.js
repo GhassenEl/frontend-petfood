@@ -7,6 +7,7 @@ import './index.css';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { PlatformLiveProvider } from './contexts/PlatformLiveContext.jsx';
+import PresenceTracker from './components/PresenceTracker.jsx';
 import App from './App.js';
 
 
@@ -17,6 +18,7 @@ root.render(
       <ThemeProvider>
         <AuthProvider>
           <PlatformLiveProvider>
+            <PresenceTracker />
             <App />
           </PlatformLiveProvider>
         </AuthProvider>

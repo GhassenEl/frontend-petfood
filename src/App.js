@@ -31,8 +31,10 @@ import AdminVendorsPage from './pages/AdminVendorsPage';
 import AdminVendorDetailPage from './pages/AdminVendorDetailPage';
 import AdminSystemConfigPage from './pages/AdminSystemConfigPage';
 import AdminSecurityPage from './pages/AdminSecurityPage';
+import AdminIntelligentSecurityPage from './pages/AdminIntelligentSecurityPage';
 import AdminModeratorsPage from './pages/AdminModeratorsPage';
 import AdminVisitorsPage from './pages/AdminVisitorsPage';
+import AdminLiveAudiencePage from './pages/AdminLiveAudiencePage';
 import AdminRefundsPage from './pages/AdminRefundsPage';
 import AdminActivityLogsPage from './pages/AdminActivityLogsPage';
 import StaffLeavePage from './pages/StaffLeavePage';
@@ -88,9 +90,16 @@ import VetClinicPage from './pages/VetClinicPage';
 import VetVaccinationsPage from './pages/VetVaccinationsPage';
 import VetAvailabilityPage from './pages/VetAvailabilityPage';
 import ClientMedicalDossierPage from './pages/ClientMedicalDossierPage';
+import ClientTeleconsultPage from './pages/ClientTeleconsultPage';
 import ClientFavoritesPage from './pages/ClientFavoritesPage';
 import ClientLoyaltyPage from './pages/ClientLoyaltyPage';
 import ClientPetCaloriesPage from './pages/ClientPetCaloriesPage';
+import ClientAdaptiveNutritionPage from './pages/ClientAdaptiveNutritionPage';
+import ClientExplainableAiPage from './pages/ClientExplainableAiPage';
+import ClientCommunityPage from './pages/ClientCommunityPage';
+import ClientGeoServicesPage from './pages/ClientGeoServicesPage';
+import ClientDigitalTwinPage from './pages/ClientDigitalTwinPage';
+import ClientVetIntelligencePage from './pages/ClientVetIntelligencePage';
 import ClientPetsPage from './pages/ClientPetsPage';
 import ClientPetPassportPage from './pages/ClientPetPassportPage';
 import PlatformServicesPage from './pages/PlatformServicesPage';
@@ -126,6 +135,7 @@ import ClientReturnsPage from './pages/ClientReturnsPage';
 import ClientDashboardPage from './pages/ClientDashboardPage';
 import ClientFamilyPage from './pages/ClientFamilyPage';
 import ClientSubscriptionsPage from './pages/ClientSubscriptionsPage';
+import ClientSmartCommercePage from './pages/ClientSmartCommercePage';
 import AdminCrmPage from './pages/AdminCrmPage';
 import AdminMlAgentPage from './pages/AdminMlAgentPage';
 import AdminIncidentsMlPage from './pages/AdminIncidentsMlPage';
@@ -135,6 +145,8 @@ import AdminStockBiPage from './pages/AdminStockBiPage';
 import AdminPlatformPerformancePage from './pages/AdminPlatformPerformancePage';
 import AdminPartnersHubPage from './pages/AdminPartnersHubPage';
 import AdminAdvancedAiPage from './pages/AdminAdvancedAiPage';
+import AdminAnalyticsDecisionPage from './pages/AdminAnalyticsDecisionPage';
+import AdminBusinessIntelligencePage from './pages/AdminBusinessIntelligencePage';
 import AdminPriceGovernancePage from './pages/AdminPriceGovernancePage';
 import AdminCitiesHubPage from './pages/AdminCitiesHubPage';
 import PlatformCitiesPage from './pages/PlatformCitiesPage';
@@ -245,9 +257,11 @@ const App = () => {
       <Route path="/admin/vendors" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVendorsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/vendors/:id" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVendorDetailPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/visitors" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVisitorsPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/live-audience" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminLiveAudiencePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/refunds" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRefundsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/system" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminSystemConfigPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/security" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminSecurityPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/intelligent-security" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminIntelligentSecurityPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/moderators" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminModeratorsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/activity-logs" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminActivityLogsPage /></AdminLayout></RoleRoute>} />
       <Route path="/vendor-dashboard" element={<RoleRoute user={user} roles={['admin']}><Navigate to="/admin/vendors" replace /></RoleRoute>} />
@@ -267,6 +281,8 @@ const App = () => {
       <Route path="/admin/rehabilitation" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRehabilitationPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/ml-agent" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminMlAgentPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/advanced-ai" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAdvancedAiPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/analytics-decision" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAnalyticsDecisionPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/business-intelligence" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminBusinessIntelligencePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/incidents-ml" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminIncidentsMlPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/stock-bi" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminStockBiPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/performance" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPlatformPerformancePage /></AdminLayout></RoleRoute>} />
@@ -280,8 +296,13 @@ const App = () => {
       <Route path="/client-family" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientFamilyPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-subscriptions" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSubscriptionsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-products" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientProductsPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-smart-commerce" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSmartCommercePage /></ClientLayout></RoleRoute>} />
       <Route path="/client-favorites" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientFavoritesPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-loyalty" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientLoyaltyPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-community" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientCommunityPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-geo-services" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientGeoServicesPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-digital-twin" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientDigitalTwinPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-vet-intelligence" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientVetIntelligencePage /></ClientLayout></RoleRoute>} />
       <Route path="/client-orders" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientOrdersPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-reviews" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientReviewsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-complaints" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientComplaintsPage /></ClientLayout></RoleRoute>} />
@@ -301,11 +322,13 @@ const App = () => {
       <Route path="/client-vaccines" element={<Navigate to="/medical-dossier" replace />} />
       <Route path="/pet-advice" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetAdvicePage /></ClientLayout></RoleRoute>} />
       <Route path="/pet-calories" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetCaloriesPage /></ClientLayout></RoleRoute>} />
+      <Route path="/pet-adaptive-nutrition" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAdaptiveNutritionPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-ecosystem" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientEcosystemHubPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-wellness" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientWellnessPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-emotions" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientOwnerEmotionsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAIAgentPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-advanced-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAdvancedAiPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-explainable-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientExplainableAiPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-ml-agent" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientMlAgentPage /></ClientLayout></RoleRoute>} />
       <Route path="/smart-food-agent" element={<RoleRoute user={user} roles={['client']}><ClientLayout><SmartFoodAgentPage /></ClientLayout></RoleRoute>} />
       <Route path="/nutripro-history" element={<RoleRoute user={user} roles={['client']}><ClientLayout><NutriProHistory /></ClientLayout></RoleRoute>} />
@@ -322,6 +345,7 @@ const App = () => {
       <Route path="/pet-feeder" element={<RoleRoute user={user} roles={['client']}><ClientLayout><PetFeederPage /></ClientLayout></RoleRoute>} />
       <Route path="/veterinary" element={<RoleRoute user={user} roles={['client']}><ClientLayout><VeterinaryPage /></ClientLayout></RoleRoute>} />
       <Route path="/medical-dossier" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientMedicalDossierPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-teleconsult" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientTeleconsultPage /></ClientLayout></RoleRoute>} />
       <Route path="/checkout" element={<RoleRoute user={user} roles={['client']}><ClientLayout><Suspense fallback={<div className="app-auth-loading" style={{ minHeight: '40vh' }}><p className="app-auth-loading__text">Chargement du paiement…</p></div>}><CheckoutPage /></Suspense></ClientLayout></RoleRoute>} />
       <Route path="/change-password" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ChangePasswordPage /></ClientLayout></RoleRoute>} />
 

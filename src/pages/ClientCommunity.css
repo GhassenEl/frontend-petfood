@@ -1,0 +1,409 @@
+.comm-page {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.comm-page h1 {
+  margin: 0 0 8px;
+  font-weight: 800;
+}
+
+.comm-lead {
+  color: #64748b;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.comm-loading,
+.comm-empty {
+  text-align: center;
+  color: #64748b;
+  padding: 32px 16px;
+}
+
+.comm-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.comm-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.comm-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.comm-tab--active {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #fff;
+}
+
+.comm-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+}
+
+.comm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.comm-btn--primary {
+  background: #0f766e;
+  color: #fff;
+}
+
+.comm-btn--primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.comm-btn--secondary {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.comm-btn--secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.comm-btn--ghost {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+.comm-muted {
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.comm-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.comm-badge--ai {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.comm-section-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+/* Post form */
+.comm-post-form {
+  background: linear-gradient(135deg, #f0fdfa, #ecfdf5);
+  border: 1px solid #99f6e4;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.comm-post-form__title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.comm-type-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.comm-type-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.comm-type-btn--active {
+  border-color: #0f766e;
+  background: #0f766e;
+  color: #fff;
+}
+
+.comm-form-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.comm-input,
+.comm-select,
+.comm-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.comm-textarea {
+  resize: vertical;
+  margin-bottom: 12px;
+}
+
+/* Feed */
+.comm-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comm-post__head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.comm-post__avatar {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.comm-post__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.comm-post__product {
+  font-weight: 700;
+  color: #0f766e;
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.comm-post__body {
+  margin: 0 0 12px;
+  line-height: 1.5;
+  color: #334155;
+}
+
+.comm-post__foot {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Reputation */
+.comm-reputation__hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+}
+
+.comm-reputation__score {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 4px solid #059669;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.comm-reputation__num {
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.comm-reputation__label {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.comm-stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.comm-factor-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.comm-factor-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+}
+
+.comm-leaderboard {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.comm-leaderboard li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+}
+
+.comm-leaderboard__me {
+  background: #f0fdfa;
+  margin: 0 -12px;
+  padding-left: 12px;
+  padding-right: 12px;
+  border-radius: 8px;
+}
+
+.comm-rank {
+  width: 24px;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.comm-leaderboard__avatar {
+  font-size: 22px;
+}
+
+.comm-leaderboard__name {
+  flex: 1;
+}
+
+.comm-leaderboard__pts {
+  color: #0f766e;
+}
+
+/* Loyalty rewards */
+.comm-loyalty__hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-color: #fcd34d;
+}
+
+.comm-loyalty__pts {
+  margin-left: auto;
+  font-size: 28px;
+  font-weight: 900;
+  color: #b45309;
+}
+
+.comm-rewards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comm-reward {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.comm-reward--auto {
+  border-color: #a7f3d0;
+  background: #f0fdf4;
+}
+
+.comm-reward__icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.comm-reward__body {
+  flex: 1;
+  min-width: 180px;
+}
+
+.comm-reward__body h4 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.comm-reward__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.comm-reward__reason {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.comm-footer-link {
+  text-align: center;
+  margin-top: 8px;
+}
+
+.comm-footer-link a {
+  color: #0f766e;
+  font-weight: 600;
+}

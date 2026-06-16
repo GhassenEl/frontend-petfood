@@ -73,6 +73,7 @@ const ClientAdvancedAiPage = () => {
           {d.groqPowered && <span style={badge}><Sparkles size={12} /> Groq</span>}
           {d.mode === 'demo' && <span style={{ ...badge, background: '#fef9c3', color: '#854d0e' }}>Mode démo</span>}
           <button type="button" onClick={load} style={btnLight}><RefreshCw size={14} /> Actualiser</button>
+          <Link to="/client-explainable-ai" style={{ ...btnLight, textDecoration: 'none' }}>Explainable AI</Link>
           <Link to="/client-ai" style={{ ...btnLight, textDecoration: 'none' }}>Chat catalogue</Link>
           <Link to="/client-ml-agent" style={{ ...btnLight, textDecoration: 'none' }}>Agent ML</Link>
         </div>

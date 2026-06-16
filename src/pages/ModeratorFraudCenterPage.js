@@ -9,6 +9,7 @@ import {
   rejectFakeReview,
   clearFakeReview,
 } from '../services/moderatorService';
+import { detectReviewAnomalies } from '../utils/contentAnomalyDetector';
 import './ModeratorPages.css';
 
 const ModeratorFraudCenterPage = () => {
@@ -73,14 +74,17 @@ const ModeratorFraudCenterPage = () => {
         priority: d.priority || 'medium',
         raw: d,
       })),
-      ...flaggedReviews.map((r) => ({
-        id: `rev-${r.id}`,
-        type: 'review',
-        title: `Faux avis — ${r.productName}`,
-        sub: `${r.author} · score NLP ${r.nlpScore || '—'}%`,
-        priority: (r.nlpScore || 0) >= 90 ? 'high' : 'low',
-        raw: r,
-      })),
+      ...flaggedReviews.map((r) => {
+        const auto = detectReviewAnomalies(r);
+        return {
+          id: `rev-${r.id}`,
+          type: 'review',
+          title: `Avis suspect — ${r.productName}`,
+          sub: `${r.author} · ${auto.summary}${r.nlpScore ? ` · NLP ${r.nlpScore}%` : ''}`,
+          priority: auto.severity === 'high' || (r.nlpScore || 0) >= 90 ? 'high' : 'low',
+          raw: r,
+        };
+      }),
     ];
     if (priority === 'all') return items;
     return items.filter((i) => i.priority === priority);

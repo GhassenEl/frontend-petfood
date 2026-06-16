@@ -54,6 +54,9 @@ const AdminVisitorsPage = () => {
         <Link to="/visitor" target="_blank" rel="noopener noreferrer" className="adm-btn adm-btn--ghost adm-btn--sm">
           <ExternalLink size={14} /> Prévisualiser le hub
         </Link>
+        <Link to="/admin/live-audience" className="adm-btn adm-btn--primary adm-btn--sm">
+          Audience temps réel →
+        </Link>
         <Link to="/admin/vendors" className="adm-btn adm-btn--ghost adm-btn--sm">Vendeurs →</Link>
         <Link to="/admin/moderators" className="adm-btn adm-btn--ghost adm-btn--sm">Modérateurs →</Link>
       </div>

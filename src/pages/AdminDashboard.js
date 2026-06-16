@@ -157,6 +157,8 @@ const AdminDashboard = () => {
     { label: 'Config. globale', icon: <TrendingUp size={18} />, color: '#ea580c', link: '/admin/system' },
     { label: 'Espace visiteur', icon: <Users size={18} />, color: '#0284c7', link: '/admin/visitors' },
     { label: 'Utilisateurs', icon: <Users size={18} />, color: '#3498db', link: '/admin/users' },
+    { label: 'Business Intelligence', icon: <TrendingUp size={18} />, color: '#1e40af', link: '/admin/business-intelligence' },
+    { label: 'Analyse & décision', icon: <TrendingUp size={18} />, color: '#2563eb', link: '/admin/analytics-decision' },
     { label: 'IA avancée', icon: <TrendingUp size={18} />, color: '#7c3aed', link: '/admin/advanced-ai' },
     { label: 'Réseau villes', icon: <Store size={18} />, color: '#0891b2', link: '/admin/cities' },
     { label: 'Gouvernance prix', icon: <TrendingUp size={18} />, color: '#0d9488', link: '/admin/prices' },

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import { exportMedicalDossierPdf } from '../utils/medicalDossierPdf';
 import ClientPrescriptionCard from '../components/ClientPrescriptionCard';
-import ClientVaccineRemindersPanel from '../components/ClientVaccineRemindersPanel';
+import ClientHealthRemindersPanel from '../components/ClientHealthRemindersPanel';
 import ClientRelayPointsPanel from '../components/ClientRelayPointsPanel';
 
 const animalEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', other: '🐾' };
@@ -101,15 +101,21 @@ const ClientMedicalDossierPage = () => {
           )}
         </div>
 
-        {/* Rappels vaccins */}
+        {/* Rappels santé automatiques */}
         <section style={{ marginBottom: 28 }}>
           <h2 style={{ fontSize: '1.1rem', margin: '0 0 12px', fontWeight: 800 }}>
-            💉 Rappels vaccins — {selected.petName}
+            🔔 Rappels automatiques — {selected.petName}
           </h2>
           <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: 14 }}>
-            Prochaines échéances vaccinales pour cet animal.
+            Vaccinations, vermifuges, rendez-vous vétérinaires et renouvellement des traitements.
           </p>
-          <ClientVaccineRemindersPanel petName={selected.petName} compact />
+          <ClientHealthRemindersPanel petName={selected.petName} compact />
+          <Link
+            to="/client-teleconsult"
+            style={{ display: 'inline-block', marginTop: 12, fontWeight: 700, color: '#7c3aed', fontSize: '0.9rem' }}
+          >
+            📹 Accéder à la téléconsultation →
+          </Link>
         </section>
 
         {/* Ordonnances */}
@@ -218,11 +224,17 @@ const ClientMedicalDossierPage = () => {
       </p>
 
       <section style={{ marginBottom: 28 }}>
-        <h2 style={{ fontSize: '1.1rem', margin: '0 0 12px', fontWeight: 800 }}>💉 Rappels vaccins</h2>
+        <h2 style={{ fontSize: '1.1rem', margin: '0 0 12px', fontWeight: 800 }}>🔔 Rappels santé automatiques</h2>
         <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: 14 }}>
-          Suivez les échéances vaccinales de tous vos animaux.
+          Vaccinations, vermifuges, rendez-vous et traitements — notifications automatiques.
         </p>
-        <ClientVaccineRemindersPanel />
+        <ClientHealthRemindersPanel />
+        <Link
+          to="/client-teleconsult"
+          style={{ display: 'inline-block', marginTop: 12, fontWeight: 700, color: '#7c3aed', fontSize: '0.9rem' }}
+        >
+          📹 Téléconsultation vétérinaire →
+        </Link>
       </section>
 
       {dossiers.length === 0 ? (

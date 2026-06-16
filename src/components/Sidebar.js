@@ -20,6 +20,8 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       title: '📊 Analytics',
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: '📈' },
+        { id: 'analytics-decision', label: 'Analyse & décision', icon: '📊' },
+        { id: 'business-intelligence', label: 'Business Intelligence', icon: '📈' },
         { id: 'powerbi', label: 'Power BI', icon: '📊' },
         { id: 'stock-bi', label: 'Stock BI', icon: '📦' },
         { id: 'performance', label: 'Performance plateforme', icon: '⚡' },
@@ -37,6 +39,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       title: '👥 Acteurs plateforme',
       items: [
         { id: 'visitors', label: 'Espace visiteur', icon: '👀' },
+        { id: 'live-audience', label: 'Audience temps réel', icon: '📡' },
         { id: 'partners', label: 'Fournisseurs & partenariats', icon: '🤝' },
         { id: 'vendors', label: 'Vendeurs marketplace', icon: '🏬' },
         { id: 'moderators', label: 'Modérateurs', icon: '🛡️' },
@@ -75,7 +78,8 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
     {
       title: '⚙️ Paramètres',
       items: [
-        { id: 'security', label: 'Sécurité & IDS', icon: '🛡️' },
+        { id: 'security', label: 'Centre de sécurité', icon: '🛡️' },
+        { id: 'intelligent-security', label: 'Sécurité intelligente', icon: '🧠' },
         { id: 'system', label: 'Configuration globale', icon: '🔧' },
         { id: 'activity-logs', label: 'Journaux d\'activité', icon: '📋' },
         { id: 'profile', label: 'Mon Profil', icon: '👤' },

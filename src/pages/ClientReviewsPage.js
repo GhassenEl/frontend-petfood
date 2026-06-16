@@ -4,6 +4,7 @@ import { Star, Plus, Trash2, Edit3, Send, Sparkles, Package } from 'lucide-react
 import { getProducts } from '../services/productService';
 import { getMyReviews, createReview, updateReview, deleteReview } from '../services/reviewService';
 import { postAnalyzeComment } from '../services/mlService';
+import { detectReviewAnomalies } from '../utils/contentAnomalyDetector';
 import { DEMO_REVIEWS, withDemoFallback } from '../utils/clientDemoData';
 import { productId, dedupeProducts, withProductIds } from '../utils/productId';
 import { emotionFromRating, ratingLabel } from '../utils/ratingHelpers';
@@ -53,7 +54,7 @@ const ClientReviewsPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingReview, setEditingReview] = useState(null);
   const [aiSuggestion, setAiSuggestion] = useState(null);
-  const [analyzing, setAnalyzing] = useState(false);
+  const [anomalyWarning, setAnomalyWarning] = useState(null);
   const [filter, setFilter] = useState('all');
   const [toast, setToast] = useState(null);
 
@@ -175,6 +176,14 @@ const ClientReviewsPage = () => {
       emotion: formData.emotion || emotionFromRating(formData.rating),
       aiSuggested: !!aiSuggestion && formData.emotion === aiSuggestion.emotion,
     };
+
+    const anomaly = detectReviewAnomalies(submitData);
+    if (anomaly.suspicious && anomaly.severity === 'high') {
+      const ok = window.confirm(
+        `Avis suspect détecté : ${anomaly.summary}\n\nPublier quand même ? (Un modérateur pourra le retirer.)`,
+      );
+      if (!ok) return;
+    }
 
     setLoading(true);
     try {
@@ -344,7 +353,11 @@ const ClientReviewsPage = () => {
                     id="rev-comment"
                     placeholder="Qualité, rapport qualité-prix, appétence pour votre animal…"
                     value={formData.comment}
-                    onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, comment: e.target.value });
+                      const a = detectReviewAnomalies({ comment: e.target.value, rating: formData.rating });
+                      setAnomalyWarning(a.suspicious ? a : null);
+                    }}
                     required
                     minLength={10}
                     maxLength={1500}
@@ -370,6 +383,13 @@ const ClientReviewsPage = () => {
                       {emotionMeta(aiSuggestion.emotion).emoji} {emotionMeta(aiSuggestion.emotion).label}
                       {' '}— confiance {Math.round((aiSuggestion.confidence || 0) * 100)} %
                     </p>
+                  </div>
+                )}
+
+                {anomalyWarning && (
+                  <div className="cc-response" style={{ marginBottom: 12, background: '#fef2f2', borderColor: '#fecaca' }}>
+                    <strong style={{ color: '#991b1b' }}>⚠️ Anomalie détectée</strong>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem' }}>{anomalyWarning.summary}</p>
                   </div>
                 )}
 

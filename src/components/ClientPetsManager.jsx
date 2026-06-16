@@ -152,9 +152,14 @@ const ClientPetsManager = ({ compact = false }) => {
           <Plus size={16} /> Ajouter un animal
         </button>
         {!compact && (
-          <Link to="/client-pet-passport" className="cpets-btn cpets-btn--ghost">
-            Passeport numérique →
-          </Link>
+          <>
+            <Link to="/client-digital-twin" className="cpets-btn cpets-btn--ghost">
+              Jumeau numérique →
+            </Link>
+            <Link to="/client-pet-passport" className="cpets-btn cpets-btn--ghost">
+              Passeport numérique →
+            </Link>
+          </>
         )}
         {compact && pets.length > 0 && (
           <Link to="/client-pets" className="cpets-card-link" style={{ marginLeft: 'auto' }}>
