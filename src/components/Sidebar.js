@@ -59,6 +59,8 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'cities', label: 'Réseau villes', icon: '🏙️' },
         { id: 'categories', label: 'Catégories', icon: '📁' },
         { id: 'stock', label: 'Stock avancé', icon: '📦' },
+        { id: 'food-quality', label: 'Qualité alimentaire IoT', icon: '🌡️' },
+        { id: 'delivery-cold-chain', label: 'Livraison chaîne du froid', icon: '🚚' },
         { id: 'promotions', label: 'Promotions & coupons', icon: '🎟️' },
         { id: 'users', label: 'Utilisateurs', icon: '👥' },
         { id: 'livreurs', label: 'Livreurs', icon: '🚚' },

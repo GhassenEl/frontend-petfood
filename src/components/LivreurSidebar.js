@@ -28,6 +28,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
       title: '🤖 Intelligence IA',
       items: [
         { id: 'intelligence', label: 'Intelligence livraison', icon: '🧠' },
+        { id: 'delivery-cold-chain', label: 'Chaîne du froid IoT', icon: '🌡️' },
         { id: 'ml', label: 'Prévisions ML', icon: '📊' },
       ],
     },

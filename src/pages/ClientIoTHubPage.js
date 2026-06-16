@@ -225,8 +225,9 @@ const ClientIoTHubPage = () => {
                 <IoTModuleCard to="/pet-feeder" icon="🍽️" title="Distributeur IoT" subtitle="ESP32, portions, capteurs niveau/température." status={`${c.feedersOnline || 0} en ligne`} statusColor="#059669" badge={d.mode === 'demo' ? 'Démo' : null} />
                 <IoTModuleCard to="/client-iot?tab=food-quality" icon="📷" title="ESP32-CAM qualité" subtitle="Détection bonne / mauvaise qualité croquettes en temps réel." status="Surveillance active" statusColor="#7c3aed" badge="Comme un frigo connecté" />
                 <IoTModuleCard to="/client-smart-water" icon="💧" title="Fontaine connectée" subtitle="Hydratation, réservoir, filtres." status={`${c.waterMonitors || 0} monitoré(s)`} statusColor="#0ea5e9" />
-                <IoTModuleCard to="/client-smart-delivery" icon="🚚" title="Livraison prédictive" subtitle="Créneaux optimisés et réappro lié." status="Planifier une livraison" statusColor="#64748b" />
-                <IoTModuleCard to="/client-traceability" icon="🔗" title="Traçabilité blockchain" subtitle="Origine et certifications aliments." status="Vérifier un lot" statusColor="#7c3aed" />
+                <IoTModuleCard to="/client-smart-delivery" icon="🚚" title="Livraison prédictive" subtitle="GPS temps réel + surveillance chaîne du froid IoT jusqu'à réception." status="Suivi actif" statusColor="#0ea5e9" badge="Capteurs véhicule" />
+                <IoTModuleCard to="/client-traceability" icon="🔗" title="Traçabilité blockchain" subtitle="Origine, lots et certifications aliments." status="Vérifier un lot" statusColor="#7c3aed" />
+                <IoTModuleCard to="/client-traceability" icon="🌡️" title="Conservation optimale" subtitle="Température, humidité et traçabilité — conditions idéales garanties." status="Chaîne du froid" statusColor="#0369a1" badge="Lots & origine" />
               </div>
 
               <section style={card}>

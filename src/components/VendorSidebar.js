@@ -30,6 +30,7 @@ const VendorSidebar = ({ onLogout, user, onNavigate }) => {
       title: '🏷️ Gestion produits',
       items: [
         { to: '/vendor/products', label: 'Mes produits', icon: '🏷️' },
+        { id: 'food-quality', label: 'Qualité alimentaire IoT', icon: '🌡️' },
         { to: '/vendor/products', label: 'Catégories & stocks', icon: '📁' },
         { to: '/vendor/products', label: 'Promotions', icon: '🎯' },
       ],

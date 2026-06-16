@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   Brain, Route, Clock, AlertTriangle, Package, Navigation, Camera,
-  BarChart3, Leaf, RefreshCw,
+  BarChart3, Leaf, RefreshCw, Thermometer,
 } from 'lucide-react';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import DemoModePill from '../components/DemoModePill';
@@ -15,10 +15,12 @@ import LivreurNavigationAssistantPanel from '../components/LivreurNavigationAssi
 import LivreurDeliveryVerificationPanel from '../components/LivreurDeliveryVerificationPanel';
 import LivreurPerformancePanel from '../components/LivreurPerformancePanel';
 import LivreurEcoOptimizationPanel from '../components/LivreurEcoOptimizationPanel';
+import DeliveryColdChainPanel from '../components/DeliveryColdChainPanel';
 import './LivreurIntelligenceHub.css';
 
 const TABS = [
   { id: 'routes', label: 'Tournées', icon: Route },
+  { id: 'cold-chain', label: 'Chaîne du froid', icon: Thermometer },
   { id: 'eta', label: 'ETA', icon: Clock },
   { id: 'delays', label: 'Retards', icon: AlertTriangle },
   { id: 'parcels', label: 'Colis', icon: Package },
@@ -119,6 +121,9 @@ const LivreurIntelligenceHubPage = () => {
       {tab === 'routes' && (
         <LivreurRouteOptimizationPanel route={pack?.optimizedRoute} loading={loading} />
       )}
+      {tab === 'cold-chain' && (
+        <DeliveryColdChainPanel role="livreur" title="Capteurs véhicule — livraison en cours" />
+      )}
       {tab === 'eta' && (
         <LivreurEtaPredictionPanel
           eta={pack?.eta}
@@ -148,6 +153,8 @@ const LivreurIntelligenceHubPage = () => {
       <p style={{ marginTop: 24, fontSize: 13, color: '#94a3b8' }}>
         Modules :{' '}
         <Link to="/livreur/route">Tournée</Link>
+        {' · '}
+        <Link to="/livreur/delivery-cold-chain">Chaîne du froid IoT</Link>
         {' · '}
         <Link to="/livreur/map">Carte</Link>
         {' · '}

@@ -145,6 +145,8 @@ import AdminIncidentsMlPage from './pages/AdminIncidentsMlPage';
 import AdminBlogArticles from './pages/AdminBlogArticles';
 import AdminRehabilitationPage from './pages/AdminRehabilitationPage';
 import AdminStockBiPage from './pages/AdminStockBiPage';
+import FoodQualitySurveillancePage from './pages/FoodQualitySurveillancePage';
+import DeliveryColdChainSurveillancePage from './pages/DeliveryColdChainSurveillancePage';
 import AdminPlatformPerformancePage from './pages/AdminPlatformPerformancePage';
 import AdminPartnersHubPage from './pages/AdminPartnersHubPage';
 import AdminAdvancedAiPage from './pages/AdminAdvancedAiPage';
@@ -260,6 +262,8 @@ const App = () => {
       <Route path="/admin/complaints" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminComplaints /></AdminLayout></RoleRoute>} />
       <Route path="/admin/products" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminProducts /></AdminLayout></RoleRoute>} />
       <Route path="/admin/stock" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminStockPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/food-quality" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><FoodQualitySurveillancePage role="admin" /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/delivery-cold-chain" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><DeliveryColdChainSurveillancePage role="admin" /></AdminLayout></RoleRoute>} />
       <Route path="/admin/sales" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminSalesPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/users" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminUsers /></AdminLayout></RoleRoute>} />
       <Route path="/admin/livreurs" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminLivreurs /></AdminLayout></RoleRoute>} />
@@ -367,6 +371,7 @@ const App = () => {
       <Route path="/livreur/leave-requests" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><StaffLeavePage roleLabel="Livreur" demoFallback /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/ml" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMlPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/intelligence" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurIntelligenceHubPage /></LivreurLayout></RoleRoute>} />
+      <Route path="/livreur/delivery-cold-chain" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><DeliveryColdChainSurveillancePage role="livreur" /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/stats" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurStatsPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/bi" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><RoleBiDashboardPage role="livreur" /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/messages" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMessagesPage /></LivreurLayout></RoleRoute>} />
@@ -417,6 +422,7 @@ const App = () => {
       <Route path="/vendor/communication" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorCommunicationPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/purchase-needs" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorPurchaseNeedsPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/ml" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorMlPage /></VendorLayout></RoleRoute>} />
+      <Route path="/vendor/food-quality" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><FoodQualitySurveillancePage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/bi" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RoleBiDashboardPage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/platform-services" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><PlatformServicesPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/profile" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><AdminProfilePage /></VendorLayout></RoleRoute>} />

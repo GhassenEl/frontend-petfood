@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import {
   Package, Truck, Clock, Brain, Video, ShoppingCart, AlertTriangle,
 } from 'lucide-react';
+import DeliveryColdChainPanel from '../components/DeliveryColdChainPanel';
 import api from '../utils/api';
 import {
   fetchPredictiveDelivery,
@@ -235,6 +236,23 @@ const ClientSmartDeliveryPage = () => {
             )}
           </>
         )}
+      </div>
+
+      {/* Chaîne du froid IoT */}
+      <div style={card}>
+        <h2 style={{ margin: '0 0 12px', fontSize: 18 }}>
+          🌡️ Surveillance chaîne du froid (livraison)
+        </h2>
+        <p style={{ margin: '0 0 16px', color: '#64748b', fontSize: 14 }}>
+          Capteurs du véhicule en temps réel — température, humidité, luminosité et qualité de l&apos;air
+          jusqu&apos;à réception de votre commande.
+        </p>
+        <DeliveryColdChainPanel
+          role="client"
+          orderId={track?.orderId || track?.id}
+          compact={!track}
+          title="Votre livraison"
+        />
       </div>
 
       {/* Géolocalisation */}
