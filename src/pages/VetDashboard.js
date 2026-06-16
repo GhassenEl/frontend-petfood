@@ -14,6 +14,7 @@ import {
   Pill,
   FolderOpen,
   MessageSquare,
+  Brain,
 } from 'lucide-react';
 import api from '../utils/api';
 import { visitModeBadge } from '../constants/visitModes';
@@ -153,6 +154,7 @@ const VetDashboard = () => {
   ];
 
   const quickActions = [
+    { to: '/vet/intelligence', icon: Brain, label: 'Intelligence IA', desc: 'Diagnostic, dossier, CR…' },
     { to: '/vet/calendar', icon: Calendar, label: 'Calendrier', desc: 'Planning RDV' },
     { to: '/vet/availability', icon: Clock, label: 'Disponibilité', desc: 'Horaires & créneaux' },
     { to: '/vet/medical-dossiers', icon: FolderOpen, label: 'Dossiers', desc: 'DMP patients' },

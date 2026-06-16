@@ -62,15 +62,15 @@ export const CLIENT_MOBILE_NAV = [
 export const LIVREUR_MOBILE_NAV = [
   { id: 'dash', to: '/livreur/dashboard', icon: '📊', label: 'Accueil' },
   { id: 'orders', to: '/livreur/orders', icon: '📦', label: 'Courses' },
-  { id: 'route', to: '/livreur/bi', icon: '📈', label: 'BI' },
+  { id: 'intel', to: '/livreur/intelligence', icon: '🧠', label: 'IA' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
 export const VET_MOBILE_NAV = [
   { id: 'dash', to: '/vet/dashboard', icon: '🩺', label: 'Accueil' },
   { id: 'calendar', to: '/vet/calendar', icon: '📅', label: 'Agenda' },
+  { id: 'intel', to: '/vet/intelligence', icon: '🧠', label: 'IA' },
   { id: 'dossiers', to: '/vet/medical-dossiers', icon: '📁', label: 'Dossiers' },
-  { id: 'clients', to: '/vet/bi', icon: '📈', label: 'BI' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
