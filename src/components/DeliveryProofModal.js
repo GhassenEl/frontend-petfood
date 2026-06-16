@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, MapPin, Camera } from 'lucide-react';
 
 const overlay = {
   position: 'fixed',
@@ -25,8 +25,20 @@ const card = {
 
 const DeliveryProofModal = ({ orderId, orderLabel, onClose, onComplete }) => {
   const [note, setNote] = useState('');
+  const [photoName, setPhotoName] = useState('');
+  const [geo, setGeo] = useState(null);
+  const [geoError, setGeoError] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setGeo({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy }),
+      () => setGeoError('Géolocalisation indisponible — confirmez manuellement.'),
+      { timeout: 8000, maximumAge: 60000 },
+    );
+  }, []);
 
   const submit = async () => {
     setLoading(true);
@@ -34,6 +46,8 @@ const DeliveryProofModal = ({ orderId, orderLabel, onClose, onComplete }) => {
     try {
       await onComplete({
         deliveryNote: note.trim() || undefined,
+        proofGeo: geo || undefined,
+        proofPhotoName: photoName || undefined,
       });
       onClose();
     } catch (err) {
@@ -58,6 +72,29 @@ const DeliveryProofModal = ({ orderId, orderLabel, onClose, onComplete }) => {
         <p style={{ margin: '0 0 16px', color: '#64748b', fontSize: 14 }}>
           Commande {orderLabel || `#${String(orderId).slice(-6)}`} — confirmez la remise au client.
         </p>
+
+        <div style={{ marginBottom: 14, padding: '10px 12px', background: geo ? '#ecfdf5' : '#fffbeb', borderRadius: 10, fontSize: 13 }}>
+          <MapPin size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+          {geo
+            ? `Position capturée (±${Math.round(geo.accuracy || 0)} m)`
+            : geoError || 'Capture géolocalisation…'}
+        </div>
+
+        <label style={labelStyle}>
+          Photo preuve (optionnel)
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={(e) => setPhotoName(e.target.files?.[0]?.name || '')}
+            style={{ ...inputStyle, padding: 8 }}
+          />
+          {photoName && (
+            <span style={{ fontSize: 12, color: '#059669', marginTop: 4 }}>
+              <Camera size={12} style={{ verticalAlign: 'middle' }} /> {photoName}
+            </span>
+          )}
+        </label>
 
         <label style={labelStyle}>
           Note (optionnel)

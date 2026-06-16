@@ -36,6 +36,8 @@ const VetSidebar = ({ onLogout, user, onNavigate }) => {
     {
       title: '🤖 Assistant IA',
       items: [
+        { id: 'intelligence', label: 'Intelligence clinique', icon: '🧠' },
+        { id: 'ml-agent', label: 'Agents ML', icon: '🔬' },
         { id: '__open-chat__', label: 'Assistant IA', icon: '🤖', action: 'open-chat' },
         { id: 'platform-services', label: 'Catalogue services', icon: '📋' },
       ],

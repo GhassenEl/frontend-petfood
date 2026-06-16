@@ -166,7 +166,9 @@ import ClientRelayPointsPage from './pages/ClientRelayPointsPage';
 import ClientProductPacksPage from './pages/ClientProductPacksPage';
 import ClientOwnerEmotionsPage from './pages/ClientOwnerEmotionsPage';
 import LivreurMlPage from './pages/LivreurMlPage';
+import LivreurIntelligenceHubPage from './pages/LivreurIntelligenceHubPage';
 import VetMlAgentPage from './pages/VetMlAgentPage';
+import VetIntelligenceHubPage from './pages/VetIntelligenceHubPage';
 import SupportDashboardPage from './pages/SupportDashboardPage';
 import NotFoundPage from './pages/NotFoundPage';
 import VendorSalesPage from './pages/VendorSalesPage';
@@ -364,6 +366,7 @@ const App = () => {
       <Route path="/livreur/availability" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurAvailabilityPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/leave-requests" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><StaffLeavePage roleLabel="Livreur" demoFallback /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/ml" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMlPage /></LivreurLayout></RoleRoute>} />
+      <Route path="/livreur/intelligence" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurIntelligenceHubPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/stats" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurStatsPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/bi" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><RoleBiDashboardPage role="livreur" /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/messages" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMessagesPage /></LivreurLayout></RoleRoute>} />
@@ -395,6 +398,7 @@ const App = () => {
       <Route path="/vet/teleconsult" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetTeleconsultPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/nutrition" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetNutritionAdvicePage /></VetLayout></RoleRoute>} />
       <Route path="/vet/ml-agent" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetMlAgentPage /></VetLayout></RoleRoute>} />
+      <Route path="/vet/intelligence" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetIntelligenceHubPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/rehabilitation" element={<RoleRoute user={user} roles={['vet']}><VetLayout><AdminRehabilitationPage /></VetLayout></RoleRoute>} />
 
       <Route path="/visitor" element={<VisitorHubPage />} />

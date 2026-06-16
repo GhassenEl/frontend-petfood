@@ -25,6 +25,13 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
       ]
     },
     {
+      title: '🤖 Intelligence IA',
+      items: [
+        { id: 'intelligence', label: 'Intelligence livraison', icon: '🧠' },
+        { id: 'ml', label: 'Prévisions ML', icon: '📊' },
+      ],
+    },
+    {
       title: '💬 Communications',
       items: [
         { id: '__open-chat__', label: 'Assistant en ligne', icon: '🤖', action: 'open-chat' },

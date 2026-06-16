@@ -1,0 +1,515 @@
+.livih-page {
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.livih-page h1 {
+  margin: 0 0 8px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #065f46;
+}
+
+.livih-lead {
+  color: #64748b;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.livih-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.livih-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.livih-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.livih-tab--active {
+  background: #059669;
+  border-color: #059669;
+  color: #fff;
+}
+
+.livih-tab-badge {
+  margin-left: 4px;
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+.livih-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.livih-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.livih-stat-bar {
+  background: #fff;
+  border: 1px solid #d1fae5;
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+
+.livih-stat-bar strong {
+  display: block;
+  font-size: 22px;
+  color: #059669;
+}
+
+.livih-stat-bar span {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.livih-panel {
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.livih-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  background: #ecfdf5;
+  border-radius: 12px;
+  color: #047857;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.livih-muted {
+  color: #94a3b8;
+  text-align: center;
+  padding: 32px;
+}
+
+.livih-muted-inline {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.livih-ai-text {
+  margin: 0 0 14px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #334155;
+}
+
+.livih-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.livih-stat {
+  text-align: center;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+
+.livih-stat strong {
+  display: block;
+  font-size: 16px;
+  color: #059669;
+}
+
+.livih-stat span {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.livih-stat--green strong {
+  color: #16a34a;
+}
+
+.livih-stat-hero {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border-radius: 14px;
+  margin-bottom: 16px;
+}
+
+.livih-stat-hero strong {
+  display: block;
+  font-size: 36px;
+  color: #047857;
+}
+
+.livih-stat-hero span {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.livih-stop-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.livih-stop-list li {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.livih-stop-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #059669;
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.livih-stop-list strong {
+  display: block;
+  font-size: 14px;
+}
+
+.livih-stop-list span {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.livih-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.livih-list--compact li {
+  font-size: 13px;
+  color: #475569;
+  padding: 4px 0;
+}
+
+.livih-card {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.livih-card p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.livih-alert--high {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.livih-alert--medium {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.livih-alert--ok {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.livih-notify-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 10px;
+  color: #9a3412;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.livih-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  margin-top: 6px;
+}
+
+.livih-action {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.livih-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #059669;
+  text-decoration: none;
+}
+
+.livih-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.livih-table th {
+  text-align: left;
+  padding: 8px 6px;
+  color: #64748b;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.livih-table td {
+  padding: 10px 6px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: top;
+}
+
+.livih-score {
+  font-weight: 800;
+  color: #7c3aed;
+}
+
+.livih-rec {
+  font-size: 12px;
+  color: #475569;
+}
+
+.livih-chip {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  background: #f1f5f9;
+  margin-right: 4px;
+}
+
+.livih-chip--urgent {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.livih-chip--sensitive {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.livih-route-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.livih-route-card {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.livih-route-card--rec {
+  border-color: #6ee7b7;
+  background: #ecfdf5;
+}
+
+.livih-route-card h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.livih-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.livih-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.livih-filters select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font: inherit;
+}
+
+.livih-btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #059669;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.livih-checklist {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+
+.livih-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 4px 0;
+}
+
+.livih-req {
+  color: #059669;
+}
+
+.livih-verify-card {
+  margin-bottom: 12px;
+}
+
+.livih-empty-ok {
+  padding: 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  color: #166534;
+}
+
+.livih-chart-wrap {
+  margin: 16px 0;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.livih-eco-compare {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.livih-eco-col {
+  flex: 1;
+  min-width: 140px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.livih-eco-col--green {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+}
+
+.livih-eco-col h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.livih-eco-col p {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #475569;
+}
+
+.livih-eco-arrow {
+  font-size: 24px;
+  color: #059669;
+}
+
+.livih-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.livih-badge--green {
+  background: #d1fae5;
+  color: #047857;
+}
+
+@media (max-width: 640px) {
+  .livih-tab {
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+}

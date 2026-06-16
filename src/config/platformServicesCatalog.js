@@ -592,6 +592,16 @@ export const PLATFORM_SERVICES = [
     serviceKey: 'orderService',
   },
   {
+    id: 'livreur-intelligence',
+    category: 'livreur',
+    roles: ['livreur'],
+    label: 'Intelligence livraison IA',
+    description: 'Tournées, ETA, retards, colis, navigation, vérification, performances et éco.',
+    route: '/livreur/intelligence',
+    icon: '🧠',
+    serviceKey: 'livreurIntelligenceHubService',
+  },
+  {
     id: 'livreur-ml',
     category: 'livreur',
     roles: ['livreur'],
@@ -623,6 +633,16 @@ export const PLATFORM_SERVICES = [
     icon: '💊',
     api: 'GET /api/vet/prescriptions',
     serviceKey: 'vetService',
+  },
+  {
+    id: 'vet-intelligence',
+    category: 'vet',
+    roles: ['vet'],
+    label: 'Intelligence clinique IA',
+    description: 'Diagnostic assisté, dossier médical, ordonnances, suivi prédictif, évolution santé, CR et nutrition pathologique.',
+    route: '/vet/intelligence',
+    icon: '🧠',
+    serviceKey: 'vetIntelligenceHubService',
   },
   {
     id: 'vet-diagnostics',
