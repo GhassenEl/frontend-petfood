@@ -36,6 +36,7 @@
     "dev:ml": "cd fastapi_service && .venv\\Scripts\\python.exe -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
     "dev:full": "concurrently -n web,api,ml -c blue,green,magenta \"vite --host --port 3001\" \"npm --prefix backend run dev\" \"npm run dev:ml\"",
     "build": "vite build",
+    "simulate:esp32cam": "node scripts/simulate-esp32cam-food-quality.mjs",
     "preview": "vite preview --port 3000 --host",
     "start": "npm run dev",
     "docker:up": "docker compose --env-file .env.docker up -d --build",

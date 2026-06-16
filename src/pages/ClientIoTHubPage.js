@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Wifi, AlertTriangle, ChevronRight, Cpu, RefreshCw, Activity,
@@ -13,6 +13,7 @@ import IoTDeviceCard from '../components/IoTDeviceCard';
 import IoTInsightsPanel from '../components/IoTInsightsPanel';
 import IoTSensorTimelinePanel from '../components/IoTSensorTimelinePanel';
 import IoTAutomationRulesPanel from '../components/IoTAutomationRulesPanel';
+import IoTFoodQualityCamPanel from '../components/IoTFoodQualityCamPanel';
 import DemoModePill from '../components/DemoModePill';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import './ClientComplaintsPage.css';
@@ -28,6 +29,7 @@ const card = {
 
 const TABS = [
   { id: 'dashboard', label: 'Tableau de bord' },
+  { id: 'food-quality', label: 'Qualité croquettes 📷' },
   { id: 'intelligence', label: 'Intelligence IA' },
   { id: 'devices', label: 'Appareils' },
   { id: 'alerts', label: 'Alertes' },
@@ -77,6 +79,7 @@ const IoTModuleCard = ({ to, icon, title, subtitle, status, statusColor, badge }
 );
 
 const ClientIoTHubPage = () => {
+  const [searchParams] = useSearchParams();
   const [tab, setTab] = useState('dashboard');
   const [pack, setPack] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -92,6 +95,11 @@ const ClientIoTHubPage = () => {
 
   useEffect(() => { load(); }, [load]);
   usePlatformRefresh(load, [load]);
+
+  useEffect(() => {
+    const t = searchParams.get('tab');
+    if (t && TABS.some((x) => x.id === t)) setTab(t);
+  }, [searchParams]);
 
   const d = pack || {};
   const c = d.counts || {};
@@ -117,7 +125,7 @@ const ClientIoTHubPage = () => {
           <div style={{ flex: 1, minWidth: 220 }}>
             <h1 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 800 }}>📡 Centre IoT & connecté</h1>
             <p style={{ margin: 0, opacity: 0.9, maxWidth: 560, lineHeight: 1.5 }}>
-              Distributeur ESP32, fontaines, routines, alertes et automatisations — pilotage unifié.
+              Distributeur ESP32, ESP32-CAM qualité croquettes, fontaines, routines, alertes et automatisations — pilotage unifié.
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -157,6 +165,7 @@ const ClientIoTHubPage = () => {
             <>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
                 <Stat value={`${c.feedersOnline || 0}/${c.feeders || 0}`} label="Distributeurs" color="#059669" />
+                <Stat value={`${c.feederCamsOnline ?? 1}/${c.feederCams ?? 1}`} label="ESP32-CAM" color="#7c3aed" />
                 <Stat value={`${c.waterOnline || 0}/${c.waterMonitors || 0}`} label="Fontaines" color="#0ea5e9" />
                 <Stat value={c.alerts || 0} label="Alertes actives" color="#f59e0b" />
                 <Stat value={c.routinesToday || 0} label="Routines/jour" color="#7c3aed" />
@@ -214,6 +223,7 @@ const ClientIoTHubPage = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16, marginBottom: 24 }}>
                 <IoTModuleCard to="/pet-feeder" icon="🍽️" title="Distributeur IoT" subtitle="ESP32, portions, capteurs niveau/température." status={`${c.feedersOnline || 0} en ligne`} statusColor="#059669" badge={d.mode === 'demo' ? 'Démo' : null} />
+                <IoTModuleCard to="/client-iot?tab=food-quality" icon="📷" title="ESP32-CAM qualité" subtitle="Détection bonne / mauvaise qualité croquettes en temps réel." status="Surveillance active" statusColor="#7c3aed" badge="Comme un frigo connecté" />
                 <IoTModuleCard to="/client-smart-water" icon="💧" title="Fontaine connectée" subtitle="Hydratation, réservoir, filtres." status={`${c.waterMonitors || 0} monitoré(s)`} statusColor="#0ea5e9" />
                 <IoTModuleCard to="/client-smart-delivery" icon="🚚" title="Livraison prédictive" subtitle="Créneaux optimisés et réappro lié." status="Planifier une livraison" statusColor="#64748b" />
                 <IoTModuleCard to="/client-traceability" icon="🔗" title="Traçabilité blockchain" subtitle="Origine et certifications aliments." status="Vérifier un lot" statusColor="#7c3aed" />
@@ -231,6 +241,12 @@ const ClientIoTHubPage = () => {
                 </ol>
               </section>
             </>
+          )}
+
+          {tab === 'food-quality' && (
+            <div className="iot-card">
+              <IoTFoodQualityCamPanel loading={loading} />
+            </div>
           )}
 
           {tab === 'intelligence' && (
@@ -278,7 +294,7 @@ const ClientIoTHubPage = () => {
                   <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
                     <div>
                       <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 700, color: SEV[a.severity], textTransform: 'uppercase' }}>
-                        {a.source === 'feeder' ? '🍽️ Distributeur' : '💧 Fontaine'} · {a.severity}
+                        {a.source === 'feeder' ? '🍽️ Distributeur' : a.source === 'feeder-cam' ? '📷 ESP32-CAM' : '💧 Fontaine'} · {a.severity}
                       </p>
                       <strong style={{ fontSize: 15 }}>{a.title}</strong>
                       <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b' }}>{a.message}</p>

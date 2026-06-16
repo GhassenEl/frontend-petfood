@@ -14,6 +14,9 @@ export const computeIoTHealthScore = ({ devices = [], alerts = [] } = {}) => {
     if (d.type === 'water' && m.filterDaysLeft != null && m.filterDaysLeft < 5) score -= 6;
     if (d.signalStrength != null && d.signalStrength < 40) score -= 5;
     if (d.batteryPercent != null && d.batteryPercent < 20) score -= 8;
+    if (d.type === 'feeder-cam' && m.foodQuality === 'bad') score -= 20;
+    else if (d.type === 'feeder-cam' && m.foodQuality === 'warning') score -= 8;
+    else if (d.type === 'feeder-cam' && m.qualityScore != null && m.qualityScore < 50) score -= 20;
   });
 
   alerts.forEach((a) => {
@@ -102,6 +105,24 @@ export const generateIoTInsights = (pack = {}) => {
     }
   });
 
+  devices.filter((d) => d.type === 'feeder-cam').forEach((d) => {
+    const m = d.metrics || {};
+    const q = m.foodQuality || (m.qualityScore < 50 ? 'bad' : m.qualityScore < 75 ? 'warning' : 'good');
+    if (q !== 'good') {
+      insights.push({
+        id: `food-quality-${d.id}`,
+        icon: q === 'bad' ? '🚫' : '⚠️',
+        priority: q === 'bad' ? 'high' : 'medium',
+        title: `Qualité croquettes ${d.petName}`,
+        message:
+          q === 'bad'
+            ? `ESP32-CAM : qualité mauvaise (${m.qualityScore ?? '—'}/100) — ne pas servir, vérifier le bac.`
+            : `ESP32-CAM : qualité limite (${m.qualityScore ?? '—'}/100) — temp ${m.temperatureC ?? '—'} °C, HR ${m.humidityPct ?? '—'} %.`,
+        link: '/client-iot',
+      });
+    }
+  });
+
   devices.filter((d) => d.type === 'water').forEach((d) => {
     const pred = predictHydrationRisk(d);
     predictions.push({ kind: 'water', ...pred });
@@ -183,6 +204,19 @@ export const buildSensorTimeline = (pack = {}) => {
           at: hoursAgo(1),
         });
       }
+    }
+    if (d.type === 'feeder-cam') {
+      const q = m.foodQuality || 'good';
+      const icons = { good: '✅', warning: '⚠️', bad: '🚫' };
+      events.push({
+        id: `${d.id}-quality`,
+        deviceId: d.id,
+        deviceName: d.name,
+        type: 'food-quality',
+        icon: icons[q] || '📷',
+        message: `Qualité croquettes : ${q === 'good' ? 'Bonne' : q === 'bad' ? 'Mauvaise' : 'À surveiller'} (${m.qualityScore ?? '—'}/100)`,
+        at: hoursAgo(0.2),
+      });
     }
     if (d.type === 'water') {
       events.push({

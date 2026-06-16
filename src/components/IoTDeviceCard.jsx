@@ -4,7 +4,14 @@ import { Wifi, WifiOff, ChevronRight, Battery, BatteryLow } from 'lucide-react';
 
 const TYPE_META = {
   feeder: { icon: '🍽️', color: '#059669', label: 'Distributeur' },
+  'feeder-cam': { icon: '📷', color: '#7c3aed', label: 'ESP32-CAM' },
   water: { icon: '💧', color: '#0ea5e9', label: 'Fontaine' },
+};
+
+const QUALITY_CHIP = {
+  good: { label: 'Bonne', color: '#059669' },
+  warning: { label: 'Limite', color: '#d97706' },
+  bad: { label: 'Mauvaise', color: '#dc2626' },
 };
 
 const formatLastSeen = (iso) => {
@@ -59,6 +66,19 @@ const IoTDeviceCard = ({ device }) => {
         )}
         {device.type === 'feeder' && m.todayGrams != null && (
           <MetricChip label="Aujourd'hui" value={`${m.todayGrams} g`} />
+        )}
+        {device.type === 'feeder-cam' && m.foodQuality && (
+          <MetricChip
+            label="Qualité"
+            value={QUALITY_CHIP[m.foodQuality]?.label || m.foodQuality}
+            warn={m.foodQuality !== 'good'}
+          />
+        )}
+        {device.type === 'feeder-cam' && m.qualityScore != null && (
+          <MetricChip label="Score" value={`${m.qualityScore}/100`} warn={m.qualityScore < 75} />
+        )}
+        {device.type === 'feeder-cam' && m.temperatureC != null && (
+          <MetricChip label="Temp." value={`${m.temperatureC}°C`} />
         )}
         {device.type === 'water' && m.todayMl != null && (
           <MetricChip label="Hydratation" value={`${m.todayMl}/${m.targetMl || '?'} ml`} warn={m.percentOfTarget < 70} />

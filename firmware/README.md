@@ -67,3 +67,52 @@ En-tête requis : `X-Device-Key: <votre_clé>`
 ## Option IA (ESP32-CAM)
 
 Pour la reconnaissance d'animal, remplacez la détection IR par un module **ESP32-CAM** et envoyez les captures à l'API FastAPI existante (`/fastapi/detect-image`).
+
+---
+
+## ESP32-CAM — Qualité croquettes temps réel
+
+Surveillance du bac de croquettes (comme un **réfrigérateur connecté**) : vision + température + humidité → **bonne** / **à surveiller** / **mauvaise**.
+
+### Matériel
+
+| Composant | Rôle |
+|-----------|------|
+| ESP32-CAM (AI Thinker) | Capture image + analyse couleur locale |
+| DHT11 (optionnel) | Température / humidité du bac |
+
+### Firmware
+
+Dossier : `firmware/esp32/PetFoodQualityESP32CAM/`
+
+1. Copier `config.example.h` → `config.h`
+2. `SIMULATION_MODE true` pour tester sans caméra (bureau)
+3. Flasher `PetFoodQualityESP32CAM.ino`
+4. Hub app : **Centre IoT** → onglet **Qualité croquettes 📷**
+
+### API
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/api/client/iot/food-quality/reading` | Lecture qualité (RGB, temp, humidité, score) |
+
+Corps JSON exemple :
+
+```json
+{
+  "deviceId": "esp32-cam",
+  "avgR": 165, "avgG": 120, "avgB": 75,
+  "moldPixelRatio": 0.01,
+  "temperatureC": 20, "humidityPct": 42,
+  "quality": "good", "qualityScore": 92
+}
+```
+
+### Simulateur sans matériel (Node)
+
+```bash
+node scripts/simulate-esp32cam-food-quality.mjs
+node scripts/simulate-esp32cam-food-quality.mjs --scenario bad --interval 3
+```
+
+Dans l'app (mode démo) : onglet **Qualité croquettes** → boutons **Simuler** ou **Flux temps réel**.

@@ -838,9 +838,11 @@ export const DEMO_IOT_PACK = {
   counts: {
     feeders: 1,
     feedersOnline: 1,
+    feederCams: 1,
+    feederCamsOnline: 1,
     waterMonitors: 2,
     waterOnline: 2,
-    alerts: 4,
+    alerts: 5,
     criticalAlerts: 1,
     routinesToday: 5,
   },
@@ -855,6 +857,26 @@ export const DEMO_IOT_PACK = {
       metrics: { reservoirPercent: 42, temperature: 24.2, todayGrams: 65, avgDailyGrams: 65, capacityGrams: 1200, isLowFood: true },
       signalStrength: 82,
       lastSeen: new Date(Date.now() - 120000).toISOString(),
+    },
+    {
+      id: 'demo-esp32cam-1',
+      type: 'feeder-cam',
+      name: 'ESP32-CAM — Bac croquettes Max',
+      status: 'online',
+      petName: 'Max',
+      route: '/client-iot',
+      metrics: {
+        foodQuality: 'warning',
+        qualityScore: 72,
+        temperatureC: 24.2,
+        humidityPct: 58,
+        moldPixelRatio: 0.04,
+        avgR: 130,
+        avgG: 128,
+        avgB: 78,
+      },
+      signalStrength: 88,
+      lastSeen: new Date(Date.now() - 30000).toISOString(),
     },
     {
       id: 'demo-water-1',
@@ -886,6 +908,7 @@ export const DEMO_IOT_PACK = {
     { id: 'a2', source: 'water', severity: 'high', title: 'Hydratation Luna', message: '66 % de l\'objectif journalier.', deviceId: 'demo-water-2', link: '/client-smart-water' },
     { id: 'a3', source: 'water', severity: 'medium', title: 'Filtre fontaine Luna', message: 'Filtre à changer dans 5 jours.', deviceId: 'demo-water-2', link: '/client-smart-water' },
     { id: 'a4', source: 'feeder', severity: 'low', title: 'Prochain repas Max', message: 'Distribution à 19:30 (30 g).', deviceId: 'demo-feeder-1', link: '/pet-feeder' },
+    { id: 'a5', source: 'feeder-cam', severity: 'medium', title: 'Qualité croquettes — limite', message: 'ESP32-CAM : score 72/100 — température et humidité du bac à surveiller.', deviceId: 'demo-esp32cam-1', link: '/client-iot' },
   ],
   automations: [
     { id: 'auto-1', label: 'Réappro croquettes', description: 'Commander quand réservoir < 30 %', trigger: 'feeder.low_food', enabled: true, link: '/client-subscriptions' },
@@ -907,6 +930,7 @@ export const DEMO_IOT_PACK = {
     { id: 'ev1', deviceId: 'demo-feeder-1', deviceName: 'Distributeur Max', type: 'level', icon: '📊', message: 'Distribution 30 g — repas matin', at: new Date(Date.now() - 900000).toISOString() },
     { id: 'ev2', deviceId: 'demo-water-2', deviceName: 'Fontaine Luna', type: 'hydration', icon: '💧', message: '165 ml aujourd\'hui (66 % objectif)', at: new Date(Date.now() - 600000).toISOString() },
     { id: 'ev3', deviceId: 'demo-feeder-1', deviceName: 'Distributeur Max', type: 'temperature', icon: '🌡️', message: 'Température bac 24.2 °C', at: new Date(Date.now() - 1800000).toISOString() },
+    { id: 'ev4', deviceId: 'demo-esp32cam-1', deviceName: 'ESP32-CAM Max', type: 'food-quality', icon: '⚠️', message: 'Qualité croquettes : À surveiller (72/100)', at: new Date(Date.now() - 450000).toISOString() },
   ],
 };
 
