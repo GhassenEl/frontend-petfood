@@ -45,6 +45,7 @@ const DigitalTwinAiPanel = ({ twin }) => {
       )}
 
       <div className="dtwin-ai-links">
+        <Link to="/client-digital-twin?tab=nutrition-twin">Digital Nutrition Twin →</Link>
         <Link to="/pet-adaptive-nutrition">Nutrition IA adaptative →</Link>
         <Link to="/client-explainable-ai">Explainable AI →</Link>
         <Link to="/veterinary">Prendre RDV vétérinaire →</Link>

@@ -3,7 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 
-const DigitalTwinNutritionPanel = ({ twin }) => {
+const DigitalTwinNutritionPanel = ({ twin, onOpenTwin }) => {
   const { feeding, nutritionRecommendation, weightHistory } = twin || {};
   const chartData = (weightHistory || []).map((w) => ({
     date: new Date(w.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
@@ -77,6 +77,19 @@ const DigitalTwinNutritionPanel = ({ twin }) => {
               <li key={i}>{typeof r === 'string' ? r : r.text || r.label}</li>
             ))}
           </ul>
+        </section>
+      )}
+
+      {onOpenTwin && (
+        <section className="dtwin-card dtwin-nutrition-twin-cta">
+          <h3>Digital Nutrition Twin</h3>
+          <p className="dtwin-muted">
+            Simulez l&apos;impact d&apos;un changement alimentaire sur le poids, les calories,
+            l&apos;équilibre nutritionnel et les risques de santé.
+          </p>
+          <button type="button" className="dtwin-btn dtwin-btn--primary" onClick={onOpenTwin}>
+            Lancer la simulation →
+          </button>
         </section>
       )}
     </div>

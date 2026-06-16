@@ -195,6 +195,18 @@ export const PLATFORM_SERVICES = [
     badge: 'IA',
   },
   {
+    id: 'digital-nutrition-twin',
+    category: 'nutrition',
+    roles: ['client'],
+    label: 'Digital Nutrition Twin',
+    description: 'Simule l\'impact d\'un changement alimentaire sur poids, calories, équilibre nutritionnel et risques santé.',
+    route: '/client-digital-twin',
+    icon: '🧬',
+    api: 'GET /api/pets/nutrition/twin',
+    serviceKey: 'digitalTwinService',
+    badge: 'Simulation',
+  },
+  {
     id: 'pet-advice',
     category: 'nutrition',
     roles: ['client'],

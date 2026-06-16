@@ -69,7 +69,7 @@ export async function loadDigitalTwinPack(options = {}) {
     }),
   );
 
-  return { twins, source: petsRes?.length ? 'api' : 'demo' };
+  return { twins, products, pets, source: petsRes?.length ? 'api' : 'demo' };
 }
 
 export async function loadDigitalTwin(petId, options = {}) {

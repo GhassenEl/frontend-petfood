@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
-  Dna, LayoutDashboard, Stethoscope, Utensils, Activity, Sparkles, RefreshCw,
+  Dna, LayoutDashboard, Stethoscope, Utensils, Activity, Sparkles, RefreshCw, Cpu,
 } from 'lucide-react';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import { loadDigitalTwinPack } from '../services/digitalTwinService';
@@ -10,18 +10,24 @@ import DigitalTwinMedicalPanel from '../components/DigitalTwinMedicalPanel';
 import DigitalTwinNutritionPanel from '../components/DigitalTwinNutritionPanel';
 import DigitalTwinActivityPanel from '../components/DigitalTwinActivityPanel';
 import DigitalTwinAiPanel from '../components/DigitalTwinAiPanel';
+import DigitalNutritionTwinPanel from '../components/DigitalNutritionTwinPanel';
 import './ClientDigitalTwin.css';
 
 const TABS = [
   { id: 'overview', label: 'Vue d\'ensemble', icon: LayoutDashboard },
   { id: 'medical', label: 'Médical', icon: Stethoscope },
   { id: 'nutrition', label: 'Alimentation', icon: Utensils },
+  { id: 'nutrition-twin', label: 'Nutrition Twin', icon: Cpu },
   { id: 'activity', label: 'Activité', icon: Activity },
   { id: 'ai', label: 'Recommandations IA', icon: Sparkles },
 ];
 
 const ClientDigitalTwinPage = () => {
-  const [tab, setTab] = useState('overview');
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab');
+  const [tab, setTab] = useState(
+    TABS.some((t) => t.id === initialTab) ? initialTab : 'overview',
+  );
   const [loading, setLoading] = useState(true);
   const [pack, setPack] = useState(null);
   const [petIndex, setPetIndex] = useState(0);
@@ -45,6 +51,7 @@ const ClientDigitalTwinPage = () => {
   usePlatformRefresh(load, [load]);
 
   const twin = pack?.twins?.[petIndex] || null;
+  const pet = pack?.pets?.[petIndex] || null;
 
   if (loading && !pack) {
     return <div className="dtwin-page"><p className="dtwin-loading">Synchronisation du jumeau numérique…</p></div>;
@@ -67,8 +74,8 @@ const ClientDigitalTwinPage = () => {
           Jumeau numérique
         </h1>
         <p className="dtwin-lead">
-          Profil numérique complet de votre animal : données médicales, historique alimentaire,
-          activité physique, recommandations IA et score de bien-être calculé automatiquement.
+          Profil numérique complet : médical, alimentation, activité, score bien-être
+          et <strong>Digital Nutrition Twin</strong> — simulation d&apos;impact d&apos;un changement alimentaire.
         </p>
       </header>
 
@@ -110,7 +117,10 @@ const ClientDigitalTwinPage = () => {
 
       {tab === 'overview' && <DigitalTwinOverview twin={twin} />}
       {tab === 'medical' && <DigitalTwinMedicalPanel twin={twin} />}
-      {tab === 'nutrition' && <DigitalTwinNutritionPanel twin={twin} />}
+      {tab === 'nutrition' && <DigitalTwinNutritionPanel twin={twin} onOpenTwin={() => setTab('nutrition-twin')} />}
+      {tab === 'nutrition-twin' && (
+        <DigitalNutritionTwinPanel twin={twin} pet={pet} products={pack?.products || []} />
+      )}
       {tab === 'activity' && <DigitalTwinActivityPanel twin={twin} />}
       {tab === 'ai' && <DigitalTwinAiPanel twin={twin} />}
 
