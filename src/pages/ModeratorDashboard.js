@@ -55,7 +55,7 @@ const ModeratorDashboard = () => {
     { label: 'Centre anti-fraude', value: stats.fraudCases ?? stats.fakeReviewsFlagged, icon: '🚨', to: '/moderator/fraud' },
     { label: 'Vendeurs en attente', value: stats.pendingVendors ?? 0, icon: '🏬', to: '/moderator/vendors' },
     { label: 'Remboursements litige', value: stats.pendingRefunds ?? 2, icon: '💸', to: '/moderator/refunds' },
-    { label: 'Faux avis détectés', value: stats.fakeReviewsFlagged, icon: '🤖', to: '/moderator/reports' },
+    { label: 'Faux avis détectés', value: stats.fakeReviewsFlagged, icon: '🤖', to: '/moderator/intelligence?tab=fake-reviews' },
     { label: 'Cas résolus aujourd\'hui', value: stats.resolvedToday, icon: '✅', to: '/moderator/analytics' },
   ];
 

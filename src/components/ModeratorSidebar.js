@@ -23,6 +23,7 @@ const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
       title: '🛡️ Modération',
       items: [
         { id: 'dashboard', label: 'Tableau de bord', icon: '📊' },
+        { id: 'intelligence', label: 'Intelligence IA', icon: '🧠' },
         { id: 'bi', label: 'Dashboard BI', icon: '📈' },
         { id: 'users', label: 'Comptes clients', icon: '👤' },
         { id: 'vendors', label: 'Vendeurs partenaires', icon: '🏬' },

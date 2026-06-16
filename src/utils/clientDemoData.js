@@ -131,6 +131,15 @@ export const DEMO_REVIEWS = [
     createdAt: daysAgo(1),
     productId: { _id: 'demo-prod-croq', name: 'Croquettes Premium Chien Adulte 12 kg' },
   },
+  {
+    _id: 'demo-rev-ai-001',
+    id: 'demo-rev-ai-001',
+    rating: 5,
+    emotion: 'neutral',
+    comment: 'En tant que propriétaire, je recommande vivement ce produit sans hésitation. Dans l\'ensemble, il répond parfaitement à mes attentes et offre un excellent rapport qualité-prix.',
+    createdAt: daysAgo(2),
+    productId: { _id: 'demo-prod-croq', name: 'Croquettes Premium Chien Adulte 12 kg' },
+  },
 ];
 
 export const DEMO_COMPLAINTS = [

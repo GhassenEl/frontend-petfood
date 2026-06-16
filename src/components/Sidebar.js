@@ -22,6 +22,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'dashboard', label: 'Dashboard', icon: '📈' },
         { id: 'analytics-decision', label: 'Analyse & décision', icon: '📊' },
         { id: 'business-intelligence', label: 'Business Intelligence', icon: '📈' },
+        { id: 'merchant-intelligence', label: 'Intelligence marchande', icon: '🏪' },
         { id: 'powerbi', label: 'Power BI', icon: '📊' },
         { id: 'stock-bi', label: 'Stock BI', icon: '📦' },
         { id: 'performance', label: 'Performance plateforme', icon: '⚡' },

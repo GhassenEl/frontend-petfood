@@ -307,3 +307,26 @@
   color: #64748b;
   font-size: 0.75rem;
 }
+
+.vnd-promo-ai {
+  margin-bottom: 16px;
+}
+
+.vnd-promo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.vnd-promo-item--high {
+  border-left: 3px solid #dc2626;
+  padding-left: 12px;
+}
+
+.vnd-promo-item--medium {
+  border-left: 3px solid #d97706;
+  padding-left: 12px;
+}

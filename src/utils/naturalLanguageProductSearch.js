@@ -38,9 +38,19 @@ export const parseNaturalLanguageQuery = (query = '') => {
     intent.explanation.push('Stade : jeune');
   }
 
-  if (/allerg|hypoallerg|intoler|sans\s+(poulet|boeuf|gluten|cereales)/.test(q)) {
+  if (/allerg|hypoallerg|intoler|sans\s+(poulet|boeuf|gluten|cereales|céréales)/.test(q)) {
     intent.allergies = true;
     intent.explanation.push('Sensibilité / allergies');
+  }
+
+  if (/sterilis|stérilis|castr|neutre/.test(q)) {
+    intent.keywords.push('sterilise', 'light', 'stérilisé');
+    intent.explanation.push('Chat/chien stérilisé');
+  }
+
+  if (/sans\s+cereales|sans\s+céréales|grain\s+free|sans\s+gluten/.test(q)) {
+    intent.keywords.push('sans cereales', 'hypoallergenique', 'mono-proteine');
+    intent.explanation.push('Sans céréales');
   }
 
   if (/light|maigrir|perte|regime|régime|surpoids/.test(q)) {

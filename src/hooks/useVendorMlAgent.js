@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { fetchVendorMlAgent } from '../services/ecosystemService';
+import { loadVendorIntelligencePack } from '../services/vendorIntelligenceService';
 
 export const useVendorMlAgent = () => {
   const [data, setData] = useState(null);
@@ -7,7 +7,7 @@ export const useVendorMlAgent = () => {
 
   const reload = useCallback(() => {
     setLoading(true);
-    return fetchVendorMlAgent()
+    return loadVendorIntelligencePack()
       .then(setData)
       .catch(() => setData(null))
       .finally(() => setLoading(false));

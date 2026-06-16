@@ -1,0 +1,387 @@
+.modi-page {
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.modi-page h1 {
+  margin: 0 0 8px;
+  font-weight: 800;
+}
+
+.modi-lead {
+  color: #64748b;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.modi-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modi-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.modi-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.modi-tab--active {
+  background: #b45309;
+  border-color: #b45309;
+  color: #fff;
+}
+
+.modi-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modi-panel {
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.modi-summary {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  background: #fffbeb;
+  border-radius: 12px;
+  color: #92400e;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.modi-muted {
+  color: #94a3b8;
+  text-align: center;
+  padding: 24px;
+}
+
+.modi-empty {
+  text-align: center;
+  padding: 32px;
+  color: #64748b;
+}
+
+.modi-empty-ok {
+  color: #047857;
+}
+
+.modi-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.modi-item {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #f1f5f9;
+  border-radius: 14px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.modi-sev-high { border-left: 4px solid #dc2626; }
+.modi-sev-medium { border-left: 4px solid #d97706; }
+.modi-sev-low { border-left: 4px solid #64748b; }
+
+.modi-conf-high { border-left: 4px solid #059669; }
+.modi-conf-medium { border-left: 4px solid #d97706; }
+.modi-conf-low { border-left: 4px solid #94a3b8; }
+.modi-conf-guess { border-left: 4px solid #cbd5e1; }
+
+.modi-quote {
+  color: #64748b;
+  font-style: italic;
+  margin: 6px 0;
+}
+
+.modi-meta {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.modi-reason {
+  font-size: 12px;
+  color: #6366f1;
+  margin: 4px 0 0;
+}
+
+.modi-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.modi-tag {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 600;
+}
+
+.modi-tag--cat {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.modi-tag--ai {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.modi-score {
+  font-size: 11px;
+  font-weight: 800;
+  color: #b45309;
+}
+
+.modi-cat-icon {
+  font-size: 1.5rem;
+}
+
+.modi-footer {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.modi-footer a {
+  color: #b45309;
+  font-weight: 700;
+}
+
+.modi-rep-hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.modi-rep-score strong {
+  font-size: 2.5rem;
+  color: #b45309;
+  display: block;
+  line-height: 1;
+}
+
+.modi-rep-score span {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.modi-rep-trend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.modi-sentiment-bars {
+  margin: 16px 0;
+}
+
+.modi-bar-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 40px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.modi-bar-track {
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.modi-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.modi-themes h4,
+.modi-panel h4 {
+  margin: 16px 0 8px;
+  font-size: 14px;
+}
+
+.modi-watchlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.modi-watchlist li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 13px;
+}
+
+.modi-warn {
+  color: #dc2626;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.modi-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.modi-cat-card {
+  text-align: center;
+  padding: 12px;
+  background: #fffbeb;
+  border-radius: 12px;
+}
+
+.modi-cat-card strong {
+  display: block;
+  font-size: 1.5rem;
+  color: #b45309;
+}
+
+.modi-cat-card span {
+  font-size: 11px;
+  text-transform: capitalize;
+  color: #64748b;
+}
+
+.modi-dash-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #334155;
+}
+
+.modi-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.modi-kpi {
+  background: #fffbeb;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 13px;
+}
+
+.modi-kpi strong {
+  display: block;
+  font-size: 1.5rem;
+  margin-top: 6px;
+  color: #b45309;
+}
+
+.modi-feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.modi-feed-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  align-items: flex-start;
+}
+
+.modi-feed-icon {
+  font-size: 1.25rem;
+}
+
+.modi-feed-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.modi-feed-type {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.modi-feed-alert {
+  margin-left: auto;
+  color: #d97706;
+  flex-shrink: 0;
+}
+
+.modi-feed-item p {
+  margin: 0;
+  color: #64748b;
+}
+
+.modi-grade {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.modi-grade-a { background: #dcfce7; color: #166534; }
+.modi-grade-b { background: #dbeafe; color: #1e40af; }
+.modi-grade-c { background: #fef3c7; color: #92400e; }
+.modi-grade-d { background: #fee2e2; color: #991b1b; }

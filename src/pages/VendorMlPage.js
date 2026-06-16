@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Brain, RefreshCw, TrendingUp, Package, Percent, AlertTriangle } from 'lucide-react';
 import useVendorMlAgent from '../hooks/useVendorMlAgent';
+import VendorPromoAssistantPanel from '../components/VendorPromoAssistantPanel';
+import VendorProductPotentialPanel from '../components/VendorProductPotentialPanel';
 import { formatDT } from '../utils/formatCurrency';
 import './VendorPages.css';
 
@@ -9,7 +11,8 @@ const VendorMlPage = () => {
   const { data, loading, reload, pythonPowered, groqPowered, mlPowered } = useVendorMlAgent();
   const agent = data || {};
   const alerts = agent.stockAlerts || agent.alerts || [];
-  const promos = agent.promoSuggestions || agent.promotions || [];
+  const promos = agent.localPromoSuggestions || agent.promoSuggestions || agent.promotions || [];
+  const highPotential = agent.localHighPotential || agent.highPotentialProducts || [];
   const forecast = agent.salesForecast || agent.forecast || [];
   const priceSuggestions = agent.priceSuggestions || [];
   const lowPerformers = agent.lowPerformers || [];
@@ -60,7 +63,11 @@ const VendorMlPage = () => {
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+          <VendorPromoAssistantPanel suggestions={promos} onApplied={reload} />
+          <div style={{ marginBottom: 16 }} />
+          <VendorProductPotentialPanel products={highPotential} />
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginTop: 16 }}>
             <section className="vnd-card">
               <h2>Alertes stock</h2>
               {alerts.length === 0 ? (
@@ -81,7 +88,7 @@ const VendorMlPage = () => {
             </section>
 
             <section className="vnd-card">
-              <h2>Promotions suggérées</h2>
+              <h2>Promotions suggérées (API)</h2>
               {promos.length === 0 ? (
                 <p className="vnd-empty">Aucune promo recommandée cette semaine.</p>
               ) : (

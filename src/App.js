@@ -108,6 +108,7 @@ import VisitorHubPage from './pages/VisitorHubPage';
 import VisitorProductsPage from './pages/VisitorProductsPage';
 import VisitorInfoPage from './pages/VisitorInfoPage';
 import VisitorToolsPage from './pages/VisitorToolsPage';
+import VisitorIntelligenceHubPage from './pages/VisitorIntelligenceHubPage';
 import VendorHubPage from './pages/VendorHubPage';
 import ModeratorHubPage from './pages/ModeratorHubPage';
 import VendorLayout from './layouts/VendorLayout';
@@ -127,6 +128,7 @@ import ModeratorUsersPage from './pages/ModeratorUsersPage';
 import ModeratorVendorsPage from './pages/ModeratorVendorsPage';
 import ModeratorFraudCenterPage from './pages/ModeratorFraudCenterPage';
 import ModeratorMessagesPage from './pages/ModeratorMessagesPage';
+import ModeratorIntelligenceHubPage from './pages/ModeratorIntelligenceHubPage';
 import VendorMlPage from './pages/VendorMlPage';
 import AdminCategoriesPage from './pages/AdminCategoriesPage';
 import AdminVetsPage from './pages/AdminVetsPage';
@@ -147,6 +149,7 @@ import AdminPartnersHubPage from './pages/AdminPartnersHubPage';
 import AdminAdvancedAiPage from './pages/AdminAdvancedAiPage';
 import AdminAnalyticsDecisionPage from './pages/AdminAnalyticsDecisionPage';
 import AdminBusinessIntelligencePage from './pages/AdminBusinessIntelligencePage';
+import AdminMerchantIntelligencePage from './pages/AdminMerchantIntelligencePage';
 import AdminPriceGovernancePage from './pages/AdminPriceGovernancePage';
 import AdminCitiesHubPage from './pages/AdminCitiesHubPage';
 import PlatformCitiesPage from './pages/PlatformCitiesPage';
@@ -225,6 +228,7 @@ const App = () => {
         <Route path="/visitor/products" element={<VisitorProductsPage />} />
         <Route path="/visitor/info" element={<VisitorInfoPage />} />
         <Route path="/visitor/tools" element={<VisitorToolsPage />} />
+        <Route path="/visitor/intelligence" element={<VisitorIntelligenceHubPage />} />
         <Route path="/vendor" element={<VendorHubPage />} />
         <Route path="/moderator" element={<ModeratorHubPage />} />
         <Route path="/capabilities" element={<CapabilitiesRoute user={null} />} />
@@ -283,6 +287,7 @@ const App = () => {
       <Route path="/admin/advanced-ai" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAdvancedAiPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/analytics-decision" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAnalyticsDecisionPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/business-intelligence" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminBusinessIntelligencePage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/merchant-intelligence" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminMerchantIntelligencePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/incidents-ml" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminIncidentsMlPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/stock-bi" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminStockBiPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/performance" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPlatformPerformancePage /></AdminLayout></RoleRoute>} />
@@ -393,6 +398,7 @@ const App = () => {
       <Route path="/visitor/products" element={<VisitorProductsPage />} />
       <Route path="/visitor/info" element={<VisitorInfoPage />} />
       <Route path="/visitor/tools" element={<VisitorToolsPage />} />
+      <Route path="/visitor/intelligence" element={<VisitorIntelligenceHubPage />} />
       <Route path="/vendor" element={<VendorHubPage />} />
       <Route path="/moderator" element={<ModeratorHubPage />} />
 
@@ -409,6 +415,7 @@ const App = () => {
       <Route path="/vendor/profile" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><AdminProfilePage /></VendorLayout></RoleRoute>} />
 
       <Route path="/moderator/dashboard" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorDashboard /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/intelligence" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorIntelligenceHubPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/users" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorUsersPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/vendors" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorVendorsPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/fraud" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorFraudCenterPage /></ModeratorLayout></RoleRoute>} />

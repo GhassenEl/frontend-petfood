@@ -26,6 +26,18 @@ export const VISITOR_SIDEBAR_SECTIONS = [
     ],
   },
   {
+    title: '🤖 Intelligence IA',
+    items: [
+      { id: 'intelligence', label: 'Hub intelligence', icon: '✨', route: '/visitor/intelligence' },
+      { id: 'intelligence-explain', label: 'Explications IA', icon: '💡', route: '/visitor/intelligence?tab=explain' },
+      { id: 'intelligence-future', label: 'Besoins futurs', icon: '📅', route: '/visitor/intelligence?tab=future' },
+      { id: 'intelligence-search', label: 'Recherche naturelle', icon: '🔍', route: '/visitor/intelligence?tab=search' },
+      { id: 'intelligence-chat', label: 'Assistant conversationnel', icon: '💬', route: '/visitor/intelligence?tab=chat' },
+      { id: 'intelligence-compare', label: 'Comparateur intelligent', icon: '⚖️', route: '/visitor/intelligence?tab=compare' },
+      { id: 'intelligence-wishlist', label: 'Liste de souhaits IA', icon: '❤️', route: '/visitor/intelligence?tab=wishlist' },
+    ],
+  },
+  {
     title: '🧪 Outils PetFoodTN',
     items: [
       { id: 'simulator', label: 'Simulateur nutrition', icon: '🔥', route: '/visitor/tools?tab=simulator' },
@@ -89,6 +101,9 @@ export const MODERATOR_PUBLIC_SIDEBAR_SECTIONS = [
     title: '🛡️ Modération',
     items: [
       { id: 'hub', label: 'Hub modération', icon: '🏠', route: '/moderator' },
+      { id: 'intelligence', label: 'Intelligence IA', icon: '🧠', route: '/moderator/intelligence' },
+      { id: 'intelligence-ai-reviews', label: 'Avis générés IA', icon: '🤖', route: '/moderator/intelligence?tab=ai-reviews' },
+      { id: 'intelligence-quality', label: 'Qualité contenu', icon: '📋', route: '/moderator/intelligence?tab=content-quality' },
       { id: 'reviews', label: 'Avis & NLP', icon: '⭐', href: '#avis' },
       { id: 'complaints', label: 'Réclamations', icon: '⚠️', href: '#reclamations' },
       { id: 'events', label: 'Événements', icon: '🎪', href: '#evenements' },
