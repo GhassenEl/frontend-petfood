@@ -19,6 +19,7 @@ import {
 import api from '../utils/api';
 import { visitModeBadge } from '../constants/visitModes';
 import VetDashboardCharts from '../components/VetDashboardCharts';
+import VetDigitalTwinDashboardPanel from '../components/VetDigitalTwinDashboardPanel';
 import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
 import { DEMO_VET_BI, withDemoDashboard, buildDemoVetWeekChart } from '../utils/vetDemoData';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
@@ -270,6 +271,8 @@ const VetDashboard = () => {
           </div>
         ))}
       </div>
+
+      <VetDigitalTwinDashboardPanel />
 
       <RealtimeStatsCharts role="vet" />
 

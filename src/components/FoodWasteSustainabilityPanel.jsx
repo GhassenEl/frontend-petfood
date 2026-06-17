@@ -1,62 +1,44 @@
-import React, { useMemo } from 'react';
-import { Leaf, Recycle, Truck, Package } from 'lucide-react';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Leaf, ExternalLink } from 'lucide-react';
+import { SUSTAINABILITY_FEATURES } from '../config/isoSustainabilityCatalog';
+import CarbonDeliveryPanel from './CarbonDeliveryPanel';
 
-const FoodWasteSustainabilityPanel = () => {
-  const stats = useMemo(() => ({
-    wasteReducedKg: 1240,
-    wasteReductionPct: 23,
-    expiryAlertsPrevented: 89,
-    co2SavedKg: 420,
-    ecoPackagingPct: 78,
-    carbonPerDelivery: 0.82,
-  }), []);
+const FoodWasteSustainabilityPanel = () => (
+  <div id="waste" className="pcmp-sustain-panel">
+    <h2 style={{ margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 8, fontSize: 1.25 }}>
+      <Leaf size={22} color="#059669" />
+      Environnement &amp; développement durable
+    </h2>
+    <p style={{ margin: '0 0 20px', fontSize: 14, color: '#64748b' }}>
+      IA anti-gaspillage, péremption, logistique verte et emballages responsables.
+    </p>
 
-  return (
-    <div id="waste" className="pcmp-sustain-panel">
-      <h3 style={{ margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 8, fontSize: 17 }}>
-        <Leaf size={20} color="#059669" />
-        Développement durable &amp; réduction gaspillage
-      </h3>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 16 }}>
-        <div className="pcmp-sustain-kpi">
-          <Recycle size={18} color="#059669" />
-          <strong>{stats.wasteReducedKg} kg</strong>
-          <span>Gaspillage évité (IA)</span>
-        </div>
-        <div className="pcmp-sustain-kpi">
-          <strong>−{stats.wasteReductionPct}%</strong>
-          <span>vs. année précédente</span>
-        </div>
-        <div className="pcmp-sustain-kpi">
-          <strong>{stats.expiryAlertsPrevented}</strong>
-          <span>Alertes péremption traitées</span>
-        </div>
-        <div className="pcmp-sustain-kpi" id="carbon">
-          <Truck size={18} color="#0369a1" />
-          <strong>{stats.co2SavedKg} kg CO₂</strong>
-          <span>Économisés (routes éco)</span>
-        </div>
-      </div>
-
-      <ul style={{ margin: 0, padding: '0 0 0 18px', fontSize: 13, color: '#475569', lineHeight: 1.8 }}>
-        <li>
-          <strong>IA anti-gaspillage</strong> — prédiction demande, redistribution lots proches péremption, don associations
-        </li>
-        <li>
-          <strong>Surveillance péremption</strong> — ESP32-CAM PetFoodIoT, alertes client et vétérinaire
-        </li>
-        <li>
-          <strong>Livraison bas carbone</strong> — regroupement colis, {stats.carbonPerDelivery} kg CO₂ / livraison moyenne
-        </li>
-        <li>
-          <Package size={12} style={{ verticalAlign: 'middle' }} />
-          {' '}
-          <strong>Emballages écologiques</strong> — {stats.ecoPackagingPct}% matériaux recyclables / compostables
-        </li>
-      </ul>
+    <div className="pcmp-sustain-grid">
+      {SUSTAINABILITY_FEATURES.map((f) => {
+        const href = f.anchor ? `${f.route}#${f.anchor}` : f.route;
+        return (
+          <article key={f.id} id={f.id} className="pcmp-sustain-card">
+            <span className="pcmp-sustain-card__icon">{f.icon}</span>
+            <div>
+              <strong>{f.label}</strong>
+              <p>{f.description}</p>
+              <div className="pcmp-sustain-card__foot">
+                <span className="pcmp-iso-badge">{f.metric}</span>
+                <Link to={href} className="pcmp-iso-link">
+                  Accéder <ExternalLink size={11} />
+                </Link>
+              </div>
+            </div>
+          </article>
+        );
+      })}
     </div>
-  );
-};
+
+    <div style={{ marginTop: 24 }} id="packaging">
+      <CarbonDeliveryPanel />
+    </div>
+  </div>
+);
 
 export default FoodWasteSustainabilityPanel;

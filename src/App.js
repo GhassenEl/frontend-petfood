@@ -116,6 +116,7 @@ import PlatformCompliancePage from './pages/PlatformCompliancePage';
 import EnterpriseFeaturesPage from './pages/EnterpriseFeaturesPage';
 import MobileAppPage from './pages/MobileAppPage';
 import CloudInfrastructurePage from './pages/CloudInfrastructurePage';
+import PremiumFeaturesPage from './pages/PremiumFeaturesPage';
 import VisitorHubPage from './pages/VisitorHubPage';
 import VisitorProductsPage from './pages/VisitorProductsPage';
 import VisitorInfoPage from './pages/VisitorInfoPage';
@@ -255,6 +256,7 @@ const App = () => {
         <Route path="/fonctionnalites" element={<EnterpriseFeaturesPage />} />
         <Route path="/mobile" element={<MobileAppPage />} />
         <Route path="/cloud" element={<CloudInfrastructurePage />} />
+        <Route path="/premium" element={<PremiumFeaturesPage />} />
         <Route path="*" element={<MarketingLandingPage />} />
       </Routes>
       </>
@@ -276,6 +278,7 @@ const App = () => {
       <Route path="/fonctionnalites" element={<EnterpriseFeaturesPage />} />
       <Route path="/mobile" element={<MobileAppPage />} />
       <Route path="/cloud" element={<CloudInfrastructurePage />} />
+      <Route path="/premium" element={<PremiumFeaturesPage />} />
 
       <Route path="/admin/dashboard" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDashboard /></AdminLayout></RoleRoute>} />
       <Route path="/admin/hub" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAdvancedHubPage /></AdminLayout></RoleRoute>} />

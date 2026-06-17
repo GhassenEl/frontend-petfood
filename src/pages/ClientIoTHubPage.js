@@ -14,6 +14,7 @@ import IoTInsightsPanel from '../components/IoTInsightsPanel';
 import IoTSensorTimelinePanel from '../components/IoTSensorTimelinePanel';
 import IoTAutomationRulesPanel from '../components/IoTAutomationRulesPanel';
 import IoTFoodQualityCamPanel from '../components/IoTFoodQualityCamPanel';
+import AdvancedIoTDevicesPanel from '../components/AdvancedIoTDevicesPanel';
 import DemoModePill from '../components/DemoModePill';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import './ClientComplaintsPage.css';
@@ -30,6 +31,7 @@ const card = {
 const TABS = [
   { id: 'dashboard', label: 'Tableau de bord' },
   { id: 'food-quality', label: 'Qualité croquettes 📷' },
+  { id: 'advanced', label: 'IoT avancé ⚡' },
   { id: 'intelligence', label: 'Intelligence IA' },
   { id: 'devices', label: 'Appareils' },
   { id: 'alerts', label: 'Alertes' },
@@ -227,7 +229,10 @@ const ClientIoTHubPage = () => {
                 <IoTModuleCard to="/client-smart-water" icon="💧" title="Fontaine connectée" subtitle="Hydratation, réservoir, filtres." status={`${c.waterMonitors || 0} monitoré(s)`} statusColor="#0ea5e9" />
                 <IoTModuleCard to="/client-smart-delivery" icon="🚚" title="Livraison prédictive" subtitle="GPS temps réel + surveillance chaîne du froid IoT jusqu'à réception." status="Suivi actif" statusColor="#0ea5e9" badge="Capteurs véhicule" />
                 <IoTModuleCard to="/client-traceability" icon="🔗" title="Traçabilité blockchain" subtitle="Origine, lots et certifications aliments." status="Vérifier un lot" statusColor="#7c3aed" />
-                <IoTModuleCard to="/client-traceability" icon="🌡️" title="Conservation optimale" subtitle="Température, humidité et traçabilité — conditions idéales garanties." status="Chaîne du froid" statusColor="#0369a1" badge="Lots & origine" />
+                <IoTModuleCard to="/client-iot?tab=advanced" icon="⚖️" title="Balance connectée" subtitle="Mesure consommation quotidienne — sync jumeau numérique." status="65 g/jour" statusColor="#059669" badge="Premium" />
+                <IoTModuleCard to="/client-iot?tab=advanced" icon="🧊" title="Réfrigérateur intelligent" subtitle="Conservation pâtées/frais — 4°C, péremption, porte." status="Lot OK" statusColor="#0369a1" />
+                <IoTModuleCard to="/client-digital-twin" icon="🧬" title="Jumeau numérique" subtitle="Historique alimentaire, poids, activité, IA — Premium PFE." status="Score bien-être" statusColor="#7c3aed" badge="PFE" />
+                <IoTModuleCard to="/premium" icon="✨" title="Fonctionnalités Premium" subtitle="IoT avancé + Smart Pet Digital Twin — vue complète PFE." status="11 modules" statusColor="#7c3aed" />
               </div>
 
               <section style={card}>
@@ -247,6 +252,12 @@ const ClientIoTHubPage = () => {
           {tab === 'food-quality' && (
             <div className="iot-card">
               <IoTFoodQualityCamPanel loading={loading} />
+            </div>
+          )}
+
+          {tab === 'advanced' && (
+            <div className="iot-card">
+              <AdvancedIoTDevicesPanel />
             </div>
           )}
 

@@ -67,6 +67,8 @@ const EnterpriseFeaturesPage = () => {
         {' · '}
         <Link to="/cloud" style={{ color: '#0f766e', fontWeight: 700 }}>Cloud</Link>
         {' · '}
+        <Link to="/premium" style={{ color: '#0f766e', fontWeight: 700 }}>Premium PFE</Link>
+        {' · '}
         <Link to="/capabilities" style={{ color: '#0f766e', fontWeight: 700 }}>Capacités par rôle</Link>
         {' · '}
         <Link to="/login" style={{ color: '#0f766e', fontWeight: 700 }}>Connexion</Link>

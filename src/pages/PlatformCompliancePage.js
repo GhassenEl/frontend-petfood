@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Leaf, Globe, CheckCircle, AlertCircle } from 'lucide-react';
 import { getPlatformComplianceDashboard } from '../utils/platformComplianceEngine';
+import IsoCompliancePanel from '../components/IsoCompliancePanel';
+import RbacTraceabilityPanel from '../components/RbacTraceabilityPanel';
 import FoodWasteSustainabilityPanel from '../components/FoodWasteSustainabilityPanel';
 import MobileBottomNav, { AUTH_PUBLIC_MOBILE_NAV } from '../components/MobileBottomNav';
 import './PlatformCompliancePage.css';
@@ -57,10 +59,10 @@ const PlatformCompliancePage = () => {
     <div className="pcmp-page">
       <header className="pcmp-hero">
         <Link to="/" className="pcmp-back">← Accueil PetfoodTN</Link>
-        <h1>Conformité ISO &amp; engagement environnemental</h1>
+        <h1>Conformité ISO &amp; développement durable</h1>
         <p>
-          PetfoodTN respecte les normes internationales de qualité, sécurité alimentaire,
-          management environnemental et certifications mondiales reconnues.
+          ISO 27001 (sécurité), ISO 9001 (qualité), traçabilité blockchain, RBAC
+          et engagement environnemental — gaspillage, péremption, CO₂ et emballages écologiques.
         </p>
         <div className="pcmp-scores">
           <div className="pcmp-score pcmp-score--main">
@@ -87,10 +89,22 @@ const PlatformCompliancePage = () => {
       </header>
 
       <section className="pcmp-section">
+        <IsoCompliancePanel />
+      </section>
+
+      <section className="pcmp-section">
+        <RbacTraceabilityPanel />
+      </section>
+
+      <section className="pcmp-section">
+        <FoodWasteSustainabilityPanel />
+      </section>
+
+      <section className="pcmp-section">
         <h2>Engagements écologiques</h2>
         <div className="pcmp-commitments">
           {dash.commitments.map((c) => (
-            <article key={c.id} className="pcmp-commitment">
+            <article key={c.id} className="pcmp-commitment" id={c.id}>
               <span className="pcmp-commitment__icon">{c.icon}</span>
               <div>
                 <strong>{c.label}</strong>
@@ -99,10 +113,6 @@ const PlatformCompliancePage = () => {
             </article>
           ))}
         </div>
-      </section>
-
-      <section className="pcmp-section">
-        <FoodWasteSustainabilityPanel />
       </section>
 
       <section className="pcmp-section">
@@ -132,8 +142,9 @@ const PlatformCompliancePage = () => {
           <strong>{dash.nextAudit}</strong>
         </p>
         <p className="pcmp-muted">
-          Chaque lot alimentaire est vérifiable via la traçabilité blockchain (SHA-256) avec
-          certifications ISO 22000, HACCP et Bio Tunisie — consultez vos commandes dans l&apos;espace client.
+          Chaque lot alimentaire est vérifiable via la{' '}
+          <Link to="/client-traceability">traçabilité blockchain</Link> (SHA-256, Merkle, ancrage IoT)
+          avec certifications ISO 22000, HACCP et Bio Tunisie.
         </p>
         {dash.expiringSoon.length > 0 && (
           <div className="pcmp-expiring">
@@ -149,6 +160,7 @@ const PlatformCompliancePage = () => {
           <Link to="/register">Créer un compte</Link>
           <Link to="/login">Connexion</Link>
           <Link to="/enterprise">Fonctionnalités entreprise</Link>
+          <Link to="/client-traceability">Traçabilité</Link>
           <a href="mailto:qualite@petfoodtn.tn">qualite@petfoodtn.tn</a>
         </div>
       </footer>

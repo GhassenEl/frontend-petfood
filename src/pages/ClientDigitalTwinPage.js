@@ -10,6 +10,7 @@ import DigitalTwinMedicalPanel from '../components/DigitalTwinMedicalPanel';
 import DigitalTwinNutritionPanel from '../components/DigitalTwinNutritionPanel';
 import DigitalTwinActivityPanel from '../components/DigitalTwinActivityPanel';
 import DigitalTwinAiPanel from '../components/DigitalTwinAiPanel';
+import DigitalTwinPremiumPanel from '../components/DigitalTwinPremiumPanel';
 import DigitalNutritionTwinPanel from '../components/DigitalNutritionTwinPanel';
 import './ClientDigitalTwin.css';
 
@@ -74,7 +75,8 @@ const ClientDigitalTwinPage = () => {
           Jumeau numérique
         </h1>
         <p className="dtwin-lead">
-          Profil numérique complet : médical, alimentation, activité, score bien-être
+          <span className="dtwin-premium-tag">Premium PFE</span>
+          {' '}Profil numérique complet : médical, alimentation, activité, score bien-être
           et <strong>Digital Nutrition Twin</strong> — simulation d&apos;impact d&apos;un changement alimentaire.
         </p>
       </header>
@@ -115,7 +117,12 @@ const ClientDigitalTwinPage = () => {
         ))}
       </div>
 
-      {tab === 'overview' && <DigitalTwinOverview twin={twin} />}
+      {tab === 'overview' && (
+        <>
+          <DigitalTwinPremiumPanel twin={twin} />
+          <DigitalTwinOverview twin={twin} />
+        </>
+      )}
       {tab === 'medical' && <DigitalTwinMedicalPanel twin={twin} />}
       {tab === 'nutrition' && <DigitalTwinNutritionPanel twin={twin} onOpenTwin={() => setTab('nutrition-twin')} />}
       {tab === 'nutrition-twin' && (
