@@ -5,6 +5,7 @@ import '../models/food_quality.dart';
 import '../services/auth_service.dart';
 import '../services/food_quality_engine.dart';
 import '../widgets/food_quality_ai_panel.dart';
+import '../widgets/petfood_lcd_card.dart';
 import '../services/food_quality_repository.dart';
 
 class FoodQualityScreen extends StatefulWidget {
@@ -128,6 +129,17 @@ class _FoodQualityScreenState extends State<FoodQualityScreen> with SingleTicker
           SliverAppBar.large(
             title: const Text('Qualité alimentaire'),
             backgroundColor: const Color(0xFFEDE9FE),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFEDE9FE), Color(0xFFD1FAE5)],
+                  ),
+                ),
+              ),
+            ),
             actions: [
               IconButton(
                 icon: Icon(_live ? Icons.sensors : Icons.sensors_off),
@@ -209,27 +221,32 @@ class _ScoreTab extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: _OledCard(reading: cur)),
+            Expanded(child: PetfoodLcdCard(reading: cur)),
             const SizedBox(width: 12),
             _ScoreRing(score: cur.qualityScore, color: color, state: cur.displayState),
           ],
         ),
+        const SizedBox(height: 12),
+        _ThresholdRow(reading: cur),
         const SizedBox(height: 16),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(device?.name ?? 'ESP32-CAM', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Text('🟢 ${device?.status ?? 'online'} · ${device?.model ?? 'ESP32-CAM + OLED'}'),
-                if (cur.aiSummary != null) ...[
-                  const SizedBox(height: 12),
-                  Text(cur.aiSummary!, style: const TextStyle(color: Color(0xFF475569))),
-                ],
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(device?.name ?? 'ESP32-CAM', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text('🟢 ${device?.status ?? 'online'} · ${device?.model ?? 'ESP32-CAM + OLED'}'),
+              if (cur.aiSummary != null) ...[
+                const SizedBox(height: 12),
+                Text(cur.aiSummary!, style: const TextStyle(color: Color(0xFF475569))),
               ],
-            ),
+            ],
           ),
         ),
         const SizedBox(height: 12),
@@ -273,6 +290,53 @@ class _ScoreTab extends StatelessWidget {
   }
 }
 
+class _ThresholdRow extends StatelessWidget {
+  const _ThresholdRow({required this.reading});
+  final FoodQualityReading reading;
+
+  @override
+  Widget build(BuildContext context) {
+    final temp = reading.temperatureC ?? 0;
+    final hum = reading.humidityPct ?? 0;
+    final score = reading.qualityScore;
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        _ThresholdChip('Temp > 30°C', temp > 30),
+        _ThresholdChip('HR > 70%', hum > 70),
+        _ThresholdChip('Qualité < 50%', score < 50),
+      ],
+    );
+  }
+}
+
+class _ThresholdChip extends StatelessWidget {
+  const _ThresholdChip(this.label, this.active);
+  final String label;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: active ? const Color(0xFFFEE2E2) : const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: active ? const Color(0xFFFCA5A5) : const Color(0xFFE2E8F0)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: active ? const Color(0xFFDC2626) : const Color(0xFF64748B),
+        ),
+      ),
+    );
+  }
+}
+
 class _AiTab extends StatelessWidget {
   const _AiTab({required this.reading});
   final FoodQualityReading? reading;
@@ -301,81 +365,6 @@ class _AiTab extends StatelessWidget {
   }
 }
 
-class _OledCard extends StatelessWidget {
-  const _OledCard({required this.reading});
-  final FoodQualityReading reading;
-
-  @override
-  Widget build(BuildContext context) {
-    final alert = reading.isNonConforme;
-    return Card(
-      color: const Color(0xFF1E293B),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text('PETFOODIOT', style: TextStyle(color: Color(0xFF64748B), fontSize: 10, letterSpacing: 1)),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0A1628),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFF334155)),
-              ),
-              child: alert
-                  ? Column(
-                      children: [
-                        const Text('⚠ ALERTE', style: TextStyle(color: Color(0xFFF87171), fontWeight: FontWeight.bold, fontFamily: 'monospace')),
-                        const SizedBox(height: 4),
-                        Text(
-                          reading.displayState,
-                          style: const TextStyle(color: Color(0xFFFCA5A5), fontSize: 12, fontFamily: 'monospace'),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Qualité : ${reading.qualityScore}%',
-                          style: const TextStyle(color: Color(0xFF86EFAC), fontFamily: 'monospace'),
-                        ),
-                      ],
-                    )
-                  : Column(
-                      children: [
-                        _OledLine('Qualité', '${reading.qualityScore}%'),
-                        _OledLine('Stock', '${reading.stockLevelPct ?? '—'}%'),
-                        _OledLine('État', reading.displayState),
-                      ],
-                    ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _OledLine extends StatelessWidget {
-  const _OledLine(this.label, this.value);
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(color: Color(0xFF94A3B8), fontFamily: 'monospace', fontSize: 12)),
-          Text(value, style: const TextStyle(color: Color(0xFF86EFAC), fontFamily: 'monospace', fontSize: 12, fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
-}
-
 class _ScoreRing extends StatelessWidget {
   const _ScoreRing({required this.score, required this.color, required this.state});
   final int score;
@@ -384,20 +373,28 @@ class _ScoreRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 100,
-      height: 100,
+    return Container(
+      width: 108,
+      height: 108,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(color: color.withValues(alpha: 0.25), blurRadius: 16, offset: const Offset(0, 6)),
+        ],
+      ),
       child: Stack(
         alignment: Alignment.center,
         children: [
           SizedBox(
-            width: 100,
-            height: 100,
+            width: 92,
+            height: 92,
             child: CircularProgressIndicator(
               value: score / 100,
-              strokeWidth: 8,
+              strokeWidth: 9,
               color: color,
-              backgroundColor: color.withValues(alpha: 0.15),
+              backgroundColor: color.withValues(alpha: 0.12),
+              strokeCap: StrokeCap.round,
             ),
           ),
           Column(

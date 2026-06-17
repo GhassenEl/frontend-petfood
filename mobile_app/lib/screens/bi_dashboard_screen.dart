@@ -41,6 +41,15 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
           SliverAppBar.large(
             title: const Text('Tableau de bord BI'),
             backgroundColor: const Color(0xFFD1FAE5),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFFD1FAE5), Color(0xFFECFDF5), Color(0xFFEDE9FE)],
+                  ),
+                ),
+              ),
+            ),
             actions: [
               IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
             ],
@@ -87,21 +96,35 @@ class _LoyaltyBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: const Color(0xFF059669).withValues(alpha: 0.1),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF059669), Color(0xFF10B981)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: const Color(0xFF059669).withValues(alpha: 0.3), blurRadius: 16, offset: const Offset(0, 8)),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         child: Row(
           children: [
-            const Icon(Icons.stars, color: Color(0xFF059669), size: 36),
-            const SizedBox(width: 12),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(Icons.stars, color: Colors.white, size: 32),
+            ),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('$points points fidélité', style: Theme.of(context).textTheme.titleMedium),
-                  Text('Niveau $tier', style: const TextStyle(color: Color(0xFF059669))),
+                  Text('$points points', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                  Text('Niveau $tier · Fidélité PetfoodTN', style: TextStyle(color: Colors.white.withValues(alpha: 0.9))),
                 ],
               ),
             ),
@@ -142,14 +165,21 @@ class _KpiGrid extends StatelessWidget {
         final color = Color(k.colorValue);
         return Card(
           elevation: 0,
-          color: color.withValues(alpha: 0.1),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          color: color.withValues(alpha: 0.08),
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(k.label, style: TextStyle(fontSize: 12, color: color.withValues(alpha: 0.9))),
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                ),
+                const SizedBox(height: 8),
+                Text(k.label, style: TextStyle(fontSize: 11, color: color.withValues(alpha: 0.85), height: 1.2)),
                 const SizedBox(height: 4),
                 Text(
                   k.value,

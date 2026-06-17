@@ -10,14 +10,17 @@ const FoodQualityOledDisplay = ({ reading }) => {
   const brand = cur.oledBrand || PETFOODIOT_BRAND;
   const showAlert = cur.isNonConforme || cur.oledAlert?.show;
 
+  const screenClass = `iot-fq-oled__screen${showAlert ? ' iot-fq-oled__screen--alert' : ''}`;
+
   if (showAlert) {
     const alertTitle = cur.oledAlert?.title || NON_CONFORME_OLED.alertTitle;
     const alertMsg = cur.oledAlert?.message || cur.state || NON_CONFORME_OLED.alertMessage;
     return (
-      <div className="iot-fq-oled" aria-label="Afficheur LCD ESP32-CAM — alerte">
+      <div className="iot-fq-oled iot-fq-oled--alert-mode" aria-label="Afficheur LCD ESP32-CAM — alerte">
         <div className="iot-fq-oled__bezel">
           <span className="iot-fq-oled__brand">{brand}</span>
-          <div className="iot-fq-oled__screen iot-fq-oled__screen--alert">
+          <div className={screenClass}>
+            <div className="iot-fq-oled__scanlines" aria-hidden />
             <div className="iot-fq-oled__alert-header">⚠ {alertTitle}</div>
             <div className="iot-fq-oled__alert-msg">{alertMsg}</div>
             <div className="iot-fq-oled__alert-score">
@@ -36,7 +39,8 @@ const FoodQualityOledDisplay = ({ reading }) => {
     <div className="iot-fq-oled" aria-label="Afficheur LCD ESP32-CAM">
       <div className="iot-fq-oled__bezel">
         <span className="iot-fq-oled__brand">{brand}</span>
-        <div className="iot-fq-oled__screen">
+        <div className={screenClass}>
+          <div className="iot-fq-oled__scanlines" aria-hidden />
           <div className="iot-fq-oled__line">
             <span>Qualité :</span>
             <strong style={{ color: meta.color }}>{score}%</strong>

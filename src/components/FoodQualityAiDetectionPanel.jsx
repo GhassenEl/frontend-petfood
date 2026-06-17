@@ -46,7 +46,7 @@ const FoodQualityAiDetectionPanel = ({ reading }) => {
         })}
       </ul>
       {(reading?.nutritionHint || reading?.consumptionAnomaly?.detected) && (
-        <div className="iot-fq-ai-extra" style={{ marginTop: 12 }}>
+        <div className="iot-fq-ai-extra">
           {reading.nutritionHint && (
             <p><strong>Nutrition :</strong> {reading.nutritionHint}</p>
           )}

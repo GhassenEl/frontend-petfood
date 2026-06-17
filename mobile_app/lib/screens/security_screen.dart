@@ -42,6 +42,15 @@ class _SecurityScreenState extends State<SecurityScreen> {
           SliverAppBar.large(
             title: const Text('Sécurité'),
             backgroundColor: const Color(0xFFDBEAFE),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFFDBEAFE), Color(0xFFE0E7FF), Color(0xFFF8FAFC)],
+                  ),
+                ),
+              ),
+            ),
             actions: [
               IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
             ],
@@ -93,14 +102,29 @@ class _ScoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: _color.withValues(alpha: 0.08),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            _color.withValues(alpha: 0.12),
+            _color.withValues(alpha: 0.04),
+          ],
+        ),
+        border: Border.all(color: _color.withValues(alpha: 0.35)),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Row(
           children: [
-            Icon(Icons.shield, size: 48, color: _color),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: _color.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.shield, size: 40, color: _color),
+            ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(

@@ -13,7 +13,7 @@ import FoodQualityLiveViewport from './FoodQualityLiveViewport';
 import FoodQualityOledDisplay from './FoodQualityOledDisplay';
 import FoodQualityAiDetectionPanel from './FoodQualityAiDetectionPanel';
 import FoodQualityCriticalBanner from './FoodQualityCriticalBanner';
-import { QUALITY_LABELS, formatTimeFr, formatTimeShort, buildScheduleStatuses, getNextScheduledCheck } from '../utils/foodQualityEngine';
+import { QUALITY_LABELS, formatTimeFr, formatTimeShort, buildScheduleStatuses, getNextScheduledCheck, ALERT_TEMP_THRESHOLD_C, ALERT_HUMIDITY_THRESHOLD_PCT, NON_CONFORME_THRESHOLD, CAPTURE_INTERVAL_MINUTES } from '../utils/foodQualityEngine';
 
 const STATUS_META = {
   done: { label: 'Effectué', className: 'iot-fq-slot--done', icon: '✅' },
@@ -95,6 +95,27 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
 
   return (
     <div className="iot-food-quality">
+      <header className="iot-fq-hero">
+        <div className="iot-fq-hero__content">
+          <span className="iot-fq-hero__badge">PetFoodIoT · ESP32-CAM</span>
+          <h3>Surveillance intelligente qualité aliments</h3>
+          <p>
+            Capture toutes les {CAPTURE_INTERVAL_MINUTES} min · IA vision · LCD local <strong>PETFOODIOT</strong>
+          </p>
+        </div>
+        <div className="iot-fq-thresholds">
+          <span className={`iot-fq-threshold${(cur.temperatureC ?? 0) > ALERT_TEMP_THRESHOLD_C ? ' iot-fq-threshold--active' : ''}`}>
+            Temp &gt; {ALERT_TEMP_THRESHOLD_C}°C
+          </span>
+          <span className={`iot-fq-threshold${(cur.humidityPct ?? 0) > ALERT_HUMIDITY_THRESHOLD_PCT ? ' iot-fq-threshold--active' : ''}`}>
+            HR &gt; {ALERT_HUMIDITY_THRESHOLD_PCT}%
+          </span>
+          <span className={`iot-fq-threshold${(cur.qualityScore ?? 100) < NON_CONFORME_THRESHOLD ? ' iot-fq-threshold--active' : ''}`}>
+            Qualité &lt; {NON_CONFORME_THRESHOLD}%
+          </span>
+        </div>
+      </header>
+
       <section className="iot-fq-usecase">
         <h4>Cas d&apos;usage — Surveillance intelligente qualité aliments</h4>
         <ol>
@@ -152,7 +173,7 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
         {state?.mode === 'demo' && <span className="iot-fq-demo">Mode simulation</span>}
       </div>
 
-      <div className="iot-fq-live-grid">
+      <div className="iot-fq-live-grid iot-fq-live-grid--glass">
         <FoodQualityLiveViewport reading={cur} isLive={isLive} lastTickAt={lastTickAt} />
         <FoodQualityOledDisplay reading={cur} />
       </div>

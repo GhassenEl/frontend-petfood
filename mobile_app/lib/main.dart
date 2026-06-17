@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'services/auth_service.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_shell.dart';
+import 'theme/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,10 +42,7 @@ class _PetfoodTnAppState extends State<PetfoodTnApp> {
     return MaterialApp(
       title: 'PetfoodTN',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF059669)),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light(),
       home: _auth.isLoggedIn
           ? HomeShell(auth: _auth)
           : LoginScreen(auth: _auth),
