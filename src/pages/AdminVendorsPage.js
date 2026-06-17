@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Store, TrendingUp, Percent, Package, Plus, RefreshCw } from 'lucide-react';
 import api from '../utils/api';
@@ -17,6 +17,7 @@ import {
   registerVendor,
   updateAdminVendor,
 } from '../services/ecosystemService';
+import { approveVendor, rejectVendor } from '../services/adminUserService';
 import { formatDT } from '../utils/formatCurrency';
 import { AdminMessageButton } from '../components/AdminMessageButton';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
@@ -66,13 +67,14 @@ const mergeVendorLists = (apiVendors, vendorUsers, marketplace) => {
 };
 
 const AdminVendorsPage = () => {
+  const [searchParams] = useSearchParams();
   const [vendors, setVendors] = useState([]);
   const [stats, setStats] = useState(null);
   const [regions, setRegions] = useState(DEMO_ADMIN_REGIONS);
   const [loading, setLoading] = useState(true);
   const [demoMode, setDemoMode] = useState(false);
   const [regionFilter, setRegionFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState(emptyForm);
@@ -196,6 +198,37 @@ const AdminVendorsPage = () => {
       setMsg(`Statut mis à jour : ${statusStyle[nextStatus]?.label || nextStatus}`);
     } catch (err) {
       setMsg(err.response?.data?.error || 'Mise à jour impossible.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleApproveVendor = async (vendor) => {
+    setBusy(true);
+    try {
+      await approveVendor(vendor.id);
+      if (vendor.userId) {
+        await api.put(`/users/${vendor.userId}`, { isActive: true }).catch(() => null);
+      }
+      setVendors((list) => list.map((v) => (
+        v.id === vendor.id ? { ...v, status: 'active' } : v
+      )));
+      setMsg(`Vendeur « ${vendor.shopName || vendor.name} » validé.`);
+    } catch (err) {
+      setMsg(err.response?.data?.error || 'Validation impossible.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleRejectVendor = async (vendor) => {
+    setBusy(true);
+    try {
+      await rejectVendor(vendor.id);
+      setVendors((list) => list.filter((v) => v.id !== vendor.id));
+      setMsg('Demande vendeur refusée.');
+    } catch (err) {
+      setMsg(err.response?.data?.error || 'Refus impossible.');
     } finally {
       setBusy(false);
     }
@@ -419,6 +452,32 @@ const AdminVendorsPage = () => {
                       >
                         Détail
                       </Link>
+                      {v.status === 'pending' && (
+                        <>
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => handleApproveVendor(v)}
+                            style={{
+                              padding: '6px 10px', borderRadius: 8, border: '1px solid #86efac',
+                              background: '#f0fdf4', color: '#166534', cursor: 'pointer', fontSize: 12, fontWeight: 700,
+                            }}
+                          >
+                            ✓ Valider
+                          </button>
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => handleRejectVendor(v)}
+                            style={{
+                              padding: '6px 10px', borderRadius: 8, border: '1px solid #fecaca',
+                              background: '#fef2f2', color: '#991b1b', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                            }}
+                          >
+                            Refuser
+                          </button>
+                        </>
+                      )}
                       {v.status !== 'pending' && (
                         <button
                           type="button"

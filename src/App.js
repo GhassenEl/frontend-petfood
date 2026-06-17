@@ -38,6 +38,13 @@ import AdminVisitorsPage from './pages/AdminVisitorsPage';
 import AdminLiveAudiencePage from './pages/AdminLiveAudiencePage';
 import AdminRefundsPage from './pages/AdminRefundsPage';
 import AdminActivityLogsPage from './pages/AdminActivityLogsPage';
+import AdminAdvancedHubPage from './pages/AdminAdvancedHubPage';
+import AdminReportsPage from './pages/AdminReportsPage';
+import AdminFoodQualityCamPage from './pages/AdminFoodQualityCamPage';
+import AdminDeliveryOpsPage from './pages/AdminDeliveryOpsPage';
+import AdminBackupsPage from './pages/AdminBackupsPage';
+import AdminIoTAnomaliesPage from './pages/AdminIoTAnomaliesPage';
+import AdminVetValidationPage from './pages/AdminVetValidationPage';
 import StaffLeavePage from './pages/StaffLeavePage';
 import ClientProductsPage from './pages/ClientProductsPage';
 import ClientOrdersPage from './pages/ClientOrdersPage';
@@ -260,6 +267,13 @@ const App = () => {
       <Route path="/qualite-iso" element={<PlatformCompliancePage />} />
 
       <Route path="/admin/dashboard" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDashboard /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/hub" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAdvancedHubPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/reports" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminReportsPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/food-quality-cam" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminFoodQualityCamPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/delivery-ops" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDeliveryOpsPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/backups" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminBackupsPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/iot-anomalies" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminIoTAnomaliesPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/vet-validation" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVetValidationPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/powerbi" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPowerBiPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/bi" element={<Navigate to="/admin/powerbi" replace />} />
       <Route path="/admin/nlp-models" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminNlpModelsPage /></AdminLayout></RoleRoute>} />

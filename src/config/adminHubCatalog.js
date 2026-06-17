@@ -1,0 +1,185 @@
+/**
+ * Catalogue des fonctionnalités avancées Admin — PetFoodTN / PetFoodIoT.
+ * Source unique pour le hub, la sidebar et la documentation.
+ */
+
+export const ADMIN_HUB_SECTIONS = [
+  {
+    id: 'users',
+    title: 'Gestion des utilisateurs',
+    icon: '👥',
+    color: '#2563eb',
+    description: 'Comptes, rôles, suspensions et validation vendeurs / vétérinaires.',
+    features: [
+      'Création, modification et suppression des comptes',
+      'Rôles : Client, Vendeur, Livreur, Vétérinaire, Modérateur',
+      'Suspension ou blocage des comptes suspects',
+      'Validation des comptes vendeurs et vétérinaires',
+    ],
+    links: [
+      { label: 'Utilisateurs', route: '/admin/users' },
+      { label: 'Vendeurs — validation', route: '/admin/vendors?status=pending' },
+      { label: 'Vétérinaires — validation', route: '/admin/vet-validation' },
+      { label: 'Modérateurs', route: '/admin/moderators' },
+      { label: 'Livreurs', route: '/admin/livreurs' },
+    ],
+  },
+  {
+    id: 'products',
+    title: 'Gestion des produits',
+    icon: '🏷️',
+    color: '#059669',
+    description: 'Catalogue, catégories, stocks et validation vendeurs.',
+    features: [
+      'Ajout, modification et suppression des produits',
+      'Validation des nouveaux produits vendeurs',
+      'Catégories aliments et accessoires',
+      'Suivi des stocks globaux',
+    ],
+    links: [
+      { label: 'Produits', route: '/admin/products' },
+      { label: 'Catégories', route: '/admin/categories' },
+      { label: 'Stock avancé', route: '/admin/stock' },
+      { label: 'Gouvernance prix', route: '/admin/prices' },
+      { label: 'Incidents ML produits', route: '/admin/incidents-ml' },
+    ],
+  },
+  {
+    id: 'orders',
+    title: 'Gestion des commandes',
+    icon: '📦',
+    color: '#e67e22',
+    description: 'Commandes, paiements, litiges et factures.',
+    features: [
+      'Consultation de toutes les commandes',
+      'Suivi paiements et remboursements',
+      'Gestion des litiges clients',
+      'Génération des factures',
+    ],
+    links: [
+      { label: 'Commandes', route: '/admin/orders' },
+      { label: 'Factures PDF', route: '/admin/invoices' },
+      { label: 'Remboursements', route: '/admin/refunds' },
+      { label: 'Réclamations / litiges', route: '/admin/complaints' },
+      { label: 'Historique', route: '/admin/history' },
+    ],
+  },
+  {
+    id: 'bi',
+    title: 'Tableau de bord intelligent',
+    icon: '📊',
+    color: '#7c3aed',
+    description: 'Ventes temps réel, CA et utilisateurs actifs.',
+    features: [
+      'Nombre de ventes en temps réel',
+      'Produits les plus vendus',
+      'CA journalier, mensuel et annuel',
+      'Statistiques utilisateurs actifs',
+    ],
+    links: [
+      { label: 'Dashboard', route: '/admin/dashboard' },
+      { label: 'Ventes & CA', route: '/admin/sales' },
+      { label: 'Business Intelligence', route: '/admin/business-intelligence' },
+      { label: 'Power BI', route: '/admin/powerbi' },
+      { label: 'Audience live', route: '/admin/live-audience' },
+    ],
+  },
+  {
+    id: 'ai',
+    title: 'Intelligence Artificielle',
+    icon: '🧠',
+    color: '#db2777',
+    description: 'Validation alertes IA, comportements et prévisions.',
+    features: [
+      'Validation des alertes générées par l\'IA',
+      'Analyse des comportements d\'achat',
+      'Prévision de la demande en aliments',
+      'Détection anomalies données IoT',
+    ],
+    links: [
+      { label: 'Incidents ML — validation', route: '/admin/incidents-ml' },
+      { label: 'Agent ML & prévisions', route: '/admin/ml-agent' },
+      { label: 'IA avancée', route: '/admin/advanced-ai' },
+      { label: 'Anomalies IoT', route: '/admin/iot-anomalies' },
+      { label: 'Analyse & décision', route: '/admin/analytics-decision' },
+    ],
+  },
+  {
+    id: 'food-quality',
+    title: 'Qualité alimentaire IoT',
+    icon: '🌡️',
+    color: '#0d9488',
+    description: 'Scores IA, péremption, ESP32-CAM et incidents.',
+    features: [
+      'Contrôle des scores qualité IA',
+      'Produits proches de la date d\'expiration',
+      'Alertes aliments détériorés ESP32-CAM',
+      'Rapports incidents alimentaires',
+    ],
+    links: [
+      { label: 'Surveillance chaîne du froid', route: '/admin/food-quality' },
+      { label: 'ESP32-CAM PetFoodIoT', route: '/admin/food-quality-cam' },
+      { label: 'Stock BI péremption', route: '/admin/stock-bi' },
+      { label: 'Rapports IoT', route: '/admin/reports?type=iot' },
+    ],
+  },
+  {
+    id: 'delivery',
+    title: 'Gestion des livraisons',
+    icon: '🚚',
+    color: '#0284c7',
+    description: 'GPS livreurs, délais, trajets et zones.',
+    features: [
+      'Suivi GPS des livreurs',
+      'Contrôle des délais de livraison',
+      'Historique des trajets',
+      'Gestion des zones de livraison',
+    ],
+    links: [
+      { label: 'Opérations livraison', route: '/admin/delivery-ops' },
+      { label: 'Chaîne du froid livraison', route: '/admin/delivery-cold-chain' },
+      { label: 'Livreurs', route: '/admin/livreurs' },
+      { label: 'Réseau villes / zones', route: '/admin/cities' },
+    ],
+  },
+  {
+    id: 'security',
+    title: 'Sécurité',
+    icon: '🛡️',
+    color: '#dc2626',
+    description: 'Logs, JWT, sauvegardes et connexions suspectes.',
+    features: [
+      'Journalisation des actions (logs)',
+      'Authentification JWT',
+      'Sauvegardes automatiques',
+      'Détection connexions suspectes',
+    ],
+    links: [
+      { label: 'Centre de sécurité', route: '/admin/security' },
+      { label: 'Sécurité intelligente', route: '/admin/intelligent-security' },
+      { label: 'Journaux d\'activité', route: '/admin/activity-logs' },
+      { label: 'Sauvegardes', route: '/admin/backups' },
+    ],
+  },
+  {
+    id: 'reports',
+    title: 'Rapports et analyses',
+    icon: '📄',
+    color: '#475569',
+    description: 'Exports PDF, CSV et rapports métier.',
+    features: [
+      'Export PDF et Excel (CSV)',
+      'Rapports de ventes',
+      'Rapports IoT',
+      'Rapports vétérinaires et satisfaction client',
+    ],
+    links: [
+      { label: 'Centre de rapports', route: '/admin/reports' },
+      { label: 'Factures PDF', route: '/admin/invoices' },
+      { label: 'Avis & satisfaction', route: '/admin/reviews' },
+      { label: 'Suivi vétérinaire', route: '/admin/veterinary' },
+    ],
+  },
+];
+
+export default ADMIN_HUB_SECTIONS;

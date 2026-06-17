@@ -9,6 +9,18 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
 
   const sections = [
     {
+      title: '🏛️ Hub Admin',
+      items: [
+        { id: 'hub', label: 'Fonctionnalités avancées', icon: '🏛️' },
+        { id: 'reports', label: 'Rapports & exports', icon: '📄' },
+        { id: 'iot-anomalies', label: 'Anomalies IoT', icon: '📡' },
+        { id: 'food-quality-cam', label: 'ESP32-CAM PetFoodIoT', icon: '📷' },
+        { id: 'delivery-ops', label: 'Opérations livraison', icon: '🚚' },
+        { id: 'vet-validation', label: 'Validation vétérinaires', icon: '🩺' },
+        { id: 'backups', label: 'Sauvegardes', icon: '💾' },
+      ],
+    },
+    {
       title: '🤖 Assistant',
       items: [
         { id: '__open-chat__', label: 'Chat assistant', icon: '💬', action: 'open-chat' },
