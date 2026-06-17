@@ -29,6 +29,13 @@ const USE_CASE_STEPS = [
   'Si qualité critique → notification client + vétérinaire.',
 ];
 
+const ALT_SCENARIO_STEPS = [
+  'L\'IA détecte une anomalie sur les aliments.',
+  'Le score de qualité devient inférieur à 50 %.',
+  'L\'écran OLED affiche : ⚠ ALERTE — Nourriture non conforme — Qualité : 42 %.',
+  'Une alerte est envoyée sur l\'application PetFoodTN.',
+];
+
 const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
   const {
     state,
@@ -90,13 +97,30 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
       <section className="iot-fq-usecase">
         <h4>Cas d&apos;usage — Surveillance intelligente qualité aliments</h4>
         <ol>
-          {USE_CASE_STEPS.map((step, i) => (
+          {USE_CASE_STEPS.map((step) => (
             <li key={step}>{step}</li>
           ))}
         </ol>
         <p className="iot-fq-usecase-actors">
           Acteurs : Client · Système IoT PetFoodTN · ESP32-CAM · Module IA · Afficheur OLED
         </p>
+      </section>
+
+      <section className="iot-fq-usecase iot-fq-usecase--alt">
+        <h4>Scénario alternatif — Nourriture détériorée</h4>
+        <ol>
+          {ALT_SCENARIO_STEPS.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ol>
+        <button
+          type="button"
+          className="iot-fq-btn iot-fq-btn--alt-scenario"
+          disabled={busy}
+          onClick={() => simulateOnce('deteriorated')}
+        >
+          ▶ Lancer scénario alternatif (42 %)
+        </button>
       </section>
 
       <FoodQualityCriticalBanner reading={cur} lastAlert={alertInfo} />
@@ -219,8 +243,8 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
         <button type="button" className="iot-fq-btn iot-fq-btn--warn" disabled={busy} onClick={() => simulateOnce('warning')}>
           Simuler ⚠️ Limite
         </button>
-        <button type="button" className="iot-fq-btn iot-fq-btn--bad" disabled={busy} onClick={() => simulateOnce('bad')}>
-          Simuler 🚫 Altéré
+        <button type="button" className="iot-fq-btn iot-fq-btn--bad" disabled={busy} onClick={() => simulateOnce('deteriorated')}>
+          Simuler ⚠️ 42% Non conforme
         </button>
         <button type="button" className="iot-fq-btn iot-fq-btn--bad" disabled={busy} onClick={() => simulateOnce('critical')}>
           Simuler 🚨 35% Critique

@@ -53,7 +53,7 @@ export default function useFoodQualityLive({ enabled = true, demoSimulate = true
         const reading = await runEsp32CamSimulation(undefined, deviceRef.current);
         setState((prev) => mergeFoodQualityReading(prev, reading));
         setLastTickAt(Date.now());
-        if (reading?.isCritical || reading?.quality === 'bad') {
+        if (reading?.isCritical || reading?.quality === 'bad' || reading?.isNonConforme) {
           const alertResult = await dispatchFoodQualityAlerts(reading, deviceRef.current);
           if (alertResult.sent) setLastAlert(alertResult);
         }

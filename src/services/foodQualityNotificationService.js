@@ -1,10 +1,11 @@
 import api from '../utils/api';
-import { QUALITY_LABELS } from '../utils/foodQualityEngine';
+import { QUALITY_LABELS, NON_CONFORME_OLED } from '../utils/foodQualityEngine';
 
 const ALERTS_KEY = 'petfoodtn:iot:food-quality-alerts';
 const ALERT_COOLDOWN_MS = 5 * 60 * 1000;
 
 let lastCriticalAt = 0;
+let lastNonConformeAt = 0;
 
 const loadLocalAlerts = () => {
   try {
@@ -22,22 +23,36 @@ const saveLocalAlerts = (alerts) => {
   }
 };
 
-/** Construit les payloads notification client + vétérinaire. */
-export function buildFoodQualityAlerts(reading, device = {}) {
-  if (!reading?.isCritical && reading?.quality !== 'bad' && reading?.quality !== 'critical') {
-    return [];
-  }
+/** Scénario alternatif — alerte application client (< 50 %, non critique). */
+function buildNonConformeAppAlert(reading, device = {}) {
+  const score = reading.qualityScore ?? 0;
+  const petName = device.petName || 'Max';
+  return {
+    id: `fq-app-${reading.analyzedAt}`,
+    type: 'iot_food_quality',
+    severity: 'high',
+    audience: 'client',
+    title: `⚠ ${NON_CONFORME_OLED.alertTitle} — ${NON_CONFORME_OLED.alertMessage}`,
+    message: `Qualité : ${score}%`,
+    description: `Anomalie IA détectée sur le récipient de ${petName}. Nourriture non conforme (${score}%).`,
+    readingId: reading.analyzedAt,
+    deviceId: device.id || reading.deviceId || 'esp32-cam',
+    link: '/client-iot?tab=food-quality',
+    createdAt: new Date().toISOString(),
+    read: false,
+  };
+}
 
+/** Alertes scénario principal — critique client + vétérinaire. */
+function buildCriticalAlerts(reading, device = {}) {
   const meta = QUALITY_LABELS[reading.quality] || QUALITY_LABELS.bad;
   const petName = device.petName || 'Max';
   const score = reading.qualityScore ?? 0;
   const action = reading.recommendedAction || 'Remplacer l\'aliment';
-  const title = `Qualité alimentaire critique — ${petName}`;
-  const message = `ESP32-CAM : ${score}% — ${meta.state}. Action recommandée : ${action}.`;
 
   const base = {
     type: 'iot_food_quality',
-    severity: reading.isCritical ? 'critical' : 'high',
+    severity: 'critical',
     readingId: reading.analyzedAt,
     deviceId: device.id || reading.deviceId || 'esp32-cam',
     link: '/client-iot?tab=food-quality',
@@ -49,20 +64,37 @@ export function buildFoodQualityAlerts(reading, device = {}) {
       ...base,
       id: `fq-client-${reading.analyzedAt}`,
       audience: 'client',
-      title,
-      message,
-      description: message,
+      title: `Qualité alimentaire critique — ${petName}`,
+      message: `ESP32-CAM : ${score}% — ${meta.state}. Action : ${action}.`,
+      description: `ESP32-CAM : ${score}% — ${meta.state}. Action : ${action}.`,
+      read: false,
     },
     {
       ...base,
       id: `fq-vet-${reading.analyzedAt}`,
       audience: 'vet',
       title: `Alerte IoT — aliment altéré (${petName})`,
-      message: `Client signalé : score ${score}%, ${meta.state}. Vérification recommandée.`,
-      description: `Le système IoT PetFoodTN a détecté une altération alimentaire pour ${petName}. ${action}.`,
+      message: `Client signalé : score ${score}%, ${meta.state}.`,
+      description: `Altération alimentaire pour ${petName}. ${action}.`,
       link: '/veterinary',
+      read: false,
     },
   ];
+}
+
+/** Construit les payloads notification selon le scénario. */
+export function buildFoodQualityAlerts(reading, device = {}) {
+  if (!reading) return [];
+
+  if (reading.isCritical || reading.quality === 'critical') {
+    return buildCriticalAlerts(reading, device);
+  }
+
+  if (reading.isNonConforme || (reading.qualityScore < 50 && reading.quality === 'bad')) {
+    return [buildNonConformeAppAlert(reading, device)];
+  }
+
+  return [];
 }
 
 /** Envoie alertes API + stockage local (mode démo). */
@@ -71,23 +103,31 @@ export async function dispatchFoodQualityAlerts(reading, device = {}) {
   if (!alerts.length) return { sent: false, alerts: [] };
 
   const now = Date.now();
-  if (reading.isCritical && now - lastCriticalAt < ALERT_COOLDOWN_MS) {
+  const isCritical = reading.isCritical || reading.quality === 'critical';
+
+  if (isCritical && now - lastCriticalAt < ALERT_COOLDOWN_MS) {
     return { sent: false, alerts: [], throttled: true };
   }
-  if (reading.isCritical) lastCriticalAt = now;
+  if (!isCritical && reading.isNonConforme && now - lastNonConformeAt < ALERT_COOLDOWN_MS) {
+    return { sent: false, alerts: [], throttled: true };
+  }
+
+  if (isCritical) lastCriticalAt = now;
+  else lastNonConformeAt = now;
 
   try {
     await api.post('/client/iot/food-quality/alerts', {
       reading,
       alerts,
-      notifyVet: true,
+      notifyVet: isCritical,
     });
-    return { sent: true, alerts, mode: 'api' };
+    return { sent: true, alerts, mode: 'api', scenario: isCritical ? 'critical' : 'alternate' };
   } catch {
-    const stored = [alerts[0], ...loadLocalAlerts().filter((a) => a.id !== alerts[0].id)].slice(0, 20);
+    const clientAlert = alerts[0];
+    const stored = [clientAlert, ...loadLocalAlerts().filter((a) => a.id !== clientAlert.id)].slice(0, 20);
     saveLocalAlerts(stored);
-    window.dispatchEvent(new CustomEvent('petfood:food-quality-alert', { detail: alerts[0] }));
-    return { sent: true, alerts, mode: 'demo' };
+    window.dispatchEvent(new CustomEvent('petfood:food-quality-alert', { detail: clientAlert }));
+    return { sent: true, alerts, mode: 'demo', scenario: isCritical ? 'critical' : 'alternate' };
   }
 }
 

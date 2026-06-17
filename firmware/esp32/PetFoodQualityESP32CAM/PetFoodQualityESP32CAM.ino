@@ -76,14 +76,24 @@ bool initOled() {
 void updateOled(int score, const char* stateLabel, int stockPct, bool critical) {
   display.clearDisplay();
   display.setCursor(0, 0);
-  display.printf("Qualite: %d%%", score);
-  display.setCursor(0, 16);
-  display.printf("Etat: %s", stateLabel);
-  display.setCursor(0, 32);
-  display.printf("Stock: %d%%", stockPct);
-  if (critical) {
-    display.setCursor(0, 48);
-    display.print("! Remplacer aliment");
+  if (score < 50 && !critical) {
+    display.setTextSize(1);
+    display.println("! ALERTE");
+    display.println("Nourriture non");
+    display.println("conforme");
+    display.printf("Qualite: %d%%", score);
+  } else if (critical) {
+    display.setTextSize(1);
+    display.println("! ALERTE");
+    display.println("Remplacer");
+    display.println("l'aliment");
+    display.printf("Qualite: %d%%", score);
+  } else {
+    display.printf("Qualite: %d%%", score);
+    display.setCursor(0, 16);
+    display.printf("Etat: %s", stateLabel);
+    display.setCursor(0, 32);
+    display.printf("Stock: %d%%", stockPct);
   }
   display.display();
 }

@@ -206,10 +206,18 @@ const NotificationBell = () => {
 
     socket.on('notification:new', onNotificationNew);
 
+    const onFoodQualityAlert = (event) => {
+      const payload = event?.detail;
+      if (!payload?.title) return;
+      onNotificationNew(payload);
+    };
+    window.addEventListener('petfood:food-quality-alert', onFoodQualityAlert);
+
     return () => {
       clearInterval(interval);
       socket.off('connect', onConnect);
       socket.off('notification:new', onNotificationNew);
+      window.removeEventListener('petfood:food-quality-alert', onFoodQualityAlert);
     };
   }, [user, userId, role, pollMs, fetchNotifications, fetchUnreadCount]);
 

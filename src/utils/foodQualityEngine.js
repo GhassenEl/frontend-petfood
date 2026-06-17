@@ -20,6 +20,14 @@ export const QUALITY_LABELS = {
   critical: { label: 'Critique', state: 'Aliment altéré', color: '#991b1b', icon: '🚨', fridge: 'Remplacer l\'aliment immédiatement' },
 };
 
+/** Seuil scénario alternatif — nourriture détériorée (< 50 %). */
+export const NON_CONFORME_THRESHOLD = 50;
+
+export const NON_CONFORME_OLED = {
+  alertTitle: 'ALERTE',
+  alertMessage: 'Nourriture non conforme',
+};
+
 export const AI_DETECTION_KEYS = [
   { key: 'mold', label: 'Moisissures', icon: '🍄' },
   { key: 'colorShift', label: 'Changement couleur', icon: '🎨' },
@@ -149,6 +157,14 @@ export const analyzeFoodQuality = ({
     stockLevelPct, temperatureC, humidityPct,
   });
   const recommendedAction = getRecommendedAction(quality, score, aiSignals);
+  const anomalyDetected = Object.values(aiSignals).some(
+    (s) => s.detected && s.severity !== 'none',
+  );
+  const isCritical = quality === 'critical' || score < 40;
+  const isNonConforme = score < NON_CONFORME_THRESHOLD;
+  const displayState = isNonConforme && !isCritical
+    ? NON_CONFORME_OLED.alertMessage
+    : meta.state;
 
   const aiSummary =
     quality === 'critical' || quality === 'bad'
@@ -163,7 +179,7 @@ export const analyzeFoodQuality = ({
     quality,
     qualityScore: score,
     label: meta.label,
-    state: meta.state,
+    state: displayState,
     color: meta.color,
     icon: meta.icon,
     avgR: Math.round(avgR),
@@ -180,7 +196,14 @@ export const analyzeFoodQuality = ({
     colorIndex: Math.round(colorIndex * 100) / 100,
     aiSignals,
     recommendedAction,
-    isCritical: quality === 'critical' || score < 40,
+    isCritical,
+    isNonConforme,
+    anomalyDetected,
+    oledAlert: isNonConforme ? {
+      show: true,
+      title: NON_CONFORME_OLED.alertTitle,
+      message: NON_CONFORME_OLED.alertMessage,
+    } : null,
     aiSummary,
     analyzedAt: new Date().toISOString(),
     source: 'esp32-cam',
@@ -212,6 +235,13 @@ const scenarios = [
     moldPixelRatio: 0.18, insectPixelRatio: 0.032,
     temperatureC: 31, humidityPct: 78, stockLevelPct: 15,
   },
+  /** Scénario alternatif — nourriture détériorée (~42 %). */
+  {
+    name: 'deteriorated',
+    avgR: 98, avgG: 138, avgB: 74,
+    moldPixelRatio: 0.08, insectPixelRatio: 0.012,
+    temperatureC: 26, humidityPct: 64, stockLevelPct: 30,
+  },
 ];
 
 let scenarioIndex = 0;
@@ -223,7 +253,7 @@ export const simulateEsp32CamReading = (forcedScenario) => {
   if (!forcedScenario) scenarioIndex += 1;
 
   const jitter = () => (Math.random() - 0.5) * 4;
-  return analyzeFoodQuality({
+  const reading = analyzeFoodQuality({
     ...base,
     avgR: base.avgR + jitter(),
     avgG: base.avgG + jitter(),
@@ -234,6 +264,24 @@ export const simulateEsp32CamReading = (forcedScenario) => {
     insectPixelRatio: Math.max(0, base.insectPixelRatio + (Math.random() - 0.5) * 0.003),
     lidOpen: false,
   });
+
+  if (forcedScenario === 'deteriorated') {
+    reading.qualityScore = 42;
+    reading.quality = 'bad';
+    reading.isNonConforme = true;
+    reading.isCritical = false;
+    reading.anomalyDetected = true;
+    reading.state = NON_CONFORME_OLED.alertMessage;
+    reading.recommendedAction = 'Remplacer l\'aliment';
+    reading.oledAlert = {
+      show: true,
+      title: NON_CONFORME_OLED.alertTitle,
+      message: NON_CONFORME_OLED.alertMessage,
+    };
+    reading.aiSummary = `Anomalie IA détectée — nourriture non conforme (${reading.qualityScore}%). ${reading.recommendedAction}.`;
+  }
+
+  return reading;
 };
 
 export const buildDemoQualityHistory = () => {
