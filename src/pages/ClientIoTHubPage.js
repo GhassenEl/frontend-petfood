@@ -18,9 +18,12 @@ import AdvancedIoTDevicesPanel from '../components/AdvancedIoTDevicesPanel';
 import IoTLiveStatusBar from '../components/IoTLiveStatusBar';
 import IoTEnvironmentPanel from '../components/IoTEnvironmentPanel';
 import IoTAnomalyPanel from '../components/IoTAnomalyPanel';
+import IoTMobileBridgePanel from '../components/IoTMobileBridgePanel';
 import DemoModePill from '../components/DemoModePill';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import useIoTLive from '../hooks/useIoTLive';
+import useIsMobile from '../hooks/useIsMobile';
+import { DEMO_ADVANCED_IOT_DEVICES } from '../config/advancedIotPremiumCatalog';
 import './ClientComplaintsPage.css';
 import './ClientIoTHub.css';
 
@@ -33,13 +36,13 @@ const card = {
 };
 
 const TABS = [
-  { id: 'dashboard', label: 'Tableau de bord' },
-  { id: 'food-quality', label: 'Qualité croquettes 📷' },
-  { id: 'advanced', label: 'IoT avancé ⚡' },
-  { id: 'intelligence', label: 'Intelligence IA' },
-  { id: 'devices', label: 'Appareils' },
-  { id: 'alerts', label: 'Alertes' },
-  { id: 'automations', label: 'Automatisations' },
+  { id: 'dashboard', label: 'Tableau de bord', shortLabel: 'Accueil' },
+  { id: 'food-quality', label: 'Qualité croquettes 📷', shortLabel: 'Qualité' },
+  { id: 'advanced', label: 'IoT avancé ⚡', shortLabel: 'Avancé' },
+  { id: 'intelligence', label: 'Intelligence IA', shortLabel: 'IA' },
+  { id: 'devices', label: 'Appareils', shortLabel: 'Appareils' },
+  { id: 'alerts', label: 'Alertes', shortLabel: 'Alertes' },
+  { id: 'automations', label: 'Automatisations', shortLabel: 'Auto' },
 ];
 
 const SEV = { high: '#dc2626', medium: '#d97706', low: '#64748b' };
@@ -89,6 +92,7 @@ const ClientIoTHubPage = () => {
   const [tab, setTab] = useState('dashboard');
   const [pack, setPack] = useState(null);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -124,23 +128,23 @@ const ClientIoTHubPage = () => {
 
   return (
     <div className="cc-page iot-hub">
-      <header className="cc-hero" style={{
+      <header className="cc-hero iot-hub-hero" style={{
         background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #0ea5e9 100%)',
         color: 'white', borderRadius: 20, marginBottom: 24,
       }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-          <div style={{ flex: 1, minWidth: 220 }}>
-            <h1 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 800 }}>📡 Centre IoT & connecté</h1>
-            <p style={{ margin: 0, opacity: 0.9, maxWidth: 560, lineHeight: 1.5 }}>
+        <div className="iot-hub-hero__inner">
+          <div className="iot-hub-hero__copy">
+            <h1>📡 Centre IoT &amp; connecté</h1>
+            <p>
               Distributeur ESP32, ESP32-CAM qualité croquettes, fontaines, routines, alertes et automatisations — pilotage unifié.
             </p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="iot-hub-hero__actions">
             {d.mode === 'demo' && <DemoModePill />}
             <HealthRing score={d.healthScore || 0} />
-            <button type="button" onClick={load} disabled={loading} style={btnLight}>
-              <RefreshCw size={16} /> Actualiser
+            <button type="button" onClick={load} disabled={loading} className="iot-hub-hero__refresh" style={btnLight}>
+              <RefreshCw size={16} /> {isMobile ? '' : 'Actualiser'}
             </button>
           </div>
         </div>
@@ -153,15 +157,17 @@ const ClientIoTHubPage = () => {
         mode={d.mode}
       />
 
-      <div className="iot-tabs">
+      <div className="iot-tabs" role="tablist" aria-label="Sections IoT">
         {TABS.map((t) => (
           <button
             key={t.id}
             type="button"
+            role="tab"
+            aria-selected={tab === t.id}
             onClick={() => setTab(t.id)}
             className={`iot-tab${tab === t.id ? ' is-active' : ''}`}
           >
-            {t.label}
+            {isMobile ? t.shortLabel : t.label}
             {t.id === 'alerts' && (c.alerts > 0 || (d.anomalies?.length || 0) > 0) && (
               <span className="iot-tab-badge">{Math.max(c.alerts || 0, d.anomalies?.length || 0)}</span>
             )}
@@ -178,7 +184,7 @@ const ClientIoTHubPage = () => {
         <>
           {tab === 'dashboard' && (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
+              <div className="iot-stats-grid">
                 <Stat value={`${c.feedersOnline || 0}/${c.feeders || 0}`} label="Distributeurs" color="#059669" />
                 <Stat value={`${c.feederCamsOnline ?? 1}/${c.feederCams ?? 1}`} label="ESP32-CAM" color="#7c3aed" />
                 <Stat value={`${c.waterOnline || 0}/${c.waterMonitors || 0}`} label="Fontaines" color="#0ea5e9" />
@@ -189,12 +195,22 @@ const ClientIoTHubPage = () => {
                 )}
               </div>
 
+              <div className="iot-mobile-bridge-wrap">
+                <IoTMobileBridgePanel
+                  mobilePush={d.mobilePush || DEMO_ADVANCED_IOT_DEVICES.mobilePush}
+                  alertCount={c.alerts || 0}
+                  healthScore={d.healthScore || 0}
+                  devicesOnline={(c.feedersOnline || 0) + (c.waterOnline || 0) + (c.feederCamsOnline || 0)}
+                  devicesTotal={(c.feeders || 0) + (c.waterMonitors || 0) + (c.feederCams || 0)}
+                />
+              </div>
+
               <div style={{ marginBottom: 20 }}>
                 <IoTEnvironmentPanel environment={d.environment} telemetry={d.telemetry} />
               </div>
 
               {feederChart.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16, marginBottom: 20 }}>
+                <div className="iot-charts-grid">
                   <div style={card}>
                     <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
                       <Activity size={16} color="#059669" /> Croquettes — 7 jours (g)
@@ -227,13 +243,13 @@ const ClientIoTHubPage = () => {
               )}
 
               {(d.routines || []).length > 0 && (
-                <div style={{ ...card, marginBottom: 20 }}>
+                <div style={{ ...card, marginBottom: 20 }} className="iot-routines-card">
                   <h3 style={{ margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 8, fontSize: 15 }}>
                     <Calendar size={18} color="#7c3aed" /> Routines du jour
                   </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div className="iot-routines-list">
                     {d.routines.slice(0, 6).map((r, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', background: '#f8fafc', borderRadius: 10 }}>
+                      <div key={i} className="iot-routine-row">
                         <span style={{ fontWeight: 800, fontSize: 13, color: '#1e40af', minWidth: 48 }}>{r.time}</span>
                         <span style={{ flex: 1, fontSize: 13 }}>{r.label}</span>
                         <span style={{ fontSize: 12, color: '#64748b' }}>{r.action}</span>
@@ -243,7 +259,7 @@ const ClientIoTHubPage = () => {
                 </div>
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16, marginBottom: 24 }}>
+              <div className="iot-modules-grid">
                 <IoTModuleCard to="/pet-feeder" icon="🍽️" title="Distributeur IoT" subtitle="ESP32, portions, capteurs niveau/température." status={`${c.feedersOnline || 0} en ligne`} statusColor="#059669" badge={d.mode === 'demo' ? 'Démo' : null} />
                 <IoTModuleCard to="/client-iot?tab=food-quality" icon="📷" title="ESP32-CAM qualité" subtitle="Détection bonne / mauvaise qualité croquettes en temps réel." status="Surveillance active" statusColor="#7c3aed" badge="Comme un frigo connecté" />
                 <IoTModuleCard to="/client-smart-water" icon="💧" title="Fontaine connectée" subtitle="Hydratation, réservoir, filtres." status={`${c.waterMonitors || 0} monitoré(s)`} statusColor="#0ea5e9" />
@@ -252,6 +268,7 @@ const ClientIoTHubPage = () => {
                 <IoTModuleCard to="/client-iot?tab=advanced" icon="⚖️" title="Balance connectée" subtitle="Mesure consommation quotidienne — sync jumeau numérique." status="65 g/jour" statusColor="#059669" badge="Premium" />
                 <IoTModuleCard to="/client-iot?tab=advanced" icon="🧊" title="Réfrigérateur intelligent" subtitle="Conservation pâtées/frais — 4°C, péremption, porte." status="Lot OK" statusColor="#0369a1" />
                 <IoTModuleCard to="/client-digital-twin" icon="🧬" title="Jumeau numérique" subtitle="Historique alimentaire, poids, activité, IA — Premium PFE." status="Score bien-être" statusColor="#7c3aed" badge="PFE" />
+                <IoTModuleCard to="/mobile#iot" icon="📱" title="App mobile Flutter" subtitle="Push IoT, scan QR, suivi livraison — synchronisé avec le hub web." status="3 push non lus" statusColor="#059669" badge="Android & iOS" />
                 <IoTModuleCard to="/premium" icon="✨" title="Fonctionnalités Premium" subtitle="IoT avancé + Smart Pet Digital Twin — vue complète PFE." status="11 modules" statusColor="#7c3aed" />
               </div>
 
@@ -283,7 +300,7 @@ const ClientIoTHubPage = () => {
 
           {tab === 'intelligence' && (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
+              <div className="iot-stats-grid">
                 <Stat value={d.healthScore ?? '—'} label="Score santé IoT" color="#059669" />
                 <Stat value={d.intelligence?.insightCount ?? 0} label="Insights IA" color="#7c3aed" />
                 <Stat value={d.intelligence?.criticalPredictions ?? 0} label="Prédictions critiques" color="#dc2626" />
@@ -308,7 +325,7 @@ const ClientIoTHubPage = () => {
           )}
 
           {tab === 'devices' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
+            <div className="iot-devices-grid">
               {(d.devices || []).map((device) => (
                 <motion.div key={device.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
                   <IoTDeviceCard device={device} />

@@ -59,6 +59,15 @@ export const CLIENT_MOBILE_NAV = [
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
+/** Navigation basse contextuelle — parcours IoT (hub, distributeur, fontaine, app mobile). */
+export const CLIENT_IOT_MOBILE_NAV = [
+  { id: 'iot', to: '/client-iot', icon: '📡', label: 'IoT', match: '/client-iot' },
+  { id: 'feeder', to: '/pet-feeder', icon: '🍽️', label: 'Distrib.', match: '/pet-feeder' },
+  { id: 'water', to: '/client-smart-water', icon: '💧', label: 'Fontaine', match: '/client-smart-water' },
+  { id: 'mobile', to: '/mobile#iot', icon: '📱', label: 'App', match: '/mobile' },
+  { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
+];
+
 export const LIVREUR_MOBILE_NAV = [
   { id: 'dash', to: '/livreur/dashboard', icon: '📊', label: 'Accueil' },
   { id: 'orders', to: '/livreur/orders', icon: '📦', label: 'Courses' },

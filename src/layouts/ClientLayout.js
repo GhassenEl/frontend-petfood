@@ -6,7 +6,15 @@ import ClientSidebar from '../components/ClientSidebar';
 import ChatAssistant from '../components/ChatAssistant';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
-import MobileBottomNav, { CLIENT_MOBILE_NAV } from '../components/MobileBottomNav';
+import MobileBottomNav, { CLIENT_MOBILE_NAV, CLIENT_IOT_MOBILE_NAV } from '../components/MobileBottomNav';
+
+const CLIENT_IOT_PATHS = [
+  '/client-iot',
+  '/pet-feeder',
+  '/client-smart-water',
+  '/client-smart-delivery',
+  '/food-quality-surveillance',
+];
 
 const CART_STORAGE_KEY = 'petfood_cart';
 
@@ -88,10 +96,14 @@ const ClientLayout = ({ children }) => {
     }
   };
 
+  const mobileNavItems = CLIENT_IOT_PATHS.some((p) => location.pathname.startsWith(p))
+    ? CLIENT_IOT_MOBILE_NAV
+    : CLIENT_MOBILE_NAV;
+
   return (
     <ResponsiveShell
       roleBadge="Espace client"
-      bottomNav={<MobileBottomNav items={CLIENT_MOBILE_NAV} />}
+      bottomNav={<MobileBottomNav items={mobileNavItems} />}
       sidebar={(onClose) => <ClientSidebar onLogout={logout} onNavigate={onClose} />}
     >
       {children}

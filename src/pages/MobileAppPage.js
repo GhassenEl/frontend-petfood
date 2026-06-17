@@ -2,8 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Smartphone, Bell, QrCode, Truck, Cpu, PawPrint, Download } from 'lucide-react';
 import { MOBILE_CLOUD_DOMAINS } from '../config/mobileCloudCatalog';
+import { DEMO_ADVANCED_IOT_DEVICES } from '../config/advancedIotPremiumCatalog';
+import IoTMobileBridgePanel from '../components/IoTMobileBridgePanel';
 import MobileBottomNav, { AUTH_PUBLIC_MOBILE_NAV } from '../components/MobileBottomNav';
 import './EnterpriseFeaturesPage.css';
+import './ClientIoTHub.css';
 
 const mobileDomain = MOBILE_CLOUD_DOMAINS.find((d) => d.id === 'mobile');
 
@@ -42,9 +45,25 @@ const MobileAppPage = () => (
             </h3>
             <p>{desc}</p>
             <span className="ef-badge ef-badge--ok">Actif</span>
+            {id === 'iot' && (
+              <Link to="/client-iot" style={{ display: 'inline-block', marginTop: 10, fontSize: 12, fontWeight: 700, color: '#2563eb', textDecoration: 'none' }}>
+                Hub IoT web →
+              </Link>
+            )}
           </article>
         ))}
       </div>
+    </section>
+
+    <section className="iot-mobile-bridge-wrap" style={{ marginBottom: 24 }} id="iot-sync">
+      <h2 style={{ fontSize: 18, marginBottom: 12 }}>Synchronisation IoT web ↔ mobile</h2>
+      <IoTMobileBridgePanel
+        mobilePush={DEMO_ADVANCED_IOT_DEVICES.mobilePush}
+        alertCount={6}
+        healthScore={76}
+        devicesOnline={4}
+        devicesTotal={4}
+      />
     </section>
 
     <section className="ef-card" style={{ marginBottom: 24 }}>

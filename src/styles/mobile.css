@@ -193,6 +193,19 @@
   .recharts-wrapper {
     max-width: 100% !important;
   }
+
+  /* Page mobile app — grille modules */
+  .ef-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ef-hero {
+    padding: 22px 18px !important;
+  }
+
+  .ef-hero h1 {
+    font-size: 22px !important;
+  }
 }
 
 /* Barre de navigation basse (app mobile) */

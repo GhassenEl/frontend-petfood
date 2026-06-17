@@ -1005,6 +1005,13 @@ export const DEMO_IOT_PACK = {
     topicPrefix: 'petfood/',
     devicesSubscribed: 5,
   },
+  mobilePush: {
+    enabled: true,
+    unread: 3,
+    lastAlert: 'Qualité croquettes — score 87%',
+    platforms: ['android', 'ios'],
+    lastSyncAt: new Date(Date.now() - 120000).toISOString(),
+  },
   sensorEvents: [
     { id: 'ev1', deviceId: 'demo-feeder-1', deviceName: 'Distributeur Max', type: 'level', icon: '📊', message: 'Distribution 30 g — repas matin', at: new Date(Date.now() - 900000).toISOString() },
     { id: 'ev2', deviceId: 'demo-water-2', deviceName: 'Fontaine Luna', type: 'hydration', icon: '💧', message: '165 ml aujourd\'hui (66 % objectif)', at: new Date(Date.now() - 600000).toISOString() },
