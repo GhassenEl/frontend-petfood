@@ -5,7 +5,7 @@ Application mobile pour contrôler le **distributeur IoT**, surveiller la **qual
 ## Fonctionnalités
 
 - Connexion au backend PetfoodTN (JWT)
-- **Qualité alimentaire IoT** (ESP32-CAM) : score temps réel, alertes, notifications, journal, OLED simulé
+- **Qualité alimentaire IoT** (ESP32-CAM) : score temps réel, **IA** (classification, moisissures, stock, péremption), alertes, notifications, journal
 - **Distributeur IoT** : statut capteurs, distribution manuelle, plan nutritionnel, planning, journal
 - **Produits** : catalogue + recommandations par animal
 - **Profil** : déconnexion, URL API configurable
@@ -63,7 +63,8 @@ lib/
   config/api_config.dart
   models/models.dart, food_quality.dart
   services/api_client.dart, auth_service.dart, repositories.dart
-  services/food_quality_engine.dart, food_quality_repository.dart
+  services/food_quality_engine.dart, food_quality_repository.dart, food_quality_ai_engine.dart
+  widgets/food_quality_ai_panel.dart
   screens/login_screen.dart, home_shell.dart, food_quality_screen.dart
   screens/feeder_screen.dart, products_screen.dart, profile_screen.dart
   main.dart

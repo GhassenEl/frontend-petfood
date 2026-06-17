@@ -1,4 +1,5 @@
 import '../models/food_quality.dart';
+import 'food_quality_ai_engine.dart';
 
 /// Moteur démo aligné sur le frontend PetFoodTN (ESP32-CAM).
 class FoodQualityEngine {
@@ -76,7 +77,7 @@ class FoodQualityEngine {
             ? 'Surveiller et ventiler le bac'
             : 'Aucune action';
 
-    return FoodQualityReading(
+    return FoodQualityAiEngine.enrich(FoodQualityReading(
       quality: quality,
       qualityScore: score,
       state: state,
@@ -97,7 +98,7 @@ class FoodQualityEngine {
           ? 'Anomalie IA — $state ($score%). $action.'
           : 'Qualité $state ($score%) — stock $stockLevelPct %.',
       analyzedAt: DateTime.now(),
-    );
+    ));
   }
 
   static FoodQualityReading simulate([String? scenario]) {
@@ -128,7 +129,7 @@ class FoodQualityEngine {
     );
 
     if (scenario == 'deteriorated') {
-      reading = FoodQualityReading(
+      reading = FoodQualityAiEngine.enrich(FoodQualityReading(
         quality: 'bad',
         qualityScore: 42,
         state: 'Nourriture non conforme',
@@ -145,9 +146,9 @@ class FoodQualityEngine {
         isNonConforme: true,
         anomalyDetected: true,
         recommendedAction: 'Remplacer l\'aliment',
-        aiSummary: 'Anomalie IA détectée — nourriture non conforme (42%). Remplacer l\'aliment.',
+        aiSummary: 'Anomalie IA détectée — nourriture dégradée (42%).',
         analyzedAt: DateTime.now(),
-      );
+      ));
     }
 
     return reading;

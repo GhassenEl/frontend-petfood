@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/food_quality.dart';
 import 'api_client.dart';
+import 'food_quality_ai_engine.dart';
 import 'food_quality_engine.dart';
 
 class FoodQualityRepository {
@@ -15,7 +16,7 @@ class FoodQualityRepository {
     try {
       final data = await api.get('/client/iot/food-quality');
       if (data is Map && data['current'] != null) {
-        return FoodQualityState.fromJson(Map<String, dynamic>.from(data));
+        return _enrichState(FoodQualityState.fromJson(Map<String, dynamic>.from(data)));
       }
     } catch (_) {
       /* fallback demo */
@@ -45,17 +46,21 @@ class FoodQualityRepository {
         'quality': reading.quality,
         'qualityScore': reading.qualityScore,
         'state': reading.state,
+        'aiClassification': reading.aiClassification,
+        'aiClassificationLabel': reading.aiClassificationLabel,
         'temperatureC': reading.temperatureC,
         'humidityPct': reading.humidityPct,
         'stockLevelPct': reading.stockLevelPct,
         'moldPixelRatio': reading.moldPixelRatio,
         'insectPixelRatio': reading.insectPixelRatio,
+        'moldDetected': reading.moldDetected,
+        'expirationDaysRemaining': reading.expirationDaysRemaining,
         'isNonConforme': reading.isNonConforme,
         'anomalyDetected': reading.anomalyDetected,
         'analyzedAt': reading.analyzedAt?.toIso8601String(),
       });
       if (data is Map && data['reading'] != null) {
-        final r = FoodQualityReading.fromJson(Map<String, dynamic>.from(data['reading']));
+        final r = _enrichReading(FoodQualityReading.fromJson(Map<String, dynamic>.from(data['reading'])));
         await _appendJournal(r);
         if (r.isNonConforme) await _storeLocalAlert(r);
         return r;
@@ -66,6 +71,18 @@ class FoodQualityRepository {
     await _appendJournal(reading);
     if (reading.isNonConforme) await _storeLocalAlert(reading);
     return reading;
+  }
+
+  FoodQualityState _enrichState(FoodQualityState state) => FoodQualityState(
+        mode: state.mode,
+        current: _enrichReading(state.current),
+        history: state.history.map(_enrichReading).toList(),
+        device: state.device,
+      );
+
+  FoodQualityReading _enrichReading(FoodQualityReading r) {
+    if (r.aiClassification != null) return r;
+    return FoodQualityAiEngine.enrich(r);
   }
 
   Future<List<AppNotification>> fetchNotifications() async {
@@ -164,6 +181,18 @@ class FoodQualityRepository {
         'recommendedAction': r.recommendedAction,
         'aiSummary': r.aiSummary,
         'analyzedAt': r.analyzedAt?.toIso8601String(),
+        'aiClassification': r.aiClassification,
+        'aiClassificationLabel': r.aiClassificationLabel,
+        'aiClassificationConfidence': r.aiClassificationConfidence,
+        'moldDetected': r.moldDetected,
+        'moldSeverity': r.moldSeverity,
+        'moldConfidence': r.moldConfidence,
+        'moldRegions': r.moldRegions,
+        'stockEstimateConfidence': r.stockEstimateConfidence,
+        'expirationDate': r.expirationDate?.toIso8601String(),
+        'expirationDaysRemaining': r.expirationDaysRemaining,
+        'expirationConfidence': r.expirationConfidence,
+        'expirationRisk': r.expirationRisk,
       };
 
   Map<String, dynamic> _notifToJson(AppNotification n) => {

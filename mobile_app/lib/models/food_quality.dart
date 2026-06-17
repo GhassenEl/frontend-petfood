@@ -49,6 +49,18 @@ class FoodQualityReading {
     this.isNonConforme = false,
     this.anomalyDetected = false,
     this.analyzedAt,
+    this.aiClassification,
+    this.aiClassificationLabel,
+    this.aiClassificationConfidence,
+    this.moldDetected,
+    this.moldSeverity,
+    this.moldConfidence,
+    this.moldRegions,
+    this.stockEstimateConfidence,
+    this.expirationDate,
+    this.expirationDaysRemaining,
+    this.expirationConfidence,
+    this.expirationRisk,
   });
 
   final String quality;
@@ -69,6 +81,20 @@ class FoodQualityReading {
   final bool isNonConforme;
   final bool anomalyDetected;
   final DateTime? analyzedAt;
+  final String? aiClassification;
+  final String? aiClassificationLabel;
+  final double? aiClassificationConfidence;
+  final bool? moldDetected;
+  final String? moldSeverity;
+  final double? moldConfidence;
+  final int? moldRegions;
+  final double? stockEstimateConfidence;
+  final DateTime? expirationDate;
+  final int? expirationDaysRemaining;
+  final double? expirationConfidence;
+  final String? expirationRisk;
+
+  String get aiClassLabel => aiClassificationLabel ?? displayState;
 
   String get displayState {
     if (isNonConforme && !isCritical) return 'Nourriture non conforme';
@@ -105,6 +131,18 @@ class FoodQualityReading {
         isNonConforme: j['isNonConforme'] == true || ((j['qualityScore'] as num?)?.toInt() ?? 100) < 50,
         anomalyDetected: j['anomalyDetected'] == true,
         analyzedAt: j['analyzedAt'] != null ? DateTime.tryParse(j['analyzedAt'].toString()) : null,
+        aiClassification: j['aiClassification']?.toString(),
+        aiClassificationLabel: j['aiClassificationLabel']?.toString(),
+        aiClassificationConfidence: (j['aiClassificationConfidence'] as num?)?.toDouble(),
+        moldDetected: j['moldDetected'] == true,
+        moldSeverity: j['moldSeverity']?.toString(),
+        moldConfidence: (j['moldConfidence'] as num?)?.toDouble(),
+        moldRegions: (j['moldRegions'] as num?)?.toInt(),
+        stockEstimateConfidence: (j['stockEstimateConfidence'] as num?)?.toDouble(),
+        expirationDate: j['expirationDate'] != null ? DateTime.tryParse(j['expirationDate'].toString()) : null,
+        expirationDaysRemaining: (j['expirationDaysRemaining'] as num?)?.toInt(),
+        expirationConfidence: (j['expirationConfidence'] as num?)?.toDouble(),
+        expirationRisk: j['expirationRisk']?.toString(),
       );
 }
 

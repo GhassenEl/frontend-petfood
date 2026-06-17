@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/food_quality.dart';
 import '../services/auth_service.dart';
 import '../services/food_quality_engine.dart';
+import '../widgets/food_quality_ai_panel.dart';
 import '../services/food_quality_repository.dart';
 
 class FoodQualityScreen extends StatefulWidget {
@@ -17,7 +18,7 @@ class FoodQualityScreen extends StatefulWidget {
 
 class _FoodQualityScreenState extends State<FoodQualityScreen> with SingleTickerProviderStateMixin {
   late final FoodQualityRepository _repo = FoodQualityRepository(widget.auth.api);
-  late final TabController _tabs = TabController(length: 4, vsync: this);
+  late final TabController _tabs = TabController(length: 5, vsync: this);
 
   FoodQualityState? _state;
   List<AppNotification> _notifications = [];
@@ -140,6 +141,7 @@ class _FoodQualityScreenState extends State<FoodQualityScreen> with SingleTicker
               isScrollable: true,
               tabs: const [
                 Tab(icon: Icon(Icons.speed), text: 'Score'),
+                Tab(icon: Icon(Icons.psychology), text: 'IA'),
                 Tab(icon: Icon(Icons.warning_amber), text: 'Alertes'),
                 Tab(icon: Icon(Icons.notifications), text: 'Notifs'),
                 Tab(icon: Icon(Icons.history), text: 'Journal'),
@@ -157,6 +159,7 @@ class _FoodQualityScreenState extends State<FoodQualityScreen> with SingleTicker
                     live: _live,
                     onSimulate: _simulate,
                   ),
+                  _AiTab(reading: _state?.current),
                   _AlertsTab(alerts: _alerts),
                   _NotificationsTab(notifications: _notifications),
                   _JournalTab(journal: _journal),
@@ -247,11 +250,16 @@ class _ScoreTab extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: [
-            FilledButton(onPressed: () => onSimulate('good'), child: const Text('92% Bon')),
+            FilledButton(onPressed: () => onSimulate('good'), child: const Text('Fraîche')),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: const Color(0xFFD97706)),
+              onPressed: () => onSimulate('warning'),
+              child: const Text('Acceptable'),
+            ),
             FilledButton(
               style: FilledButton.styleFrom(backgroundColor: const Color(0xFFD97706)),
               onPressed: () => onSimulate('deteriorated'),
-              child: const Text('42% Non conforme'),
+              child: const Text('Dégradée 42%'),
             ),
             FilledButton(
               style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
@@ -260,6 +268,34 @@ class _ScoreTab extends StatelessWidget {
             ),
           ],
         ),
+      ],
+    );
+  }
+}
+
+class _AiTab extends StatelessWidget {
+  const _AiTab({required this.reading});
+  final FoodQualityReading? reading;
+
+  @override
+  Widget build(BuildContext context) {
+    if (reading == null) {
+      return const Center(child: Text('Aucune analyse IA'));
+    }
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        FoodQualityAiPanel(reading: reading!),
+        if (reading!.aiSummary != null) ...[
+          const SizedBox(height: 12),
+          Card(
+            color: const Color(0xFFF5F3FF),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Text(reading!.aiSummary!, style: const TextStyle(fontSize: 13, height: 1.45)),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -470,8 +506,11 @@ class _JournalTab extends StatelessWidget {
         return Card(
           child: ListTile(
             leading: CircleAvatar(backgroundColor: c.withValues(alpha: 0.15), child: Text('${r.qualityScore}', style: TextStyle(color: c, fontWeight: FontWeight.bold, fontSize: 12))),
-            title: Text(r.displayState),
-            subtitle: Text('Stock ${r.stockLevelPct ?? '—'} % · ${r.temperatureC?.toStringAsFixed(1) ?? '—'} °C'),
+            title: Text(r.aiClassLabel),
+            subtitle: Text(
+              'Stock ${r.stockLevelPct ?? '—'} % · Péremption ${r.expirationDaysRemaining ?? '—'} j'
+              '${r.moldDetected == true ? ' · Moisissure IA' : ''}',
+            ),
             trailing: Text(_fmt(r.analyzedAt), style: const TextStyle(fontSize: 11)),
           ),
         );
