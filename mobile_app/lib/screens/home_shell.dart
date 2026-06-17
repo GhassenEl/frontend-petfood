@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import 'feeder_screen.dart';
+import 'food_quality_screen.dart';
 import 'products_screen.dart';
 import 'profile_screen.dart';
 
@@ -19,6 +20,7 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     final pages = [
+      FoodQualityScreen(auth: widget.auth),
       FeederScreen(auth: widget.auth),
       ProductsScreen(auth: widget.auth),
       ProfileScreen(auth: widget.auth),
@@ -30,6 +32,7 @@ class _HomeShellState extends State<HomeShell> {
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: const [
+          NavigationDestination(icon: Icon(Icons.camera_alt), label: 'Qualité'),
           NavigationDestination(icon: Icon(Icons.pets), label: 'Distributeur'),
           NavigationDestination(icon: Icon(Icons.shopping_bag), label: 'Produits'),
           NavigationDestination(icon: Icon(Icons.person), label: 'Profil'),

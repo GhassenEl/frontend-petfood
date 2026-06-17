@@ -1,10 +1,11 @@
 # PetfoodTN Mobile (Flutter)
 
-Application mobile pour contrôler le **distributeur IoT** et consulter les **produits recommandés** pour vos animaux.
+Application mobile pour contrôler le **distributeur IoT**, surveiller la **qualité alimentaire ESP32-CAM** et consulter les **produits recommandés** pour vos animaux.
 
 ## Fonctionnalités
 
 - Connexion au backend PetfoodTN (JWT)
+- **Qualité alimentaire IoT** (ESP32-CAM) : score temps réel, alertes, notifications, journal, OLED simulé
 - **Distributeur IoT** : statut capteurs, distribution manuelle, plan nutritionnel, planning, journal
 - **Produits** : catalogue + recommandations par animal
 - **Profil** : déconnexion, URL API configurable
@@ -60,8 +61,10 @@ flutter build apk --release
 ```
 lib/
   config/api_config.dart
-  models/models.dart
+  models/models.dart, food_quality.dart
   services/api_client.dart, auth_service.dart, repositories.dart
-  screens/login_screen.dart, home_shell.dart, feeder_screen.dart, products_screen.dart, profile_screen.dart
+  services/food_quality_engine.dart, food_quality_repository.dart
+  screens/login_screen.dart, home_shell.dart, food_quality_screen.dart
+  screens/feeder_screen.dart, products_screen.dart, profile_screen.dart
   main.dart
 ```
