@@ -56,6 +56,7 @@ import ClientPetAdvicePage from './pages/ClientPetAdvicePage';
 import ClientServicesPage from './pages/ClientServicesPage';
 import ClientTraceabilityPage from './pages/ClientTraceabilityPage';
 import ClientSmartWaterPage from './pages/ClientSmartWaterPage';
+import ClientSmartHubPage from './pages/ClientSmartHubPage';
 import ClientIoTHubPage from './pages/ClientIoTHubPage';
 import ClientSmartDeliveryPage from './pages/ClientSmartDeliveryPage';
 import EventsPage from './pages/EventsPage';
@@ -368,6 +369,7 @@ const App = () => {
       <Route path="/pet-advice" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetAdvicePage /></ClientLayout></RoleRoute>} />
       <Route path="/pet-calories" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetCaloriesPage /></ClientLayout></RoleRoute>} />
       <Route path="/pet-adaptive-nutrition" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAdaptiveNutritionPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-smart-hub" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSmartHubPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-ecosystem" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientEcosystemHubPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-wellness" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientWellnessPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-emotions" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientOwnerEmotionsPage /></ClientLayout></RoleRoute>} />

@@ -69,6 +69,7 @@ export const CLIENT_SIDEBAR_SECTIONS = [
     title: '🤖 IA & Premium',
     items: [
       { id: '__open-chat__', label: 'Assistant IA', icon: '💬', action: 'open-chat' },
+      { id: 'client-smart-hub', label: 'Hub intelligent', icon: '✨' },
       { id: 'client-ecosystem', label: 'Hub écosystème', icon: '🌐' },
       { id: 'client-ai', label: 'Agent IA', icon: '🤖' },
       { id: 'client-advanced-ai', label: 'IA avancée', icon: '✨' },

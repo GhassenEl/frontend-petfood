@@ -20,6 +20,9 @@ export const NOTIFICATION_TYPE_LABELS = {
   leave_status: 'Congés',
   leave_request: 'Demande congé',
   iot_food_quality: 'Qualité alimentaire IoT',
+  smart_meal: 'Rappel repas',
+  smart_vaccination: 'Rappel vaccination',
+  smart_stock: 'Rupture stock',
 };
 
 export const NOTIFICATION_ROLE_LABELS = {
@@ -63,6 +66,12 @@ export const getNotificationIcon = (type) => {
       return '🏖️';
     case 'iot_food_quality':
       return '📷';
+    case 'smart_meal':
+      return '🍽️';
+    case 'smart_vaccination':
+      return '💉';
+    case 'smart_stock':
+      return '📦';
     default:
       return '🔔';
   }
