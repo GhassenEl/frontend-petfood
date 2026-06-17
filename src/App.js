@@ -73,6 +73,7 @@ const EnterpriseFeaturesPage = lazy(() => import('./pages/EnterpriseFeaturesPage
 const IntelligencePlatformPage = lazy(() => import('./pages/IntelligencePlatformPage'));
 const MobileAppPage = lazy(() => import('./pages/MobileAppPage'));
 const CloudInfrastructurePage = lazy(() => import('./pages/CloudInfrastructurePage'));
+const BigDataPlatformPage = lazy(() => import('./pages/BigDataPlatformPage'));
 const PremiumFeaturesPage = lazy(() => import('./pages/PremiumFeaturesPage'));
 const AdminAdvancedHubPage = lazy(() => import('./pages/AdminAdvancedHubPage'));
 import LivreurDashboard from './pages/LivreurDashboard';
@@ -249,6 +250,7 @@ const App = () => {
         <Route path="/ia" element={<IntelligencePlatformPage />} />
         <Route path="/mobile" element={<MobileAppPage />} />
         <Route path="/cloud" element={<CloudInfrastructurePage />} />
+        <Route path="/big-data" element={<BigDataPlatformPage />} />
         <Route path="/premium" element={<PremiumFeaturesPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
@@ -275,6 +277,7 @@ const App = () => {
       <Route path="/ia" element={<IntelligencePlatformPage />} />
       <Route path="/mobile" element={<MobileAppPage />} />
       <Route path="/cloud" element={<CloudInfrastructurePage />} />
+      <Route path="/big-data" element={<BigDataPlatformPage />} />
       <Route path="/premium" element={<PremiumFeaturesPage />} />
 
       <Route path="/admin/dashboard" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDashboard /></AdminLayout></RoleRoute>} />

@@ -69,6 +69,15 @@ const CloudInfrastructurePage = () => {
       </section>
 
       <section className="ef-card" style={{ marginBottom: 24 }}>
+        <h3 style={{ margin: '0 0 8px' }}>Plateforme Big Data</h3>
+        <p style={{ margin: '0 0 12px', fontSize: 14, color: '#475569' }}>
+          Kafka, Spark et Hadoop pour commandes massives, IoT temps réel et stockage images ESP32-CAM.
+          {' '}
+          <Link to="/big-data">Voir la plateforme →</Link>
+        </p>
+      </section>
+
+      <section className="ef-card" style={{ marginBottom: 24 }}>
         <h3 style={{ margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
           <HardDrive size={18} /> Sauvegarde automatique
         </h3>
