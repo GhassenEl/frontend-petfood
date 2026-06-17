@@ -19,6 +19,7 @@ import IoTLiveStatusBar from '../components/IoTLiveStatusBar';
 import IoTEnvironmentPanel from '../components/IoTEnvironmentPanel';
 import IoTAnomalyPanel from '../components/IoTAnomalyPanel';
 import IoTMobileBridgePanel from '../components/IoTMobileBridgePanel';
+import EthicalDisclaimer from '../components/EthicalDisclaimer';
 import DemoModePill from '../components/DemoModePill';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import useIoTLive from '../hooks/useIoTLive';
@@ -156,6 +157,8 @@ const ClientIoTHubPage = () => {
         lastEventAt={live.lastEventAt}
         mode={d.mode}
       />
+
+      <EthicalDisclaimer variant="iot" compact />
 
       <div className="iot-tabs" role="tablist" aria-label="Sections IoT">
         {TABS.map((t) => (

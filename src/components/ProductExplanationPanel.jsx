@@ -21,7 +21,7 @@ const ProductExplanationPanel = ({ items = [], loading }) => {
                 <span className="xai-reason-icon" aria-hidden>{r.icon}</span>
                 <div>
                   <strong>{r.label}</strong>
-                  <span className="xai-confidence">{r.confidence}% confiance</span>
+                  <span className="xai-confidence">{r.confidence}% indicateur indicatif</span>
                   <p>{r.detail}</p>
                 </div>
               </li>

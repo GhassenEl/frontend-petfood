@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import useIntelligencePlatform from '../hooks/useIntelligencePlatform';
 import { countIntelligencePillars } from '../config/intelligencePillarsCatalog';
 import MobileBottomNav, { AUTH_PUBLIC_MOBILE_NAV } from '../components/MobileBottomNav';
+import EthicalDisclaimer from '../components/EthicalDisclaimer';
 import './IntelligencePlatformPage.css';
 
 const PillarCard = ({ pillar, userRole }) => {
@@ -120,6 +121,8 @@ const IntelligencePlatformPage = () => {
       {error && (
         <p className="ip-error" role="alert">Mode démo — API ML indisponible ({error.message})</p>
       )}
+
+      <EthicalDisclaimer variant="ai" />
 
       <section className="ip-grid">
         {(pack?.pillars || []).map((pillar) => (

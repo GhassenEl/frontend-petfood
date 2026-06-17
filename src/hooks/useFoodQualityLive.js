@@ -6,6 +6,7 @@ import {
   mergeFoodQualityReading,
 } from '../services/iotFoodQualityService';
 import { dispatchFoodQualityAlerts } from '../services/foodQualityNotificationService';
+import { isCameraCaptureAllowed } from '../utils/privacyPreferences';
 
 const LIVE_INTERVAL_MS = 5000;
 
@@ -49,6 +50,8 @@ export default function useFoodQualityLive({ enabled = true, demoSimulate = true
     if (!enabled || !isLive) return undefined;
 
     const tick = async () => {
+      if (!isCameraCaptureAllowed()) return;
+
       if (modeRef.current === 'demo' && demoSimulate) {
         const reading = await runEsp32CamSimulation(undefined, deviceRef.current);
         setState((prev) => mergeFoodQualityReading(prev, reading));
@@ -80,6 +83,7 @@ export default function useFoodQualityLive({ enabled = true, demoSimulate = true
     const onConnect = () => setSocketConnected(true);
     const onDisconnect = () => setSocketConnected(false);
     const onReading = (payload) => {
+      if (!isCameraCaptureAllowed()) return;
       if (payload?.reading) applyReading(payload.reading);
       else if (payload?.qualityScore != null) applyReading(payload);
     };

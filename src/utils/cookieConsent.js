@@ -20,7 +20,7 @@ export const COOKIE_CATEGORIES = {
   analytics: {
     id: 'analytics',
     label: 'Analytique',
-    description: 'Mesure d’audience et amélioration de l’expérience.',
+    description: 'Audience agrégée (page visitée, chemins sensibles masqués) — visible par les administrateurs pour améliorer le service.',
     required: false,
   },
   marketing: {

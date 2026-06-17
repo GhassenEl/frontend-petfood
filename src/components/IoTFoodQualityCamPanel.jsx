@@ -13,6 +13,9 @@ import FoodQualityLiveViewport from './FoodQualityLiveViewport';
 import FoodQualityOledDisplay from './FoodQualityOledDisplay';
 import FoodQualityAiDetectionPanel from './FoodQualityAiDetectionPanel';
 import FoodQualityCriticalBanner from './FoodQualityCriticalBanner';
+import IoTPrivacyConsentPanel from './IoTPrivacyConsentPanel';
+import EthicalDisclaimer from './EthicalDisclaimer';
+import { isCameraCaptureAllowed } from '../utils/privacyPreferences';
 import { QUALITY_LABELS, formatTimeFr, formatTimeShort, buildScheduleStatuses, getNextScheduledCheck, ALERT_TEMP_THRESHOLD_C, ALERT_HUMIDITY_THRESHOLD_PCT, NON_CONFORME_THRESHOLD, CAPTURE_INTERVAL_MINUTES } from '../utils/foodQualityEngine';
 
 const STATUS_META = {
@@ -33,7 +36,7 @@ const USE_CASE_STEPS = [
 const ALT_SCENARIO_STEPS = [
   'Si température > 30 °C, humidité > 70 % et qualité < 50 % :',
   'LCD : ⚠ ALERTE — Qualité : 42 % — Nourriture altérée.',
-  'Notification client + information vétérinaire.',
+  'Notification client (partage vétérinaire uniquement si vous l\'avez activé).',
   'Recommandation : remplacer la nourriture.',
 ];
 
@@ -55,6 +58,7 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
   const [localAlert, setLocalAlert] = useState(null);
 
   const simulateOnce = async (scenario) => {
+    if (!isCameraCaptureAllowed()) return;
     setBusy(true);
     try {
       const reading = await runEsp32CamSimulation(scenario, state?.device);
@@ -92,9 +96,13 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
   }));
   const nextCheck = state?.nextCheck;
   const alertInfo = localAlert || lastAlert;
+  const cameraAllowed = isCameraCaptureAllowed();
 
   return (
     <div className="iot-food-quality">
+      <IoTPrivacyConsentPanel />
+      <EthicalDisclaimer variant="iot" compact />
+
       <header className="iot-fq-hero">
         <div className="iot-fq-hero__content">
           <span className="iot-fq-hero__badge">PetFoodIoT · ESP32-CAM</span>
@@ -138,11 +146,16 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
         <button
           type="button"
           className="iot-fq-btn iot-fq-btn--alt-scenario"
-          disabled={busy}
+          disabled={busy || !cameraAllowed}
           onClick={() => simulateOnce('deteriorated')}
         >
           ▶ Lancer scénario alternatif (42 %)
         </button>
+        {!cameraAllowed && (
+          <p className="iot-privacy-panel__hint" style={{ marginTop: 8 }}>
+            Activez la capture ESP32-CAM ci-dessus pour lancer les simulations.
+          </p>
+        )}
       </section>
 
       <FoodQualityCriticalBanner reading={cur} lastAlert={alertInfo} />

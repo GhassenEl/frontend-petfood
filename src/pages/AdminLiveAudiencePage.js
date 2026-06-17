@@ -61,6 +61,7 @@ const AdminLiveAudiencePage = () => {
         </h1>
         <p>
           Visiteurs sur le site, clients connectés et acteurs par région — mise à jour automatique toutes les 5 s.
+          Données collectées uniquement si l&apos;utilisateur a accepté les cookies analytique ; chemins sensibles masqués côté client.
         </p>
         <div className="adm-export-row" style={{ marginTop: 12 }}>
           <button type="button" className="adm-btn adm-btn--ghost adm-btn--sm" onClick={reload}>

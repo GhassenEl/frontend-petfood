@@ -1,9 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import getSocket from '../utils/socketClient';
 import { getStoredCity } from '../hooks/usePlatformCity';
 import { postPresenceHeartbeat } from '../services/adminPresenceService';
+import { isCategoryAllowed } from '../utils/cookieConsent';
+import { buildPresencePayload } from '../utils/presencePrivacy';
 
 const SESSION_KEY = 'petfood_presence_session';
 
@@ -20,26 +22,35 @@ export const getPresenceSessionId = () => {
   }
 };
 
-/** Envoie la présence (socket + HTTP secours) pour visiteurs et utilisateurs connectés. */
+/** Présence temps réel — uniquement si cookies « analytique » acceptés. */
 const PresenceTracker = () => {
   const { user } = useAuth();
   const location = useLocation();
   const pathRef = useRef(location.pathname);
+  const [analyticsAllowed, setAnalyticsAllowed] = useState(() => isCategoryAllowed('analytics'));
 
   useEffect(() => {
     pathRef.current = location.pathname;
   }, [location.pathname]);
 
   useEffect(() => {
+    const sync = () => setAnalyticsAllowed(isCategoryAllowed('analytics'));
+    window.addEventListener('petfood:cookie-consent', sync);
+    return () => window.removeEventListener('petfood:cookie-consent', sync);
+  }, []);
+
+  useEffect(() => {
+    if (!analyticsAllowed) return undefined;
+
     const socket = getSocket();
     const sessionId = getPresenceSessionId();
 
-    const payload = () => ({
+    const payload = () => buildPresencePayload({
       sessionId,
       userId: user?.id || user?._id || null,
       role: user?.role || 'visitor',
-      name: user?.name || 'Visiteur',
-      region: getStoredCity() || user?.region || 'Non assignée',
+      name: user?.name,
+      region: getStoredCity() || user?.region,
       path: pathRef.current,
     });
 
@@ -60,15 +71,18 @@ const PresenceTracker = () => {
 
     const intervalId = window.setInterval(() => {
       const p = payload();
-      if (socket.connected) socket.emit('presence:heartbeat', { path: p.path, region: p.region });
-      else postPresenceHeartbeat(p);
+      if (socket.connected) {
+        socket.emit('presence:heartbeat', { path: p.path, region: p.region });
+      } else {
+        postPresenceHeartbeat(p);
+      }
     }, 30_000);
 
     return () => {
       socket.off('connect', onConnect);
       window.clearInterval(intervalId);
     };
-  }, [user?.id, user?._id, user?.role, user?.name, user?.region, location.pathname]);
+  }, [analyticsAllowed, user?.id, user?._id, user?.role, user?.name, user?.region, location.pathname]);
 
   return null;
 };

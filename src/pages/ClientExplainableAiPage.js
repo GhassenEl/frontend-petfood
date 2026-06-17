@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Brain, MessageSquareText, HeartPulse, Search, RefreshCw } from 'lucide-react';
 import ProductExplanationPanel from '../components/ProductExplanationPanel';
+import EthicalDisclaimer from '../components/EthicalDisclaimer';
 import EarlyHealthRiskPanel from '../components/EarlyHealthRiskPanel';
 import NaturalLanguageSearchPanel from '../components/NaturalLanguageSearchPanel';
 import { loadExplainableAiPack, runNaturalLanguageSearch } from '../services/explainableAiService';
@@ -50,6 +51,8 @@ const ClientExplainableAiPage = () => {
       <p className="xai-lead">
         Explicabilité des recommandations, détection précoce des risques de santé et recherche produits en langage naturel.
       </p>
+
+      <EthicalDisclaimer variant="ai" compact />
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 16, alignItems: 'center' }}>
         {tab !== 'search' && (

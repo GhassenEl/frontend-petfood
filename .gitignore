@@ -56,5 +56,9 @@ test-results/
 *.bak
 *.backup
 
+# Fichiers sensibles / temporaires locaux
+PetfoodTN-Comptes-Acces.pdf
+tmp_*.json
+
 # Auto-generated agent rules (personalized per developer)
 .brainsync/agent-rules.md

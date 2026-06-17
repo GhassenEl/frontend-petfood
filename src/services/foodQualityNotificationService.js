@@ -1,5 +1,6 @@
 import api from '../utils/api';
 import { QUALITY_LABELS, NON_CONFORME_OLED, evaluatePetFoodIoTAlert } from '../utils/foodQualityEngine';
+import { isVetAlertSharingAllowed } from '../utils/privacyPreferences';
 
 const ALERTS_KEY = 'petfoodtn:iot:food-quality-alerts';
 const ALERT_COOLDOWN_MS = 5 * 60 * 1000;
@@ -80,7 +81,7 @@ function buildCriticalAlerts(reading, device = {}) {
     createdAt: new Date().toISOString(),
   };
 
-  return [
+  const alerts = [
     {
       ...base,
       id: `fq-client-${reading.analyzedAt}`,
@@ -90,8 +91,9 @@ function buildCriticalAlerts(reading, device = {}) {
       description: `ESP32-CAM : ${score}% — ${meta.state}. Action : ${action}.`,
       read: false,
     },
-    buildVetAlert(reading, device),
   ];
+  if (isVetAlertSharingAllowed()) alerts.push(buildVetAlert(reading, device));
+  return alerts;
 }
 
 /** Construit les payloads notification selon le scénario PetFoodIoT. */
@@ -106,7 +108,7 @@ export function buildFoodQualityAlerts(reading, device = {}) {
 
   if (reading.isNonConforme || (reading.qualityScore < 50 && reading.quality === 'bad')) {
     const alerts = [buildNonConformeAppAlert(reading, device)];
-    if (flags.notifyVet) alerts.push(buildVetAlert(reading, device));
+    if (flags.notifyVet && isVetAlertSharingAllowed()) alerts.push(buildVetAlert(reading, device));
     return alerts;
   }
 
@@ -136,7 +138,7 @@ export async function dispatchFoodQualityAlerts(reading, device = {}) {
     await api.post('/client/iot/food-quality/alerts', {
       reading,
       alerts,
-      notifyVet: isCritical || flags.notifyVet,
+      notifyVet: isVetAlertSharingAllowed() && (isCritical || flags.notifyVet),
     });
     return { sent: true, alerts, mode: 'api', scenario: isCritical ? 'critical' : 'alternate' };
   } catch {

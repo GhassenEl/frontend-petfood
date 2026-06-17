@@ -18,6 +18,7 @@ import {
 } from '../services/traceabilityService';
 import { getDemoProductTraceability, DEMO_MY_ORDER_TRACES } from '../utils/clientDemoData';
 import { analyzeTraceBlockchain } from '../utils/blockchainEngine';
+import EthicalDisclaimer from '../components/EthicalDisclaimer';
 import './ClientTraceability.css';
 
 const card = {
@@ -235,6 +236,8 @@ const ClientTraceabilityPage = () => {
           <div className="bc-kpi"><strong>{kpis.orders}</strong><span>Achats traçables</span></div>
         </div>
       </header>
+
+      <EthicalDisclaimer variant="blockchain" />
 
       <div className="bc-tabs">
         {TABS.map((t) => (

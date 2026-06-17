@@ -151,7 +151,7 @@ export const explainProductRecommendation = (product, pet = {}, recommendation =
     productName: product.name,
     reasons,
     summary,
-    transparencyNote: 'Explications générées localement (Explainable AI) — validation vétérinaire recommandée.',
+    transparencyNote: 'Scores indicatifs (règles métier locales ou démo) — ne remplacent pas l’avis d’un vétérinaire.',
   };
 };
 

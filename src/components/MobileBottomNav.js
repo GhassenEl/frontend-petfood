@@ -2,6 +2,39 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import useIsMobile from '../hooks/useIsMobile';
 
+const navAriaLabel = (item) => {
+  const labels = {
+    home: 'Accueil',
+    products: 'Boutique',
+    orders: 'Commandes',
+    vet: 'Espace vétérinaire',
+    menu: 'Ouvrir le menu',
+    iot: 'Centre IoT',
+    feeder: 'Distributeur IoT',
+    water: 'Fontaine connectée',
+    mobile: 'Application mobile',
+    dash: 'Tableau de bord',
+    intel: 'Intelligence artificielle',
+    calendar: 'Agenda',
+    dossiers: 'Dossiers médicaux',
+    complaints: 'Réclamations',
+    tickets: 'Tickets support',
+    assist: 'Assistance',
+    hub: 'Hub',
+    reviews: 'Avis',
+    visitor: 'Espace visiteur',
+    login: 'Connexion',
+    register: 'Inscription',
+    contact: 'Contact',
+    commissions: 'Commissions',
+    sales: 'Business intelligence',
+    users: 'Utilisateurs',
+    content: 'Contenu',
+    reports: 'Rapports',
+  };
+  return labels[item.id] || item.label;
+};
+
 const MobileBottomNav = ({ items = [] }) => {
   const isMobile = useIsMobile();
   const location = useLocation();
@@ -22,7 +55,7 @@ const MobileBottomNav = ({ items = [] }) => {
               type="button"
               className="mobile-bottom-nav__item"
               onClick={openMenu}
-              aria-label="Ouvrir le menu"
+              aria-label={navAriaLabel(item)}
             >
               <span className="mobile-bottom-nav__icon" aria-hidden>{item.icon}</span>
               <span className="mobile-bottom-nav__label">{item.label}</span>
@@ -34,6 +67,7 @@ const MobileBottomNav = ({ items = [] }) => {
           <NavLink
             key={item.id}
             to={item.to}
+            aria-label={navAriaLabel(item)}
             className={({ isActive }) => {
               const queryMatch = item.matchQuery
                 ? location.search.includes(item.matchQuery)

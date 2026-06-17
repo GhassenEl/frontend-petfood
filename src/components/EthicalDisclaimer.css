@@ -1,0 +1,76 @@
+.ethical-disclaimer {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.ethical-disclaimer strong {
+  display: block;
+  font-size: 13px;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.ethical-disclaimer p {
+  margin: 0;
+}
+
+.ethical-disclaimer__icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #64748b;
+}
+
+.ethical-disclaimer--ai {
+  border-color: #ddd6fe;
+  background: #faf5ff;
+}
+
+.ethical-disclaimer--ai .ethical-disclaimer__icon {
+  color: #7c3aed;
+}
+
+.ethical-disclaimer--blockchain {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.ethical-disclaimer--blockchain .ethical-disclaimer__icon {
+  color: #2563eb;
+}
+
+.ethical-disclaimer--iot {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.ethical-disclaimer--iot .ethical-disclaimer__icon {
+  color: #b45309;
+}
+
+.ethical-disclaimer--analytics {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.ethical-disclaimer--analytics .ethical-disclaimer__icon {
+  color: #059669;
+}
+
+.ethical-disclaimer--compact {
+  padding: 10px 12px;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.ethical-disclaimer--compact strong {
+  font-size: 12px;
+}
