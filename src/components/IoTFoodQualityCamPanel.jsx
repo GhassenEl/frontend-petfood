@@ -1,13 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Camera, Thermometer, Droplets, RefreshCw, Play, Square, Clock, Calendar } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
+import { Camera, Thermometer, Droplets, RefreshCw, Play, Square, Clock, Calendar, Wifi, WifiOff } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts';
 import {
-  fetchFoodQualityState,
   runEsp32CamSimulation,
   saveFoodQualitySchedules,
 } from '../services/iotFoodQualityService';
+import useFoodQualityLive from '../hooks/useFoodQualityLive';
+import FoodQualityLiveViewport from './FoodQualityLiveViewport';
 import { QUALITY_LABELS, formatTimeFr, formatTimeShort, buildScheduleStatuses, getNextScheduledCheck } from '../utils/foodQualityEngine';
 
 const STATUS_META = {
@@ -17,74 +18,42 @@ const STATUS_META = {
 };
 
 const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
-  const [state, setState] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [simulating, setSimulating] = useState(false);
+  const {
+    state,
+    loading,
+    isLive,
+    setIsLive,
+    lastTickAt,
+    socketConnected,
+    reload,
+    applyReading,
+    patchState,
+  } = useFoodQualityLive({ enabled: true, demoSimulate: true });
+
   const [busy, setBusy] = useState(false);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      setState(await fetchFoodQualityState());
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  useEffect(() => {
-    if (!simulating) return undefined;
-    const id = setInterval(async () => {
-      const reading = await runEsp32CamSimulation();
-      setState((prev) => {
-        const history = [reading, ...(prev?.history || []).slice(0, 19)];
-        return {
-          ...prev,
-          current: reading,
-          history,
-          mode: 'demo',
-          scheduleStatuses: prev?.schedules
-            ? buildScheduleStatuses(prev.schedules, history)
-            : prev?.scheduleStatuses,
-        };
-      });
-    }, 4000);
-    return () => clearInterval(id);
-  }, [simulating]);
 
   const simulateOnce = async (scenario) => {
     setBusy(true);
     try {
       const reading = await runEsp32CamSimulation(scenario);
-      setState((prev) => {
-        const history = [reading, ...(prev?.history || []).slice(0, 19)];
-        return {
-          ...prev,
-          current: reading,
-          history,
-          scheduleStatuses: buildScheduleStatuses(prev?.schedules || [], history),
-        };
-      });
+      applyReading(reading);
     } finally {
       setBusy(false);
     }
   };
 
-  const toggleSchedule = async (id) => {
+  const toggleSchedule = useCallback(async (id) => {
     const schedules = (state?.schedules || []).map((s) => (
       s.id === id ? { ...s, enabled: !s.enabled } : s
     ));
     const saved = await saveFoodQualitySchedules(schedules);
-    setState((prev) => ({
+    patchState((prev) => ({
       ...prev,
       schedules: saved,
       nextCheck: getNextScheduledCheck(saved),
       scheduleStatuses: buildScheduleStatuses(saved, prev?.history || []),
     }));
-  };
+  }, [state?.schedules, patchState]);
 
   if (packLoading || loading) {
     return <p className="iot-muted">Connexion ESP32-CAM…</p>;
@@ -102,15 +71,32 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
     <div className="iot-food-quality">
       <p className="iot-summary">
         <Camera size={16} aria-hidden />
-        ESP32-CAM surveille le bac croquettes en temps réel (comme un réfrigérateur connecté) :
-        couleur, moisissure, température et humidité → qualité <strong>bonne</strong> ou <strong>mauvaise</strong>.
+        ESP32-CAM surveille le bac croquettes en <strong>temps réel</strong> :
+        couleur RGB, moisissure, température et humidité → qualité{' '}
+        <strong>bonne</strong>, <strong>limite</strong> ou <strong>mauvaise</strong>.
       </p>
 
       <div className="iot-fq-device">
         <span>📷 {state?.device?.name || 'ESP32-CAM'}</span>
         <span className="iot-fq-status">🟢 {state?.device?.status || 'online'}</span>
+        {isLive && (
+          <span className="iot-fq-live-pill">
+            <span className="iot-fq-live-dot" /> Flux actif · 5 s
+          </span>
+        )}
+        {socketConnected ? (
+          <span className="iot-fq-socket iot-fq-socket--on" title="Socket.IO connecté">
+            <Wifi size={13} /> Push temps réel
+          </span>
+        ) : (
+          <span className="iot-fq-socket" title="Polling actif">
+            <WifiOff size={13} /> Polling
+          </span>
+        )}
         {state?.mode === 'demo' && <span className="iot-fq-demo">Mode simulation</span>}
       </div>
+
+      <FoodQualityLiveViewport reading={cur} isLive={isLive} lastTickAt={lastTickAt} />
 
       <div className="iot-fq-times">
         <div className="iot-fq-time-card">
@@ -200,20 +186,20 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
         </button>
         <button
           type="button"
-          className={`iot-fq-btn iot-fq-btn--live${simulating ? ' is-on' : ''}`}
-          onClick={() => setSimulating((s) => !s)}
+          className={`iot-fq-btn iot-fq-btn--live${isLive ? ' is-on' : ''}`}
+          onClick={() => setIsLive((s) => !s)}
         >
-          {simulating ? <Square size={14} /> : <Play size={14} />}
-          {simulating ? 'Stop flux' : 'Flux temps réel'}
+          {isLive ? <Square size={14} /> : <Play size={14} />}
+          {isLive ? 'Pause flux' : 'Reprendre flux'}
         </button>
-        <button type="button" className="iot-fq-btn iot-fq-btn--ghost" onClick={load} disabled={busy}>
+        <button type="button" className="iot-fq-btn iot-fq-btn--ghost" onClick={reload} disabled={busy}>
           <RefreshCw size={14} /> Actualiser
         </button>
       </div>
 
       {chartData.length > 1 && (
         <div className="iot-fq-chart">
-          <h4>Historique score qualité (par horaire)</h4>
+          <h4>Historique score qualité (temps réel)</h4>
           <ResponsiveContainer width="100%" height={160}>
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -241,10 +227,10 @@ const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {
                 </tr>
               </thead>
               <tbody>
-                {state.history.slice(0, 8).map((r, i) => {
+                {state.history.slice(0, 8).map((r) => {
                   const q = QUALITY_LABELS[r.quality] || QUALITY_LABELS.good;
                   return (
-                    <tr key={`${r.analyzedAt}-${i}`}>
+                    <tr key={r.analyzedAt}>
                       <td>{formatTimeFr(r.analyzedAt)}</td>
                       <td><span style={{ color: q.color }}>{q.icon} {q.label}</span></td>
                       <td>{r.qualityScore}/100</td>

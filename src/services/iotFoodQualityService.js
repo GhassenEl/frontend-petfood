@@ -13,6 +13,23 @@ import {
   buildScheduleStatuses,
 } from '../utils/foodQualityEngine';
 
+/** Fusionne une nouvelle lecture dans l'état affiché. */
+export function mergeFoodQualityReading(prev, reading) {
+  if (!reading) return prev;
+  const history = [reading, ...(prev?.history || []).filter(
+    (r) => r.analyzedAt !== reading.analyzedAt,
+  )].slice(0, 24);
+  const schedules = prev?.schedules || getStoredQualitySchedules();
+  return enrichFoodQualityState({
+    ...prev,
+    current: reading,
+    history,
+    schedules,
+    mode: prev?.mode || 'live',
+    device: prev?.device,
+  });
+}
+
 export async function fetchFoodQualityState() {
   let mode = 'demo';
   let current = null;

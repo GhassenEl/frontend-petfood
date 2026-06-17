@@ -314,6 +314,17 @@ export const PLATFORM_SERVICES = [
     serviceKey: 'ecosystemService',
   },
   {
+    id: 'client-esp32cam-food-quality',
+    category: 'iot',
+    roles: ['client'],
+    label: 'ESP32-CAM qualité croquettes',
+    description: 'Détection temps réel : couleur, moisissure, température et humidité du bac.',
+    route: '/client-iot?tab=food-quality',
+    icon: '📷',
+    api: 'GET /api/client/iot/food-quality',
+    serviceKey: 'iotFoodQualityService',
+  },
+  {
     id: 'pet-feeder',
     category: 'iot',
     roles: ['client'],
