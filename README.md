@@ -57,6 +57,8 @@ The dev script uses `concurrently` to start Vite **and** `npm --prefix backend r
 
 ## Demo accounts
 
+Voir **[docs/COMPTES-ACCES.md](./docs/COMPTES-ACCES.md)** — tous les acteurs (admin, client, vétérinaire, livreur, vendeur, modérateur, support).
+
 | Role    | Email                  | Password         |
 |---------|------------------------|------------------|
 | Admin   | admin@petfood.tn       | PetfoodTN2024!   |

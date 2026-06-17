@@ -8,33 +8,54 @@ const outPath = join(__dirname, '..', 'PetfoodTN-Comptes-Acces.pdf');
 
 const accounts = [
   {
-    role: 'Admin (propriétaire plateforme)',
+    role: 'Administrateur',
     email: 'admin@petfood.tn',
     password: 'PetfoodTN2024!',
-    name: 'El Jezi Ghassen',
+    name: 'Ghassen Admin',
     home: '/admin/dashboard',
   },
   {
-    role: 'Client (propriétaire animal)',
+    role: 'Client',
     email: 'client@petfood.tn',
     password: 'MonChat123!',
-    name: 'Client Test',
-    home: '/client-products',
-    extra: 'Vétérinaire : /veterinary',
+    name: 'Sami Ben Ali',
+    home: '/client-dashboard',
   },
   {
     role: 'Vétérinaire',
     email: 'vet@petfood.tn',
     password: 'Vet2024!',
-    name: 'Dr. Salma Khelifi',
+    name: 'Dr. Amira Khelifi',
     home: '/vet/dashboard',
   },
   {
     role: 'Livreur',
     email: 'livreur@petfood.tn',
     password: 'Livreur123!',
-    name: 'Livreur Test',
+    name: 'Karim Mansouri',
     home: '/livreur/dashboard',
+  },
+  {
+    role: 'Vendeur',
+    email: 'vendor@petfood.tn',
+    password: 'Vendor2024!',
+    name: 'Leila Mansouri',
+    home: '/vendor/dashboard',
+  },
+  {
+    role: 'Modérateur',
+    email: 'moderator@petfood.tn',
+    password: 'Moderator2024!',
+    name: 'Nour Modération',
+    home: '/moderator/dashboard',
+  },
+  {
+    role: 'Service client',
+    email: 'support@petfood.tn',
+    password: 'Support2024!',
+    name: 'Sonia Service Client',
+    home: '/support/dashboard',
+    note: 'Créer via /admin/users (non seedé par défaut)',
   },
 ];
 
@@ -75,7 +96,8 @@ doc.text('Environnement de démonstration / développement', margin, 21);
 y = 38;
 
 addLine(`Généré le : ${new Date().toLocaleString('fr-FR')}`, { size: 9, color: [100, 100, 100] });
-addLine('URL application : http://localhost:3001', { size: 9, color: [100, 100, 100] });
+addLine('URL application : http://localhost:3001/login', { size: 9, color: [100, 100, 100] });
+addLine('Référence : docs/COMPTES-ACCES.md · src/config/demoAccounts.js', { size: 9, color: [100, 100, 100] });
 y += 4;
 
 addLine('Comptes principaux', { size: 14, bold: true, color: [230, 126, 34] });
@@ -88,6 +110,7 @@ accounts.forEach((acc, i) => {
   addLine(`   Mot de passe : ${acc.password}`);
   addLine(`   Accueil  : ${acc.home}`);
   if (acc.extra) addLine(`   ${acc.extra}`);
+  if (acc.note) addLine(`   Note : ${acc.note}`);
   y += 3;
 });
 

@@ -19,7 +19,6 @@ import {
   formatLockoutRemaining,
 } from '../utils/loginAttemptGuard';
 import LoginPetsLogo from '../components/LoginPetsLogo';
-import PetfoodLogo from '../components/PetfoodLogo';
 
 const LoginPage = () => {
   const { login, logout } = useAuth();
@@ -292,39 +291,6 @@ const LoginPage = () => {
     },
     registerHint: { textAlign: 'center', color: '#475569', fontSize: '14px', margin: '18px 0 0' },
     registerLink: { color: '#10b981', fontWeight: 700, textDecoration: 'none' },
-    topBar: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      zIndex: 2,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '16px 20px',
-      gap: '12px',
-      flexWrap: 'wrap',
-    },
-    topBarLeft: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '10px',
-    },
-    topBarActions: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '10px',
-      flexWrap: 'wrap',
-    },
-    homeLink: {
-      display: 'inline-flex',
-      alignItems: 'center',
-      textDecoration: 'none',
-      padding: '6px 10px',
-      borderRadius: '12px',
-      background: 'rgba(255,255,255,0.12)',
-      backdropFilter: 'blur(8px)',
-    },
     signInBtn: {
       padding: '10px 18px',
       borderRadius: '12px',
@@ -335,17 +301,23 @@ const LoginPage = () => {
       fontWeight: 700,
       cursor: 'pointer',
       boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+      flex: 1,
     },
     signOutBtn: {
       padding: '10px 18px',
       borderRadius: '12px',
-      border: '2px solid rgba(255,255,255,0.85)',
-      background: 'rgba(255,255,255,0.15)',
-      color: 'white',
+      border: '2px solid #d1d5db',
+      background: '#f9fafb',
+      color: '#374151',
       fontSize: '14px',
       fontWeight: 700,
       cursor: 'pointer',
-      backdropFilter: 'blur(8px)',
+      flex: 1,
+    },
+    authActionsRow: {
+      display: 'flex',
+      gap: '10px',
+      marginTop: '12px',
     },
     capsHint: {
       fontSize: '12px',
@@ -364,31 +336,6 @@ const LoginPage = () => {
   return (
     <div className="login-page-root" style={styles.container}>
       <div style={styles.overlay} />
-
-      <header className="login-page-topbar" style={styles.topBar} aria-label="Actions de connexion">
-        <div style={styles.topBarLeft}>
-          <Link to="/" style={styles.homeLink} aria-label="PetfoodTN — accueil">
-            <PetfoodLogo size="sm" variant="light" />
-          </Link>
-        </div>
-        <div style={styles.topBarActions}>
-          <button type="button" style={styles.signInBtn} onClick={handleSignInFocus}>
-            Sign in
-          </button>
-          <button
-            type="button"
-            style={{
-              ...styles.signOutBtn,
-              opacity: signingOut ? 0.7 : 1,
-              cursor: signingOut ? 'not-allowed' : 'pointer',
-            }}
-            onClick={handleSignOut}
-            disabled={signingOut}
-          >
-            {signingOut ? 'Sign out…' : 'Sign out'}
-          </button>
-        </div>
-      </header>
 
       <div
         ref={formRef}
@@ -525,19 +472,28 @@ const LoginPage = () => {
           >
             {loading ? <span style={styles.spinner} /> : 'Se connecter →'}
           </button>
+
+          <div style={styles.authActionsRow}>
+            <button type="button" style={styles.signInBtn} onClick={handleSignInFocus}>
+              Sign in
+            </button>
+            <button
+              type="button"
+              style={{
+                ...styles.signOutBtn,
+                opacity: signingOut ? 0.7 : 1,
+                cursor: signingOut ? 'not-allowed' : 'pointer',
+              }}
+              onClick={handleSignOut}
+              disabled={signingOut}
+            >
+              {signingOut ? 'Sign out…' : 'Sign out'}
+            </button>
+          </div>
         </form>
 
         <p style={styles.registerHint}>
           Pas de compte ? <Link to="/register" style={styles.registerLink}>Créer un compte</Link>
-        </p>
-        <p style={{ ...styles.registerHint, marginTop: 12 }}>
-          <Link to="/" style={{ ...styles.registerLink, color: '#059669' }}>← Découvrir les services PetfoodTN</Link>
-          {' · '}
-          <Link to="/visitor" style={{ ...styles.registerLink, color: '#0284c7' }}>Espace visiteur 👀</Link>
-          {' · '}
-          <Link to="/vendor" style={{ ...styles.registerLink, color: '#0d9488' }}>Espace vendeur 🏬</Link>
-          {' · '}
-          <Link to="/moderator" style={{ ...styles.registerLink, color: '#d97706' }}>Espace modération 🛡️</Link>
         </p>
       </div>
     </div>
