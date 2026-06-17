@@ -15,8 +15,12 @@ import IoTSensorTimelinePanel from '../components/IoTSensorTimelinePanel';
 import IoTAutomationRulesPanel from '../components/IoTAutomationRulesPanel';
 import IoTFoodQualityCamPanel from '../components/IoTFoodQualityCamPanel';
 import AdvancedIoTDevicesPanel from '../components/AdvancedIoTDevicesPanel';
+import IoTLiveStatusBar from '../components/IoTLiveStatusBar';
+import IoTEnvironmentPanel from '../components/IoTEnvironmentPanel';
+import IoTAnomalyPanel from '../components/IoTAnomalyPanel';
 import DemoModePill from '../components/DemoModePill';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import useIoTLive from '../hooks/useIoTLive';
 import './ClientComplaintsPage.css';
 import './ClientIoTHub.css';
 
@@ -103,6 +107,8 @@ const ClientIoTHubPage = () => {
     if (t && TABS.some((x) => x.id === t)) setTab(t);
   }, [searchParams]);
 
+  const live = useIoTLive({ enabled: true });
+
   const d = pack || {};
   const c = d.counts || {};
 
@@ -140,6 +146,13 @@ const ClientIoTHubPage = () => {
         </div>
       </header>
 
+      <IoTLiveStatusBar
+        socketConnected={live.socketConnected}
+        mqttConnected={live.mqttConnected || d.mqtt?.connected}
+        lastEventAt={live.lastEventAt}
+        mode={d.mode}
+      />
+
       <div className="iot-tabs">
         {TABS.map((t) => (
           <button
@@ -149,8 +162,8 @@ const ClientIoTHubPage = () => {
             className={`iot-tab${tab === t.id ? ' is-active' : ''}`}
           >
             {t.label}
-            {t.id === 'alerts' && c.alerts > 0 && (
-              <span className="iot-tab-badge">{c.alerts}</span>
+            {t.id === 'alerts' && (c.alerts > 0 || (d.anomalies?.length || 0) > 0) && (
+              <span className="iot-tab-badge">{Math.max(c.alerts || 0, d.anomalies?.length || 0)}</span>
             )}
             {t.id === 'intelligence' && (d.intelligence?.insightCount || 0) > 0 && (
               <span className="iot-tab-badge">{d.intelligence.insightCount}</span>
@@ -171,6 +184,13 @@ const ClientIoTHubPage = () => {
                 <Stat value={`${c.waterOnline || 0}/${c.waterMonitors || 0}`} label="Fontaines" color="#0ea5e9" />
                 <Stat value={c.alerts || 0} label="Alertes actives" color="#f59e0b" />
                 <Stat value={c.routinesToday || 0} label="Routines/jour" color="#7c3aed" />
+                {d.consumptionForecast?.daysUntilEmpty != null && (
+                  <Stat value={`${d.consumptionForecast.daysUntilEmpty}j`} label="Stock estimé" color={d.consumptionForecast.urgency === 'high' ? '#dc2626' : '#059669'} />
+                )}
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <IoTEnvironmentPanel environment={d.environment} telemetry={d.telemetry} />
               </div>
 
               {feederChart.length > 0 && (
@@ -269,6 +289,9 @@ const ClientIoTHubPage = () => {
                 <Stat value={d.intelligence?.criticalPredictions ?? 0} label="Prédictions critiques" color="#dc2626" />
                 <Stat value={(d.sensorTimeline || []).length} label="Événements capteurs" color="#0ea5e9" />
               </div>
+              <div style={{ marginBottom: 16 }}>
+                <IoTAnomalyPanel anomalies={d.anomalies} loading={loading} />
+              </div>
               <div className="iot-intel-grid">
                 <div className="iot-card">
                   <IoTInsightsPanel
@@ -296,6 +319,10 @@ const ClientIoTHubPage = () => {
           )}
 
           {tab === 'alerts' && (
+            <>
+              <div style={{ marginBottom: 16 }}>
+                <IoTAnomalyPanel anomalies={d.anomalies} loading={loading} />
+              </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {(d.alerts || []).map((a) => (
                 <div key={a.id} style={{
@@ -327,6 +354,7 @@ const ClientIoTHubPage = () => {
                 </div>
               )}
             </div>
+            </>
           )}
 
           {tab === 'automations' && (

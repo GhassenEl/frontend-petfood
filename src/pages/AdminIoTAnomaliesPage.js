@@ -1,63 +1,51 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Radar, Check, X } from 'lucide-react';
 import { validateIncidentProposal } from '../services/incidentMlService';
-import { simulateEsp32CamReading } from '../utils/foodQualityEngine';
+import { fetchIoTPack } from '../services/iotService';
+import { buildIoTAnomalies } from '../utils/iotAnomalyEngine';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import './AdminPages.css';
 
-const DEMO_IOT_ANOMALIES = [
-  {
-    id: 'iot-a1',
-    source: 'ESP32-CAM',
-    device: 'Récipient Max',
-    message: 'Nourriture altérée — qualité 42 %',
-    severity: 'high',
-    validated: false,
-    at: new Date().toISOString(),
-  },
-  {
-    id: 'iot-a2',
-    source: 'Chaîne du froid',
-    device: 'Entrepôt Tunis',
-    message: 'Température seuil dépassé — 8 °C',
-    severity: 'medium',
-    validated: true,
-    at: new Date(Date.now() - 3600000).toISOString(),
-  },
-  {
-    id: 'iot-a3',
-    source: 'Livraison',
-    device: 'Véhicule #12',
-    message: 'Humidité anormale en transit — 78 %',
-    severity: 'medium',
-    validated: false,
-    at: new Date(Date.now() - 7200000).toISOString(),
-  },
-];
+const mapAnomalyToRow = (a) => ({
+  id: a.id,
+  source: a.type === 'food-quality' || a.type === 'mold' ? 'ESP32-CAM' : a.type === 'humidity' ? 'Capteur HR' : a.type === 'temperature' ? 'Température' : 'IoT',
+  device: a.deviceName || '—',
+  message: a.message,
+  severity: a.severity,
+  validated: false,
+  at: new Date().toISOString(),
+});
 
 const AdminIoTAnomaliesPage = () => {
-  const [anomalies, setAnomalies] = useState(DEMO_IOT_ANOMALIES);
+  const [anomalies, setAnomalies] = useState([]);
   const [busy, setBusy] = useState(null);
 
-  const refresh = useCallback(() => {
-    const reading = simulateEsp32CamReading('deteriorated');
-    if (reading.isNonConforme) {
+  const refresh = useCallback(async () => {
+    try {
+      const pack = await fetchIoTPack();
+      const detected = (pack.anomalies || buildIoTAnomalies(pack)).map(mapAnomalyToRow);
       setAnomalies((prev) => {
-        const exists = prev.some((a) => a.source === 'ESP32-CAM' && !a.validated);
-        if (exists) return prev;
-        return [{
-          id: `iot-live-${Date.now()}`,
-          source: 'ESP32-CAM',
-          device: 'Récipient Max',
-          message: `Qualité ${reading.qualityScore} % — ${reading.state}`,
-          severity: 'high',
-          validated: false,
-          at: reading.analyzedAt,
-        }, ...prev];
+        const validated = prev.filter((a) => a.validated);
+        const merged = [...detected, ...validated.filter((v) => !detected.some((d) => d.id === v.id))];
+        return merged.slice(0, 30);
       });
+    } catch {
+      setAnomalies((prev) => (prev.length ? prev : [
+        mapAnomalyToRow({
+          id: 'iot-a1',
+          type: 'food-quality',
+          deviceName: 'ESP32-CAM Max',
+          message: 'Nourriture altérée — qualité 42 %',
+          severity: 'high',
+        }),
+      ]));
     }
   }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   usePlatformRefresh(refresh);
 
@@ -80,11 +68,13 @@ const AdminIoTAnomaliesPage = () => {
       <header className="adm-hero">
         <h1><Radar size={24} /> Anomalies IoT — validation IA</h1>
         <p>
-          Détection automatique des anomalies PetFoodIoT (ESP32-CAM, capteurs, livraison).
+          Détection automatique PetFoodIoT (température, humidité, consommation, ESP32-CAM, MQTT).
           {' '}
           <Link to="/admin/food-quality-cam">ESP32-CAM →</Link>
           {' · '}
           <Link to="/admin/incidents-ml">Incidents ML →</Link>
+          {' · '}
+          <Link to="/intelligence">Plateforme IA →</Link>
         </p>
       </header>
 
@@ -96,6 +86,10 @@ const AdminIoTAnomaliesPage = () => {
         <div className="adm-hub-kpi">
           <strong>{anomalies.length}</strong>
           <span>Total alertes</span>
+        </div>
+        <div className="adm-hub-kpi">
+          <strong>{anomalies.filter((a) => a.severity === 'high').length}</strong>
+          <span>Critiques</span>
         </div>
       </div>
 

@@ -6,6 +6,8 @@ const TYPE_META = {
   feeder: { icon: '🍽️', color: '#059669', label: 'Distributeur' },
   'feeder-cam': { icon: '📷', color: '#7c3aed', label: 'ESP32-CAM' },
   water: { icon: '💧', color: '#0ea5e9', label: 'Fontaine' },
+  scale: { icon: '⚖️', color: '#059669', label: 'Balance' },
+  'smart-fridge': { icon: '🧊', color: '#0369a1', label: 'Réfrigérateur' },
 };
 
 const QUALITY_CHIP = {
@@ -85,6 +87,15 @@ const IoTDeviceCard = ({ device }) => {
         )}
         {device.type === 'water' && m.filterDaysLeft != null && (
           <MetricChip label="Filtre" value={`${m.filterDaysLeft} j`} warn={m.filterDaysLeft < 7} />
+        )}
+        {device.type === 'scale' && m.todayGrams != null && (
+          <MetricChip label="Consommation" value={`${m.todayGrams} g/j`} warn={m.adherence < 80} />
+        )}
+        {device.type === 'smart-fridge' && m.temperatureC != null && (
+          <MetricChip label="Frigo" value={`${m.temperatureC}°C`} warn={m.temperatureC > 6} />
+        )}
+        {(device.type === 'feeder-cam' || device.type === 'smart-fridge') && m.humidityPct != null && (
+          <MetricChip label="HR" value={`${m.humidityPct}%`} warn={m.humidityPct > 75} />
         )}
       </div>
       <div className="iot-device-meta-row">

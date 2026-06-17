@@ -1,3 +1,10 @@
+import {
+  buildIoTAnomalies,
+  buildEnvironmentSummary,
+  forecastConsumption,
+  detectConsumptionSpike,
+} from './iotAnomalyEngine';
+
 const hoursAgo = (h) => new Date(Date.now() - h * 3600000).toISOString();
 
 /** Score santé global du parc IoT (0–100). */
@@ -123,6 +130,44 @@ export const generateIoTInsights = (pack = {}) => {
     }
   });
 
+  devices.filter((d) => d.type === 'smart-fridge').forEach((d) => {
+    const m = d.metrics || {};
+    if (m.temperatureC != null && m.temperatureC > 6) {
+      insights.push({
+        id: `fridge-${d.id}`,
+        icon: '🧊',
+        priority: 'high',
+        title: `Chaîne du froid ${d.petName}`,
+        message: `Réfrigérateur à ${m.temperatureC} °C — seuil 4 °C dépassé.`,
+        link: '/client-iot?tab=advanced',
+      });
+    }
+    if (m.expiryDays != null && m.expiryDays < 7) {
+      insights.push({
+        id: `expiry-${d.id}`,
+        icon: '📅',
+        priority: 'medium',
+        title: 'Péremption proche',
+        message: `Lot alimentaire expire dans ${m.expiryDays} jours.`,
+        link: '/client-iot?tab=advanced',
+      });
+    }
+  });
+
+  devices.filter((d) => d.type === 'scale').forEach((d) => {
+    const m = d.metrics || {};
+    if (m.adherence != null && m.adherence < 80) {
+      insights.push({
+        id: `scale-${d.id}`,
+        icon: '⚖️',
+        priority: 'medium',
+        title: `Ration ${d.petName}`,
+        message: `Adhérence nutritionnelle ${m.adherence} % — ajuster la distribution.`,
+        link: '/client-digital-twin',
+      });
+    }
+  });
+
   devices.filter((d) => d.type === 'water').forEach((d) => {
     const pred = predictHydrationRisk(d);
     predictions.push({ kind: 'water', ...pred });
@@ -217,6 +262,17 @@ export const buildSensorTimeline = (pack = {}) => {
         message: `Qualité croquettes : ${q === 'good' ? 'Bonne' : q === 'bad' ? 'Mauvaise' : 'À surveiller'} (${m.qualityScore ?? '—'}/100)`,
         at: hoursAgo(0.2),
       });
+      if (m.humidityPct != null) {
+        events.push({
+          id: `${d.id}-humidity`,
+          deviceId: d.id,
+          deviceName: d.name,
+          type: 'humidity',
+          icon: '💧',
+          message: `Humidité bac ${m.humidityPct} %`,
+          at: hoursAgo(0.35),
+        });
+      }
     }
     if (d.type === 'water') {
       events.push({
@@ -265,15 +321,39 @@ export const enrichIoTPack = (pack) => {
     },
   }));
 
+  const enriched = { ...base, devices };
+  const anomalies = buildIoTAnomalies(enriched);
+  const environment = buildEnvironmentSummary(devices);
+  const feeder = devices.find((d) => d.type === 'feeder');
+  const consumptionForecast = feeder
+    ? forecastConsumption(
+        base.telemetry?.feederGrams7d,
+        feeder.metrics?.reservoirPercent,
+        feeder.metrics?.capacityGrams
+      )
+    : null;
+  const feederSpike = detectConsumptionSpike(base.telemetry?.feederGrams7d, 'Croquettes');
+
   return {
-    ...base,
-    devices,
+    ...enriched,
     healthScore,
     insights,
     predictions,
     sensorTimeline,
+    anomalies,
+    environment,
+    consumptionForecast,
+    consumptionSpike: feederSpike,
+    mqtt: {
+      connected: base.mqtt?.connected ?? base.mode === 'live',
+      broker: base.mqtt?.broker || 'mqtt://localhost:1883',
+      topicPrefix: base.mqtt?.topicPrefix || 'petfood/',
+      devicesSubscribed: base.mqtt?.devicesSubscribed ?? devices.filter((d) => d.status === 'online').length,
+    },
     intelligence: {
       insightCount: insights.length,
+      anomalyCount: anomalies.length,
+      criticalAnomalies: anomalies.filter((a) => a.severity === 'high').length,
       criticalPredictions: predictions.filter((p) => p.urgency === 'high' || p.risk === 'high').length,
     },
   };

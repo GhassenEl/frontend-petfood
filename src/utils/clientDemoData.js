@@ -996,6 +996,14 @@ export const DEMO_IOT_PACK = {
   telemetry: {
     feederGrams7d: [52, 58, 61, 55, 68, 72, 65],
     waterMl7d: [480, 510, 445, 520, 490, 505, 420],
+    temperature7d: [22.1, 22.8, 23.4, 24.2, 24.8, 24.2, 23.6],
+    humidity7d: [52, 54, 56, 58, 62, 58, 55],
+  },
+  mqtt: {
+    connected: true,
+    broker: 'mqtt://localhost:1883',
+    topicPrefix: 'petfood/',
+    devicesSubscribed: 5,
   },
   sensorEvents: [
     { id: 'ev1', deviceId: 'demo-feeder-1', deviceName: 'Distributeur Max', type: 'level', icon: '📊', message: 'Distribution 30 g — repas matin', at: new Date(Date.now() - 900000).toISOString() },
