@@ -5,6 +5,7 @@ import {
   runEsp32CamSimulation,
   mergeFoodQualityReading,
 } from '../services/iotFoodQualityService';
+import { dispatchFoodQualityAlerts } from '../services/foodQualityNotificationService';
 
 const LIVE_INTERVAL_MS = 5000;
 
@@ -17,7 +18,9 @@ export default function useFoodQualityLive({ enabled = true, demoSimulate = true
   const [isLive, setIsLive] = useState(true);
   const [lastTickAt, setLastTickAt] = useState(null);
   const [socketConnected, setSocketConnected] = useState(false);
+  const [lastAlert, setLastAlert] = useState(null);
   const modeRef = useRef('demo');
+  const deviceRef = useRef(null);
 
   const applyReading = useCallback((reading) => {
     if (!reading) return;
@@ -30,6 +33,7 @@ export default function useFoodQualityLive({ enabled = true, demoSimulate = true
     try {
       const next = await fetchFoodQualityState();
       modeRef.current = next?.mode || 'demo';
+      deviceRef.current = next?.device;
       setState(next);
       setLastTickAt(Date.now());
     } finally {
@@ -46,9 +50,13 @@ export default function useFoodQualityLive({ enabled = true, demoSimulate = true
 
     const tick = async () => {
       if (modeRef.current === 'demo' && demoSimulate) {
-        const reading = await runEsp32CamSimulation();
+        const reading = await runEsp32CamSimulation(undefined, deviceRef.current);
         setState((prev) => mergeFoodQualityReading(prev, reading));
         setLastTickAt(Date.now());
+        if (reading?.isCritical || reading?.quality === 'bad') {
+          const alertResult = await dispatchFoodQualityAlerts(reading, deviceRef.current);
+          if (alertResult.sent) setLastAlert(alertResult);
+        }
         return;
       }
       try {
@@ -108,5 +116,6 @@ export default function useFoodQualityLive({ enabled = true, demoSimulate = true
     reload: load,
     applyReading,
     patchState,
+    lastAlert,
   };
 }

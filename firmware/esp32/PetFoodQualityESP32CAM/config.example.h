@@ -17,6 +17,14 @@
 // Intervalle capture + analyse (ms)
 #define ANALYZE_MS      8000
 
+// Afficheur OLED SSD1306 (I2C) — Qualité / État / Stock
+#define USE_OLED        true
+#define OLED_SDA        14
+#define OLED_SCL        15
+
+// Capteur ultrason ou estimation stock (% remplissage récipient)
+#define USE_STOCK_EST   true
+
 // true = pas de caméra requise (test bureau)
 #define SIMULATION_MODE true
 

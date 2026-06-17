@@ -1,11 +1,13 @@
 /**
  * PetfoodTN — ESP32-CAM : qualité croquettes temps réel (bonne / mauvaise)
  *
- * Comme un réfrigérateur connecté : vision (couleur + taches) + température + humidité.
+ * Comme un réfrigérateur connecté : vision (couleur + taches + insectes) + température + humidité.
+ * Affichage local SSD1306 OLED : Qualité %, État, Stock %.
  *
  * Bibliothèques Arduino :
  *   - esp32 by Espressif
  *   - DHT sensor library (Adafruit)
+ *   - Adafruit SSD1306 + Adafruit GFX (si USE_OLED)
  *   - ArduinoJson
  *
  * Carte : AI Thinker ESP32-CAM
@@ -16,12 +18,22 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
+#include <string.h>
 #include "esp_camera.h"
 #include "esp_timer.h"
 
 #if USE_DHT
 #include <DHT.h>
 DHT dht(DHT_PIN, DHT11);
+#endif
+
+#if USE_OLED
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 #endif
 
 // Broches ESP32-CAM AI Thinker
@@ -44,7 +56,59 @@ DHT dht(DHT_PIN, DHT11);
 
 static float simTemp = 21.0f;
 static float simHum = 44.0f;
+static float simStock = 65.0f;
 static int simPhase = 0;
+
+#if USE_OLED
+bool initOled() {
+  Wire.begin(OLED_SDA, OLED_SCL);
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println("OLED init échouée");
+    return false;
+  }
+  display.clearDisplay();
+  display.setTextColor(SSD1306_WHITE);
+  display.setTextSize(1);
+  display.display();
+  return true;
+}
+
+void updateOled(int score, const char* stateLabel, int stockPct, bool critical) {
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.printf("Qualite: %d%%", score);
+  display.setCursor(0, 16);
+  display.printf("Etat: %s", stateLabel);
+  display.setCursor(0, 32);
+  display.printf("Stock: %d%%", stockPct);
+  if (critical) {
+    display.setCursor(0, 48);
+    display.print("! Remplacer aliment");
+  }
+  display.display();
+}
+#endif
+
+/** Estime le niveau restant (% pixels nourriture vs fond). */
+float estimateStockLevel(camera_fb_t* fb, float avgR) {
+#if USE_STOCK_EST
+  if (!fb || !fb->buf) return simStock;
+  uint32_t foodPx = 0;
+  const size_t pixels = fb->len / 2;
+  const uint16_t* buf = (const uint16_t*)fb->buf;
+  for (size_t i = 0; i < pixels; i += 8) {
+    uint16_t p = buf[i];
+    uint8_t r = ((p >> 11) & 0x1F) << 3;
+    if (r > 90 && r < 200) foodPx++;
+  }
+  const size_t sampled = pixels / 8;
+  if (sampled == 0) return simStock;
+  float ratio = (float)foodPx / sampled;
+  return fmaxf(5.0f, fminf(95.0f, ratio * 100.0f));
+#else
+  return simStock;
+#endif
+}
 
 bool initCamera() {
   camera_config_t config;
@@ -89,14 +153,16 @@ void connectWiFi() {
   Serial.println(WiFi.status() == WL_CONNECTED ? " OK" : " ECHEC");
 }
 
-/** Analyse couleur + pixels sombres (proxy moisissure) sur frame RGB565. */
-void analyzeFrame(camera_fb_t* fb, float* avgR, float* avgG, float* avgB, float* moldRatio) {
+/** Analyse couleur + moisissure + insectes (petits clusters sombres) sur frame RGB565. */
+void analyzeFrame(camera_fb_t* fb, float* avgR, float* avgG, float* avgB, float* moldRatio, float* insectRatio) {
   *avgR = *avgG = *avgB = 0;
   *moldRatio = 0;
+  *insectRatio = 0;
   if (!fb || !fb->buf) return;
 
   uint32_t sumR = 0, sumG = 0, sumB = 0;
   uint32_t dark = 0;
+  uint32_t insect = 0;
   const size_t pixels = fb->len / 2;
   const uint16_t* buf = (const uint16_t*)fb->buf;
 
@@ -111,8 +177,9 @@ void analyzeFrame(camera_fb_t* fb, float* avgR, float* avgG, float* avgB, float*
     sumR += r;
     sumG += g;
     sumB += b;
-    if (g > r + 15 && g > b + 10) dark++;  // teinte verte/sombre suspecte
+    if (g > r + 15 && g > b + 10) dark++;
     else if (r < 60 && g < 80 && b < 60) dark++;
+    else if (r < 45 && g < 45 && b < 45 && (i % 16 == 0)) insect++;
   }
 
   const size_t sampled = pixels / 4;
@@ -121,26 +188,37 @@ void analyzeFrame(camera_fb_t* fb, float* avgR, float* avgG, float* avgB, float*
   *avgG = (float)sumG / sampled;
   *avgB = (float)sumB / sampled;
   *moldRatio = (float)dark / sampled;
+  *insectRatio = (float)insect / sampled;
 }
 
-void simulateReading(float* avgR, float* avgG, float* avgB, float* moldRatio, float* temp, float* hum) {
-  simPhase = (simPhase + 1) % 3;
+void simulateReading(float* avgR, float* avgG, float* avgB, float* moldRatio, float* insectRatio, float* temp, float* hum, float* stock) {
+  simPhase = (simPhase + 1) % 4;
   if (simPhase == 0) {
-    *avgR = 165; *avgG = 120; *avgB = 75; *moldRatio = 0.01f;
-    simTemp = 20.0f; simHum = 42.0f;
+    *avgR = 165; *avgG = 120; *avgB = 75; *moldRatio = 0.01f; *insectRatio = 0.0f;
+    simTemp = 20.0f; simHum = 42.0f; simStock = 65.0f;
   } else if (simPhase == 1) {
-    *avgR = 130; *avgG = 135; *avgB = 80; *moldRatio = 0.05f;
-    simTemp = 26.0f; simHum = 62.0f;
+    *avgR = 130; *avgG = 135; *avgB = 80; *moldRatio = 0.05f; *insectRatio = 0.005f;
+    simTemp = 26.0f; simHum = 62.0f; simStock = 38.0f;
+  } else if (simPhase == 2) {
+    *avgR = 90; *avgG = 150; *avgB = 70; *moldRatio = 0.14f; *insectRatio = 0.018f;
+    simTemp = 29.0f; simHum = 75.0f; simStock = 22.0f;
   } else {
-    *avgR = 90; *avgG = 150; *avgB = 70; *moldRatio = 0.14f;
-    simTemp = 29.0f; simHum = 75.0f;
+    *avgR = 75; *avgG = 160; *avgB = 65; *moldRatio = 0.18f; *insectRatio = 0.032f;
+    simTemp = 31.0f; simHum = 78.0f; simStock = 15.0f;
   }
   *temp = simTemp + (random(0, 20) - 10) * 0.1f;
   *hum = simHum + (random(0, 10) - 5);
+  *stock = simStock + (random(0, 10) - 5);
+}
+
+const char* qualityStateLabel(const char* quality) {
+  if (strcmp(quality, "critical") == 0 || strcmp(quality, "bad") == 0) return "Aliment altere";
+  if (strcmp(quality, "warning") == 0) return "Limite";
+  return "Bon";
 }
 
 /** Score qualité (aligné frontend foodQualityEngine.js). */
-const char* scoreQuality(int* score, float avgR, float avgG, float avgB, float mold, float temp, float hum) {
+const char* scoreQuality(int* score, float avgR, float avgG, float avgB, float mold, float insect, float temp, float hum) {
   *score = 92;
   if (temp > 28) *score -= 35;
   else if (temp > 25) *score -= 18;
@@ -151,14 +229,17 @@ const char* scoreQuality(int* score, float avgR, float avgG, float avgB, float m
   if (mold > 0.12f) *score -= 40;
   else if (mold > 0.06f) *score -= 22;
   else if (mold > 0.03f) *score -= 10;
+  if (insect > 0.025f) *score -= 35;
+  else if (insect > 0.012f) *score -= 18;
   if (*score < 0) *score = 0;
   if (*score > 100) *score = 100;
+  if (*score < 40) return "critical";
   if (*score < 50) return "bad";
   if (*score < 75) return "warning";
   return "good";
 }
 
-bool postQuality(float avgR, float avgG, float avgB, float mold, float temp, float hum, const char* quality, int score) {
+bool postQuality(float avgR, float avgG, float avgB, float mold, float insect, float temp, float hum, float stock, const char* quality, int score) {
   if (WiFi.status() != WL_CONNECTED) return false;
 
   HTTPClient http;
@@ -174,6 +255,8 @@ bool postQuality(float avgR, float avgG, float avgB, float mold, float temp, flo
   doc["avgG"] = avgG;
   doc["avgB"] = avgB;
   doc["moldPixelRatio"] = mold;
+  doc["insectPixelRatio"] = insect;
+  doc["stockLevelPct"] = stock;
   doc["temperatureC"] = temp;
   doc["humidityPct"] = hum;
   doc["quality"] = quality;
@@ -198,6 +281,10 @@ void setup() {
   dht.begin();
 #endif
 
+#if USE_OLED
+  initOled();
+#endif
+
   connectWiFi();
 
 #if !SIMULATION_MODE
@@ -210,13 +297,14 @@ void setup() {
 }
 
 void loop() {
-  float avgR, avgG, avgB, mold, temp = 22.0f, hum = 45.0f;
+  float avgR, avgG, avgB, mold, insect = 0, temp = 22.0f, hum = 45.0f, stock = 65.0f;
 
 #if SIMULATION_MODE
-  simulateReading(&avgR, &avgG, &avgB, &mold, &temp, &hum);
+  simulateReading(&avgR, &avgG, &avgB, &mold, &insect, &temp, &hum, &stock);
 #else
   camera_fb_t* fb = esp_camera_fb_get();
-  analyzeFrame(fb, &avgR, &avgG, &avgB, &mold);
+  analyzeFrame(fb, &avgR, &avgG, &avgB, &mold, &insect);
+  stock = estimateStockLevel(fb, avgR);
   esp_camera_fb_return(fb);
 #if USE_DHT
   temp = dht.readTemperature();
@@ -227,8 +315,12 @@ void loop() {
 #endif
 
   int score = 0;
-  const char* quality = scoreQuality(&score, avgR, avgG, avgB, mold, temp, hum);
-  postQuality(avgR, avgG, avgB, mold, temp, hum, quality, score);
+  const char* quality = scoreQuality(&score, avgR, avgG, avgB, mold, insect, temp, hum);
+  postQuality(avgR, avgG, avgB, mold, insect, temp, hum, stock, quality, score);
+
+#if USE_OLED
+  updateOled(score, qualityStateLabel(quality), (int)stock, score < 40);
+#endif
 
   delay(ANALYZE_MS);
 }

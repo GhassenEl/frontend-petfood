@@ -1,6 +1,6 @@
 /**
- * Analyse qualité croquettes — ESP32-CAM + capteurs type réfrigérateur connecté.
- * Entrées : RGB moyen, pixels sombres (moisissure), température, humidité, couvercle.
+ * Analyse qualité aliments — ESP32-CAM + module IA PetFoodTN.
+ * Cas d'usage : moisissures, couleur, insectes, dégradation, niveau stock.
  */
 
 const STORAGE_KEY = 'petfoodtn:iot:food-quality-readings';
@@ -14,17 +14,91 @@ export const DEFAULT_FOOD_QUALITY_SCHEDULES = [
 ];
 
 export const QUALITY_LABELS = {
-  good: { label: 'Bonne', color: '#059669', icon: '✅', fridge: 'Zone fraîche OK' },
-  warning: { label: 'À surveiller', color: '#d97706', icon: '⚠️', fridge: 'Température / humidité limite' },
-  bad: { label: 'Mauvaise', color: '#dc2626', icon: '🚫', fridge: 'Risque altération — ne pas servir' },
+  good: { label: 'Bonne', state: 'Bon', color: '#059669', icon: '✅', fridge: 'Conservation optimale' },
+  warning: { label: 'À surveiller', state: 'Limite', color: '#d97706', icon: '⚠️', fridge: 'Surveiller température / humidité' },
+  bad: { label: 'Mauvaise', state: 'Aliment altéré', color: '#dc2626', icon: '🚫', fridge: 'Ne pas servir — remplacer' },
+  critical: { label: 'Critique', state: 'Aliment altéré', color: '#991b1b', icon: '🚨', fridge: 'Remplacer l\'aliment immédiatement' },
 };
 
-/** Analyse une mesure capteur (comme un frigo connecté). */
+export const AI_DETECTION_KEYS = [
+  { key: 'mold', label: 'Moisissures', icon: '🍄' },
+  { key: 'colorShift', label: 'Changement couleur', icon: '🎨' },
+  { key: 'insects', label: 'Présence insectes', icon: '🐜' },
+  { key: 'degradation', label: 'Dégradation', icon: '📉' },
+  { key: 'stock', label: 'Niveau récipient', icon: '📦' },
+];
+
+/** Détections IA à partir des métriques capteur / vision. */
+export const detectAiSignals = ({
+  avgR = 140,
+  avgG = 110,
+  avgB = 70,
+  moldPixelRatio = 0,
+  darkSpotRatio = 0,
+  insectPixelRatio = 0,
+  colorShiftScore = 0,
+  degradationIndex = 0,
+  stockLevelPct = 65,
+  temperatureC = 22,
+  humidityPct = 45,
+} = {}) => {
+  const mold = moldPixelRatio || darkSpotRatio;
+  const colorIndex = (avgG - avgR * 0.3) / 255;
+  const computedColorShift = colorShiftScore || Math.max(0, Math.min(100, Math.round(
+    (Math.abs(avgR - 155) + Math.abs(avgG - 115)) / 3 + (colorIndex > 0.25 ? 25 : 0),
+  )));
+
+  const moldDetected = mold > 0.04;
+  const moldSeverity = mold > 0.12 ? 'high' : mold > 0.06 ? 'medium' : moldDetected ? 'low' : 'none';
+
+  const colorShiftDetected = computedColorShift > 18 || avgR < 95 || (avgG > avgR + 25);
+  const colorSeverity = computedColorShift > 40 ? 'high' : computedColorShift > 22 ? 'medium' : colorShiftDetected ? 'low' : 'none';
+
+  const insectsDetected = insectPixelRatio > 0.008;
+  const insectSeverity = insectPixelRatio > 0.025 ? 'high' : insectPixelRatio > 0.015 ? 'medium' : insectsDetected ? 'low' : 'none';
+
+  const degradationDetected = degradationIndex > 25 || temperatureC > 26 || humidityPct > 62;
+  const degradationSeverity = degradationIndex > 60 ? 'high' : degradationIndex > 35 ? 'medium' : degradationDetected ? 'low' : 'none';
+
+  const stockLow = stockLevelPct < 25;
+  const stockSeverity = stockLevelPct < 10 ? 'high' : stockLevelPct < 25 ? 'medium' : 'none';
+
+  return {
+    mold: { detected: moldDetected, severity: moldSeverity, value: Math.round(mold * 1000) / 10, unit: '% pixels' },
+    colorShift: { detected: colorShiftDetected, severity: colorSeverity, value: computedColorShift, unit: '/100' },
+    insects: { detected: insectsDetected, severity: insectSeverity, value: Math.round(insectPixelRatio * 10000) / 100, unit: '% pixels' },
+    degradation: { detected: degradationDetected, severity: degradationSeverity, value: degradationIndex, unit: '/100' },
+    stock: { detected: stockLow, severity: stockSeverity, value: Math.round(stockLevelPct), unit: '% restant' },
+  };
+};
+
+/** Action recommandée selon le score et les détections. */
+export const getRecommendedAction = (quality, qualityScore, signals = {}) => {
+  if (quality === 'critical' || qualityScore < 40) {
+    return 'Remplacer l\'aliment';
+  }
+  if (quality === 'bad' || qualityScore < 50) {
+    return 'Retirer et remplacer l\'aliment';
+  }
+  if (signals.stock?.severity === 'high' || signals.stock?.severity === 'medium') {
+    return 'Réapprovisionner le récipient';
+  }
+  if (quality === 'warning') {
+    return 'Surveiller et ventiler le bac';
+  }
+  return 'Aucune action — aliment OK';
+};
+
+/** Analyse complète (vision ESP32-CAM + capteurs + module IA). */
 export const analyzeFoodQuality = ({
   avgR = 140,
   avgG = 110,
   avgB = 70,
   moldPixelRatio = 0,
+  insectPixelRatio = 0,
+  colorShiftScore = 0,
+  degradationIndex = 0,
+  stockLevelPct = 65,
   temperatureC = 22,
   humidityPct = 45,
   lidOpen = false,
@@ -33,58 +107,80 @@ export const analyzeFoodQuality = ({
   const mold = moldPixelRatio || darkSpotRatio;
   let score = 92;
 
-  // Température bac croquettes (idéal 15–22 °C)
   if (temperatureC > 28) score -= 35;
   else if (temperatureC > 25) score -= 18;
   else if (temperatureC > 22) score -= 8;
   else if (temperatureC < 10) score -= 5;
 
-  // Humidité (idéal 35–55 % — au-delà moisissure)
   if (humidityPct > 70) score -= 30;
   else if (humidityPct > 60) score -= 15;
   else if (humidityPct < 25) score -= 5;
 
-  // Couleur anormale (oxidation / moisissure verte)
   const colorIndex = (avgG - avgR * 0.3) / 255;
   if (colorIndex > 0.35) score -= 20;
   if (avgR < 80 && avgG > 100) score -= 25;
 
-  // Moisissure / taches sombres (vision ESP32-CAM)
   if (mold > 0.12) score -= 40;
   else if (mold > 0.06) score -= 22;
   else if (mold > 0.03) score -= 10;
+
+  if (insectPixelRatio > 0.025) score -= 35;
+  else if (insectPixelRatio > 0.012) score -= 18;
+
+  const computedDegradation = degradationIndex || Math.max(0, Math.min(100,
+    (mold * 200) + (insectPixelRatio * 300) + (temperatureC > 25 ? (temperatureC - 22) * 8 : 0),
+  ));
+  if (computedDegradation > 55) score -= 25;
+  else if (computedDegradation > 30) score -= 12;
 
   if (lidOpen) score -= 12;
 
   score = Math.max(0, Math.min(100, Math.round(score)));
 
   let quality = 'good';
-  if (score < 50) quality = 'bad';
+  if (score < 40) quality = 'critical';
+  else if (score < 50) quality = 'bad';
   else if (score < 75) quality = 'warning';
 
-  const meta = QUALITY_LABELS[quality];
+  const meta = QUALITY_LABELS[quality] || QUALITY_LABELS.good;
+  const aiSignals = detectAiSignals({
+    avgR, avgG, avgB, moldPixelRatio: mold, insectPixelRatio,
+    colorShiftScore, degradationIndex: computedDegradation,
+    stockLevelPct, temperatureC, humidityPct,
+  });
+  const recommendedAction = getRecommendedAction(quality, score, aiSignals);
 
   const aiSummary =
-    quality === 'bad'
-      ? `Qualité mauvaise (${score}/100) — ${mold > 0.08 ? 'taches suspectes détectées' : 'conditions de stockage dégradées'}. Retirez les croquettes.`
+    quality === 'critical' || quality === 'bad'
+      ? `Qualité ${meta.state.toLowerCase()} (${score}%) — ${
+        aiSignals.mold.detected ? 'moisissures détectées. ' : ''
+      }${aiSignals.insects.detected ? 'insectes suspects. ' : ''}Action : ${recommendedAction}.`
       : quality === 'warning'
-        ? `Qualité acceptable mais limite (${score}/100) — vérifiez température (${temperatureC} °C) et humidité (${humidityPct} %).`
-        : `Qualité bonne (${score}/100) — conditions de conservation optimales.`;
+        ? `Qualité limite (${score}%) — température ${temperatureC} °C, humidité ${humidityPct} %. ${recommendedAction}.`
+        : `Qualité bonne (${score}%) — stock ${Math.round(stockLevelPct)} %, conservation optimale.`;
 
   return {
     quality,
     qualityScore: score,
     label: meta.label,
+    state: meta.state,
     color: meta.color,
     icon: meta.icon,
     avgR: Math.round(avgR),
     avgG: Math.round(avgG),
     avgB: Math.round(avgB),
     moldPixelRatio: Math.round(mold * 1000) / 1000,
+    insectPixelRatio: Math.round(insectPixelRatio * 10000) / 10000,
+    colorShiftScore: aiSignals.colorShift.value,
+    degradationIndex: computedDegradation,
+    stockLevelPct: Math.round(stockLevelPct),
     temperatureC: Math.round(temperatureC * 10) / 10,
     humidityPct: Math.round(humidityPct),
     lidOpen,
     colorIndex: Math.round(colorIndex * 100) / 100,
+    aiSignals,
+    recommendedAction,
+    isCritical: quality === 'critical' || score < 40,
     aiSummary,
     analyzedAt: new Date().toISOString(),
     source: 'esp32-cam',
@@ -92,14 +188,34 @@ export const analyzeFoodQuality = ({
 };
 
 const scenarios = [
-  { name: 'good', avgR: 165, avgG: 120, avgB: 75, moldPixelRatio: 0.01, temperatureC: 20, humidityPct: 42 },
-  { name: 'warning', avgR: 130, avgG: 135, avgB: 80, moldPixelRatio: 0.05, temperatureC: 26, humidityPct: 62 },
-  { name: 'bad', avgR: 90, avgG: 150, avgB: 70, moldPixelRatio: 0.14, temperatureC: 29, humidityPct: 75 },
+  {
+    name: 'good',
+    avgR: 165, avgG: 120, avgB: 75,
+    moldPixelRatio: 0.01, insectPixelRatio: 0,
+    temperatureC: 20, humidityPct: 42, stockLevelPct: 65,
+  },
+  {
+    name: 'warning',
+    avgR: 130, avgG: 135, avgB: 80,
+    moldPixelRatio: 0.05, insectPixelRatio: 0.005,
+    temperatureC: 26, humidityPct: 62, stockLevelPct: 38,
+  },
+  {
+    name: 'bad',
+    avgR: 90, avgG: 150, avgB: 70,
+    moldPixelRatio: 0.14, insectPixelRatio: 0.018,
+    temperatureC: 29, humidityPct: 75, stockLevelPct: 22,
+  },
+  {
+    name: 'critical',
+    avgR: 75, avgG: 160, avgB: 65,
+    moldPixelRatio: 0.18, insectPixelRatio: 0.032,
+    temperatureC: 31, humidityPct: 78, stockLevelPct: 15,
+  },
 ];
 
 let scenarioIndex = 0;
 
-/** Simule une lecture ESP32-CAM (cycle bon → alerte → mauvais). */
 export const simulateEsp32CamReading = (forcedScenario) => {
   const base = forcedScenario
     ? scenarios.find((s) => s.name === forcedScenario) || scenarios[0]
@@ -113,7 +229,9 @@ export const simulateEsp32CamReading = (forcedScenario) => {
     avgG: base.avgG + jitter(),
     temperatureC: base.temperatureC + jitter() * 0.5,
     humidityPct: base.humidityPct + jitter(),
+    stockLevelPct: Math.max(5, base.stockLevelPct + jitter() * 2),
     moldPixelRatio: Math.max(0, base.moldPixelRatio + (Math.random() - 0.5) * 0.01),
+    insectPixelRatio: Math.max(0, base.insectPixelRatio + (Math.random() - 0.5) * 0.003),
     lidOpen: false,
   });
 };
@@ -134,7 +252,7 @@ export const buildDemoQualityHistory = () => {
       else return;
     }
 
-    const s = scenarios[i % 3];
+    const s = scenarios[i % scenarios.length];
     const reading = analyzeFoodQuality({
       ...s,
       moldPixelRatio: s.moldPixelRatio + (Math.random() * 0.02),
@@ -148,7 +266,6 @@ export const buildDemoQualityHistory = () => {
   return history.sort((a, b) => new Date(b.analyzedAt) - new Date(a.analyzedAt));
 };
 
-/** "07:30" → minutes depuis minuit */
 export const timeToMinutes = (time = '00:00') => {
   const [h, m] = String(time).split(':').map(Number);
   return (h || 0) * 60 + (m || 0);
@@ -169,7 +286,6 @@ export const formatTimeShort = (iso) => {
   return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 };
 
-/** Prochain créneau de contrôle ESP32-CAM */
 export const getNextScheduledCheck = (schedules = DEFAULT_FOOD_QUALITY_SCHEDULES, refDate = new Date()) => {
   const enabled = schedules.filter((s) => s.enabled !== false);
   if (!enabled.length) return null;
@@ -194,7 +310,6 @@ export const getNextScheduledCheck = (schedules = DEFAULT_FOOD_QUALITY_SCHEDULES
   return { ...first, at: next.toISOString(), isToday: false };
 };
 
-/** Statut de chaque horaire aujourd'hui (effectué / manqué / à venir) */
 export const buildScheduleStatuses = (schedules = DEFAULT_FOOD_QUALITY_SCHEDULES, history = [], refDate = new Date()) => {
   const today = refDate.toDateString();
   const nowMin = refDate.getHours() * 60 + refDate.getMinutes();

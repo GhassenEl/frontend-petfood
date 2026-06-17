@@ -24,6 +24,7 @@ const TYPE_LABELS = {
   vet_consultation: 'Consultation',
   leave_status: 'Congés',
   leave_request: 'Demande congé',
+  iot_food_quality: 'Qualité alimentaire IoT',
 };
 
 const ROLE_LABELS = {
@@ -86,6 +87,8 @@ const getIcon = (type) => {
     case 'leave_status':
     case 'leave_request':
       return '🏖️';
+    case 'iot_food_quality':
+      return '📷';
     default:
       return '🔔';
   }

@@ -12,6 +12,7 @@ import {
   getNextScheduledCheck,
   buildScheduleStatuses,
 } from '../utils/foodQualityEngine';
+import { dispatchFoodQualityAlerts } from './foodQualityNotificationService';
 
 /** Fusionne une nouvelle lecture dans l'état affiché. */
 export function mergeFoodQualityReading(prev, reading) {
@@ -60,10 +61,11 @@ export async function fetchFoodQualityState() {
     schedules,
     device: {
       id: 'demo-esp32cam-1',
-      name: 'ESP32-CAM — Bac croquettes Max',
+      name: 'ESP32-CAM — Récipient Max',
       petName: 'Max',
-      model: 'ESP32-CAM + DHT11',
+      model: 'ESP32-CAM + DHT11 + SSD1306 OLED',
       status: 'online',
+      display: 'OLED 128x64',
     },
   });
 }
@@ -89,19 +91,24 @@ export async function saveFoodQualitySchedules(schedules) {
   }
 }
 
-export async function postFoodQualityReading(reading) {
+export async function postFoodQualityReading(reading, device) {
+  let saved = reading;
   try {
     const { data } = await api.post('/client/iot/food-quality/reading', reading);
-    return data?.reading || reading;
+    saved = data?.reading || reading;
   } catch {
-    return storeQualityReading(reading)[0];
+    saved = storeQualityReading(reading)[0];
   }
+
+  const alertResult = await dispatchFoodQualityAlerts(saved, device);
+  return { reading: saved, alertResult };
 }
 
-export async function runEsp32CamSimulation(scenario) {
+export async function runEsp32CamSimulation(scenario, device) {
   const reading = simulateEsp32CamReading(scenario);
-  reading.deviceId = 'demo-esp32cam-1';
-  return postFoodQualityReading(reading);
+  reading.deviceId = device?.id || 'demo-esp32cam-1';
+  const result = await postFoodQualityReading(reading, device);
+  return result.reading;
 }
 
 export { analyzeFoodQuality, simulateEsp32CamReading };
