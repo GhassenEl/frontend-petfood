@@ -1178,6 +1178,69 @@ export const applyDemoWaterRefill = (tracking, volumeMl = 1500) => {
   return next;
 };
 
+const DEMO_GENESIS_HASH = '0'.repeat(64);
+const DEMO_BLOCK_HASHES = [
+  'a3f8c2e1b9d04f6a8e7c5d3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3',
+  'b4e9d3f2c0a15e7b9d8f6e4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3',
+  'c5f0e4a3b1c26f8d0b9a7e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3',
+  'd6a1f5b4c3e27f9e1c0b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3',
+  'e6f1a5b4c3d26f8e0d9b7a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3',
+];
+const DEMO_MERKLE_ROOT = '5052df2f01dc08d6c4563a59e8f4d763d13203e72c14a629a290d307e40d4e3f';
+
+const buildDemoSupplyChain = () => [
+  {
+    step: 'origine',
+    label: 'Origine matières premières',
+    location: 'Béja, Tunisie',
+    actor: 'NutriPet SARL',
+    timestamp: daysAgo(90),
+    hash: DEMO_BLOCK_HASHES[0],
+    prevHash: DEMO_GENESIS_HASH,
+    dataPayload: 'LOT:PF-TN-2026-A042 | Matières: volaille 42%, céréales 38%',
+  },
+  {
+    step: 'transformation',
+    label: 'Fabrication / conditionnement',
+    location: 'Usine de conditionnement Béja Nord',
+    actor: 'NutriPet SARL',
+    timestamp: daysAgo(45),
+    hash: DEMO_BLOCK_HASHES[1],
+    prevHash: DEMO_BLOCK_HASHES[0],
+    dataPayload: 'Temp extrusion: 85°C | Humidité: 8.2%',
+  },
+  {
+    step: 'certification',
+    label: 'Contrôle & certification',
+    location: 'Laboratoire partenaire',
+    actor: 'PetfoodTN Quality Lab',
+    timestamp: daysAgo(30),
+    hash: DEMO_BLOCK_HASHES[2],
+    prevHash: DEMO_BLOCK_HASHES[1],
+    dataPayload: 'ISO 22000 | Salmonelle: négatif | Aflatoxines: OK',
+  },
+  {
+    step: 'distribution',
+    label: 'Entrepôt & distribution',
+    location: 'Hub PetfoodTN Tunis',
+    actor: 'PetfoodTN Logistics',
+    timestamp: daysAgo(20),
+    hash: DEMO_BLOCK_HASHES[3],
+    prevHash: DEMO_BLOCK_HASHES[2],
+    dataPayload: 'Chaîne du froid: 4–18°C | GPS: 36.8065, 10.1815',
+  },
+  {
+    step: 'retail',
+    label: 'Mise en vente marketplace',
+    location: 'PetfoodTN Marketplace',
+    actor: 'PetfoodTN',
+    timestamp: daysAgo(5),
+    hash: DEMO_BLOCK_HASHES[4],
+    prevHash: DEMO_BLOCK_HASHES[3],
+    dataPayload: 'SKU marketplace | Prix TTC enregistré',
+  },
+];
+
 export const getDemoProductTraceability = (productId, productName = 'Croquettes Premium Chien') => ({
   product: { id: productId, name: productName },
   batchCode: 'PF-TN-2026-A042',
@@ -1193,23 +1256,26 @@ export const getDemoProductTraceability = (productId, productName = 'Croquettes 
     network: 'PetfoodTN Chain (SHA-256)',
     algorithm: 'SHA-256',
     blockCount: 5,
-    rootHash: 'a3f8c2e1b9d04f6a8e7c5d3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6',
-    lastBlockHash: 'e6f1a5b4c3d26f8e0d9b7a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8',
+    rootHash: DEMO_MERKLE_ROOT,
+    merkleRoot: DEMO_MERKLE_ROOT,
+    lastBlockHash: DEMO_BLOCK_HASHES[4],
     isVerified: true,
     trustScore: 94,
     verification: { valid: true, reason: 'Chaîne intacte — aucune altération détectée (démo).', blockCount: 5 },
   },
+  iotAnchor: {
+    deviceId: 'ESP32-CAM-PFIOT-001',
+    qualityScore: 87,
+    txHash: 'f7a2b3c4d5e6789012345678901234567890abcdef1234567890abcdef123456',
+    capturedAt: daysAgo(3),
+    temperature: 22.4,
+    humidity: 48,
+  },
   nutrition: { protein: '26%', fat: '12%', fiber: '4%', moisture: '9%', ash: '7%', kcalPer100g: 360 },
   allergens: ['Volaille'],
   ingredients: ['Viande déshydratée de poulet', 'Riz complet', 'Huile de poisson', 'Légumes déshydratés', 'Vitamines & minéraux'],
-  qrPayload: { batchCode: 'PF-TN-2026-A042', productId: productId, verifyUrl: '/client-traceability?batch=PF-TN-2026-A042', rootHash: 'a3f8c2e1b9d04f6a' },
-  supplyChain: [
-    { step: 'origine', label: 'Origine matières premières', location: 'Béja, Tunisie', actor: 'NutriPet SARL', timestamp: daysAgo(90), hash: 'a3f8c2e1b9d04f6a8e7c5d3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6' },
-    { step: 'transformation', label: 'Fabrication / conditionnement', location: 'Usine de conditionnement Béja Nord', actor: 'NutriPet SARL', timestamp: daysAgo(45), hash: 'b4e9d3f2c0a15e7b9d8f6e4c3b2a1f0e9d8c7b6a5f4e3' },
-    { step: 'certification', label: 'Contrôle & certification', location: 'Laboratoire partenaire', actor: 'PetfoodTN Quality Lab', timestamp: daysAgo(30), hash: 'c5f0e4a3b1c26f8d0b9a7e5d4c3b2a1f0e9d8c7b6a5f4e3d2' },
-    { step: 'distribution', label: 'Entrepôt & distribution', location: 'Hub PetfoodTN Tunis', actor: 'PetfoodTN Logistics', timestamp: daysAgo(20), hash: 'd6a1f5b4c3e27g9e1c0b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2' },
-    { step: 'retail', label: 'Mise en vente marketplace', location: 'PetfoodTN Marketplace', actor: 'PetfoodTN', timestamp: daysAgo(5), hash: 'e6f1a5b4c3d26f8e0d9b7a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8' },
-  ],
+  qrPayload: { batchCode: 'PF-TN-2026-A042', productId: productId, verifyUrl: '/client-traceability?batch=PF-TN-2026-A042', rootHash: DEMO_MERKLE_ROOT.slice(0, 16) },
+  supplyChain: buildDemoSupplyChain(),
   demoMode: true,
 });
 

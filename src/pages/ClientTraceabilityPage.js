@@ -2,10 +2,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   Shield, Link2, MapPin, CheckCircle2, XCircle, Search, RefreshCw,
-  Package, QrCode, Copy, Beaker, AlertTriangle,
+  Package, QrCode, Copy, Beaker, AlertTriangle, Cpu,
 } from 'lucide-react';
 import api from '../utils/api';
 import BlockchainTimeline from '../components/BlockchainTimeline';
+import BlockchainBlockExplorer from '../components/BlockchainBlockExplorer';
 import DemoModePill from '../components/DemoModePill';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import {
@@ -16,6 +17,8 @@ import {
   verifyBatchCode,
 } from '../services/traceabilityService';
 import { getDemoProductTraceability, DEMO_MY_ORDER_TRACES } from '../utils/clientDemoData';
+import { analyzeTraceBlockchain } from '../utils/blockchainEngine';
+import './ClientTraceability.css';
 
 const card = {
   background: '#fff',
@@ -28,6 +31,7 @@ const card = {
 
 const TABS = [
   { id: 'explorer', label: 'Explorateur' },
+  { id: 'blocks', label: 'Explorateur blocs' },
   { id: 'orders', label: 'Mes achats' },
   { id: 'verify', label: 'Vérifier un lot' },
 ];
@@ -74,6 +78,8 @@ const ClientTraceabilityPage = () => {
   const [batchResult, setBatchResult] = useState(null);
   const [batchBusy, setBatchBusy] = useState(false);
   const [copyMsg, setCopyMsg] = useState('');
+  const [localAnalysis, setLocalAnalysis] = useState(null);
+  const [analysisBusy, setAnalysisBusy] = useState(false);
 
   const loadOverview = useCallback(async () => {
     setLoading(true);
@@ -133,8 +139,28 @@ const ClientTraceabilityPage = () => {
   }, [catalog]);
 
   useEffect(() => {
-    if (selectedId && tab === 'explorer') loadTrace(selectedId);
+    if (selectedId && (tab === 'explorer' || tab === 'blocks')) loadTrace(selectedId);
   }, [selectedId, tab, loadTrace]);
+
+  useEffect(() => {
+    if (!trace) {
+      setLocalAnalysis(null);
+      return undefined;
+    }
+    let cancelled = false;
+    setAnalysisBusy(true);
+    analyzeTraceBlockchain(trace)
+      .then((result) => {
+        if (!cancelled) setLocalAnalysis(result);
+      })
+      .catch(() => {
+        if (!cancelled) setLocalAnalysis(null);
+      })
+      .finally(() => {
+        if (!cancelled) setAnalysisBusy(false);
+      });
+    return () => { cancelled = true; };
+  }, [trace]);
 
   const runBatchVerify = async () => {
     const code = batchInput.trim();
@@ -169,7 +195,8 @@ const ClientTraceabilityPage = () => {
   }, []);
 
   const bc = trace?.blockchain;
-  const valid = bc?.isVerified && (bc?.verification?.valid ?? verify?.valid);
+  const valid = localAnalysis?.valid ?? (bc?.isVerified && (bc?.verification?.valid ?? verify?.valid));
+  const trustScore = localAnalysis?.trustScore ?? bc?.trustScore ?? (valid ? 90 : 40);
 
   const kpis = useMemo(() => ({
     traced: traceList.length || catalog.length,
@@ -187,20 +214,12 @@ const ClientTraceabilityPage = () => {
 
   return (
     <div style={{ padding: 24, maxWidth: 1100, margin: '0 auto' }}>
-      <header style={{
-        ...card,
-        background: 'linear-gradient(135deg, #0f766e, #115e59, #134e4a)',
-        color: '#fff',
-        border: 'none',
-      }}
-      >
+      <header className="bc-page-header">
         <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h1 style={{ margin: '0 0 8px', fontWeight: 900, fontSize: 26, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Link2 size={28} /> Traçabilité blockchain
-            </h1>
-            <p style={{ margin: 0, opacity: 0.9, fontSize: 14, maxWidth: 560 }}>
-              Origine, certifications, chaîne d&apos;approvisionnement immuable (SHA-256) et vérification de lot en temps réel.
+            <h1><Link2 size={28} /> Traçabilité blockchain</h1>
+            <p>
+              Origine, certifications, chaîne d&apos;approvisionnement immuable (SHA-256), racine Merkle et ancrage IoT PetFoodIoT.
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -210,25 +229,20 @@ const ClientTraceabilityPage = () => {
             </button>
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 12, marginTop: 20 }}>
-          <Kpi label="Produits tracés" value={kpis.traced} />
-          <Kpi label="Chaînes vérifiées" value={kpis.verified || (valid ? 1 : 0)} />
-          <Kpi label="Achats traçables" value={kpis.orders} />
+        <div className="bc-kpis">
+          <div className="bc-kpi"><strong>{kpis.traced}</strong><span>Produits tracés</span></div>
+          <div className="bc-kpi"><strong>{kpis.verified || (valid ? 1 : 0)}</strong><span>Chaînes vérifiées</span></div>
+          <div className="bc-kpi"><strong>{kpis.orders}</strong><span>Achats traçables</span></div>
         </div>
       </header>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div className="bc-tabs">
         {TABS.map((t) => (
           <button
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            style={{
-              padding: '10px 16px', borderRadius: 10, fontWeight: 700, cursor: 'pointer',
-              border: tab === t.id ? '2px solid #0f766e' : '1px solid #e2e8f0',
-              background: tab === t.id ? '#f0fdfa' : '#fff',
-              color: tab === t.id ? '#0f766e' : '#475569',
-            }}
+            className={`bc-tab${tab === t.id ? ' bc-tab--active' : ''}`}
           >
             {t.label}
           </button>
@@ -280,7 +294,70 @@ const ClientTraceabilityPage = () => {
           )}
 
           {loading && <p style={{ color: '#94a3b8' }}>Chargement de la chaîne…</p>}
-          {trace && <TraceDetail trace={trace} valid={valid} onCopyHash={copyHash} copyMsg={copyMsg} />}
+          {trace && (
+            <TraceDetail
+              trace={trace}
+              valid={valid}
+              trustScore={trustScore}
+              localAnalysis={localAnalysis}
+              analysisBusy={analysisBusy}
+              onCopyHash={copyHash}
+              copyMsg={copyMsg}
+            />
+          )}
+        </>
+      )}
+
+      {tab === 'blocks' && (
+        <>
+          <div className="bc-card" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+            <Search size={18} color="#64748b" />
+            <select
+              value={selectedId}
+              onChange={(e) => {
+                setSelectedId(e.target.value);
+                setSearchParams(e.target.value ? { productId: e.target.value } : {});
+              }}
+              style={{ flex: 1, minWidth: 220, padding: 10, borderRadius: 8, border: '1px solid #e2e8f0' }}
+            >
+              <option value="">— Choisir un produit —</option>
+              {catalog.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+            {valid != null && <StatusBadge valid={valid} />}
+          </div>
+
+          {loading && <p style={{ color: '#94a3b8' }}>Chargement des blocs…</p>}
+
+          {trace && (
+            <div className="bc-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
+                <div>
+                  <h2 style={{ margin: '0 0 4px', fontSize: 18 }}>{trace.product?.name}</h2>
+                  <p style={{ margin: 0, color: '#64748b', fontSize: 13 }}>
+                    Lot <strong>{trace.batchCode}</strong> · {bc?.blockCount || trace.supplyChain?.length} blocs
+                  </p>
+                </div>
+                <TrustRing score={trustScore} valid={valid} />
+              </div>
+
+              <BlockchainVerifyPanel analysis={localAnalysis} busy={analysisBusy} />
+
+              <BlockchainBlockExplorer
+                steps={trace.supplyChain || []}
+                valid={valid}
+                merkleRoot={bc?.merkleRoot || bc?.rootHash}
+                iotAnchor={trace.iotAnchor}
+                onCopyHash={copyHash}
+              />
+              {copyMsg && <p style={{ margin: '8px 0 0', fontSize: 12, color: '#059669' }}>{copyMsg}</p>}
+            </div>
+          )}
+
+          {!trace && !loading && (
+            <p style={{ color: '#64748b' }}>Sélectionnez un produit pour explorer la chaîne de blocs.</p>
+          )}
         </>
       )}
 
@@ -373,7 +450,7 @@ const ClientTraceabilityPage = () => {
   );
 };
 
-const TraceDetail = ({ trace, valid, onCopyHash, copyMsg, compact }) => {
+const TraceDetail = ({ trace, valid, trustScore, localAnalysis, analysisBusy, onCopyHash, copyMsg, compact }) => {
   const bc = trace?.blockchain;
   return (
     <>
@@ -385,10 +462,17 @@ const TraceDetail = ({ trace, valid, onCopyHash, copyMsg, compact }) => {
               Lot <strong>{trace.batchCode}</strong> · {bc?.network || bc?.algorithm}
             </p>
           </div>
-          {!compact && <TrustMeter score={bc?.trustScore || (valid ? 90 : 40)} />}
+          {!compact && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <TrustRing score={trustScore} valid={valid} />
+              <TrustMeter score={trustScore} />
+            </div>
+          )}
         </div>
         {copyMsg && <p style={{ margin: '8px 0 0', fontSize: 12, color: '#059669' }}>{copyMsg}</p>}
       </div>
+
+      {!compact && <BlockchainVerifyPanel analysis={localAnalysis} busy={analysisBusy} />}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
         <div style={card}>
@@ -444,15 +528,15 @@ const TraceDetail = ({ trace, valid, onCopyHash, copyMsg, compact }) => {
       <div style={card}>
         <h3 style={{ marginTop: 0 }}>Chaîne blockchain ({bc?.blockCount} blocs)</h3>
         <div style={{ fontSize: 12, color: '#64748b', marginBottom: 12, wordBreak: 'break-all' }}>
-          Racine : {bc?.rootHash}
-          <button type="button" onClick={() => onCopyHash(bc?.rootHash)} style={copyBtn} title="Copier">
+          Racine Merkle : {bc?.merkleRoot || bc?.rootHash}
+          <button type="button" onClick={() => onCopyHash(bc?.merkleRoot || bc?.rootHash)} style={copyBtn} title="Copier">
             <Copy size={12} />
           </button>
         </div>
         <BlockchainTimeline steps={trace.supplyChain || []} valid={valid} />
-        {bc?.verification && (
+        {(localAnalysis?.reason || bc?.verification?.reason) && (
           <p style={{ marginTop: 12, fontSize: 14, fontWeight: 600, color: valid ? '#047857' : '#b91c1c' }}>
-            {bc.verification.reason}
+            {localAnalysis?.reason || bc.verification.reason}
           </p>
         )}
       </div>
@@ -468,12 +552,47 @@ const TraceDetail = ({ trace, valid, onCopyHash, copyMsg, compact }) => {
   );
 };
 
-const Kpi = ({ label, value }) => (
-  <div style={{ padding: '12px 16px', borderRadius: 12, background: 'rgba(255,255,255,0.12)', textAlign: 'center' }}>
-    <div style={{ fontSize: 24, fontWeight: 900 }}>{value}</div>
-    <div style={{ fontSize: 11, opacity: 0.85 }}>{label}</div>
-  </div>
-);
+const BlockchainVerifyPanel = ({ analysis, busy }) => {
+  if (busy) {
+    return <p className="bc-pulse" style={{ fontSize: 13, color: '#64748b', marginBottom: 16 }}>Vérification locale SHA-256 / Merkle…</p>;
+  }
+  if (!analysis) return null;
+
+  const chainOk = analysis.chain?.valid;
+  const merkleOk = analysis.merkle?.valid;
+  const iotOk = !analysis.iotAnchor || analysis.iotAnchor.valid;
+
+  return (
+    <div className="bc-verify-panel">
+      <div className={`bc-verify-stat${chainOk ? ' bc-verify-stat--ok' : ' bc-verify-stat--bad'}`}>
+        <strong>{chainOk ? '✓' : '✗'}</strong>
+        <span>Chaînage blocs</span>
+      </div>
+      <div className={`bc-verify-stat${merkleOk ? ' bc-verify-stat--ok' : ' bc-verify-stat--bad'}`}>
+        <strong>{merkleOk ? '✓' : '✗'}</strong>
+        <span>Racine Merkle</span>
+      </div>
+      <div className={`bc-verify-stat${iotOk ? ' bc-verify-stat--ok' : ' bc-verify-stat--bad'}`}>
+        <strong>{analysis.iotAnchor ? (iotOk ? '✓' : '✗') : '—'}</strong>
+        <span><Cpu size={10} style={{ verticalAlign: 'middle' }} /> Ancrage IoT</span>
+      </div>
+      <div className="bc-verify-stat">
+        <strong>{analysis.blockCount}</strong>
+        <span>Blocs</span>
+      </div>
+    </div>
+  );
+};
+
+const TrustRing = ({ score = 0, valid }) => {
+  const color = valid ? (score >= 85 ? '#059669' : '#d97706') : '#dc2626';
+  return (
+    <div className="bc-trust-ring" style={{ borderColor: color, color }}>
+      <span className="bc-trust-ring__score">{score}</span>
+      <span className="bc-trust-ring__label">Confiance</span>
+    </div>
+  );
+};
 
 const StatusBadge = ({ valid }) => (
   <span style={{
