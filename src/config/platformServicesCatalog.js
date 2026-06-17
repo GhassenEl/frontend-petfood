@@ -101,6 +101,18 @@ export const PLATFORM_SERVICES = [
     serviceKey: 'ecosystemService',
   },
   {
+    id: 'platform-compliance',
+    category: 'ecosystem',
+    roles: ['client', 'visitor'],
+    label: 'Conformité ISO & environnement',
+    description: 'Normes ISO, certifications mondiales, engagements écologiques et audits qualité.',
+    route: '/compliance',
+    icon: '🛡️',
+    api: 'GET /api/platform/compliance',
+    serviceKey: 'platformComplianceEngine',
+    badge: 'ISO',
+  },
+  {
     id: 'checkout',
     category: 'boutique',
     roles: ['client'],

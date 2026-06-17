@@ -105,6 +105,7 @@ import ClientPetsPage from './pages/ClientPetsPage';
 import ClientPetPassportPage from './pages/ClientPetPassportPage';
 import PlatformServicesPage from './pages/PlatformServicesPage';
 import MarketingLandingPage from './pages/MarketingLandingPage';
+import PlatformCompliancePage from './pages/PlatformCompliancePage';
 import VisitorHubPage from './pages/VisitorHubPage';
 import VisitorProductsPage from './pages/VisitorProductsPage';
 import VisitorInfoPage from './pages/VisitorInfoPage';
@@ -238,6 +239,8 @@ const App = () => {
         <Route path="/vendor" element={<VendorHubPage />} />
         <Route path="/moderator" element={<ModeratorHubPage />} />
         <Route path="/capabilities" element={<CapabilitiesRoute user={null} />} />
+        <Route path="/compliance" element={<PlatformCompliancePage />} />
+        <Route path="/qualite-iso" element={<PlatformCompliancePage />} />
         <Route path="*" element={<MarketingLandingPage />} />
       </Routes>
       </>
@@ -252,6 +255,9 @@ const App = () => {
       <Route path="/" element={<Navigate to={userHome} replace />} />
       <Route path="/login" element={<Navigate to={userHome} replace />} />
       <Route path="/register" element={<Navigate to={userHome} replace />} />
+
+      <Route path="/compliance" element={<PlatformCompliancePage />} />
+      <Route path="/qualite-iso" element={<PlatformCompliancePage />} />
 
       <Route path="/admin/dashboard" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDashboard /></AdminLayout></RoleRoute>} />
       <Route path="/admin/powerbi" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPowerBiPage /></AdminLayout></RoleRoute>} />

@@ -16,7 +16,9 @@ import {
 import { fetchMarketingLiveData } from '../services/marketingService';
 import { SERVICE_RATE_CARDS } from '../utils/clientDemoData';
 import MobileBottomNav, { AUTH_PUBLIC_MOBILE_NAV } from '../components/MobileBottomNav';
+import PlatformComplianceBadges from '../components/PlatformComplianceBadges';
 import './MarketingLandingPage.css';
+import './PlatformCompliancePage.css';
 
 const renderStars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
 
@@ -437,6 +439,14 @@ const MarketingLandingPage = () => {
         </div>
       </section>
 
+      <section id="conformite" className="mkt-section mkt-section--alt">
+        <h2 className="mkt-section__title">ISO &amp; environnement écologique</h2>
+        <p className="mkt-section__sub">
+          Normes internationales, certifications mondiales et engagements RSE vérifiés.
+        </p>
+        <PlatformComplianceBadges />
+      </section>
+
       <section id="faq" className="mkt-section mkt-section--alt">
         <h2 className="mkt-section__title">Questions fréquentes</h2>
         <p className="mkt-section__sub">Tout ce qu&apos;il faut savoir avant de créer votre compte.</p>
@@ -489,6 +499,11 @@ const MarketingLandingPage = () => {
             <strong>Compte</strong>
             <Link to="/register">Inscription</Link>
             <Link to="/login">Connexion</Link>
+          </div>
+          <div>
+            <strong>Conformité</strong>
+            <Link to="/compliance">ISO &amp; environnement</Link>
+            <Link to="/compliance">Certifications mondiales</Link>
           </div>
           <div>
             <strong>Contact</strong>

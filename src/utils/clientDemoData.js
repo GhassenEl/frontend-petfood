@@ -1,5 +1,7 @@
 /** Données de démonstration lorsque l'API renvoie des listes vides (espace client). */
 
+import { getProductTraceabilityCerts } from '../config/platformComplianceCatalog';
+
 const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString();
 const hoursAgo = (n) => new Date(Date.now() - n * 3600000).toISOString();
 const daysAhead = (n) => new Date(Date.now() + n * 86400000).toISOString();
@@ -1186,10 +1188,7 @@ export const getDemoProductTraceability = (productId, productName = 'Croquettes 
     facility: 'Usine de conditionnement Béja Nord',
     harvestDate: daysAgo(45),
   },
-  certifications: [
-    { certId: 'CERT-ISO22000', type: 'ISO 22000', issuer: 'TUNAC', standard: 'Sécurité alimentaire', verified: true },
-    { certId: 'CERT-BIO-TN', type: 'Bio Tunisie', issuer: 'ONAB', standard: 'Agriculture biologique', verified: true },
-  ],
+  certifications: getProductTraceabilityCerts(),
   blockchain: {
     network: 'PetfoodTN Chain (SHA-256)',
     algorithm: 'SHA-256',

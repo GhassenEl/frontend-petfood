@@ -182,11 +182,12 @@ export const MARKETING_IOT_FEATURES = [
 ];
 
 export const MARKETING_TRUST_BADGES = [
+  { icon: '🛡️', label: 'ISO 22000', sub: 'Sécurité alimentaire certifiée' },
+  { icon: '🌿', label: 'ISO 14001', sub: 'Management environnemental' },
+  { icon: '✅', label: 'ISO 9001', sub: 'Qualité certifiée' },
+  { icon: '🌍', label: 'FSSC 22000', sub: 'Norme mondiale GFSI' },
+  { icon: '♻️', label: 'Éco-responsable', sub: 'Emballages recyclables' },
   { icon: '🔒', label: 'Paiement sécurisé', sub: 'Stripe · PayPal · Wallet' },
-  { icon: '⭐', label: 'Avis 5 étoiles', sub: 'Produits & services notés' },
-  { icon: '🧠', label: 'Analyse NLP', sub: 'Émotions & sentiments clients' },
-  { icon: '🚚', label: 'Livraison TN', sub: '24–48 h Grand Tunis' },
-  { icon: '🇹🇳', label: '100 % Tunisie', sub: 'Races & refuges locaux' },
 ];
 
 export const MARKETING_PROMO_CODES = [
@@ -219,6 +220,10 @@ export const MARKETING_FAQ = [
   {
     q: 'Je suis vétérinaire ou refuge — comment devenir partenaire ?',
     a: 'Écrivez à partenaires@petfoodtn.tn pour un accès professionnel (clinique, marketplace, refuges).',
+  },
+  {
+    q: 'PetfoodTN respecte-t-il les normes ISO et l\'environnement ?',
+    a: 'Oui — ISO 22000, 9001, 14001, 45001 et 27001, plus certifications mondiales (FSSC, BRC, IFS, HACCP) et engagements écologiques (Bio Tunisie, emballages recyclables, livraison carbone compensée). Consultez la page Conformité ISO & environnement.',
   },
 ];
 
