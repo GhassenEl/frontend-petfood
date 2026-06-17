@@ -5,7 +5,10 @@ import { isHomeVisit, isOnlineVisit, visitModeLabel } from '../constants/visitMo
 import TeleconsultMeetPanel from '../components/TeleconsultMeetPanel';
 import MedicationFormFields from '../components/MedicationFormFields';
 import { emptyMedicationRow, serializeMedications, validateMedications } from '../utils/medications';
+import { checkPrescriptionStock } from '../utils/vetPharmacyAlerts';
+import { fetchPharmacyCatalog } from '../services/vetMedicationService';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import './VetPages.css';
 
 const emptyConsultation = {
   symptoms: '',
@@ -186,6 +189,14 @@ const VetAppointmentDetailPage = () => {
     if (!meds.length) {
       window.alert('Ajoutez au moins un médicament.');
       return;
+    }
+    const catalog = await fetchPharmacyCatalog();
+    const stockCheck = checkPrescriptionStock(meds, catalog);
+    if (!stockCheck.ok) {
+      const proceed = window.confirm(
+        `Alertes stock :\n${stockCheck.warnings.map((w) => `• ${w.message}`).join('\n')}\n\nCréer l'ordonnance quand même ?`
+      );
+      if (!proceed) return;
     }
     try {
       const { data } = await api.post('/vet/prescriptions', {

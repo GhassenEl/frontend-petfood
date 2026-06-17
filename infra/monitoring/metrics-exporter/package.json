@@ -1,0 +1,6 @@
+{
+  "name": "petfood-metrics-exporter",
+  "private": true,
+  "type": "module",
+  "dependencies": {}
+}

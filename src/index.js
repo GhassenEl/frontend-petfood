@@ -1,28 +1,5 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import './index.css';
-
-
-import { ThemeProvider } from './contexts/ThemeContext.jsx';
-import { AuthProvider } from './contexts/AuthContext.jsx';
-import { PlatformLiveProvider } from './contexts/PlatformLiveContext.jsx';
-import PresenceTracker from './components/PresenceTracker.jsx';
-import App from './App.js';
-
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <ThemeProvider>
-        <AuthProvider>
-          <PlatformLiveProvider>
-            <PresenceTracker />
-            <App />
-          </PlatformLiveProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </BrowserRouter>
-  </React.StrictMode>
-);
+/**
+ * Point d'entrée legacy — l'app charge /src/index.jsx via index.html.
+ * Ce fichier reste aligné pour les outils qui résolvent index.js par défaut.
+ */
+import './index.jsx';

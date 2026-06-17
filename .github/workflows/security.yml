@@ -1,0 +1,139 @@
+name: DevSecOps
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  secret-scan:
+    name: Secrets exposés (Gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  dependency-audit:
+    name: Dépendances — npm audit + OWASP
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: npm ci (frontend)
+        run: npm ci
+
+      - name: npm audit (frontend)
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      - name: Checkout backend repo
+        uses: ./.github/actions/checkout-backend
+
+      - name: npm ci (backend)
+        working-directory: backend
+        run: npm ci
+
+      - name: npm audit (backend)
+        working-directory: backend
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      - name: OWASP Dependency-Check (frontend)
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: petfoodtn-frontend
+          path: .
+          format: HTML
+          out: reports
+        continue-on-error: true
+
+      - name: Upload OWASP report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owasp-dependency-check
+          path: reports/
+          retention-days: 14
+
+  trivy-fs:
+    name: Trivy — scan fichiers
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trivy filesystem
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: CRITICAL,HIGH
+          format: sarif
+          output: trivy-fs.sarif
+          ignore-unfixed: true
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-fs.sarif
+        continue-on-error: true
+
+  trivy-images:
+    name: Trivy — scan images Docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: []
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout backend repo
+        uses: ./.github/actions/checkout-backend
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build images (local)
+        run: |
+          docker compose --env-file .env.docker.example build
+          docker compose -f docker-compose.yml -f docker-compose.ml.yml --env-file .env.docker.example build ml
+          docker tag "$(docker compose --env-file .env.docker.example images -q frontend)" petfoodtn-frontend:ci
+          docker tag "$(docker compose --env-file .env.docker.example images -q backend)" petfoodtn-backend:ci
+
+      - name: Trivy — frontend image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: petfoodtn-frontend:ci
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: '0'
+        continue-on-error: true
+
+      - name: Trivy — backend image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: petfoodtn-backend:ci
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: '0'
+        continue-on-error: true

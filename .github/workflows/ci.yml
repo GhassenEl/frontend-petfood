@@ -118,3 +118,72 @@ jobs:
 
       - name: Build ML overlay
         run: docker compose -f docker-compose.yml -f docker-compose.ml.yml --env-file .env.docker.example build ml
+
+  sonarqube:
+    name: SonarQube — qualité code
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [frontend-build]
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install & build (for analyse)
+        run: |
+          npm ci
+          npm run build
+        env:
+          VITE_API_BASE: /api
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        continue-on-error: true
+
+  api-tests:
+    name: Backend — tests API wallet
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [backend-tests]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout backend repo
+        uses: ./.github/actions/checkout-backend
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Prisma generate
+        working-directory: backend
+        run: npx prisma generate
+        env:
+          DATABASE_URL: file:./dev.db
+
+      - name: Start backend & run API tests
+        run: |
+          cd backend
+          export DATABASE_URL=file:./dev.db
+          export JWT_SECRET=ci-test-secret-min-32-characters-long
+          export DEMO_MODE=true
+          export PORT=5002
+          node server.js &
+          sleep 8
+          cd ..
+          npm run test:api

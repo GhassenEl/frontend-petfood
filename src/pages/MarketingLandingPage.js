@@ -112,6 +112,7 @@ const MarketingLandingPage = () => {
           <a href="#services" className="mkt-nav__link mkt-nav__link--hide-mobile">Services</a>
           <a href="#acteurs" className="mkt-nav__link mkt-nav__link--hide-mobile">Acteurs</a>
           <Link to="/visitor" className="mkt-nav__link mkt-nav__link--hide-mobile">Visiteur</Link>
+          <Link to="/contact" className="mkt-nav__link mkt-nav__link--hide-mobile">Contact</Link>
           <Link to="/vendor" className="mkt-nav__link mkt-nav__link--hide-mobile">Vendeur</Link>
           <Link to="/moderator" className="mkt-nav__link mkt-nav__link--hide-mobile">Modération</Link>
           <a href="#iot" className="mkt-nav__link mkt-nav__link--hide-mobile">IoT</a>

@@ -2,6 +2,8 @@
 
 Guide d'exploitation : CI/CD, Docker, santé des services et déploiement.
 
+> **Architecture DevOps complète (PFE)** : voir [DEVOPS-PLATFORM.md](./DEVOPS-PLATFORM.md) — CI/CD, SonarQube, Trivy, Prometheus, Grafana, Terraform, Ansible, Kubernetes, sauvegardes nocturnes.
+
 ## Architecture runtime
 
 > **Note CI** : le dossier `backend/` est dans `.gitignore` (repo séparé [backend-petfood](https://github.com/GhassenEl/backend-petfood)).  
@@ -99,6 +101,8 @@ Comptes démo après seed : `admin@petfood.tn` / `PetfoodTN2024!`
 | `docker-compose.ghcr.yml` | Images pré-buildées GHCR (CD) |
 | `docker-compose.caddy.yml` | HTTPS Let's Encrypt (Caddy) |
 | `docker-compose.vpn.yml` | WireGuard pour distributeurs IoT |
+| `docker-compose.iot.yml` | Broker MQTT Mosquitto (ESP32, capteurs) |
+| `docker-compose.monitoring.yml` | Prometheus + Grafana + exporters |
 
 Exemple manuel :
 
@@ -115,7 +119,9 @@ docker compose \
 
 | Workflow | Déclencheur | Jobs |
 |----------|-------------|------|
-| `.github/workflows/ci.yml` | push/PR `main` | build Vite, tests ML backend, smoke FastAPI, `docker compose build` |
+| `.github/workflows/ci.yml` | push/PR `main` | build Vite, tests ML backend, smoke FastAPI, SonarQube, API tests, `docker compose build` |
+| `.github/workflows/security.yml` | push/PR + hebdo | Gitleaks, npm audit, OWASP, Trivy images |
+| `.github/workflows/backup-nightly.yml` | 02:00 UTC | Sauvegarde PostgreSQL + médias + ML sur VPS |
 | `.github/workflows/e2e.yml` | push/PR `main` | Playwright E2E + tests API wallet |
 | `.github/workflows/publish-ghcr.yml` | push `main` / tags `v*` | Publication images Docker GHCR |
 | `.github/workflows/deploy-vps.yml` | après publish | CD SSH vers VPS |
@@ -181,7 +187,8 @@ docker compose --env-file .env.docker ps
 4. Stripe : `STRIPE_SECRET_KEY` + `STRIPE_MOCK=0`.
 5. Firebase (IoT) : variables dans `backend/.env` — voir `firebase/README.md`.
 6. HTTPS : placer un reverse proxy (Traefik, Caddy, Nginx) devant le port 8080.
-7. Sauvegardes PostgreSQL : volume `pgdata` — planifier `pg_dump` régulier.
+7. Sauvegardes PostgreSQL : `npm run devops:backup` ou cron `scripts/devops/backup-nightly.sh`.
+8. Monitoring : `npm run docker:monitoring:up` → Grafana http://localhost:3000
 
 ## VPN IoT (optionnel)
 

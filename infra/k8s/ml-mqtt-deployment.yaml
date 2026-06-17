@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petfood-ml
+  namespace: petfoodtn
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: petfood-ml
+  template:
+    metadata:
+      labels:
+        app: petfood-ml
+    spec:
+      containers:
+        - name: ml
+          image: ghcr.io/ghassenel/petfoodtn-ml:latest
+          ports:
+            - containerPort: 8000
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 20
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petfood-ml
+  namespace: petfoodtn
+spec:
+  selector:
+    app: petfood-ml
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petfood-mqtt
+  namespace: petfoodtn
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: petfood-mqtt
+  template:
+    metadata:
+      labels:
+        app: petfood-mqtt
+    spec:
+      containers:
+        - name: mqtt
+          image: eclipse-mosquitto:2
+          ports:
+            - containerPort: 1883
+            - containerPort: 9001
+          volumeMounts:
+            - name: config
+              mountPath: /mosquitto/config
+      volumes:
+        - name: config
+          configMap:
+            name: petfood-mosquitto-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petfood-mqtt
+  namespace: petfoodtn
+spec:
+  selector:
+    app: petfood-mqtt
+  ports:
+    - name: mqtt
+      port: 1883
+      targetPort: 1883
+    - name: ws
+      port: 9001
+      targetPort: 9001

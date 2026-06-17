@@ -190,9 +190,12 @@ export const DEMO_VET_DASHBOARD = {
   ],
   clinicalAlerts: [
     { level: 'warning', message: '6 vaccins à prévoir sous 30 jours', link: '/vet/vaccinations' },
-    { level: 'info', message: 'Stock bas : Antiparasitaire chat (3 unités)', link: '/vet/pharmacy' },
+    { level: 'critical', message: 'Rupture : Collyre antibiotique (0 flacon)', link: '/vet/pharmacy' },
+    { level: 'warning', message: 'Stock bas : Antiparasitaire chat (3 unités)', link: '/vet/pharmacy' },
+    { level: 'warning', message: 'Péremption proche : Antihistaminique chien (12 j)', link: '/vet/pharmacy' },
     { level: 'critical', message: '1 RDV non assigné dans le pool', link: '/vet/calendar' },
   ],
+  pharmacySummary: { ruptures: 1, lowStock: 2, expiry: 1 },
   weekChart: [
     { name: 'Lun', rdv: 4, consultations: 3 },
     { name: 'Mar', rdv: 5, consultations: 4 },
@@ -317,20 +320,31 @@ export const DEMO_VET_VACCINATIONS = [
 ];
 
 export const DEMO_VET_PHARMACY_MEDS = [
-  { id: 'med-1', name: 'Antiparasitaire chat spot-on', stockQty: 3, minStock: 10, unit: 'flacon', lowStock: true, treatments: [{ disease: 'Parasites externes' }] },
+  { id: 'med-1', name: 'Antiparasitaire chat spot-on', stockQty: 3, minStock: 10, unit: 'flacon', lowStock: true, location: 'Stock clinique', treatments: [{ disease: 'Parasites externes' }] },
   { id: 'med-2', name: 'Amoxicilline 500 mg', stockQty: 24, minStock: 8, unit: 'cp', pharmacy: 'Stock clinique', treatments: [{ disease: 'Infection cutanée' }] },
   { id: 'med-3', name: 'Anti-inflammatoire chien', stockQty: 18, minStock: 6, unit: 'cp', pharmacy: 'Stock clinique', treatments: [{ disease: 'Arthrose' }] },
   { id: 'med-4', name: 'Vaccin rage chien', stockQty: 12, minStock: 5, unit: 'dose', pharmacy: 'Réfrigérateur A', treatments: [{ disease: 'Prévention rage' }] },
   { id: 'med-5', name: 'Shampoing dermatologique', stockQty: 9, minStock: 4, unit: 'flacon', pharmacy: 'Stock clinique', treatments: [{ disease: 'Dermatite' }] },
+  { id: 'med-6', name: 'Collyre antibiotique', stockQty: 0, minStock: 4, unit: 'flacon', pharmacy: 'Armoire A', treatments: [{ disease: 'Conjonctivite' }] },
+  { id: 'med-7', name: 'Antihistaminique chien', stockQty: 2, minStock: 6, unit: 'cp', pharmacy: 'Stock clinique', expiryDate: new Date(Date.now() + 12 * 86400000).toISOString(), treatments: [{ disease: 'Allergie' }] },
 ];
 
-export const DEMO_VET_PHARMACY_ALERTS = DEMO_VET_PHARMACY_MEDS.filter((m) => m.lowStock).map((m) => ({
-  id: m.id,
-  name: m.name,
-  stockQty: m.stockQty,
-  minStock: m.minStock,
-  unit: m.unit,
-}));
+export const DEMO_VET_PHARMACY_ALERTS = DEMO_VET_PHARMACY_MEDS
+  .filter((m) => m.lowStock || m.stockQty <= 0 || m.expiryDate)
+  .map((m) => ({
+    id: m.id,
+    name: m.name,
+    stockQty: m.stockQty,
+    minStock: m.minStock,
+    unit: m.unit,
+    status: m.stockQty <= 0 ? 'rupture' : 'stock_bas',
+    level: m.stockQty <= 0 ? 'critical' : 'warning',
+    label: m.stockQty <= 0 ? 'Rupture' : 'Stock bas',
+    message: m.stockQty <= 0
+      ? `${m.name} — rupture de stock`
+      : `${m.name} — ${m.stockQty} ${m.unit} (min ${m.minStock})`,
+    link: '/vet/pharmacy',
+  }));
 
 export const DEMO_VET_BI = {
   summary: {

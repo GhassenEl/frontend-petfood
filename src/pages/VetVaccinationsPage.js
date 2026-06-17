@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import { DEMO_VET_VACCINATIONS, withDemoFallback } from '../utils/vetDemoData';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import VetClinicalAlertsBar from '../components/VetClinicalAlertsBar';
+import './VetPages.css';
 
 const statusStyle = (status, nextDue) => {
   const overdue = nextDue && new Date(nextDue) < new Date();
@@ -59,6 +61,7 @@ const VetVaccinationsPage = () => {
 
   return (
     <div style={{ padding: 24, maxWidth: 1000, margin: '0 auto' }}>
+      <VetClinicalAlertsBar compact />
       <h1 style={{ margin: '0 0 8px' }}>💉 Vaccinations & rappels</h1>
       <p style={{ color: '#64748b', marginTop: 0 }}>
         Suivi des vaccins administrés — synchronisés depuis les dossiers médicaux signés.

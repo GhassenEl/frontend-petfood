@@ -17,33 +17,25 @@ const NotFoundPage = () => {
   const home = HOME[user?.role] || '/';
 
   return (
-    <div style={{
-      minHeight: '60vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 32,
-      textAlign: 'center',
-    }}>
-      <div style={{ fontSize: 64, marginBottom: 16 }}>🐾</div>
-      <h1 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 900 }}>Page introuvable</h1>
-      <p style={{ margin: '0 0 24px', color: '#64748b', maxWidth: 400 }}>
-        Cette adresse n&apos;existe pas ou a été déplacée.
+    <div className="not-found-page">
+      <div className="not-found-page__emoji" aria-hidden>🐾</div>
+      <h1 className="not-found-page__title">Page introuvable</h1>
+      <p className="not-found-page__text">
+        Cette adresse n&apos;existe pas ou a été déplacée. Utilisez les liens ci-dessous pour continuer.
       </p>
-      <Link
-        to={home}
-        style={{
-          padding: '12px 24px',
-          borderRadius: 12,
-          background: '#e67e22',
-          color: '#fff',
-          fontWeight: 700,
-          textDecoration: 'none',
-        }}
-      >
-        Retour à l&apos;accueil
-      </Link>
+      <div className="not-found-page__actions">
+        <Link to={home} className="not-found-page__btn not-found-page__btn--primary">
+          Retour à l&apos;accueil
+        </Link>
+        <Link to="/contact" className="not-found-page__btn not-found-page__btn--secondary">
+          Contact &amp; questions
+        </Link>
+        {!user && (
+          <Link to="/visitor" className="not-found-page__btn not-found-page__btn--secondary">
+            Espace visiteur
+          </Link>
+        )}
+      </div>
     </div>
   );
 };

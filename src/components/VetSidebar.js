@@ -1,55 +1,14 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
 import ThemeToggles from './ThemeToggles';
+import ConfigSidebarNav from './platform/ConfigSidebarNav';
+import useVetClinicalOverview from '../hooks/useVetClinicalOverview';
+import { VET_SIDEBAR_SECTIONS, getVetSidebarBadge } from '../config/vetSidebarConfig';
+import '../pages/VetPages.css';
 
 const VetSidebar = ({ onLogout, user, onNavigate }) => {
   const [sidebarImageError, setSidebarImageError] = useState(false);
-
-  const sections = [
-    {
-      title: '🩺 Activités cliniques',
-      items: [
-        { id: 'dashboard', label: 'Tableau de bord', icon: '📊' },
-        { id: 'bi', label: 'Dashboard BI', icon: '📈' },
-        { id: 'calendar', label: 'Calendrier', icon: '📅' },
-        { id: 'availability', label: 'Disponibilité', icon: '🟢' },
-        { id: 'prescriptions', label: 'Ordonnances', icon: '💊' },
-        { id: 'medication-recommendations', label: 'Recommandations médicaments', icon: '✨' },
-        { id: 'pharmacy', label: 'Pharmacie', icon: '🏪' },
-        { id: 'clinic', label: 'Ma clinique', icon: '🏥' },
-        { id: 'medical-dossiers', label: 'Dossiers médicaux', icon: '📁' },
-        { id: 'vaccinations', label: 'Vaccinations', icon: '💉' },
-        { id: 'diagnostics', label: 'Détection précoce', icon: '🔬' },
-        { id: 'teleconsult', label: 'Téléconsultations', icon: '📹' },
-        { id: 'nutrition', label: 'Conseils nutrition', icon: '🥗' },
-      ],
-    },
-    {
-      title: '👥 Patients & suivi',
-      items: [
-        { id: 'clients', label: 'Clients', icon: '👥' },
-        { id: 'history', label: 'Historique', icon: '📜' },
-        { id: 'contact-requests', label: 'Demandes contact', icon: '📩' },
-      ],
-    },
-    {
-      title: '🤖 Assistant IA',
-      items: [
-        { id: 'intelligence', label: 'Intelligence clinique', icon: '🧠' },
-        { id: 'ml-agent', label: 'Agents ML', icon: '🔬' },
-        { id: '__open-chat__', label: 'Assistant IA', icon: '🤖', action: 'open-chat' },
-        { id: 'platform-services', label: 'Catalogue services', icon: '📋' },
-      ],
-    },
-    {
-      title: '👤 Compte',
-      items: [
-        { id: 'leave-requests', label: 'Congés / maladie', icon: '🏖️' },
-        { id: 'profile', label: 'Profil', icon: '👤' },
-      ],
-    },
-  ];
+  const { overview } = useVetClinicalOverview();
 
   return (
     <aside className="livreur-sidebar vet-sidebar" aria-label="Navigation vétérinaire">
@@ -84,46 +43,12 @@ const VetSidebar = ({ onLogout, user, onNavigate }) => {
       </div>
 
       <nav className="sidebar-nav">
-        {sections.map((section) => (
-          <div key={section.title} className="admin-sidebar-section">
-            <p className="admin-sidebar-section-title">{section.title}</p>
-            {section.items.map((item) =>
-              item.action === 'open-chat' ? (
-                <button
-                  key={item.id}
-                  type="button"
-                  className="admin-sidebar-item"
-                  style={{
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    border: 'none',
-                    background: 'transparent',
-                    font: 'inherit',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => {
-                    window.dispatchEvent(new CustomEvent('petfood:open-chat'));
-                    onNavigate?.();
-                  }}
-                >
-                  <span className="icon">{item.icon}</span>
-                  <span>{item.label}</span>
-                </button>
-              ) : (
-                <NavLink
-                  key={item.id}
-                  to={`/vet/${item.id}`}
-                  onClick={() => onNavigate?.()}
-                  className={({ isActive }) => `admin-sidebar-item ${isActive ? 'active' : ''}`}
-                >
-                  <span className="icon">{item.icon}</span>
-                  <span>{item.label}</span>
-                </NavLink>
-              )
-            )}
-          </div>
-        ))}
+        <ConfigSidebarNav
+          sections={VET_SIDEBAR_SECTIONS}
+          routePrefix="/vet/"
+          onNavigate={onNavigate}
+          getBadge={(itemId) => getVetSidebarBadge(itemId, overview)}
+        />
       </nav>
 
       <div className="sidebar-footer">

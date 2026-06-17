@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pill, Stethoscope } from 'lucide-react';
+import { Pill, Stethoscope, AlertTriangle } from 'lucide-react';
 import MedicationSchedule from './MedicationSchedule';
 import { parseMedications } from '../utils/prescriptionHelpers';
 
@@ -10,7 +10,7 @@ const cardStyle = {
   padding: 16,
 };
 
-const ClientPrescriptionCard = ({ prescription: rx, showSchedule = true }) => {
+const ClientPrescriptionCard = ({ prescription: rx, showSchedule = true, stockWarnings = [] }) => {
   if (!rx) return null;
   const meds = parseMedications(rx.medications);
   const vetName = rx.vet?.name || rx.vetName;
@@ -94,6 +94,17 @@ const ClientPrescriptionCard = ({ prescription: rx, showSchedule = true }) => {
         <p style={{ margin: '12px 0 0', fontSize: 13, color: '#4b5563', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
           <strong>Instructions :</strong> {rx.instructions}
         </p>
+      )}
+
+      {stockWarnings.length > 0 && (
+        <div className="vet-rx-stock-warnings" style={{ marginTop: 10 }}>
+          <strong><AlertTriangle size={14} style={{ verticalAlign: 'middle' }} /> Disponibilité pharmacie</strong>
+          <ul>
+            {stockWarnings.map((w) => (
+              <li key={w.name}>{w.message}</li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {showSchedule && meds.length > 0 && <MedicationSchedule medications={meds} />}

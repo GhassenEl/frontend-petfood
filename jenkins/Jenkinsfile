@@ -1,0 +1,146 @@
+/**
+ * Pipeline Jenkins — miroir du CI/CD GitHub Actions PetfoodTN.
+ * Branche : main | Déclencheur : webhook GitHub ou poll SCM
+ *
+ * Plugins requis : NodeJS, Docker, Pipeline, OWASP Dependency-Check, SonarQube Scanner
+ */
+pipeline {
+  agent any
+
+  environment {
+    NODE_VERSION = '20'
+    PYTHON_VERSION = '3.12'
+    REGISTRY = 'ghcr.io'
+    IMAGE_OWNER = 'ghassenel'
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+    timeout(time: 60, unit: 'MINUTES')
+    disableConcurrentBuilds()
+  }
+
+  triggers {
+    pollSCM('H/5 * * * *')
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+        dir('backend') {
+          git url: 'https://github.com/GhassenEl/backend-petfood.git', branch: 'main'
+        }
+      }
+    }
+
+    stage('CI — Frontend build') {
+      steps {
+        sh 'npm ci'
+        sh 'VITE_API_BASE=/api npm run build'
+      }
+    }
+
+    stage('CI — Backend tests') {
+      steps {
+        dir('backend') {
+          sh 'npm ci'
+          sh 'npx prisma generate'
+          sh '''
+            export DATABASE_URL=file:./dev.db
+            export JWT_SECRET=ci-test-secret-min-32-characters-long
+            export DEMO_MODE=true
+            npm run test:ml
+          '''
+        }
+      }
+    }
+
+    stage('CI — ML smoke') {
+      steps {
+        sh '''
+          pip3 install -r fastapi_service/requirements.txt
+          cd fastapi_service
+          uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+          sleep 3
+          curl -fsS http://127.0.0.1:8000/health
+        '''
+      }
+    }
+
+    stage('DevSecOps — Audit dépendances') {
+      steps {
+        sh 'npm audit --audit-level=high || true'
+        dependencyCheck additionalArguments: '--scan . --format HTML --out owasp-report', odcInstallation: 'OWASP-Dependency-Check'
+      }
+    }
+
+    stage('DevSecOps — SonarQube') {
+      when {
+        expression { return env.SONAR_TOKEN?.trim() }
+      }
+      steps {
+        withSonarQubeEnv('SonarQube') {
+          sh 'npx sonar-scanner -Dsonar.login=$SONAR_TOKEN'
+        }
+      }
+    }
+
+    stage('Docker — Build images') {
+      steps {
+        sh 'docker compose --env-file .env.docker.example build'
+        sh 'docker compose -f docker-compose.yml -f docker-compose.ml.yml --env-file .env.docker.example build ml'
+      }
+    }
+
+    stage('DevSecOps — Trivy images') {
+      steps {
+        sh 'trivy image --severity HIGH,CRITICAL --exit-code 0 frontendlido-frontend:latest || true'
+        sh 'trivy image --severity HIGH,CRITICAL --exit-code 0 frontendlido-backend:latest || true'
+      }
+    }
+
+    stage('CD — Push GHCR') {
+      when {
+        branch 'main'
+      }
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'ghcr-credentials', usernameVariable: 'GHCR_USER', passwordVariable: 'GHCR_TOKEN')]) {
+          sh '''
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            docker tag frontendlido-frontend:latest $REGISTRY/$IMAGE_OWNER/petfoodtn-frontend:latest
+            docker tag frontendlido-backend:latest $REGISTRY/$IMAGE_OWNER/petfoodtn-backend:latest
+            docker push $REGISTRY/$IMAGE_OWNER/petfoodtn-frontend:latest
+            docker push $REGISTRY/$IMAGE_OWNER/petfoodtn-backend:latest
+          '''
+        }
+      }
+    }
+
+    stage('CD — Deploy VPS') {
+      when {
+        branch 'main'
+      }
+      steps {
+        sshagent(credentials: ['vps-ssh-key']) {
+          sh '''
+            ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST "
+              cd /opt/petfoodtn &&
+              docker compose -f docker-compose.yml -f docker-compose.ghcr.yml -f docker-compose.ml.yml -f docker-compose.prod.yml pull &&
+              docker compose -f docker-compose.yml -f docker-compose.ghcr.yml -f docker-compose.ml.yml -f docker-compose.prod.yml up -d
+            "
+          '''
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      echo 'Pipeline PetfoodTN terminé avec succès'
+    }
+    failure {
+      echo 'Échec pipeline — vérifier logs Jenkins / SonarQube / Trivy'
+    }
+  }
+}

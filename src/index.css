@@ -14,7 +14,7 @@ body,
 
 body {
   margin: 0;
-  font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+  font-family: var(--font-sans, 'Inter', 'Segoe UI', system-ui, sans-serif);
   background: #f4efe7;
   color: #171717;
 }

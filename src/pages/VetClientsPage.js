@@ -7,6 +7,8 @@ import {
   saveExtraVetClient,
 } from '../utils/vetDemoData';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import VetClinicalAlertsBar from '../components/VetClinicalAlertsBar';
+import './VetPages.css';
 
 const animalEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', rabbit: '🐰', other: '🐾' };
 
@@ -106,6 +108,7 @@ const VetClientsPage = () => {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
+      <VetClinicalAlertsBar compact />
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
         <div>
           <h1 style={{ margin: '0 0 8px' }}>👥 Clients & animaux</h1>
@@ -250,6 +253,13 @@ const VetClientsPage = () => {
                 </p>
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  <Link
+                    to={`/vet/prescriptions?ownerId=${encodeURIComponent(id)}`}
+                    className="btn btn-outline"
+                    style={{ fontSize: 12, padding: '6px 12px', textDecoration: 'none' }}
+                  >
+                    💊 Ordonnance
+                  </Link>
                   <Link
                     to={`/vet/clients/${id}`}
                     className="btn btn-primary"

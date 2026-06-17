@@ -1,0 +1,94 @@
+---
+# Déploiement PetfoodTN sur VPS — Infrastructure as Code (Ansible)
+# Usage : ansible-playbook -i inventory.ini playbook.yml
+
+- name: Provisionner serveur PetfoodTN
+  hosts: petfoodtn
+  become: true
+  vars:
+    deploy_path: /opt/petfoodtn
+    repo_url: https://github.com/GhassenEl/frontend-petfood.git
+    compose_files:
+      - docker-compose.yml
+      - docker-compose.ghcr.yml
+      - docker-compose.ml.yml
+      - docker-compose.prod.yml
+      - docker-compose.caddy.yml
+      - docker-compose.monitoring.yml
+
+  tasks:
+    - name: Paquets système
+      apt:
+        name:
+          - docker.io
+          - docker-compose-plugin
+          - curl
+          - cron
+          - postgresql-client
+        state: present
+        update_cache: true
+
+    - name: Utilisateur dans groupe docker
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: true
+
+    - name: Répertoire déploiement
+      file:
+        path: "{{ deploy_path }}"
+        state: directory
+        mode: '0755'
+
+    - name: Synchroniser fichiers compose (rsync local ou git)
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ deploy_path }}"
+        version: main
+        force: true
+      when: sync_from_git | default(true)
+
+    - name: Fichier .env.docker (template)
+      template:
+        src: templates/env.docker.j2
+        dest: "{{ deploy_path }}/.env.docker"
+        mode: '0600'
+      when: env_template | default(false)
+
+    - name: Login GHCR
+      shell: echo "{{ ghcr_token }}" | docker login ghcr.io -u "{{ ghcr_owner }}" --password-stdin
+      no_log: true
+      when: ghcr_token is defined
+
+    - name: Pull images
+      shell: >
+        docker compose
+        {% for f in compose_files %}-f {{ deploy_path }}/{{ f }} {% endfor %}
+        --env-file {{ deploy_path }}/.env.docker pull
+      args:
+        chdir: "{{ deploy_path }}"
+
+    - name: Démarrer stack
+      shell: >
+        docker compose
+        {% for f in compose_files %}-f {{ deploy_path }}/{{ f }} {% endfor %}
+        --env-file {{ deploy_path }}/.env.docker up -d --remove-orphans
+      args:
+        chdir: "{{ deploy_path }}"
+
+    - name: Cron sauvegarde nocturne
+      cron:
+        name: petfoodtn-backup
+        minute: "0"
+        hour: "2"
+        job: "{{ deploy_path }}/scripts/devops/backup-nightly.sh >> /var/log/petfoodtn-backup.log 2>&1"
+        user: root
+
+    - name: Vérifier santé nginx
+      uri:
+        url: "http://127.0.0.1/nginx-health"
+        status_code: 200
+      register: health
+      retries: 5
+      delay: 10
+      until: health.status == 200

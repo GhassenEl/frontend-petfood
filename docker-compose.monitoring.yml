@@ -1,0 +1,90 @@
+# Monitoring temps réel — Prometheus + Grafana + exporters
+# Usage : docker compose -f docker-compose.yml -f docker-compose.monitoring.yml --env-file .env.docker up -d
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    container_name: petfood-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=15d'
+    volumes:
+      - ./infra/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - '${PROMETHEUS_PORT:-9090}:9090'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: petfood-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-petfood-admin}
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+    volumes:
+      - ./infra/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - '${GRAFANA_PORT:-3000}:3000'
+    depends_on:
+      - prometheus
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.0
+    container_name: petfood-node-exporter
+    restart: unless-stopped
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    ports:
+      - '${NODE_EXPORTER_PORT:-9100}:9100'
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: petfood-cadvisor
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - '${CADVISOR_PORT:-8081}:8080'
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.25.0
+    container_name: petfood-blackbox
+    restart: unless-stopped
+    volumes:
+      - ./infra/monitoring/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    ports:
+      - '${BLACKBOX_PORT:-9115}:9115'
+
+  metrics-exporter:
+    build:
+      context: ./infra/monitoring/metrics-exporter
+      dockerfile: Dockerfile
+    container_name: petfood-metrics-exporter
+    restart: unless-stopped
+    environment:
+      BACKEND_URL: http://backend:5002
+      SCRAPE_INTERVAL_MS: ${METRICS_SCRAPE_INTERVAL_MS:-30000}
+    ports:
+      - '${METRICS_EXPORTER_PORT:-9105}:9105'
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  prometheus_data:
+  grafana_data:

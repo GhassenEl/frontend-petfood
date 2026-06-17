@@ -4,35 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import getSocket from '../utils/socketClient';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
+import {
+  NOTIFICATION_TYPE_LABELS,
+  NOTIFICATION_ROLE_LABELS,
+  getNotificationIcon,
+  getNotificationTitle,
+} from '../config/notificationTypes';
 import './NotificationBell.css';
 
 const DISMISS_KEY = (userId) => `petfood_dismissed_notifs_${userId}`;
-
-const TYPE_LABELS = {
-  order: 'Commande',
-  new_order: 'Nouvelle commande',
-  livreur_new_order: 'Nouvelle course',
-  livreur_shipped: 'Livraison',
-  message: 'Message',
-  admin_message: 'Message',
-  complaint: 'Réclamation',
-  new_complaint: 'Réclamation',
-  review: 'Avis',
-  new_review: 'Avis client',
-  vet_appointment: 'Rendez-vous',
-  vet_contact: 'Demande contact',
-  vet_consultation: 'Consultation',
-  leave_status: 'Congés',
-  leave_request: 'Demande congé',
-  iot_food_quality: 'Qualité alimentaire IoT',
-};
-
-const ROLE_LABELS = {
-  admin: 'Administration',
-  client: 'Espace client',
-  livreur: 'Espace livreur',
-  vet: 'Espace vétérinaire',
-};
 
 const loadDismissed = (userId) => {
   try {
@@ -53,45 +33,6 @@ const saveDismissed = (userId, set) => {
 const getBody = (n) => {
   const raw = n?.description || n?.message || n?.body || '';
   return String(raw).replace(/\s+/g, ' ').trim();
-};
-
-const getTitle = (n) => {
-  const t = n?.title?.trim();
-  if (t) return t;
-  return TYPE_LABELS[n?.type] || 'Notification';
-};
-
-const getIcon = (type) => {
-  switch (type) {
-    case 'order':
-    case 'new_order':
-    case 'livreur_new_order':
-      return '📦';
-    case 'livreur_shipped':
-      return '🚚';
-    case 'message':
-    case 'admin_message':
-      return '💬';
-    case 'complaint':
-    case 'new_complaint':
-      return '⚠️';
-    case 'review':
-    case 'new_review':
-      return '⭐';
-    case 'vet_appointment':
-      return '📅';
-    case 'vet_contact':
-      return '📩';
-    case 'vet_consultation':
-      return '🩺';
-    case 'leave_status':
-    case 'leave_request':
-      return '🏖️';
-    case 'iot_food_quality':
-      return '📷';
-    default:
-      return '🔔';
-  }
 };
 
 const formatTime = (dateStr) => {
@@ -211,13 +152,20 @@ const NotificationBell = () => {
       if (!payload?.title) return;
       onNotificationNew(payload);
     };
+    const onVetPharmacyAlert = (event) => {
+      const payload = event?.detail;
+      if (!payload?.title) return;
+      onNotificationNew(payload);
+    };
     window.addEventListener('petfood:food-quality-alert', onFoodQualityAlert);
+    window.addEventListener('petfood:vet-pharmacy-alert', onVetPharmacyAlert);
 
     return () => {
       clearInterval(interval);
       socket.off('connect', onConnect);
       socket.off('notification:new', onNotificationNew);
       window.removeEventListener('petfood:food-quality-alert', onFoodQualityAlert);
+      window.removeEventListener('petfood:vet-pharmacy-alert', onVetPharmacyAlert);
     };
   }, [user, userId, role, pollMs, fetchNotifications, fetchUnreadCount]);
 
@@ -281,7 +229,7 @@ const NotificationBell = () => {
       {toast && portalTarget && createPortal(
         <div className="notif-toast" role="status">
           <p className="notif-toast-title">
-            {getIcon(toast.type)} {getTitle(toast)}
+            {getNotificationIcon(toast.type)} {getNotificationTitle(toast)}
           </p>
           {getBody(toast) && <p className="notif-toast-desc">{getBody(toast)}</p>}
         </div>,
@@ -310,7 +258,7 @@ const NotificationBell = () => {
               <div>
                 <h3 className="notif-panel-title">🔔 Notifications</h3>
                 <p className="notif-panel-sub">
-                  {ROLE_LABELS[role] || 'Mon espace'}
+                  {NOTIFICATION_ROLE_LABELS[role] || 'Mon espace'}
                   {unreadCount > 0 ? ` · ${unreadCount} non lue${unreadCount > 1 ? 's' : ''}` : ''}
                 </p>
               </div>
@@ -339,10 +287,10 @@ const NotificationBell = () => {
                       className={`notif-item ${n.read ? 'notif-item--read' : 'notif-item--unread'}`}
                       onClick={() => markAsRead(n.id, n.link)}
                     >
-                      <span className="notif-item-icon">{getIcon(n.type)}</span>
+                      <span className="notif-item-icon">{getNotificationIcon(n.type)}</span>
                       <span className="notif-item-body">
-                        <span className="notif-item-type">{TYPE_LABELS[n.type] || 'Info'}</span>
-                        <p className="notif-item-title">{getTitle(n)}</p>
+                        <span className="notif-item-type">{NOTIFICATION_TYPE_LABELS[n.type] || 'Info'}</span>
+                        <p className="notif-item-title">{getNotificationTitle(n)}</p>
                         {body && <p className="notif-item-desc">{body}</p>}
                         <p className="notif-item-time">{formatTime(n.createdAt)}</p>
                       </span>

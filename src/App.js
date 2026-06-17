@@ -38,7 +38,6 @@ import AdminVisitorsPage from './pages/AdminVisitorsPage';
 import AdminLiveAudiencePage from './pages/AdminLiveAudiencePage';
 import AdminRefundsPage from './pages/AdminRefundsPage';
 import AdminActivityLogsPage from './pages/AdminActivityLogsPage';
-import AdminAdvancedHubPage from './pages/AdminAdvancedHubPage';
 import AdminReportsPage from './pages/AdminReportsPage';
 import AdminFoodQualityCamPage from './pages/AdminFoodQualityCamPage';
 import AdminDeliveryOpsPage from './pages/AdminDeliveryOpsPage';
@@ -68,6 +67,12 @@ import VeterinaryPage from './pages/VeterinaryPage';
 import PetFeederPage from './pages/PetFeederPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const PlatformCompliancePage = lazy(() => import('./pages/PlatformCompliancePage'));
+const EnterpriseFeaturesPage = lazy(() => import('./pages/EnterpriseFeaturesPage'));
+const MobileAppPage = lazy(() => import('./pages/MobileAppPage'));
+const CloudInfrastructurePage = lazy(() => import('./pages/CloudInfrastructurePage'));
+const PremiumFeaturesPage = lazy(() => import('./pages/PremiumFeaturesPage'));
+const AdminAdvancedHubPage = lazy(() => import('./pages/AdminAdvancedHubPage'));
 import LivreurDashboard from './pages/LivreurDashboard';
 import LivreurOrdersPage from './pages/LivreurOrdersPage';
 import LivreurMapPage from './pages/LivreurMapPage';
@@ -112,11 +117,6 @@ import ClientPetsPage from './pages/ClientPetsPage';
 import ClientPetPassportPage from './pages/ClientPetPassportPage';
 import PlatformServicesPage from './pages/PlatformServicesPage';
 import MarketingLandingPage from './pages/MarketingLandingPage';
-import PlatformCompliancePage from './pages/PlatformCompliancePage';
-import EnterpriseFeaturesPage from './pages/EnterpriseFeaturesPage';
-import MobileAppPage from './pages/MobileAppPage';
-import CloudInfrastructurePage from './pages/CloudInfrastructurePage';
-import PremiumFeaturesPage from './pages/PremiumFeaturesPage';
 import VisitorHubPage from './pages/VisitorHubPage';
 import VisitorProductsPage from './pages/VisitorProductsPage';
 import VisitorInfoPage from './pages/VisitorInfoPage';
@@ -198,28 +198,14 @@ import SupportReturnsPage from './pages/SupportReturnsPage';
 import RoleBiDashboardPage from './pages/RoleBiDashboardPage';
 import AuthMobileRoute from './components/AuthMobileRoute';
 import CapabilitiesRoute from './components/CapabilitiesRoute';
-
-const homeByRole = {
-  admin: '/admin/dashboard',
-  client: '/client-dashboard',
-  livreur: '/livreur/dashboard',
-  vet: '/vet/dashboard',
-  vendor: '/vendor/dashboard',
-  moderator: '/moderator/dashboard',
-  support: '/support/dashboard',
-};
-
-const RoleRoute = ({ user, roles, children }) => {
-  if (!user) return <LoginPage />;
-  if (!roles.includes(user.role)) {
-    return <Navigate to={homeByRole[user.role] || '/'} replace />;
-  }
-  return children;
-};
+import PageLoader from './routes/PageLoader';
+import RoleRoute from './routes/RoleRoute';
+import RoleLayoutShell from './routes/RoleLayoutShell';
+import { getRoleHome } from './config/roleConfig';
 
 const App = () => {
   const { user, loading } = useAuth();
-  const userHome = homeByRole[user?.role] || '/';
+  const userHome = getRoleHome(user?.role);
 
   if (loading) {
     return (
@@ -235,6 +221,7 @@ const App = () => {
       <>
       <CookieConsentBanner />
       <SessionExpiryBanner />
+      <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/" element={<MarketingLandingPage />} />
         <Route path="/marketing" element={<MarketingLandingPage />} />
@@ -259,8 +246,9 @@ const App = () => {
         <Route path="/mobile" element={<MobileAppPage />} />
         <Route path="/cloud" element={<CloudInfrastructurePage />} />
         <Route path="/premium" element={<PremiumFeaturesPage />} />
-        <Route path="*" element={<MarketingLandingPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      </Suspense>
       </>
     );
   }
@@ -269,6 +257,7 @@ const App = () => {
     <>
     <CookieConsentBanner />
     <SessionExpiryBanner />
+    <Suspense fallback={<PageLoader />}>
     <Routes>
       <Route path="/" element={<Navigate to={userHome} replace />} />
       <Route path="/login" element={<Navigate to={userHome} replace />} />
@@ -493,8 +482,9 @@ const App = () => {
       <Route path="/support/profile" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><AdminProfilePage /></ServiceClientLayout></RoleRoute>} />
       <Route path="/support/dashboard" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportDashboardPage /></ServiceClientLayout></RoleRoute>} />
 
-      <Route path="*" element={<NotFoundPage />} />
+      <Route path="*" element={<RoleLayoutShell user={user}><NotFoundPage /></RoleLayoutShell>} />
     </Routes>
+    </Suspense>
     </>
   );
 };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import PlatformLiveBadge from '../components/PlatformLiveBadge';
 import CitySelector from '../components/CitySelector';

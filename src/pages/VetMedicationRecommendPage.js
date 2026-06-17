@@ -3,6 +3,13 @@ import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import VetMedicationRecommender from '../components/VetMedicationRecommender';
 import MedicationFormFields from '../components/MedicationFormFields';
+import VetPharmacyAlertsPanel from '../components/VetPharmacyAlertsPanel';
+import { fetchPharmacyCatalog } from '../services/vetMedicationService';
+import {
+  buildPharmacyAlerts,
+  checkPrescriptionStock,
+  summarizePharmacyStock,
+} from '../utils/vetPharmacyAlerts';
 import {
   emptyMedicationRow,
   serializeMedications,
@@ -10,9 +17,11 @@ import {
 } from '../utils/medications';
 import { DEMO_VET_BI } from '../utils/vetDemoData';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import './VetPages.css';
 
 const VetMedicationRecommendPage = () => {
   const [clients, setClients] = useState([]);
+  const [catalog, setCatalog] = useState([]);
   const [ownerId, setOwnerId] = useState('');
   const [petName, setPetName] = useState('');
   const [diagnosis, setDiagnosis] = useState('');
@@ -23,10 +32,15 @@ const VetMedicationRecommendPage = () => {
 
   const loadClients = useCallback(async () => {
     try {
-      const { data } = await api.get('/vet/clients');
+      const [{ data }, meds] = await Promise.all([
+        api.get('/vet/clients'),
+        fetchPharmacyCatalog(),
+      ]);
       setClients(data || []);
+      setCatalog(meds || []);
     } catch {
       setClients([]);
+      setCatalog([]);
     }
   }, []);
 
@@ -48,6 +62,13 @@ const VetMedicationRecommendPage = () => {
     ageYears: selectedPet?.ageYears,
   }), [petName, selectedPet]);
 
+  const pharmacySummary = useMemo(() => summarizePharmacyStock(catalog), [catalog]);
+  const pharmacyAlerts = useMemo(() => buildPharmacyAlerts(catalog), [catalog]);
+  const stockPreview = useMemo(
+    () => checkPrescriptionStock(serializeMedications(medications), catalog),
+    [medications, catalog]
+  );
+
   const applyToPrescription = (rows) => {
     setMedications(rows.length ? rows : [emptyMedicationRow()]);
   };
@@ -66,6 +87,13 @@ const VetMedicationRecommendPage = () => {
     if (!petName || !ownerId || !meds.length) {
       window.alert('Sélectionnez client, animal et médicaments.');
       return;
+    }
+    const stockCheck = checkPrescriptionStock(meds, catalog);
+    if (!stockCheck.ok) {
+      const proceed = window.confirm(
+        `Alertes stock :\n${stockCheck.warnings.map((w) => `• ${w.message}`).join('\n')}\n\nContinuer ?`
+      );
+      if (!proceed) return;
     }
     setSaving(true);
     try {
@@ -98,10 +126,12 @@ const VetMedicationRecommendPage = () => {
         <Link to="/vet/prescriptions" style={{ color: '#0ea5e9', fontSize: 14 }}>Ordonnances →</Link>
         <Link to="/vet/diagnostics" style={{ color: '#0ea5e9', fontSize: 14 }}>Détection précoce →</Link>
       </div>
-      <p style={{ color: '#64748b', marginBottom: 24, lineHeight: 1.6 }}>
+      <p style={{ color: '#64748b', marginBottom: 16, lineHeight: 1.6 }}>
         Moteur de recommandation basé sur le diagnostic, les symptômes, l&apos;espèce et le poids —
         croisé avec le stock pharmacie et les protocoles BI ({DEMO_VET_BI.diseaseTreatments?.length || 0} protocoles).
       </p>
+
+      <VetPharmacyAlertsPanel alerts={pharmacyAlerts} summary={pharmacySummary} compact />
 
       <div style={{
         display: 'grid',
@@ -185,6 +215,16 @@ const VetMedicationRecommendPage = () => {
             style={{ width: '100%', marginTop: 6, padding: 10, borderRadius: 8, border: '1px solid #e5e7eb', boxSizing: 'border-box' }}
           />
         </label>
+        {!stockPreview.ok && stockPreview.warnings.length > 0 && (
+          <div className="vet-rx-stock-warnings">
+            <strong>⚠ Stock insuffisant ou rupture</strong>
+            <ul>
+              {stockPreview.warnings.map((w) => (
+                <li key={`${w.name}-${w.status}`}>{w.message}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         <button
           type="button"
           disabled={saving}

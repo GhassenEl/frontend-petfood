@@ -10,6 +10,7 @@ import {
   FREQUENCY_OPTIONS,
   DURATION_OPTIONS,
 } from '../utils/medications';
+import { classifyMedicationStock } from '../utils/vetPharmacyAlerts';
 
 const MedicationFormFields = ({
   medications,
@@ -162,19 +163,27 @@ const MedicationFormFields = ({
 
       {rows.map((row, index) => {
         const cat = catalogByName.get((row.name || '').toLowerCase());
+        const stockInfo = cat ? classifyMedicationStock(cat) : null;
+        const rowBorder = stockInfo?.level === 'critical' ? '#fecaca' : stockInfo?.level === 'warning' ? '#fcd34d' : '#e5e7eb';
+        const rowBg = stockInfo?.level === 'critical' ? '#fef2f2' : stockInfo?.level === 'warning' ? '#fffbeb' : '#f9fafb';
         return (
           <div
             key={index}
             style={{
               padding: 14,
               borderRadius: 12,
-              border: cat?.lowStock ? '1px solid #fcd34d' : '1px solid #e5e7eb',
-              background: cat?.lowStock ? '#fffbeb' : '#f9fafb',
+              border: `1px solid ${rowBorder}`,
+              background: rowBg,
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
               <strong style={{ fontSize: 13, color: '#374151' }}>Médicament {index + 1}</strong>
-              <div style={{ display: 'flex', gap: 6 }}>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                {stockInfo && stockInfo.status !== 'ok' && (
+                  <span className={`vet-stock-badge vet-stock-badge--${stockInfo.level === 'critical' ? 'critical' : 'warning'}`}>
+                    {stockInfo.label}
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => calculateDose(index)}
@@ -189,9 +198,9 @@ const MedicationFormFields = ({
               </div>
             </div>
 
-            {cat?.lowStock && (
-              <p style={{ margin: '0 0 8px', fontSize: 12, color: '#b45309' }}>
-                ⚠ Stock bas : {cat.stockQty} {cat.unit} (min {cat.minStock})
+            {stockInfo && stockInfo.status !== 'ok' && (
+              <p style={{ margin: '0 0 8px', fontSize: 12, color: stockInfo.level === 'critical' ? '#b91c1c' : '#b45309' }}>
+                ⚠ {stockInfo.message}
               </p>
             )}
 

@@ -124,7 +124,7 @@ export const VENDOR_PUBLIC_MOBILE_NAV = [
 export const VISITOR_MOBILE_NAV = [
   { id: 'hub', to: '/visitor', icon: '👀', label: 'Découvrir' },
   { id: 'products', to: '/visitor/products', icon: '🏷️', label: 'Produits' },
-  { id: 'tools', to: '/visitor/tools', icon: '🧪', label: 'Outils' },
+  { id: 'contact', to: '/contact', icon: '📧', label: 'Contact' },
   { id: 'register', to: '/register', icon: '✨', label: 'Inscription' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
@@ -132,7 +132,7 @@ export const VISITOR_MOBILE_NAV = [
 export const AUTH_PUBLIC_MOBILE_NAV = [
   { id: 'home', to: '/', icon: '🏠', label: 'Accueil' },
   { id: 'visitor', to: '/visitor', icon: '👀', label: 'Visiteur' },
-  { id: 'caps', to: '/capabilities', icon: '📋', label: 'Rôles' },
+  { id: 'contact', to: '/contact', icon: '📧', label: 'Contact' },
   { id: 'login', to: '/login', icon: '🔑', label: 'Connexion' },
   { id: 'register', to: '/register', icon: '✨', label: 'Inscrire' },
 ];

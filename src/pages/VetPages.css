@@ -1,0 +1,470 @@
+/* Pages vétérinaires — pharmacie, ordonnances, alertes */
+
+.vet-pharmacy-panel {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #fcd34d;
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.vet-pharmacy-panel--compact {
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.vet-pharmacy-panel--ok {
+  background: #ecfdf5;
+  border-color: #86efac;
+}
+
+.vet-pharmacy-panel__ok {
+  font-size: 14px;
+  font-weight: 600;
+  color: #047857;
+}
+
+.vet-pharmacy-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.vet-pharmacy-panel__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vet-pharmacy-panel__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.vet-pharmacy-panel__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.vet-pharmacy-chip {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.vet-pharmacy-chip--critical {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.vet-pharmacy-chip--warning {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.vet-pharmacy-panel__notif-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0369a1;
+  cursor: pointer;
+}
+
+.vet-pharmacy-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vet-pharmacy-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: white;
+  border-radius: 12px;
+  border-left: 4px solid #f59e0b;
+}
+
+.vet-pharmacy-alert--critical {
+  border-left-color: #ef4444;
+}
+
+.vet-pharmacy-alert--warning {
+  border-left-color: #f59e0b;
+}
+
+.vet-pharmacy-alert__icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #b45309;
+}
+
+.vet-pharmacy-alert--critical .vet-pharmacy-alert__icon {
+  color: #dc2626;
+}
+
+.vet-pharmacy-alert__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.vet-pharmacy-alert__body strong {
+  font-size: 14px;
+  color: #1e293b;
+  margin-right: 8px;
+}
+
+.vet-pharmacy-alert__badge {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.vet-pharmacy-alert--critical .vet-pharmacy-alert__badge {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.vet-pharmacy-alert__body p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.vet-pharmacy-alert__loc {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.vet-pharmacy-alert__link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0369a1;
+  text-decoration: none;
+  white-space: nowrap;
+  align-self: center;
+}
+
+.vet-pharmacy-panel__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(251, 191, 36, 0.35);
+}
+
+.vet-pharmacy-panel__footer a {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0369a1;
+  text-decoration: none;
+}
+
+.vet-pharmacy-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.vet-pharmacy-kpi {
+  background: white;
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.vet-pharmacy-kpi--critical {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.vet-pharmacy-kpi__value {
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: #0c4a6e;
+}
+
+.vet-pharmacy-kpi--critical .vet-pharmacy-kpi__value {
+  color: #b91c1c;
+}
+
+.vet-pharmacy-kpi__label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.vet-stock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.vet-stock-badge--ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.vet-stock-badge--warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.vet-stock-badge--critical {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.vet-rx-stock-warnings {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  font-size: 12px;
+  color: #9a3412;
+}
+
+.vet-rx-stock-warnings ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.vet-pharmacy-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.vet-pharmacy-tab {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+}
+
+.vet-pharmacy-tab--active {
+  background: #0ea5e9;
+  border-color: #0ea5e9;
+  color: white;
+}
+
+/* Barre alertes cliniques transversale */
+.vet-clinical-bar {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+
+.vet-clinical-bar--compact {
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+
+.vet-clinical-bar--ok {
+  background: #ecfdf5;
+  border-color: #86efac;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: #047857;
+}
+
+.vet-clinical-bar--ok a {
+  color: #0369a1;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.vet-clinical-bar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vet-clinical-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
+
+.vet-clinical-chip:hover {
+  transform: translateY(-1px);
+}
+
+.vet-clinical-chip--critical {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.vet-clinical-chip--warning {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.vet-clinical-chip--info {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.vet-clinical-bar__list {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.vet-clinical-bar__list a {
+  color: #0c4a6e;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.vet-clinical-bar__list li {
+  padding: 6px 10px;
+  background: white;
+  border-radius: 8px;
+  border-left: 3px solid #0ea5e9;
+}
+
+/* En-tête page vétérinaire */
+.vet-page-header {
+  margin-bottom: 20px;
+}
+
+.vet-page-header h1 {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0c4a6e;
+}
+
+.vet-page-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.vet-page-header__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.vet-page-header__links a {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0369a1;
+  text-decoration: none;
+}
+
+.vet-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 20px;
+}
+
+.vet-quick-actions a,
+.vet-quick-actions button {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.vet-quick-actions a:hover,
+.vet-quick-actions button:hover {
+  border-color: #0ea5e9;
+  color: #0369a1;
+}
+
+.vet-sidebar-badge {
+  margin-left: auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vet-sidebar-badge--warn {
+  background: #f59e0b;
+}
+
+.vet-sidebar-badge--info {
+  background: #3b82f6;
+}

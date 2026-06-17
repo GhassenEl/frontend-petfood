@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petfood-backend
+  namespace: petfoodtn
+  labels:
+    app: petfood-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: petfood-backend
+  template:
+    metadata:
+      labels:
+        app: petfood-backend
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/ghassenel/petfoodtn-backend:latest
+          ports:
+            - containerPort: 5002
+          envFrom:
+            - secretRef:
+                name: petfood-backend-secrets
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5002
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5002
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petfood-backend
+  namespace: petfoodtn
+spec:
+  selector:
+    app: petfood-backend
+  ports:
+    - port: 5002
+      targetPort: 5002
+  type: ClusterIP

@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api from '../utils/api';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import VetClinicalAlertsBar from '../components/VetClinicalAlertsBar';
+import './VetPages.css';
 import {
   DEMO_VET_HISTORY,
   getDemoVetClient,
@@ -16,6 +18,7 @@ const clientId = (c) => c?.id || c?._id;
 const VetClientDetailPage = () => {
   const { id } = useParams();
   const [client, setClient] = useState(null);
+  const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -24,8 +27,17 @@ const VetClientDetailPage = () => {
       const { data } = await api.get(`/vet/clients/${id}`);
       if (data?.name) {
         setClient(data);
-        return;
+      } else {
+        throw new Error('empty');
       }
+      try {
+        const { data: consults } = await api.get('/vet/consultations');
+        setConsultations((consults || []).filter((c) => (c.ownerId === id || c.owner?.id === id)));
+      } catch {
+        setConsultations([]);
+      }
+      setLoading(false);
+      return;
     } catch {
       /* fallback démo */
     }
@@ -53,10 +65,13 @@ const VetClientDetailPage = () => {
   usePlatformRefresh(load);
 
   const recentConsultations = useMemo(() => {
+    if (consultations.length) {
+      return consultations.slice(0, 5);
+    }
     return (DEMO_VET_HISTORY.consultations || [])
       .filter((c) => c.ownerId === id)
       .slice(0, 5);
-  }, [id]);
+  }, [consultations, id]);
 
   if (loading) {
     return <div style={{ padding: 40, textAlign: 'center' }}>Chargement…</div>;
@@ -79,6 +94,8 @@ const VetClientDetailPage = () => {
         ← Clients
       </Link>
 
+      <VetClinicalAlertsBar compact />
+
       <header
         style={{
           marginTop: 12,
@@ -92,6 +109,12 @@ const VetClientDetailPage = () => {
         <h1 style={{ margin: '0 0 6px', fontSize: '1.6rem' }}>{client.name}</h1>
         <p style={{ margin: 0, opacity: 0.9, fontSize: 14 }}>{client.email}</p>
         {client.phone && <p style={{ margin: '6px 0 0', opacity: 0.85, fontSize: 14 }}>📞 {client.phone}</p>}
+        <div className="vet-quick-actions" style={{ marginTop: 16 }}>
+          <Link to={`/vet/prescriptions?ownerId=${encodeURIComponent(cid)}`}>💊 Ordonnance</Link>
+          <Link to="/vet/calendar">📅 Planifier RDV</Link>
+          <Link to="/vet/teleconsult">📹 Téléconsultation</Link>
+          <Link to={`/vet/medical-dossiers?q=${encodeURIComponent(client.name || '')}`}>📁 Dossier médical</Link>
+        </div>
       </header>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginBottom: 24 }}>
@@ -153,6 +176,13 @@ const VetClientDetailPage = () => {
                   )}
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                  <Link
+                    to={`/vet/prescriptions?ownerId=${encodeURIComponent(cid)}&petName=${encodeURIComponent(pet.name)}`}
+                    className="btn btn-outline"
+                    style={{ fontSize: 12, padding: '6px 12px', textDecoration: 'none' }}
+                  >
+                    💊 Ordonnance
+                  </Link>
                   <Link
                     to={`/vet/history?ownerId=${encodeURIComponent(cid)}&petName=${encodeURIComponent(pet.name)}`}
                     className="btn btn-outline"

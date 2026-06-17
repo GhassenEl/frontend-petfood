@@ -1,0 +1,33 @@
+# Mosquitto MQTT — broker IoT PetfoodTN (ESP32, distributeurs, capteurs)
+# Usage : docker compose -f docker-compose.yml -f docker-compose.iot.yml --env-file .env.docker up -d
+
+services:
+  mqtt:
+    image: eclipse-mosquitto:2
+    container_name: petfood-mqtt
+    restart: unless-stopped
+    ports:
+      - '${MQTT_PORT:-1883}:1883'
+      - '${MQTT_WS_PORT:-9001}:9001'
+    volumes:
+      - ./infra/mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mqtt_data:/mosquitto/data
+      - mqtt_log:/mosquitto/log
+    healthcheck:
+      test: ['CMD-SHELL', 'mosquitto_sub -h 127.0.0.1 -t "$$SYS/broker/version" -C 1 -W 3 || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  backend:
+    environment:
+      MQTT_BROKER_URL: ${MQTT_BROKER_URL:-mqtt://mqtt:1883}
+      MQTT_TOPIC_PREFIX: ${MQTT_TOPIC_PREFIX:-petfood/}
+    depends_on:
+      mqtt:
+        condition: service_healthy
+
+volumes:
+  mqtt_data:
+  mqtt_log:

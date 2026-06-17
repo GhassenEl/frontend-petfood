@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Pencil, RefreshCw } from 'lucide-react';
 import {
@@ -9,12 +9,23 @@ import {
   fetchVetPharmacyMovements,
   updateVetMedicationThresholds,
 } from '../services/vetPharmacyService';
+import {
+  notifyNewPharmacyAlerts,
+  persistVetPharmacyNotification,
+} from '../services/vetPharmacyNotificationService';
+import VetPharmacyAlertsPanel from '../components/VetPharmacyAlertsPanel';
+import VetClinicalAlertsBar from '../components/VetClinicalAlertsBar';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import {
-  DEMO_VET_PHARMACY_ALERTS,
+  buildPharmacyAlerts,
+  classifyMedicationStock,
+  summarizePharmacyStock,
+} from '../utils/vetPharmacyAlerts';
+import {
   DEMO_VET_PHARMACY_MEDS,
   withDemoFallback,
 } from '../utils/vetDemoData';
+import './VetPages.css';
 
 const emptyForm = () => ({
   name: '',
@@ -24,12 +35,17 @@ const emptyForm = () => ({
   location: 'Stock clinique',
 });
 
+const StockBadge = ({ med }) => {
+  const c = classifyMedicationStock(med);
+  return <span className={`vet-stock-badge vet-stock-badge--${c.level === 'critical' ? 'critical' : c.level === 'warning' ? 'warning' : 'ok'}`}>{c.label}</span>;
+};
+
 const VetPharmacyPage = () => {
   const [medications, setMedications] = useState([]);
-  const [alerts, setAlerts] = useState([]);
   const [movements, setMovements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [tab, setTab] = useState('catalogue');
   const [showAdd, setShowAdd] = useState(false);
   const [addForm, setAddForm] = useState(emptyForm());
   const [adjustTarget, setAdjustTarget] = useState(null);
@@ -41,21 +57,35 @@ const VetPharmacyPage = () => {
     location: '',
   });
 
+  const summary = useMemo(() => summarizePharmacyStock(medications), [medications]);
+  const alerts = useMemo(() => summary.alerts, [summary]);
+
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const [meds, al, mv] = await Promise.all([
+      const [meds, apiAlerts, mv] = await Promise.all([
         fetchVetPharmacyCatalog(),
-        fetchVetPharmacyAlerts(),
+        fetchVetPharmacyAlerts().catch(() => []),
         fetchVetPharmacyMovements(20).catch(() => []),
       ]);
-      setMedications(withDemoFallback(meds, DEMO_VET_PHARMACY_MEDS));
-      setAlerts(withDemoFallback(al, DEMO_VET_PHARMACY_ALERTS));
+      const catalog = withDemoFallback(meds, DEMO_VET_PHARMACY_MEDS);
+      setMedications(catalog);
       setMovements(Array.isArray(mv) ? mv : []);
+
+      const computedAlerts = buildPharmacyAlerts(catalog);
+      const mergedAlerts = computedAlerts.length
+        ? computedAlerts
+        : buildPharmacyAlerts(withDemoFallback(apiAlerts, []));
+
+      notifyNewPharmacyAlerts(mergedAlerts);
+      mergedAlerts
+        .filter((a) => a.level === 'critical')
+        .forEach((a) => persistVetPharmacyNotification(a));
     } catch {
-      setMedications(DEMO_VET_PHARMACY_MEDS);
-      setAlerts(DEMO_VET_PHARMACY_ALERTS);
+      const catalog = DEMO_VET_PHARMACY_MEDS;
+      setMedications(catalog);
       setMovements([]);
+      notifyNewPharmacyAlerts(buildPharmacyAlerts(catalog));
     } finally {
       setLoading(false);
     }
@@ -150,14 +180,20 @@ const VetPharmacyPage = () => {
 
   if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Chargement pharmacie…</div>;
 
+  const filteredMeds = tab === 'alertes'
+    ? medications.filter((m) => classifyMedicationStock(m).status !== 'ok')
+    : medications;
+
   return (
     <div style={{ padding: 24, maxWidth: 1100, margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
         <div>
           <h1 style={{ margin: 0 }}>💊 Pharmacie clinique</h1>
           <p style={{ color: '#64748b', margin: '8px 0 0' }}>
-            Gestion du stock, alertes et catalogue ordonnances.{' '}
-            <Link to="/vet/bi" style={{ color: '#0ea5e9' }}>Dashboard BI →</Link>
+            Stock, ruptures, ordonnances et alertes notifications.{' '}
+            <Link to="/vet/prescriptions" style={{ color: '#0ea5e9' }}>Ordonnances →</Link>
+            {' · '}
+            <Link to="/vet/bi" style={{ color: '#0ea5e9' }}>BI →</Link>
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -168,6 +204,46 @@ const VetPharmacyPage = () => {
             <Plus size={16} /> Ajouter
           </button>
         </div>
+      </div>
+
+      <VetClinicalAlertsBar compact />
+
+      <div className="vet-pharmacy-kpis">
+        <div className="vet-pharmacy-kpi">
+          <div className="vet-pharmacy-kpi__value">{summary.total}</div>
+          <div className="vet-pharmacy-kpi__label">Références</div>
+        </div>
+        <div className={`vet-pharmacy-kpi ${summary.ruptures ? 'vet-pharmacy-kpi--critical' : ''}`}>
+          <div className="vet-pharmacy-kpi__value">{summary.ruptures}</div>
+          <div className="vet-pharmacy-kpi__label">Ruptures</div>
+        </div>
+        <div className="vet-pharmacy-kpi">
+          <div className="vet-pharmacy-kpi__value">{summary.lowStock}</div>
+          <div className="vet-pharmacy-kpi__label">Stock bas</div>
+        </div>
+        <div className="vet-pharmacy-kpi">
+          <div className="vet-pharmacy-kpi__value">{summary.expiry}</div>
+          <div className="vet-pharmacy-kpi__label">Péremption</div>
+        </div>
+      </div>
+
+      <VetPharmacyAlertsPanel alerts={alerts} summary={summary} />
+
+      <div className="vet-pharmacy-tabs">
+        {[
+          { id: 'catalogue', label: `Catalogue (${medications.length})` },
+          { id: 'alertes', label: `Alertes (${alerts.length})` },
+          { id: 'mouvements', label: 'Mouvements' },
+        ].map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className={`vet-pharmacy-tab ${tab === t.id ? 'vet-pharmacy-tab--active' : ''}`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {showAdd && (
@@ -187,65 +263,75 @@ const VetPharmacyPage = () => {
         </form>
       )}
 
-      {alerts.length > 0 && (
-        <div style={{ background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: 14, padding: 16, marginBottom: 20 }}>
-          <strong style={{ color: '#b45309' }}>⚠ Alertes stock ({alerts.length})</strong>
-          <ul style={{ margin: '8px 0 0', paddingLeft: 18 }}>
-            {alerts.map((a) => (
-              <li key={a.id || a.name} style={{ fontSize: 14 }}>
-                {a.name} — {a.stockQty} {a.unit} (minimum {a.minStock})
-              </li>
-            ))}
-          </ul>
+      {tab !== 'mouvements' && (
+        <div style={{ overflowX: 'auto', background: 'white', borderRadius: 14, boxShadow: '0 2px 10px rgba(0,0,0,0.05)', marginBottom: 20 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+            <thead>
+              <tr style={{ textAlign: 'left', borderBottom: '2px solid #e5e7eb' }}>
+                <th style={{ padding: 12 }}>Médicament</th>
+                <th style={{ padding: 12 }}>Statut</th>
+                <th style={{ padding: 12 }}>Stock</th>
+                <th style={{ padding: 12 }}>Min</th>
+                <th style={{ padding: 12 }}>Unité</th>
+                <th style={{ padding: 12 }}>Emplacement</th>
+                <th style={{ padding: 12 }}>Protocoles BI</th>
+                <th style={{ padding: 12 }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredMeds.length === 0 ? (
+                <tr>
+                  <td colSpan={8} style={{ padding: 24, textAlign: 'center', color: '#94a3b8' }}>
+                    Aucun médicament dans cette vue.
+                  </td>
+                </tr>
+              ) : filteredMeds.map((m) => {
+                const stockClass = classifyMedicationStock(m);
+                return (
+                  <tr
+                    key={m.id}
+                    style={{
+                      borderBottom: '1px solid #f3f4f6',
+                      background: stockClass.level === 'critical' ? '#fef2f2' : stockClass.level === 'warning' ? '#fffbeb' : 'transparent',
+                    }}
+                  >
+                    <td style={{ padding: 12 }}><strong>{m.name}</strong></td>
+                    <td style={{ padding: 12 }}><StockBadge med={m} /></td>
+                    <td style={{ padding: 12, color: stockClass.level === 'critical' ? '#b91c1c' : stockClass.level === 'warning' ? '#b45309' : '#059669', fontWeight: 700 }}>{m.stockQty}</td>
+                    <td style={{ padding: 12 }}>{m.minStock}</td>
+                    <td style={{ padding: 12 }}>{m.unit}</td>
+                    <td style={{ padding: 12 }}>{m.location || m.pharmacy || 'Stock clinique'}</td>
+                    <td style={{ padding: 12, fontSize: 12, color: '#64748b' }}>
+                      {(m.treatments || []).map((t) => t.disease).filter(Boolean).join(', ') || '—'}
+                    </td>
+                    <td style={{ padding: 12 }}>
+                      <button type="button" onClick={() => openAdjust(m)} style={btnSmall}>Stock</button>
+                      <button type="button" onClick={() => openThresholds(m)} style={{ ...btnSmall, marginLeft: 6 }}>
+                        <Pencil size={12} style={{ verticalAlign: 'middle' }} /> Seuils
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 
-      <div style={{ overflowX: 'auto', background: 'white', borderRadius: 14, boxShadow: '0 2px 10px rgba(0,0,0,0.05)', marginBottom: 20 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '2px solid #e5e7eb' }}>
-              <th style={{ padding: 12 }}>Médicament</th>
-              <th style={{ padding: 12 }}>Stock</th>
-              <th style={{ padding: 12 }}>Min</th>
-              <th style={{ padding: 12 }}>Unité</th>
-              <th style={{ padding: 12 }}>Emplacement</th>
-              <th style={{ padding: 12 }}>Protocoles BI</th>
-              <th style={{ padding: 12 }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {medications.map((m) => (
-              <tr key={m.id} style={{ borderBottom: '1px solid #f3f4f6', background: m.lowStock ? '#fffbeb' : 'transparent' }}>
-                <td style={{ padding: 12 }}><strong>{m.name}</strong></td>
-                <td style={{ padding: 12, color: m.lowStock ? '#b45309' : '#059669', fontWeight: 700 }}>{m.stockQty}</td>
-                <td style={{ padding: 12 }}>{m.minStock}</td>
-                <td style={{ padding: 12 }}>{m.unit}</td>
-                <td style={{ padding: 12 }}>{m.location || m.pharmacy || 'Stock clinique'}</td>
-                <td style={{ padding: 12, fontSize: 12, color: '#64748b' }}>
-                  {(m.treatments || []).map((t) => t.disease).filter(Boolean).join(', ') || '—'}
-                </td>
-                <td style={{ padding: 12 }}>
-                  <button type="button" onClick={() => openAdjust(m)} style={btnSmall}>Stock</button>
-                  <button type="button" onClick={() => openThresholds(m)} style={{ ...btnSmall, marginLeft: 6 }}>
-                    <Pencil size={12} style={{ verticalAlign: 'middle' }} /> Seuils
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {movements.length > 0 && (
+      {tab === 'mouvements' && (
         <div style={panelStyle}>
           <strong>Mouvements récents</strong>
-          <ul style={{ margin: '10px 0 0', paddingLeft: 18, fontSize: 13, color: '#475569' }}>
-            {movements.map((mv) => (
-              <li key={mv.id}>
-                {new Date(mv.date).toLocaleString('fr-FR')} — {mv.medicationName}: {mv.qty > 0 ? '+' : ''}{mv.qty} ({mv.reason})
-              </li>
-            ))}
-          </ul>
+          {movements.length === 0 ? (
+            <p style={{ margin: '12px 0 0', color: '#94a3b8', fontSize: 13 }}>Aucun mouvement enregistré.</p>
+          ) : (
+            <ul style={{ margin: '10px 0 0', paddingLeft: 18, fontSize: 13, color: '#475569' }}>
+              {movements.map((mv) => (
+                <li key={mv.id}>
+                  {new Date(mv.date).toLocaleString('fr-FR')} — {mv.medicationName}: {mv.qty > 0 ? '+' : ''}{mv.qty} ({mv.reason})
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
@@ -255,7 +341,7 @@ const VetPharmacyPage = () => {
             <h3 style={{ marginTop: 0 }}>Ajuster le stock — {adjustTarget.name}</h3>
             <p style={{ color: '#64748b', fontSize: 14 }}>Stock actuel : {adjustTarget.stockQty} {adjustTarget.unit}</p>
             <input type="number" required placeholder="Ajustement (+/-)" value={adjustForm.adjustment} onChange={(e) => setAdjustForm({ ...adjustForm, adjustment: e.target.value })} style={{ ...inputStyle, width: '100%', marginBottom: 10 }} />
-            <input placeholder="Motif (optionnel)" value={adjustForm.reason} onChange={(e) => setAdjustForm({ ...adjustForm, reason: e.target.value })} style={{ ...inputStyle, width: '100%', marginBottom: 14 }} />
+            <input placeholder="Motif (réappro, ordonnance, perte…)" value={adjustForm.reason} onChange={(e) => setAdjustForm({ ...adjustForm, reason: e.target.value })} style={{ ...inputStyle, width: '100%', marginBottom: 14 }} />
             <div style={{ display: 'flex', gap: 8 }}>
               <button type="submit" style={btnPrimary} disabled={busy}>Valider</button>
               <button type="button" style={btnGhost} onClick={() => setAdjustTarget(null)}>Annuler</button>

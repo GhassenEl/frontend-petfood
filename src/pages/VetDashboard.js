@@ -15,14 +15,20 @@ import {
   FolderOpen,
   MessageSquare,
   Brain,
+  PackageX,
 } from 'lucide-react';
 import api from '../utils/api';
+import { fetchPharmacyCatalog } from '../services/vetMedicationService';
+import { summarizePharmacyStock } from '../utils/vetPharmacyAlerts';
+import { notifyNewPharmacyAlerts } from '../services/vetPharmacyNotificationService';
 import { visitModeBadge } from '../constants/visitModes';
 import VetDashboardCharts from '../components/VetDashboardCharts';
 import VetDigitalTwinDashboardPanel from '../components/VetDigitalTwinDashboardPanel';
+import VetClinicalAlertsBar from '../components/VetClinicalAlertsBar';
 import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
 import { DEMO_VET_BI, withDemoDashboard, buildDemoVetWeekChart } from '../utils/vetDemoData';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import './VetPages.css';
 
 const STATUS_LABELS = {
   scheduled: 'Planifié',
@@ -42,6 +48,7 @@ const formatDay = (date) =>
 
 const VetDashboard = () => {
   const [data, setData] = useState(null);
+  const [pharmacySummary, setPharmacySummary] = useState({ ruptures: 0, lowStock: 0, expiry: 0, vaccinesOverdue: 0 });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -49,11 +56,22 @@ const VetDashboard = () => {
     if (!silent) setLoading(true);
     else setRefreshing(true);
     try {
-      const { data: dash } = await api.get('/vet/dashboard');
+      const [{ data: dash }, catalog, vaccinesRes] = await Promise.all([
+        api.get('/vet/dashboard'),
+        fetchPharmacyCatalog(),
+        api.get('/vet/vaccinations').catch(() => ({ data: null })),
+      ]);
       setData(withDemoDashboard(dash));
+      const summary = summarizePharmacyStock(catalog);
+      const vaccines = vaccinesRes.data || [];
+      const now = new Date();
+      const vaccinesOverdue = vaccines.filter((v) => v.nextDue && new Date(v.nextDue) < now).length;
+      setPharmacySummary({ ...summary, vaccinesOverdue });
+      notifyNewPharmacyAlerts(summary.alerts);
     } catch (error) {
       console.error('Vet dashboard error:', error);
       setData(withDemoDashboard(null));
+      setPharmacySummary({ ruptures: 1, lowStock: 2, expiry: 1, vaccinesOverdue: 1, alerts: [] });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -143,6 +161,15 @@ const VetDashboard = () => {
       bg: '#ede9fe',
       link: '/vet/contact-requests',
     },
+    {
+      label: 'Ruptures pharmacie',
+      value: pharmacySummary.ruptures ?? data?.pharmacySummary?.ruptures ?? 0,
+      icon: PackageX,
+      color: '#dc2626',
+      bg: '#fef2f2',
+      link: '/vet/pharmacy',
+      highlight: (pharmacySummary.ruptures ?? 0) > 0,
+    },
   ];
 
   const secondaryKpis = [
@@ -151,7 +178,8 @@ const VetDashboard = () => {
     { label: 'RDV terminés (semaine)', value: weekStats.completedAppointments ?? 0, icon: '✅' },
     { label: 'Dossiers actifs', value: clinicStats.dossiersCount ?? 0, icon: '📁' },
     { label: 'Entrées signées', value: clinicStats.signedEntriesCount ?? 0, icon: '✍️' },
-    { label: 'Vaccins à prévoir', value: clinicStats.vaccinesDueSoon ?? 0, icon: '💉' },
+    { label: 'Vaccins en retard', value: pharmacySummary.vaccinesOverdue ?? data?.pharmacySummary?.expiry ?? clinicStats.vaccinesDueSoon ?? 0, icon: '💉' },
+    { label: 'Demandes contact', value: pendingContactRequests, icon: '📩' },
   ];
 
   const quickActions = [
@@ -216,6 +244,8 @@ const VetDashboard = () => {
           </button>
         </div>
       </motion.header>
+
+      <VetClinicalAlertsBar />
 
       {/* KPIs principaux */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 20 }}>

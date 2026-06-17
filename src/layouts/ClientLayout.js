@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
+import ResponsiveShell from './ResponsiveShell';
 import ClientSidebar from '../components/ClientSidebar';
 import ChatAssistant from '../components/ChatAssistant';
 import CartModal from '../components/CartModal';
