@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
+from app.ml.intelligence_suite import run_intelligence_suite
 from app.ml.platform_engine import (
     detect_anomalies,
     rank_products_senior_dog,
@@ -88,3 +89,12 @@ def senior_dog_rank(body: PetRankRequest):
 def anomalies(body: PlatformSnapshot):
     snap = _snap_dict(body)
     return detect_anomalies(snap.get("orders", []))
+
+
+@router.post("/intelligence/suite")
+def intelligence_suite(body: PlatformSnapshot):
+    """10 piliers Intelligence PetfoodTN — ventes, stocks ML, reco, sentiment, IoT, vision, fraude, twin."""
+    try:
+        return run_intelligence_suite(_snap_dict(body))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e

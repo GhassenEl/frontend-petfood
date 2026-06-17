@@ -69,6 +69,7 @@ import ChangePasswordPage from './pages/ChangePasswordPage';
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const PlatformCompliancePage = lazy(() => import('./pages/PlatformCompliancePage'));
 const EnterpriseFeaturesPage = lazy(() => import('./pages/EnterpriseFeaturesPage'));
+const IntelligencePlatformPage = lazy(() => import('./pages/IntelligencePlatformPage'));
 const MobileAppPage = lazy(() => import('./pages/MobileAppPage'));
 const CloudInfrastructurePage = lazy(() => import('./pages/CloudInfrastructurePage'));
 const PremiumFeaturesPage = lazy(() => import('./pages/PremiumFeaturesPage'));
@@ -243,6 +244,8 @@ const App = () => {
         <Route path="/qualite-iso" element={<PlatformCompliancePage />} />
         <Route path="/enterprise" element={<EnterpriseFeaturesPage />} />
         <Route path="/fonctionnalites" element={<EnterpriseFeaturesPage />} />
+        <Route path="/intelligence" element={<IntelligencePlatformPage />} />
+        <Route path="/ia" element={<IntelligencePlatformPage />} />
         <Route path="/mobile" element={<MobileAppPage />} />
         <Route path="/cloud" element={<CloudInfrastructurePage />} />
         <Route path="/premium" element={<PremiumFeaturesPage />} />
@@ -267,6 +270,8 @@ const App = () => {
       <Route path="/qualite-iso" element={<PlatformCompliancePage />} />
       <Route path="/enterprise" element={<EnterpriseFeaturesPage />} />
       <Route path="/fonctionnalites" element={<EnterpriseFeaturesPage />} />
+      <Route path="/intelligence" element={<IntelligencePlatformPage />} />
+      <Route path="/ia" element={<IntelligencePlatformPage />} />
       <Route path="/mobile" element={<MobileAppPage />} />
       <Route path="/cloud" element={<CloudInfrastructurePage />} />
       <Route path="/premium" element={<PremiumFeaturesPage />} />
@@ -318,6 +323,7 @@ const App = () => {
       <Route path="/admin/crm" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminCrmPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/rehabilitation" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRehabilitationPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/ml-agent" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminMlAgentPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/intelligence" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><IntelligencePlatformPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/advanced-ai" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAdvancedAiPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/analytics-decision" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAnalyticsDecisionPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/business-intelligence" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminBusinessIntelligencePage /></AdminLayout></RoleRoute>} />

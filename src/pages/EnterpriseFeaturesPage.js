@@ -61,6 +61,8 @@ const EnterpriseFeaturesPage = () => {
       ))}
 
       <p style={{ textAlign: 'center', fontSize: 13, color: '#94a3b8', marginTop: 16 }}>
+        <Link to="/intelligence" style={{ color: '#0f766e', fontWeight: 700 }}>Intelligence IA (10 piliers)</Link>
+        {' · '}
         <Link to="/compliance" style={{ color: '#0f766e', fontWeight: 700 }}>Conformité ISO</Link>
         {' · '}
         <Link to="/mobile" style={{ color: '#0f766e', fontWeight: 700 }}>App mobile</Link>
