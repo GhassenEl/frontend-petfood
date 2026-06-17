@@ -1,16 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Mail, Phone, MapPin, Clock, Send, Building2,
-  MessageCircle, CheckCircle2, ExternalLink, Share2,
+  MessageCircle, CheckCircle2, ExternalLink, Share2, HelpCircle, User,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import PetfoodLogo from '../components/PetfoodLogo';
+import { MARKETING_FAQ } from '../config/marketingContent';
+import './VisitorPages.css';
+
+const WHATSAPP_NUMBER = '21671100100';
 
 const contactInfo = [
   { icon: Mail, label: 'Email', value: 'contact@petfood.tn', href: 'mailto:contact@petfood.tn' },
   { icon: Phone, label: 'Téléphone', value: '+216 71 100 100', href: 'tel:+21671100100' },
+  { icon: MessageCircle, label: 'WhatsApp', value: '+216 71 100 100', href: `https://wa.me/${WHATSAPP_NUMBER}` },
   { icon: MapPin, label: 'Siège social', value: 'Les Berges du Lac 2, 1053 Tunis', href: 'https://maps.google.com/?q=Les+Berges+du+Lac+2+Tunis' },
   { icon: Clock, label: 'Horaires', value: 'Lun – Ven, 08:30 – 17:30', href: null },
 ];
@@ -19,15 +25,22 @@ const socialLinks = [
   { name: 'Facebook', emoji: 'f', url: 'https://facebook.com/petfoodtn', color: '#1877f2' },
   { name: 'Instagram', emoji: '📷', url: 'https://instagram.com/petfoodtn', color: '#e4405f' },
   { name: 'LinkedIn', emoji: 'in', url: 'https://linkedin.com/company/petfoodtn', color: '#0a66c2' },
+  { name: 'TikTok', emoji: '♪', url: 'https://tiktok.com/@petfoodtn', color: '#010101' },
+  { name: 'Twitter / X', emoji: '𝕏', url: 'https://x.com/petfoodtn', color: '#14171a' },
+  { name: 'Snapchat', emoji: '👻', url: 'https://snapchat.com/add/petfoodtn', color: '#fffc00', textColor: '#1e293b' },
+  { name: 'WhatsApp', emoji: '💬', url: `https://wa.me/${WHATSAPP_NUMBER}`, color: '#25d366' },
 ];
 
 const subjectOptions = [
+  'Question — espace questionnement',
   'Information produit',
   'Suivi de commande',
   'Partenariat / entreprise',
   'Support technique',
   'Autre demande',
 ];
+
+const QUESTION_SUBJECT = subjectOptions[0];
 
 const services = [
   { emoji: '🐶', title: 'Nutrition canine', text: 'Croquettes premium, plans NutriPro et distributeur IoT.' },
@@ -37,12 +50,17 @@ const services = [
 
 const ContactPage = () => {
   const { user } = useAuth();
-  const [form, setForm] = useState({ name: '', email: '', subject: subjectOptions[0], message: '' });
+  const formRef = useRef(null);
+  const isClient = user?.role === 'client';
+  const audienceLabel = isClient ? 'Client' : 'Visiteur';
+  const audienceColor = isClient ? '#0284c7' : '#ea580c';
+  const [form, setForm] = useState({ name: '', email: '', subject: QUESTION_SUBJECT, message: '' });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (!user) return undefined;
     const loadProfile = async () => {
       try {
         const { data } = await api.get('/users/profile');
@@ -58,7 +76,13 @@ const ContactPage = () => {
       }
     };
     loadProfile();
+    return undefined;
   }, [user]);
+
+  const scrollToQuestionForm = () => {
+    setForm((f) => ({ ...f, subject: QUESTION_SUBJECT }));
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,9 +96,10 @@ const ContactPage = () => {
         subject: form.subject,
         message: form.message,
         userId: user?.id || user?._id,
+        audienceType: isClient ? 'client' : 'visiteur',
       });
       setSuccess('Votre message a été envoyé. Notre équipe vous répond sous 24 h ouvrées.');
-      setForm((f) => ({ ...f, subject: subjectOptions[0], message: '' }));
+      setForm((f) => ({ ...f, subject: QUESTION_SUBJECT, message: '' }));
     } catch (err) {
       setError(err?.response?.data?.error || 'Envoi impossible. Réessayez plus tard.');
     } finally {
@@ -113,8 +138,13 @@ const ContactPage = () => {
           <div>
             <PetfoodLogo size="lg" showTagline variant="light" />
             <div style={{ marginTop: 20, maxWidth: 480 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.12)', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, marginBottom: 12 }}>
-                <Building2 size={14} /> Contact entreprise
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.12)', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
+                  <Building2 size={14} /> Contact entreprise
+                </div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.18)', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
+                  <User size={14} /> Espace {audienceLabel}
+                </div>
               </div>
               <h1 style={{ margin: '0 0 10px', fontSize: 28, fontWeight: 800, lineHeight: 1.2 }}>
                 Parlons nutrition, commandes & partenariats
@@ -147,6 +177,7 @@ const ContactPage = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: 24 }}>
         {/* Formulaire */}
         <motion.section
+          ref={formRef}
           initial={{ opacity: 0, x: -12 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
@@ -252,7 +283,7 @@ const ContactPage = () => {
               <Share2 size={18} color="#64748b" /> Réseaux sociaux
             </h3>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-              {socialLinks.map(({ name, emoji, url, color }) => (
+              {socialLinks.map(({ name, emoji, url, color, textColor }) => (
                 <a
                   key={name}
                   href={url}
@@ -264,11 +295,12 @@ const ContactPage = () => {
                     gap: 8,
                     padding: '10px 16px',
                     background: color,
-                    color: 'white',
+                    color: textColor || 'white',
                     borderRadius: 12,
                     textDecoration: 'none',
                     fontWeight: 700,
                     fontSize: 13,
+                    border: name === 'Snapchat' ? '1px solid #e2e8f0' : 'none',
                   }}
                 >
                   <span style={{ fontWeight: 800, fontSize: 14 }}>{emoji}</span> {name}
@@ -290,6 +322,86 @@ const ContactPage = () => {
           </div>
         </motion.aside>
       </div>
+
+      {/* Espace questionnement — client & visiteur */}
+      <motion.section
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        style={{ ...cardStyle, marginTop: 28 }}
+      >
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
+          <div>
+            <h2 style={{ margin: '0 0 6px', fontSize: 20, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <HelpCircle size={22} color="#ea580c" /> Espace questionnement
+            </h2>
+            <p style={{ margin: 0, color: '#64748b', fontSize: 14, maxWidth: 560, lineHeight: 1.6 }}>
+              {isClient
+                ? 'En tant que client connecté, consultez la FAQ ou posez votre question via le formulaire.'
+                : 'Visiteur ou futur client : trouvez une réponse rapide ci-dessous ou envoyez-nous votre question.'}
+            </p>
+          </div>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '8px 14px',
+            borderRadius: 20,
+            background: `${audienceColor}18`,
+            color: audienceColor,
+            fontWeight: 800,
+            fontSize: 13,
+          }}
+          >
+            <User size={14} /> Profil : {audienceLabel}
+          </span>
+        </div>
+
+        <div className="vis-faq" style={{ marginBottom: 20 }}>
+          {MARKETING_FAQ.map((item) => (
+            <details key={item.q}>
+              <summary>{item.q}</summary>
+              <p>{item.a}</p>
+            </details>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+          <button type="button" onClick={scrollToQuestionForm} style={btnPrimary}>
+            Poser une question à l&apos;équipe
+          </button>
+          <Link
+            to="/visitor/info?tab=faq"
+            style={{
+              padding: '12px 18px',
+              borderRadius: 12,
+              border: '1px solid #e2e8f0',
+              color: '#0c4a6e',
+              fontWeight: 700,
+              fontSize: 14,
+              textDecoration: 'none',
+              background: '#f8fafc',
+            }}
+          >
+            FAQ complète →
+          </Link>
+          {!isClient && (
+            <Link
+              to="/register"
+              style={{
+                padding: '12px 18px',
+                borderRadius: 12,
+                color: '#ea580c',
+                fontWeight: 700,
+                fontSize: 14,
+                textDecoration: 'none',
+              }}
+            >
+              Créer un compte client
+            </Link>
+          )}
+        </div>
+      </motion.section>
 
       {/* Services */}
       <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>

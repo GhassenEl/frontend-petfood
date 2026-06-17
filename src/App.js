@@ -122,6 +122,7 @@ import VisitorProductsPage from './pages/VisitorProductsPage';
 import VisitorInfoPage from './pages/VisitorInfoPage';
 import VisitorToolsPage from './pages/VisitorToolsPage';
 import VisitorIntelligenceHubPage from './pages/VisitorIntelligenceHubPage';
+import VisitorLayout from './layouts/VisitorLayout';
 import VendorHubPage from './pages/VendorHubPage';
 import ModeratorHubPage from './pages/ModeratorHubPage';
 import VendorLayout from './layouts/VendorLayout';
@@ -247,6 +248,7 @@ const App = () => {
         <Route path="/visitor/info" element={<VisitorInfoPage />} />
         <Route path="/visitor/tools" element={<VisitorToolsPage />} />
         <Route path="/visitor/intelligence" element={<VisitorIntelligenceHubPage />} />
+        <Route path="/contact" element={<VisitorLayout><ContactPage /></VisitorLayout>} />
         <Route path="/vendor" element={<VendorHubPage />} />
         <Route path="/moderator" element={<ModeratorHubPage />} />
         <Route path="/capabilities" element={<CapabilitiesRoute user={null} />} />
@@ -388,7 +390,11 @@ const App = () => {
       <Route path="/client-esp32cam-food-quality" element={<Navigate to="/client-iot?tab=food-quality" replace />} />
       <Route path="/client-smart-water" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSmartWaterPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-smart-delivery" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSmartDeliveryPage /></ClientLayout></RoleRoute>} />
-      <Route path="/contact" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ContactPage /></ClientLayout></RoleRoute>} />
+      <Route path="/contact" element={
+        user?.role === 'client'
+          ? <RoleRoute user={user} roles={['client']}><ClientLayout><ContactPage /></ClientLayout></RoleRoute>
+          : <VisitorLayout><ContactPage /></VisitorLayout>
+      } />
       <Route path="/store-locator" element={<RoleRoute user={user} roles={['client']}><ClientLayout><StoreLocatorPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-cities" element={<RoleRoute user={user} roles={['client']}><ClientLayout><PlatformCitiesPage /></ClientLayout></RoleRoute>} />
       <Route path="/pet-feeder" element={<RoleRoute user={user} roles={['client']}><ClientLayout><PetFeederPage /></ClientLayout></RoleRoute>} />

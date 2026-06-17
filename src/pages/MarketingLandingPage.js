@@ -507,6 +507,7 @@ const MarketingLandingPage = () => {
           </div>
           <div>
             <strong>Contact</strong>
+            <Link to="/contact">Contact &amp; questions</Link>
             <a href="mailto:contact@petfoodtn.tn">contact@petfoodtn.tn</a>
             <a href="mailto:partenaires@petfoodtn.tn">Partenaires</a>
           </div>

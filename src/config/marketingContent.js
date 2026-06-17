@@ -233,6 +233,7 @@ export const VISITOR_QUICK_LINKS = [
   { id: 'promos', icon: '🔥', label: 'Promotions', route: '/visitor/products?tab=promos' },
   { id: 'tools', icon: '🧪', label: 'Outils nutrition', route: '/visitor/tools' },
   { id: 'info', icon: '📚', label: 'Infos & FAQ', route: '/visitor/info' },
+  { id: 'contact', icon: '📧', label: 'Contact', route: '/contact' },
   { id: 'reviews', icon: '⭐', label: 'Avis clients', route: '/visitor/info' },
   { id: 'vendor', icon: '🏬', label: 'Espace vendeur', route: '/vendor' },
   { id: 'register', icon: '✨', label: 'Inscription', route: '/register' },
