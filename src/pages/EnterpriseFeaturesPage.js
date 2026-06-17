@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ENTERPRISE_DOMAINS, countEnterpriseFeatures } from '../config/enterpriseFeaturesCatalog';
+import { MOBILE_CLOUD_DOMAINS, countMobileCloudFeatures } from '../config/mobileCloudCatalog';
 import MobileBottomNav, { AUTH_PUBLIC_MOBILE_NAV } from '../components/MobileBottomNav';
 import './EnterpriseFeaturesPage.css';
 
@@ -24,6 +25,8 @@ const FeatureCard = ({ feature }) => {
 
 const EnterpriseFeaturesPage = () => {
   const stats = countEnterpriseFeatures();
+  const mobileCloudStats = countMobileCloudFeatures();
+  const allDomains = [...ENTERPRISE_DOMAINS, ...MOBILE_CLOUD_DOMAINS];
 
   return (
     <div className="ef-page">
@@ -36,14 +39,14 @@ const EnterpriseFeaturesPage = () => {
           conformité ISO et développement durable — plateforme complète pour l&apos;écosystème pet food tunisien.
         </p>
         <div className="ef-stats">
-          <div className="ef-stat"><strong>{stats.total}</strong><span>Fonctionnalités</span></div>
-          <div className="ef-stat"><strong>{stats.implemented}</strong><span>Actives</span></div>
-          <div className="ef-stat"><strong>{ENTERPRISE_DOMAINS.length}</strong><span>Domaines</span></div>
-          <div className="ef-stat"><strong>24/7</strong><span>Assistant IA</span></div>
+          <div className="ef-stat"><strong>{stats.total + mobileCloudStats.total}</strong><span>Fonctionnalités</span></div>
+          <div className="ef-stat"><strong>{stats.implemented + mobileCloudStats.implemented}</strong><span>Actives</span></div>
+          <div className="ef-stat"><strong>{allDomains.length}</strong><span>Domaines</span></div>
+          <div className="ef-stat"><strong>Flutter</strong><span>Mobile</span></div>
         </div>
       </header>
 
-      {ENTERPRISE_DOMAINS.map((domain) => (
+      {allDomains.map((domain) => (
         <section key={domain.id} className="ef-domain">
           <div className="ef-domain__head">
             <span style={{ fontSize: 24 }}>{domain.icon}</span>
@@ -59,6 +62,10 @@ const EnterpriseFeaturesPage = () => {
 
       <p style={{ textAlign: 'center', fontSize: 13, color: '#94a3b8', marginTop: 16 }}>
         <Link to="/compliance" style={{ color: '#0f766e', fontWeight: 700 }}>Conformité ISO</Link>
+        {' · '}
+        <Link to="/mobile" style={{ color: '#0f766e', fontWeight: 700 }}>App mobile</Link>
+        {' · '}
+        <Link to="/cloud" style={{ color: '#0f766e', fontWeight: 700 }}>Cloud</Link>
         {' · '}
         <Link to="/capabilities" style={{ color: '#0f766e', fontWeight: 700 }}>Capacités par rôle</Link>
         {' · '}

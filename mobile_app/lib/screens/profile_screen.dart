@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import '../config/api_config.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
+import 'pets_screen.dart';
+import 'delivery_tracking_screen.dart';
+import 'qr_scan_screen.dart';
+import 'notifications_screen.dart';
+import 'food_quality_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key, required this.auth});
@@ -17,11 +22,15 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  void _open(BuildContext context, Widget screen) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = auth.user;
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil'), backgroundColor: const Color(0xFFF3F4F6)),
+      appBar: AppBar(title: const Text('Profil & services'), backgroundColor: const Color(0xFFF3F4F6)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -39,6 +48,54 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
+          const Text('Services mobile', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          const SizedBox(height: 8),
+          Card(
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.pets, color: Color(0xFF059669)),
+                  title: const Text('Mes animaux'),
+                  subtitle: const Text('Gestion profil animal'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _open(context, PetsScreen(auth: auth)),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.local_shipping, color: Color(0xFF1E40AF)),
+                  title: const Text('Suivi livraison'),
+                  subtitle: const Text('Temps réel · chaîne du froid'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _open(context, DeliveryTrackingScreen(auth: auth)),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.qr_code_scanner, color: Color(0xFF7C3AED)),
+                  title: const Text('Scan QR produit'),
+                  subtitle: const Text('Traçabilité blockchain lot'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _open(context, QrScanScreen(auth: auth)),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.notifications_active, color: Color(0xFFD97706)),
+                  title: const Text('Notifications push'),
+                  subtitle: const Text('Alertes IoT et livraison'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _open(context, const NotificationsScreen()),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.camera_alt, color: Color(0xFF059669)),
+                  title: const Text('Données IoT'),
+                  subtitle: const Text('ESP32-CAM qualité alimentaire'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _open(context, FoodQualityScreen(auth: auth)),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           Card(
             child: Column(
               children: [
@@ -49,15 +106,9 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.memory),
-                  title: const Text('Firmware ESP32'),
-                  subtitle: const Text('firmware/esp32/PetFeederESP32'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.info_outline),
-                  title: const Text('Version'),
-                  subtitle: const Text('PetfoodTN Mobile 1.0.0'),
+                  leading: const Icon(Icons.phone_android),
+                  title: const Text('Plateformes'),
+                  subtitle: const Text('Flutter Android & iOS 1.1.0'),
                 ),
               ],
             ),

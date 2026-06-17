@@ -10,7 +10,13 @@ Application mobile pour contrôler le **distributeur IoT**, surveiller la **qual
 - **Distributeur IoT** : statut capteurs, distribution manuelle, plan nutritionnel, planning, journal
 - **Sécurité** : score posture, contrôles JWT/IDS/IoT, sessions actives, journal des menaces
 - **Produits** : catalogue + recommandations par animal
-- **Profil** : déconnexion, URL API configurable
+- **Profil & services** : animaux (CRUD), suivi livraison temps réel, scan QR lot blockchain, notifications push, accès IoT
+- **Notifications push** : alertes IoT, livraison et qualité (persistance locale — FCM/APNs en production)
+- **Scan QR Code** : vérification lot PF-TN-XXXX / traçabilité blockchain
+- **Suivi livraison** : ETA, livreur, chaîne du froid, chronologie
+- **Gestion profil animal** : ajout chien/chat/NAC, synchronisation API `/pets`
+
+Voir aussi la page web : `/mobile` et `/cloud`
 
 ## Prérequis
 
