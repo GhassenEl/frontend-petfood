@@ -1,10 +1,21 @@
 /**
- * Analyse qualité aliments — ESP32-CAM + module IA PetFoodTN.
+ * Analyse qualité aliments — ESP32-CAM + module IA PetFoodIoT / PetFoodTN.
  * Cas d'usage : moisissures, couleur, insectes, dégradation, niveau stock.
  */
 
 const STORAGE_KEY = 'petfoodtn:iot:food-quality-readings';
 const SCHEDULES_KEY = 'petfoodtn:iot:food-quality-schedules';
+
+/** Marque afficheur LCD/OLED local ESP32-CAM. */
+export const PETFOODIOT_BRAND = 'PETFOODIOT';
+
+/** Capture périodique — scénario principal (30 min). */
+export const CAPTURE_INTERVAL_MINUTES = 30;
+export const CAPTURE_INTERVAL_MS = CAPTURE_INTERVAL_MINUTES * 60 * 1000;
+
+/** Seuils scénario d'alerte PetFoodIoT. */
+export const ALERT_TEMP_THRESHOLD_C = 30;
+export const ALERT_HUMIDITY_THRESHOLD_PCT = 70;
 
 export const DEFAULT_FOOD_QUALITY_SCHEDULES = [
   { id: 'sq-1', time: '07:15', label: 'Avant petit-déjeuner Max', enabled: true },
@@ -14,7 +25,7 @@ export const DEFAULT_FOOD_QUALITY_SCHEDULES = [
 ];
 
 export const QUALITY_LABELS = {
-  good: { label: 'Bonne', state: 'Bon', color: '#059669', icon: '✅', fridge: 'Conservation optimale' },
+  good: { label: 'Bonne', state: 'Frais', color: '#059669', icon: '✅', fridge: 'Conservation optimale' },
   warning: { label: 'À surveiller', state: 'Limite', color: '#d97706', icon: '⚠️', fridge: 'Surveiller température / humidité' },
   bad: { label: 'Mauvaise', state: 'Aliment altéré', color: '#dc2626', icon: '🚫', fridge: 'Ne pas servir — remplacer' },
   critical: { label: 'Critique', state: 'Aliment altéré', color: '#991b1b', icon: '🚨', fridge: 'Remplacer l\'aliment immédiatement' },
@@ -25,7 +36,64 @@ export const NON_CONFORME_THRESHOLD = 50;
 
 export const NON_CONFORME_OLED = {
   alertTitle: 'ALERTE',
-  alertMessage: 'Nourriture non conforme',
+  alertMessage: 'Nourriture altérée',
+};
+
+/** Évalue le scénario d'alerte PetFoodIoT (temp / humidité / qualité). */
+export const evaluatePetFoodIoTAlert = (reading = {}) => {
+  const temp = reading.temperatureC ?? 0;
+  const hum = reading.humidityPct ?? 0;
+  const score = reading.qualityScore ?? 100;
+  const tempHigh = temp > ALERT_TEMP_THRESHOLD_C;
+  const humidityHigh = hum > ALERT_HUMIDITY_THRESHOLD_PCT;
+  const qualityLow = score < NON_CONFORME_THRESHOLD;
+  return {
+    tempHigh,
+    humidityHigh,
+    qualityLow,
+    isFullAlertScenario: tempHigh && humidityHigh && qualityLow,
+    notifyVet: qualityLow && (tempHigh || humidityHigh || score < 40),
+    reasons: [
+      tempHigh ? `Température ${temp} °C > ${ALERT_TEMP_THRESHOLD_C} °C` : null,
+      humidityHigh ? `Humidité ${hum} % > ${ALERT_HUMIDITY_THRESHOLD_PCT} %` : null,
+      qualityLow ? `Qualité ${score} % < ${NON_CONFORME_THRESHOLD} %` : null,
+    ].filter(Boolean),
+  };
+};
+
+/** Recommandation nutritionnelle selon la qualité détectée. */
+export const getNutritionHintForQuality = (reading = {}, petName = 'Max') => {
+  const score = reading.qualityScore ?? 100;
+  if (score < 50) {
+    return `Ne pas servir à ${petName} — remplacer par une ration fraîche adaptée à son profil nutritionnel.`;
+  }
+  if (score < 75) {
+    return `Surveiller les portions de ${petName} — privilégier une formule haute digestibilité si baisse d'appétit.`;
+  }
+  return `Ration ${petName} conforme — maintenir le plan nutritionnel habituel (croquettes / pâtée selon profil).`;
+};
+
+/** Détecte une consommation inhabituelle via l'historique stock. */
+export const detectConsumptionAnomaly = (history = []) => {
+  if (!Array.isArray(history) || history.length < 2) return null;
+  const sorted = [...history].sort((a, b) => new Date(b.analyzedAt) - new Date(a.analyzedAt));
+  const latest = sorted[0]?.stockLevelPct;
+  const previous = sorted[1]?.stockLevelPct;
+  if (latest == null || previous == null) return null;
+  const drop = previous - latest;
+  if (drop > 25) {
+    return {
+      detected: true,
+      message: `Chute stock anormale (${previous} % → ${latest} %) — vérifier consommation ou fuite du récipient.`,
+    };
+  }
+  if (drop < -15) {
+    return {
+      detected: true,
+      message: 'Réapprovisionnement détecté sans action client — vérifier le distributeur.',
+    };
+  }
+  return { detected: false, message: 'Consommation dans la norme.' };
 };
 
 export const AI_DETECTION_KEYS = [
@@ -175,6 +243,9 @@ export const analyzeFoodQuality = ({
         ? `Qualité limite (${score}%) — température ${temperatureC} °C, humidité ${humidityPct} %. ${recommendedAction}.`
         : `Qualité bonne (${score}%) — stock ${Math.round(stockLevelPct)} %, conservation optimale.`;
 
+  const alertFlags = evaluatePetFoodIoTAlert({ temperatureC, humidityPct, qualityScore: score });
+  const nutritionHint = getNutritionHintForQuality({ qualityScore: score, quality });
+
   return {
     quality,
     qualityScore: score,
@@ -204,6 +275,10 @@ export const analyzeFoodQuality = ({
       title: NON_CONFORME_OLED.alertTitle,
       message: NON_CONFORME_OLED.alertMessage,
     } : null,
+    alertFlags,
+    nutritionHint,
+    captureIntervalMinutes: CAPTURE_INTERVAL_MINUTES,
+    oledBrand: PETFOODIOT_BRAND,
     aiSummary,
     analyzedAt: new Date().toISOString(),
     source: 'esp32-cam',
@@ -235,12 +310,12 @@ const scenarios = [
     moldPixelRatio: 0.18, insectPixelRatio: 0.032,
     temperatureC: 31, humidityPct: 78, stockLevelPct: 15,
   },
-  /** Scénario alternatif — nourriture détériorée (~42 %). */
+  /** Scénario alternatif — alerte PetFoodIoT (42 %, temp/humidité élevées). */
   {
     name: 'deteriorated',
     avgR: 98, avgG: 138, avgB: 74,
     moldPixelRatio: 0.08, insectPixelRatio: 0.012,
-    temperatureC: 26, humidityPct: 64, stockLevelPct: 30,
+    temperatureC: 31, humidityPct: 72, stockLevelPct: 30,
   },
 ];
 
@@ -271,6 +346,8 @@ export const simulateEsp32CamReading = (forcedScenario) => {
     reading.isNonConforme = true;
     reading.isCritical = false;
     reading.anomalyDetected = true;
+    reading.temperatureC = 31;
+    reading.humidityPct = 72;
     reading.state = NON_CONFORME_OLED.alertMessage;
     reading.recommendedAction = 'Remplacer l\'aliment';
     reading.oledAlert = {
@@ -278,7 +355,9 @@ export const simulateEsp32CamReading = (forcedScenario) => {
       title: NON_CONFORME_OLED.alertTitle,
       message: NON_CONFORME_OLED.alertMessage,
     };
-    reading.aiSummary = `Anomalie IA détectée — nourriture non conforme (${reading.qualityScore}%). ${reading.recommendedAction}.`;
+    reading.alertFlags = evaluatePetFoodIoTAlert(reading);
+    reading.nutritionHint = getNutritionHintForQuality(reading);
+    reading.aiSummary = `Anomalie IA détectée — ${NON_CONFORME_OLED.alertMessage} (${reading.qualityScore}%). ${reading.recommendedAction}.`;
   }
 
   return reading;

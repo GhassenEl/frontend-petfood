@@ -22,18 +22,19 @@ const STATUS_META = {
 };
 
 const USE_CASE_STEPS = [
-  'Le client place les aliments dans un récipient équipé ESP32-CAM.',
-  'L\'ESP32-CAM capture périodiquement des images et les envoie à PetFoodTN IoT.',
-  'Le module IA analyse moisissures, couleur, insectes, dégradation et niveau stock.',
-  'Le score s\'affiche sur l\'OLED local et en temps réel sur le site / app.',
-  'Si qualité critique → notification client + vétérinaire.',
+  'Le client remplit le distributeur de nourriture.',
+  'L\'ESP32-CAM capture une image toutes les 30 minutes.',
+  'Les capteurs mesurent température, humidité et quantité restante.',
+  'Le module IA détecte moisissures, insectes et dégradation.',
+  'L\'afficheur LCD affiche : PETFOODIOT — Qualité, Stock, État (Frais).',
+  'Le client consulte les données sur l\'application mobile PetFoodTN.',
 ];
 
 const ALT_SCENARIO_STEPS = [
-  'L\'IA détecte une anomalie sur les aliments.',
-  'Le score de qualité devient inférieur à 50 %.',
-  'L\'écran OLED affiche : ⚠ ALERTE — Nourriture non conforme — Qualité : 42 %.',
-  'Une alerte est envoyée sur l\'application PetFoodTN.',
+  'Si température > 30 °C, humidité > 70 % et qualité < 50 % :',
+  'LCD : ⚠ ALERTE — Qualité : 42 % — Nourriture altérée.',
+  'Notification client + information vétérinaire.',
+  'Recommandation : remplacer la nourriture.',
 ];
 
 const IoTFoodQualityCamPanel = ({ loading: packLoading }) => {

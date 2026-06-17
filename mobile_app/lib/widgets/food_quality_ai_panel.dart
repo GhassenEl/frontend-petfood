@@ -34,6 +34,8 @@ class FoodQualityAiPanel extends StatelessWidget {
         _StockCard(reading: reading),
         const SizedBox(height: 10),
         _ExpirationCard(reading: reading),
+        const SizedBox(height: 10),
+        _NutritionCard(reading: reading),
       ],
     );
   }
@@ -291,6 +293,44 @@ class _ExpirationCard extends StatelessWidget {
       default:
         return 'Conservation optimale prévue';
     }
+  }
+}
+
+class _NutritionCard extends StatelessWidget {
+  const _NutritionCard({required this.reading});
+  final FoodQualityReading reading;
+
+  @override
+  Widget build(BuildContext context) {
+    final score = reading.qualityScore;
+    String hint;
+    if (score < 50) {
+      hint = 'Ne pas servir — remplacer par une ration fraîche adaptée au profil nutritionnel.';
+    } else if (score < 75) {
+      hint = 'Surveiller les portions — formule haute digestibilité si baisse d\'appétit.';
+    } else {
+      hint = 'Ration conforme — maintenir le plan nutritionnel habituel.';
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.restaurant, size: 18, color: Color(0xFF059669)),
+                SizedBox(width: 8),
+                Text('Recommandation nutritionnelle', style: TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(hint, style: const TextStyle(fontSize: 13, color: Color(0xFF475569))),
+          ],
+        ),
+      ),
+    );
   }
 }
 

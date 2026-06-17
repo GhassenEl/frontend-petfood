@@ -14,8 +14,9 @@
 #define DHT_PIN         13
 #define USE_DHT         true
 
-// Intervalle capture + analyse (ms)
-#define ANALYZE_MS      8000
+// Intervalle capture + analyse (ms) — scénario PetFoodIoT : 30 minutes
+#define ANALYZE_MS      (30UL * 60UL * 1000UL)
+// Dev / simulation rapide : #define ANALYZE_MS 8000
 
 // Afficheur OLED SSD1306 (I2C) — Qualité / État / Stock
 #define USE_OLED        true

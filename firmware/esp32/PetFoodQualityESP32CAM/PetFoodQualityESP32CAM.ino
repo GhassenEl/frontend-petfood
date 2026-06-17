@@ -75,25 +75,25 @@ bool initOled() {
 
 void updateOled(int score, const char* stateLabel, int stockPct, bool critical) {
   display.clearDisplay();
+  display.setTextSize(1);
   display.setCursor(0, 0);
+  display.println("PETFOODIOT");
   if (score < 50 && !critical) {
-    display.setTextSize(1);
     display.println("! ALERTE");
-    display.println("Nourriture non");
-    display.println("conforme");
+    display.println("Nourriture altere");
     display.printf("Qualite: %d%%", score);
   } else if (critical) {
-    display.setTextSize(1);
     display.println("! ALERTE");
     display.println("Remplacer");
     display.println("l'aliment");
     display.printf("Qualite: %d%%", score);
   } else {
+    display.setCursor(0, 12);
     display.printf("Qualite: %d%%", score);
-    display.setCursor(0, 16);
-    display.printf("Etat: %s", stateLabel);
-    display.setCursor(0, 32);
+    display.setCursor(0, 24);
     display.printf("Stock: %d%%", stockPct);
+    display.setCursor(0, 36);
+    display.printf("Etat: %s", stateLabel);
   }
   display.display();
 }
@@ -222,9 +222,9 @@ void simulateReading(float* avgR, float* avgG, float* avgB, float* moldRatio, fl
 }
 
 const char* qualityStateLabel(const char* quality) {
-  if (strcmp(quality, "critical") == 0 || strcmp(quality, "bad") == 0) return "Aliment altere";
+  if (strcmp(quality, "critical") == 0 || strcmp(quality, "bad") == 0) return "Altere";
   if (strcmp(quality, "warning") == 0) return "Limite";
-  return "Bon";
+  return "Frais";
 }
 
 /** Score qualité (aligné frontend foodQualityEngine.js). */

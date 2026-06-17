@@ -315,7 +315,7 @@ class _OledCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('PetFoodTN IoT', style: TextStyle(color: Color(0xFF64748B), fontSize: 10)),
+            const Text('PETFOODIOT', style: TextStyle(color: Color(0xFF64748B), fontSize: 10, letterSpacing: 1)),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(12),
@@ -344,8 +344,8 @@ class _OledCard extends StatelessWidget {
                   : Column(
                       children: [
                         _OledLine('Qualité', '${reading.qualityScore}%'),
-                        _OledLine('État', reading.displayState),
                         _OledLine('Stock', '${reading.stockLevelPct ?? '—'}%'),
+                        _OledLine('État', reading.displayState),
                       ],
                     ),
             ),

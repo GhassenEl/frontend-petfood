@@ -45,6 +45,16 @@ const FoodQualityAiDetectionPanel = ({ reading }) => {
           );
         })}
       </ul>
+      {(reading?.nutritionHint || reading?.consumptionAnomaly?.detected) && (
+        <div className="iot-fq-ai-extra" style={{ marginTop: 12 }}>
+          {reading.nutritionHint && (
+            <p><strong>Nutrition :</strong> {reading.nutritionHint}</p>
+          )}
+          {reading.consumptionAnomaly?.detected && (
+            <p><strong>Consommation :</strong> {reading.consumptionAnomaly.message}</p>
+          )}
+        </div>
+      )}
     </section>
   );
 };

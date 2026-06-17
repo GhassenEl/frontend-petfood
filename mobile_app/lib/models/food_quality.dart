@@ -97,11 +97,11 @@ class FoodQualityReading {
   String get aiClassLabel => aiClassificationLabel ?? displayState;
 
   String get displayState {
-    if (isNonConforme && !isCritical) return 'Nourriture non conforme';
+    if (isNonConforme && !isCritical) return 'Nourriture altérée';
     if (state != null && state!.isNotEmpty) return state!;
     switch (quality) {
       case 'good':
-        return 'Bon';
+        return 'Frais';
       case 'warning':
         return 'Limite';
       case 'bad':

@@ -62,9 +62,9 @@ class FoodQualityEngine {
 
     String state;
     if (isNonConforme && !isCritical) {
-      state = 'Nourriture non conforme';
+      state = 'Nourriture altérée';
     } else if (quality == 'good') {
-      state = 'Bon';
+      state = 'Frais';
     } else if (quality == 'warning') {
       state = 'Limite';
     } else {
@@ -105,7 +105,7 @@ class FoodQualityEngine {
     const scenarios = [
       {'name': 'good', 'r': 165.0, 'g': 120.0, 'b': 75.0, 'mold': 0.01, 'insect': 0.0, 't': 20.0, 'h': 42.0, 'stock': 65},
       {'name': 'warning', 'r': 130.0, 'g': 135.0, 'b': 80.0, 'mold': 0.05, 'insect': 0.005, 't': 26.0, 'h': 62.0, 'stock': 38},
-      {'name': 'deteriorated', 'r': 98.0, 'g': 138.0, 'b': 74.0, 'mold': 0.08, 'insect': 0.012, 't': 26.0, 'h': 64.0, 'stock': 30},
+      {'name': 'deteriorated', 'r': 98.0, 'g': 138.0, 'b': 74.0, 'mold': 0.08, 'insect': 0.012, 't': 31.0, 'h': 72.0, 'stock': 30},
       {'name': 'critical', 'r': 75.0, 'g': 160.0, 'b': 65.0, 'mold': 0.18, 'insect': 0.032, 't': 31.0, 'h': 78.0, 'stock': 15},
     ];
 
@@ -132,10 +132,10 @@ class FoodQualityEngine {
       reading = FoodQualityAiEngine.enrich(FoodQualityReading(
         quality: 'bad',
         qualityScore: 42,
-        state: 'Nourriture non conforme',
+        state: 'Nourriture altérée',
         label: 'Mauvaise',
-        temperatureC: reading.temperatureC,
-        humidityPct: reading.humidityPct,
+        temperatureC: 31,
+        humidityPct: 72,
         stockLevelPct: reading.stockLevelPct,
         moldPixelRatio: reading.moldPixelRatio,
         insectPixelRatio: reading.insectPixelRatio,
@@ -146,7 +146,7 @@ class FoodQualityEngine {
         isNonConforme: true,
         anomalyDetected: true,
         recommendedAction: 'Remplacer l\'aliment',
-        aiSummary: 'Anomalie IA détectée — nourriture dégradée (42%).',
+        aiSummary: '⚠ ALERTE — Nourriture altérée (42%). Temp > 30°C, humidité > 70%. Remplacer l\'aliment.',
         analyzedAt: DateTime.now(),
       ));
     }
