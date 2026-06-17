@@ -5,10 +5,10 @@ import { getReportCatalog, exportReport } from '../services/adminReportsService'
 import './AdminPages.css';
 
 const REPORTS = [
-  { id: 'sales', icon: '💰', exportFn: () => exportReport('sales') },
+  { id: 'sales', icon: '💰', exportFn: () => exportReport('sales'), excelFn: () => exportReport('sales', 'excel') },
   { id: 'iot', icon: '📡', exportFn: () => exportReport('iot') },
   { id: 'vet', icon: '🩺', exportFn: () => exportReport('vet') },
-  { id: 'satisfaction', icon: '⭐', exportFn: () => exportReport('satisfaction') },
+  { id: 'satisfaction', icon: '⭐', exportFn: () => exportReport('satisfaction'), excelFn: () => exportReport('satisfaction', 'excel') },
   { id: 'users', icon: '👥', exportFn: () => exportReport('users') },
 ];
 
@@ -19,8 +19,8 @@ const AdminReportsPage = () => {
   const [busy, setBusy] = useState(null);
   const [msg, setMsg] = useState('');
 
-  const handleExport = useCallback(async (id, fn) => {
-    setBusy(id);
+  const handleExport = useCallback(async (id, fn, label = 'csv') => {
+    setBusy(`${id}-${label}`);
     setMsg('');
     try {
       const result = await fn();
@@ -45,7 +45,7 @@ const AdminReportsPage = () => {
       {msg && <p className="adm-banner adm-banner--info">{msg}</p>}
 
       <div className="adm-reports-grid">
-        {REPORTS.map(({ id, icon, exportFn }) => {
+        {REPORTS.map(({ id, icon, exportFn, excelFn }) => {
           const meta = catalog[id];
           const highlighted = highlight === id;
           return (
@@ -60,12 +60,23 @@ const AdminReportsPage = () => {
                 <button
                   type="button"
                   className="adm-btn adm-btn--primary adm-btn--sm"
-                  disabled={busy === id}
-                  onClick={() => handleExport(id, exportFn)}
+                  disabled={!!busy}
+                  onClick={() => handleExport(id, exportFn, 'csv')}
                 >
                   <Download size={14} />
-                  {busy === id ? 'Export…' : 'Exporter CSV / JSON'}
+                  {busy === `${id}-csv` ? 'Export…' : 'CSV / JSON'}
                 </button>
+                {excelFn && (
+                  <button
+                    type="button"
+                    className="adm-btn adm-btn--ghost adm-btn--sm"
+                    disabled={!!busy}
+                    onClick={() => handleExport(id, excelFn, 'excel')}
+                  >
+                    <FileSpreadsheet size={14} />
+                    {busy === `${id}-excel` ? 'Export…' : 'Excel'}
+                  </button>
+                )}
                 {id === 'sales' && (
                   <a href="/admin/invoices" className="adm-btn adm-btn--ghost adm-btn--sm">
                     <FileSpreadsheet size={14} /> Factures PDF →
@@ -81,6 +92,7 @@ const AdminReportsPage = () => {
         <h3>Formats supportés</h3>
         <ul className="adm-hub-card__features">
           <li><strong>CSV</strong> — compatible Excel (ventes, IoT, utilisateurs, vétérinaire)</li>
+          <li><strong>Excel (.xls)</strong> — ventes et satisfaction (export natif)</li>
           <li><strong>JSON</strong> — satisfaction client (avis + réclamations)</li>
           <li><strong>PDF</strong> — factures via <a href="/admin/invoices">Gestion factures</a></li>
         </ul>

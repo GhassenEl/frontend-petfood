@@ -317,6 +317,30 @@
   text-decoration: underline;
 }
 
+.pcmp-sustain-panel {
+  padding: 4px 0;
+}
+
+.pcmp-sustain-kpi {
+  padding: 14px;
+  border-radius: 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  text-align: center;
+}
+
+.pcmp-sustain-kpi strong {
+  display: block;
+  font-size: 18px;
+  color: #047857;
+  margin: 6px 0 2px;
+}
+
+.pcmp-sustain-kpi span {
+  font-size: 11px;
+  color: #64748b;
+}
+
 @media (max-width: 600px) {
   .pcmp-scores {
     display: grid;

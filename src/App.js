@@ -113,6 +113,7 @@ import ClientPetPassportPage from './pages/ClientPetPassportPage';
 import PlatformServicesPage from './pages/PlatformServicesPage';
 import MarketingLandingPage from './pages/MarketingLandingPage';
 import PlatformCompliancePage from './pages/PlatformCompliancePage';
+import EnterpriseFeaturesPage from './pages/EnterpriseFeaturesPage';
 import VisitorHubPage from './pages/VisitorHubPage';
 import VisitorProductsPage from './pages/VisitorProductsPage';
 import VisitorInfoPage from './pages/VisitorInfoPage';
@@ -248,6 +249,8 @@ const App = () => {
         <Route path="/capabilities" element={<CapabilitiesRoute user={null} />} />
         <Route path="/compliance" element={<PlatformCompliancePage />} />
         <Route path="/qualite-iso" element={<PlatformCompliancePage />} />
+        <Route path="/enterprise" element={<EnterpriseFeaturesPage />} />
+        <Route path="/fonctionnalites" element={<EnterpriseFeaturesPage />} />
         <Route path="*" element={<MarketingLandingPage />} />
       </Routes>
       </>
@@ -265,6 +268,8 @@ const App = () => {
 
       <Route path="/compliance" element={<PlatformCompliancePage />} />
       <Route path="/qualite-iso" element={<PlatformCompliancePage />} />
+      <Route path="/enterprise" element={<EnterpriseFeaturesPage />} />
+      <Route path="/fonctionnalites" element={<EnterpriseFeaturesPage />} />
 
       <Route path="/admin/dashboard" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDashboard /></AdminLayout></RoleRoute>} />
       <Route path="/admin/hub" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAdvancedHubPage /></AdminLayout></RoleRoute>} />

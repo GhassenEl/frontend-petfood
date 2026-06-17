@@ -61,6 +61,19 @@ export const downloadCsv = (filename, headers, rows) => {
   downloadBlob(filename, rowsToCsv(headers, rows), 'text/csv;charset=utf-8');
 };
 
+/** Export Excel-compatible (.xls HTML table — ouvre dans Excel sans dépendance). */
+export const downloadExcel = (filename, headers, rows, sheetName = 'Rapport') => {
+  const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const head = headers.map((h) => `<th>${esc(h)}</th>`).join('');
+  const body = rows.map((row) => `<tr>${headers.map((h) => `<td>${esc(row[h])}</td>`).join('')}</tr>`).join('');
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+<x:Name>${esc(sheetName)}</x:Name></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>
+<body><table border="1"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></body></html>`;
+  const name = filename.endsWith('.xls') ? filename : `${filename.replace(/\.(csv|xlsx?)$/i, '')}.xls`;
+  downloadBlob(name, html, 'application/vnd.ms-excel;charset=utf-8');
+};
+
 export const readFileText = (file) => new Promise((resolve, reject) => {
   const reader = new FileReader();
   reader.onload = () => resolve(String(reader.result || ''));

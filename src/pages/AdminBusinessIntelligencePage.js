@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BarChart3, Users, TrendingUp, Package, RefreshCw } from 'lucide-react';
+import { BarChart3, Users, TrendingUp, Package, RefreshCw, MapPin } from 'lucide-react';
 import ClientSegmentationPanel from '../components/ClientSegmentationPanel';
 import MarketTrendsPanel from '../components/MarketTrendsPanel';
 import PredictiveStockPanel from '../components/PredictiveStockPanel';
+import AdminGeographicSalesPanel from '../components/AdminGeographicSalesPanel';
 import { loadBusinessIntelligencePack } from '../services/businessIntelligenceService';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import './AdminBusinessIntelligence.css';
@@ -12,6 +13,7 @@ const TABS = [
   { id: 'segments', label: 'Segmentation clients', icon: Users },
   { id: 'trends', label: 'Tendances marché', icon: TrendingUp },
   { id: 'stock', label: 'Stocks prédictifs', icon: Package },
+  { id: 'geo', label: 'Ventes géographiques', icon: MapPin },
 ];
 
 const AdminBusinessIntelligencePage = () => {
@@ -127,6 +129,12 @@ const AdminBusinessIntelligencePage = () => {
               Prévision des ruptures avant qu&apos;elles ne se produisent (vélocité + stock actuel).
             </p>
             <PredictiveStockPanel predictions={pack?.stockPredictions} loading={loading} />
+          </>
+        )}
+        {tab === 'geo' && (
+          <>
+            <h2 style={{ marginTop: 0, fontSize: 18 }}>Répartition géographique du chiffre d&apos;affaires</h2>
+            <AdminGeographicSalesPanel loading={loading} />
           </>
         )}
       </div>

@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, CreditCard, Key, MessageSquareOff, LayoutDashboard, Users } from 'lucide-react';
+import { Shield, CreditCard, Key, MessageSquareOff, LayoutDashboard, Users, ShieldCheck } from 'lucide-react';
 import FraudDetectionPanel from '../components/FraudDetectionPanel';
 import JwtAuthSecurityPanel from '../components/JwtAuthSecurityPanel';
+import TwoFactorAuthPanel from '../components/TwoFactorAuthPanel';
 import AutoModerationPanel from '../components/AutoModerationPanel';
 import PlatformSecurityOverviewPanel from '../components/PlatformSecurityOverviewPanel';
 import AdminActiveSessionsPanel from '../components/AdminActiveSessionsPanel';
@@ -15,6 +16,7 @@ const TABS = [
   { id: 'sessions', label: 'Sessions actives', icon: Users },
   { id: 'fraud', label: 'Détection fraude', icon: CreditCard },
   { id: 'jwt', label: 'Authentification JWT', icon: Key },
+  { id: '2fa', label: '2FA', icon: ShieldCheck },
   { id: 'moderation', label: 'Modération auto', icon: MessageSquareOff },
 ];
 
@@ -103,6 +105,13 @@ const AdminIntelligentSecurityPage = () => {
           <>
             <h2 style={{ marginTop: 0, fontSize: 18 }}>Authentification sécurisée</h2>
             <JwtAuthSecurityPanel jwt={intel?.jwt} loading={loading} />
+          </>
+        )}
+
+        {tab === '2fa' && (
+          <>
+            <h2 style={{ marginTop: 0, fontSize: 18 }}>Authentification à deux facteurs</h2>
+            <TwoFactorAuthPanel enabled={intel?.twoFactorEnabled} />
           </>
         )}
 

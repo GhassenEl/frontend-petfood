@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Leaf, Globe, CheckCircle, AlertCircle } from 'lucide-react';
 import { getPlatformComplianceDashboard } from '../utils/platformComplianceEngine';
+import FoodWasteSustainabilityPanel from '../components/FoodWasteSustainabilityPanel';
 import MobileBottomNav, { AUTH_PUBLIC_MOBILE_NAV } from '../components/MobileBottomNav';
 import './PlatformCompliancePage.css';
 
@@ -101,6 +102,10 @@ const PlatformCompliancePage = () => {
       </section>
 
       <section className="pcmp-section">
+        <FoodWasteSustainabilityPanel />
+      </section>
+
+      <section className="pcmp-section">
         <div className="pcmp-tabs">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
@@ -143,6 +148,7 @@ const PlatformCompliancePage = () => {
         <div className="pcmp-footer__links">
           <Link to="/register">Créer un compte</Link>
           <Link to="/login">Connexion</Link>
+          <Link to="/enterprise">Fonctionnalités entreprise</Link>
           <a href="mailto:qualite@petfoodtn.tn">qualite@petfoodtn.tn</a>
         </div>
       </footer>

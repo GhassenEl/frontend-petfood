@@ -1,5 +1,5 @@
 import api from '../utils/api';
-import { downloadCsv, downloadJson } from '../utils/dataImportExport';
+import { downloadCsv, downloadJson, downloadExcel } from '../utils/dataImportExport';
 import {
   DEMO_ADMIN_ORDERS,
   DEMO_ADMIN_USERS,
@@ -127,7 +127,52 @@ export async function exportUsersReport() {
   }
 }
 
-export const exportReport = (type) => {
+export async function exportSalesReportExcel() {
+  try {
+    const res = await api.get('/orders');
+    const orders = withDemoFallback(res.data || [], DEMO_ADMIN_ORDERS);
+    const rows = orders.map((o) => ({
+      id: o._id || o.id,
+      total: o.total,
+      status: o.status,
+      payment: o.paymentMethod || o.payment || '—',
+      createdAt: o.createdAt,
+    }));
+    const headers = ['id', 'total', 'status', 'payment', 'createdAt'];
+    downloadExcel(`${REPORT_TYPES.sales.filename}.xls`, headers, rows, 'Ventes');
+    return { ok: true, count: rows.length, format: 'excel' };
+  } catch {
+    const rows = DEMO_ADMIN_ORDERS.map((o) => ({
+      id: o._id || o.id,
+      total: o.total,
+      status: o.status,
+      payment: o.paymentMethod || 'carte',
+      createdAt: o.createdAt,
+    }));
+    downloadExcel(`${REPORT_TYPES.sales.filename}.xls`, ['id', 'total', 'status', 'payment', 'createdAt'], rows, 'Ventes');
+    return { ok: true, count: rows.length, format: 'excel', mode: 'demo' };
+  }
+}
+
+export async function exportSatisfactionReportExcel() {
+  const rows = [
+    { theme: 'Qualité produit', avg: 4.6, count: 128, sentiment: 'positif' },
+    { theme: 'Livraison', avg: 4.2, count: 95, sentiment: 'positif' },
+    { theme: 'Emballage', avg: 4.4, count: 67, sentiment: 'positif' },
+    { theme: 'Service client', avg: 3.9, count: 42, sentiment: 'neutre' },
+  ];
+  downloadExcel(`${REPORT_TYPES.satisfaction.filename}.xls`, ['theme', 'avg', 'count', 'sentiment'], rows, 'Satisfaction');
+  return { ok: true, count: rows.length, format: 'excel', mode: 'demo' };
+}
+
+export const exportReport = (type, format = 'csv') => {
+  if (format === 'excel') {
+    switch (type) {
+      case 'sales': return exportSalesReportExcel();
+      case 'satisfaction': return exportSatisfactionReportExcel();
+      default: return exportSalesReportExcel();
+    }
+  }
   switch (type) {
     case 'sales': return exportSalesReport();
     case 'iot': return exportIotReport();
