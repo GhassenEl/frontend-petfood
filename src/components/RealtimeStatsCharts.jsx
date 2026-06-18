@@ -20,7 +20,8 @@ import {
 } from 'recharts';
 import { Activity, RefreshCw } from 'lucide-react';
 import useRealtimeStats from '../hooks/useRealtimeStats';
-import { ROLE_REALTIME_META } from '../utils/realtimeStatsDemo';
+import { ROLE_REALTIME_META, getRoleRealtimeDemo } from '../utils/realtimeStatsDemo';
+import { mergeChartSeries, mergeLiveSeries } from '../utils/chartSeriesNormalize';
 
 const PIE_COLORS = ['#e67e22', '#27ae60', '#3498db', '#9b59b6', '#e74c3c', '#f39c12', '#14b8a6', '#0ea5e9'];
 
@@ -44,7 +45,7 @@ const LiveBadge = ({ demo, updatedAt }) => (
   </span>
 );
 
-const RealtimeStatsCharts = ({ role, intervalMs = 8000, detailLink, detailLabel }) => {
+const RealtimeStatsCharts = ({ role, intervalMs = 8000, detailLink, detailLabel, hideBreakdown = false, hideMonthly = false }) => {
   const meta = ROLE_REALTIME_META[role] || {};
   const { data, demo, loading, refreshing, reload } = useRealtimeStats(role, intervalMs);
 
@@ -60,17 +61,19 @@ const RealtimeStatsCharts = ({ role, intervalMs = 8000, detailLink, detailLabel 
 
   const {
     kpis = [],
-    liveSeries = [],
-    dailySeries = [],
     breakdown = [],
     monthlySeries = [],
     updatedAt,
   } = data;
 
+  const demoFallback = getRoleRealtimeDemo(role) || {};
+  const liveSeries = mergeLiveSeries(data.liveSeries, demoFallback.liveSeries);
+  const dailySeries = mergeChartSeries(data.dailySeries, demoFallback.dailySeries);
+
   const accent = meta.accent || '#3498db';
   const accent2 = meta.accent2 || '#27ae60';
-  const link = detailLink || meta.detailLink;
-  const linkLabel = detailLabel || meta.detailLabel || 'Détails';
+  const link = detailLink !== undefined ? detailLink : meta.detailLink;
+  const linkLabel = detailLabel !== undefined ? detailLabel : (meta.detailLabel || 'Détails');
 
   return (
     <motion.div
@@ -172,7 +175,7 @@ const RealtimeStatsCharts = ({ role, intervalMs = 8000, detailLink, detailLabel 
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }}>
-        {monthlySeries?.length > 0 && (
+        {!hideMonthly && monthlySeries?.length > 0 && (
           <div className="card-animal" style={{ padding: 22 }}>
             <h3 style={{ margin: '0 0 12px', fontSize: '0.95rem', fontWeight: 700 }}>Tendance mensuelle</h3>
             <ResponsiveContainer width="100%" height={200}>
@@ -187,6 +190,7 @@ const RealtimeStatsCharts = ({ role, intervalMs = 8000, detailLink, detailLabel 
           </div>
         )}
 
+        {!hideBreakdown && (
         <div className="card-animal" style={{ padding: 22 }}>
           <h3 style={{ margin: '0 0 12px', fontSize: '0.95rem', fontWeight: 700 }}>Répartition</h3>
           <ResponsiveContainer width="100%" height={200}>
@@ -201,6 +205,7 @@ const RealtimeStatsCharts = ({ role, intervalMs = 8000, detailLink, detailLabel 
             </PieChart>
           </ResponsiveContainer>
         </div>
+        )}
       </div>
     </motion.div>
   );

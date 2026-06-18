@@ -78,14 +78,14 @@ export const DEMO_MODERATOR_PENDING_PRODUCTS = [
   {
     id: 'mp-2', vendorId: 'v-2', vendorName: 'Pets & Co Sfax',
     name: 'Jouet interactif chat laser', price: 24, category: 'jouets',
-    imageUrl: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d4?w=400&h=300&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&h=300&fit=crop',
     status: 'pending', submittedAt: hoursAgo(5),
     imageFlag: null,
   },
   {
     id: 'mp-3', vendorId: 'v-5', vendorName: 'Aquarium Plus Bizerte',
     name: 'Pompe aquarium 200 L/h', price: 45, category: 'accessoires',
-    imageUrl: 'https://images.unsplash.com/photo-1524704654690-b56c05a4fe29?w=400&h=300&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1574158622682-6d4d4b86bb96?w=400&h=300&fit=crop',
     status: 'pending', submittedAt: hoursAgo(8),
     imageFlag: 'low_quality',
   },

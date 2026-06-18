@@ -337,8 +337,33 @@ export const withDemoFallback = (data, demo) => {
 };
 
 export const withDemoStats = (data) => {
-  if (data?.dailyChart?.length && data?.totalDelivered != null) return data;
-  return DEMO_LIVREUR_STATS;
+  const base = DEMO_LIVREUR_STATS;
+  if (!data) return { ...base };
+
+  const dailyChart = Array.isArray(data.dailyChart) && data.dailyChart.length > 0
+    ? data.dailyChart.map((d) => ({
+      ...d,
+      commission: d.commission ?? (d.count ?? 0) * COMMISSION_PER_DELIVERY,
+    }))
+    : base.dailyChart;
+
+  const hasBreakdown = data.statusBreakdown
+    && Object.values(data.statusBreakdown).some((v) => Number(v) > 0);
+  const statusBreakdown = hasBreakdown ? data.statusBreakdown : base.statusBreakdown;
+
+  return {
+    ...base,
+    ...data,
+    dailyChart,
+    statusBreakdown,
+    totalDelivered: data.totalDelivered ?? base.totalDelivered,
+    totalCommission: data.totalCommission ?? base.totalCommission,
+    weekDelivered: data.weekDelivered ?? base.weekDelivered,
+    weekCommission: data.weekCommission ?? base.weekCommission,
+    onTimeRate: data.onTimeRate ?? base.onTimeRate,
+    avgDeliveryMinutes: data.avgDeliveryMinutes ?? base.avgDeliveryMinutes,
+    commissionPerDelivery: data.commissionPerDelivery ?? base.commissionPerDelivery,
+  };
 };
 
 export const withDemoDashboard = (data) => {

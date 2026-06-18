@@ -672,12 +672,34 @@ export const DEMO_VET_TIMELINE = [
 ];
 
 export const DEMO_VET_NUTRITION = {
+  petProfile: { species: 'Chien', weightKg: 12, ageYears: 4, activity: 'Modérée', condition: 'Peau sensible' },
   summary: 'Apport calorique adapté au poids actuel et à l\'activité modérée. Privilégier une alimentation hypoallergénique si signes cutanés persistants.',
-  calories: { supported: true, dailyKcal: 320, dryFoodGramsPerDay: 95 },
+  calories: { supported: true, dailyKcal: 320, dryFoodGramsPerDay: 95, wetFoodGramsPerDay: 180 },
+  macros: { protein: '26 %', fat: '14 %', fiber: '3,5 %', moisture: '10 %' },
+  mealPlan: [
+    { time: '08:00', label: 'Matin', portion: '45 g croquettes + eau fraîche', kcal: 110 },
+    { time: '13:00', label: 'Midi', portion: '60 g pâtée digestive', kcal: 85 },
+    { time: '19:30', label: 'Soir', portion: '50 g croquettes', kcal: 125 },
+  ],
   nutritionPlans: [],
   productRecommendations: {
-    food: [{ name: 'Croquettes hypoallergéniques Saumon 2 kg' }, { name: 'Pâtée digestive chat 400 g' }],
+    food: [
+      { name: 'Croquettes hypoallergéniques Saumon 2 kg', reason: 'Peau sensible, oméga-3' },
+      { name: 'Pâtée digestive chat 400 g', reason: 'Transit fragile' },
+      { name: 'Complément articulations (glucosamine)', reason: 'Chien actif 12 kg' },
+    ],
   },
+  tips: [
+    'Répartir la ration en 2 à 3 repas pour limiter les variations glycémiques.',
+    'Surveiller le poids toutes les 2 semaines (objectif : stabilité ± 3 %).',
+    'Éviter les friandises > 10 % de l\'apport calorique journalier.',
+    'Proposer de l\'eau fraîche après l\'exercice — hydratation essentielle.',
+  ],
+  warnings: [
+    'Allergie suspectée aux protéines bovines — éviter les formulations au bœuf.',
+    'Consultation de contrôle recommandée dans 30 jours pour réévaluation du poids.',
+  ],
+  hydration: { dailyMl: 480, note: 'Environ 40 ml/kg/jour pour un chien de 12 kg actif.' },
 };
 
 const filterByPatient = (items, ownerId, petName, ownerField = 'ownerId') => {

@@ -2,6 +2,7 @@
 
 import api from '../utils/api';
 import { getRoleBiDemo } from '../utils/roleBiDemoData';
+import { chartSeriesHasValues, mergeChartSeries } from '../utils/chartSeriesNormalize';
 
 const API_PATHS = {
   vendor: '/ecosystem/vendor/bi/dashboard',
@@ -12,11 +13,21 @@ const API_PATHS = {
 const normalize = (role, raw) => {
   const demo = getRoleBiDemo(role);
   if (!raw || typeof raw !== 'object') return demo;
+
+  const trendRaw = raw.trend ?? raw.trendData ?? raw.monthlyTrend;
+  const dailyRaw = raw.daily ?? raw.dailySeries ?? raw.dailyVolume;
+  const breakdownRaw = raw.breakdown ?? raw.distribution;
+
+  const trend = mergeChartSeries(trendRaw, demo.trend);
+  const daily = mergeChartSeries(dailyRaw, demo.daily);
+  const validBreakdown = Array.isArray(breakdownRaw)
+    && breakdownRaw.some((b) => Number(b?.value) > 0);
+
   return {
     kpis: raw.kpis?.length ? raw.kpis : demo.kpis,
-    trend: raw.trend?.length ? raw.trend : demo.trend,
-    breakdown: raw.breakdown?.length ? raw.breakdown : demo.breakdown,
-    daily: raw.daily?.length ? raw.daily : demo.daily,
+    trend: chartSeriesHasValues(trend) ? trend : demo.trend,
+    breakdown: validBreakdown ? breakdownRaw : demo.breakdown,
+    daily: chartSeriesHasValues(daily) ? daily : demo.daily,
     table: raw.table?.rows?.length ? raw.table : demo.table,
     alerts: raw.alerts?.length ? raw.alerts : demo.alerts,
     updatedAt: raw.updatedAt || new Date().toISOString(),

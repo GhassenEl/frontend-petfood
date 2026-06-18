@@ -9,7 +9,6 @@ const SENSITIVE_PREFIXES = [
   '/client-profile',
   '/admin',
   '/vet/medical',
-  '/support/tickets',
 ];
 
 /** Masque les chemins sensibles avant envoi analytics. */

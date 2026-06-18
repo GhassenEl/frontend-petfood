@@ -112,7 +112,7 @@ export const LIVREUR_MOBILE_NAV = [
 export const VET_MOBILE_NAV = [
   { id: 'dash', to: '/vet/dashboard', icon: '🩺', label: 'Accueil' },
   { id: 'calendar', to: '/vet/calendar', icon: '📅', label: 'Agenda' },
-  { id: 'intel', to: '/vet/intelligence', icon: '🧠', label: 'IA' },
+  { id: 'clinic', to: '/vet/clinic', icon: '🏥', label: 'Clinique' },
   { id: 'dossiers', to: '/vet/medical-dossiers', icon: '📁', label: 'Dossiers' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
@@ -128,14 +128,14 @@ export const MODERATOR_MOBILE_NAV = [
   { id: 'dash', to: '/moderator/dashboard', icon: '🛡️', label: 'Accueil' },
   { id: 'users', to: '/moderator/users', icon: '👤', label: 'Users' },
   { id: 'content', to: '/moderator/content', icon: '🏷️', label: 'Contenu' },
-  { id: 'reports', to: '/moderator/bi', icon: '📈', label: 'BI' },
+  { id: 'reviews', to: '/moderator/reviews', icon: '⭐', label: 'Avis' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
 export const VENDOR_MOBILE_NAV = [
   { id: 'dash', to: '/vendor/dashboard', icon: '📊', label: 'Dashboard' },
   { id: 'products', to: '/vendor/products', icon: '🏷️', label: 'Produits' },
-  { id: 'sales', to: '/vendor/bi', icon: '📈', label: 'BI' },
+  { id: 'sales', to: '/vendor/sales', icon: '📜', label: 'Ventes' },
   { id: 'orders', to: '/vendor/orders', icon: '📦', label: 'Commandes' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];

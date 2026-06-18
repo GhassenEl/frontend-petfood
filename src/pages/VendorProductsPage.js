@@ -15,6 +15,20 @@ import {
 import AdminImageUpload from '../components/AdminImageUpload';
 import './VendorPages.css';
 
+const IMG_FALLBACK = 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&h=300&fit=crop';
+
+const ProductThumb = ({ product }) => {
+  const [src, setSrc] = useState(() => resolveNaturalProductImage(product));
+  return (
+    <img
+      src={src}
+      alt=""
+      className="vnd-product-img"
+      onError={() => setSrc(IMG_FALLBACK)}
+    />
+  );
+};
+
 const emptyProduct = {
   name: '', categoryId: '', price: '', stock: '', description: '', imageUrl: '', promotionPercent: 0,
 };
@@ -200,7 +214,7 @@ const VendorProductsPage = () => {
                   <tbody>
                     {products.map((p) => (
                       <tr key={p.id}>
-                        <td><img src={resolveNaturalProductImage(p)} alt="" className="vnd-product-img" /></td>
+                        <td><ProductThumb product={p} /></td>
                         <td><strong>{p.name}</strong></td>
                         <td>{catLabel(p.categoryId)}</td>
                         <td>{formatDT(p.price, { decimals: 0 })}</td>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
-  Package, Users, Star, AlertTriangle, TrendingUp, ArrowRight, Store,
+  TrendingUp, BarChart3, Boxes,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
@@ -11,7 +11,6 @@ import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
 import {
   DEMO_ADMIN_ORDERS,
   DEMO_ADMIN_USERS,
-  buildDemoRecentActivity,
   buildDemoRevenueChart,
   buildDemoStatusChart,
   buildDemoOrdersDailyChart,
@@ -29,13 +28,11 @@ const AdminDashboard = () => {
   const [statusData, setStatusData] = useState(buildDemoStatusChart());
   const [dailyData, setDailyData] = useState(buildDemoOrdersDailyChart());
   const [usersData, setUsersData] = useState(buildDemoUsersGrowthChart());
-  const [recentActivity, setRecentActivity] = useState(buildDemoRecentActivity());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStats();
     fetchChartData();
-    fetchRecentActivity();
     const id = window.setInterval(() => {
       fetchStats();
       fetchChartData();
@@ -46,7 +43,6 @@ const AdminDashboard = () => {
   usePlatformRefresh(() => {
     fetchStats();
     fetchChartData();
-    fetchRecentActivity();
   });
 
   const fetchStats = async () => {
@@ -94,81 +90,23 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchRecentActivity = async () => {
-    try {
-      const [ordersRes, reviewsRes, complaintsRes] = await Promise.all([
-        api.get('/orders?limit=5').catch(() => ({ data: [] })),
-        api.get('/reviews?limit=3').catch(() => ({ data: [] })),
-        api.get('/complaints/all?limit=3').catch(() => ({ data: [] })),
-      ]);
-
-      const orders = withDemoFallback(ordersRes.data || [], DEMO_ADMIN_ORDERS);
-      const activities = [
-        ...orders.slice(0, 5).map((o) => ({
-          type: 'order',
-          icon: '📦',
-          text: `Commande #${String(o._id || o.id).slice(-6)} — ${o.total} DT`,
-          time: o.createdAt,
-          color: '#e67e22',
-        })),
-        ...(reviewsRes.data || []).map((r) => {
-          const preview = r.comment?.length > 100 ? `${r.comment.substring(0, 100)}...` : r.comment;
-          return {
-            type: 'review',
-            icon: '⭐',
-            text: `Avis ${r.rating}/5 — ${preview}`,
-            time: r.createdAt,
-            color: '#f39c12',
-          };
-        }),
-        ...(complaintsRes.data || []).map((c) => ({
-          type: 'complaint',
-          icon: '⚠️',
-          text: `Réclamation: ${c.subject}`,
-          time: c.createdAt,
-          color: '#e74c3c',
-        })),
-      ]
-        .sort((a, b) => new Date(b.time) - new Date(a.time))
-        .slice(0, 8);
-
-      setRecentActivity(activities.length ? activities : buildDemoRecentActivity());
-    } catch (error) {
-      console.error('Activity error', error);
-      setRecentActivity(buildDemoRecentActivity());
-    }
-  };
-
   const statCards = [
     { label: 'Commandes', value: stats.totalOrders, icon: '📦', color: '#e67e22', bg: 'rgba(230,126,34,0.1)', link: '/admin/orders' },
-    { label: 'Chiffre d\'affaires', value: `${Number(stats.totalRevenue).toLocaleString('fr-FR')} DT`, icon: '💰', color: '#27ae60', bg: 'rgba(39,174,96,0.1)', link: '/admin/invoices' },
+    { label: 'Chiffre d\'affaires', value: `${Number(stats.totalRevenue).toLocaleString('fr-FR')} DT`, icon: '💰', color: '#27ae60', bg: 'rgba(39,174,96,0.1)', link: '/admin/sales' },
     { label: 'Utilisateurs', value: stats.totalUsers, icon: '👥', color: '#3498db', bg: 'rgba(52,152,219,0.1)', link: '/admin/users' },
     { label: 'Avis', value: stats.totalReviews, icon: '⭐', color: '#f39c12', bg: 'rgba(243,156,18,0.1)', link: '/admin/reviews' },
     { label: 'Réclamations', value: stats.totalComplaints, icon: '⚠️', color: '#e74c3c', bg: 'rgba(231,76,60,0.1)', link: '/admin/complaints' },
     { label: 'En attente', value: stats.pendingOrders, icon: '⏳', color: '#9b59b6', bg: 'rgba(155,89,182,0.1)', link: '/admin/orders' },
   ];
 
-  const quickActions = [
-    { label: 'Ventes & CA', icon: <TrendingUp size={18} />, color: '#e67e22', link: '/admin/sales' },
-    { label: 'Stock & alertes', icon: <Package size={18} />, color: '#2563eb', link: '/admin/stock' },
-    { label: 'Promotions', icon: <Star size={18} />, color: '#d97706', link: '/admin/promotions' },
-    { label: 'Power BI', icon: <TrendingUp size={18} />, color: '#6366f1', link: '/admin/powerbi' },
-    { label: 'Modèles NLP', icon: <TrendingUp size={18} />, color: '#7c3aed', link: '/admin/nlp-models' },
-    { label: 'Config. globale', icon: <TrendingUp size={18} />, color: '#ea580c', link: '/admin/system' },
-    { label: 'Espace visiteur', icon: <Users size={18} />, color: '#0284c7', link: '/admin/visitors' },
-    { label: 'Utilisateurs', icon: <Users size={18} />, color: '#3498db', link: '/admin/users' },
+  const biShortcuts = [
+    { label: 'Power BI', icon: <BarChart3 size={18} />, color: '#6366f1', link: '/admin/powerbi' },
     { label: 'Business Intelligence', icon: <TrendingUp size={18} />, color: '#1e40af', link: '/admin/business-intelligence' },
-    { label: 'Analyse & décision', icon: <TrendingUp size={18} />, color: '#2563eb', link: '/admin/analytics-decision' },
-    { label: 'IA avancée', icon: <TrendingUp size={18} />, color: '#7c3aed', link: '/admin/advanced-ai' },
-    { label: 'Réseau villes', icon: <Store size={18} />, color: '#0891b2', link: '/admin/cities' },
-    { label: 'Gouvernance prix', icon: <TrendingUp size={18} />, color: '#0d9488', link: '/admin/prices' },
-    { label: 'Fournisseurs & partenariats', icon: <Store size={18} />, color: '#0d9488', link: '/admin/partners' },
-    { label: 'Modérateurs', icon: <Users size={18} />, color: '#d97706', link: '/admin/moderators' },
-    { label: 'Remboursements', icon: <TrendingUp size={18} />, color: '#7c3aed', link: '/admin/refunds' },
-    { label: 'Réclamations', icon: <AlertTriangle size={18} />, color: '#e74c3c', link: '/admin/complaints' },
+    { label: 'Gestion stock', icon: <Boxes size={18} />, color: '#2563eb', link: '/admin/stock' },
+    { label: 'Ventes & CA', icon: <TrendingUp size={18} />, color: '#e67e22', link: '/admin/sales' },
   ];
 
-  const firstName = user?.name?.split(' ')[0] || 'Admin';
+  const displayName = user?.name || 'Administrateur';
 
   if (loading) {
     return (
@@ -187,52 +125,26 @@ const AdminDashboard = () => {
         transition={{ duration: 0.5 }}
         className="hero-animal"
         style={{
-          background: 'linear-gradient(135deg, rgba(230,126,34,0.08) 0%, rgba(39,174,96,0.06) 100%)',
+          backgroundImage: 'linear-gradient(135deg, rgba(15,23,42,0.82) 0%, rgba(30,64,175,0.72) 100%), url(https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1400&q=80)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
           borderRadius: '24px',
-          padding: '32px',
+          padding: '36px 32px',
           marginBottom: '28px',
-          border: '1px solid rgba(230,126,34,0.1)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          color: 'white',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
-          <span style={{ fontSize: '2.5rem' }}>👋</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{ fontSize: '2.5rem' }}>🐾</span>
           <div>
-            <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 800, color: '#333' }}>
-              Bonjour, {firstName} !
+            <h1 style={{ margin: 0, fontSize: '1.9rem', fontWeight: 800, color: 'white' }}>
+              Bonjour, {displayName} !
             </h1>
-            <p style={{ margin: '6px 0 0', color: '#777', fontSize: '0.95rem' }}>
-              Voici ce qui se passe sur PetfoodTN aujourd&apos;hui 🐕🐈
+            <p style={{ margin: '8px 0 0', color: 'rgba(255,255,255,0.88)', fontSize: '0.95rem' }}>
+              Tableau de bord PetfoodTN — chiens, chats et compagnons 🐕🐈🐰
             </p>
           </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '16px' }}>
-          {quickActions.map((action) => (
-            <motion.button
-              key={action.label}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigate(action.link)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 18px',
-                background: 'white',
-                border: 'none',
-                borderRadius: '14px',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: action.color,
-                cursor: 'pointer',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
-              }}
-            >
-              {action.icon}
-              {action.label}
-              <ArrowRight size={14} />
-            </motion.button>
-          ))}
         </div>
       </motion.div>
 
@@ -264,6 +176,39 @@ const AdminDashboard = () => {
         ))}
       </div>
 
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '12px',
+        marginBottom: '28px',
+      }}>
+        {biShortcuts.map((item) => (
+          <motion.button
+            key={item.label}
+            type="button"
+            whileHover={{ y: -2 }}
+            onClick={() => navigate(item.link)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '14px 18px',
+              background: 'white',
+              border: '1px solid #e5e7eb',
+              borderRadius: '14px',
+              fontSize: '0.9rem',
+              fontWeight: 700,
+              color: item.color,
+              cursor: 'pointer',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+            }}
+          >
+            {item.icon}
+            {item.label}
+          </motion.button>
+        ))}
+      </div>
+
       <RealtimeStatsCharts role="admin" />
 
       <AdminDashboardCharts
@@ -272,51 +217,6 @@ const AdminDashboard = () => {
         dailyData={dailyData}
         usersData={usersData}
       />
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-        className="card-animal"
-        style={{ padding: '24px' }}
-      >
-        <h3 style={{ margin: '0 0 20px', fontSize: '1rem', fontWeight: 700, color: '#444', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          🔔 Activité récente
-        </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {recentActivity.map((activity, i) => (
-            <motion.div
-              key={`${activity.type}-${i}`}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 + i * 0.05 }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                padding: '12px 16px',
-                borderRadius: '14px',
-                background: 'rgba(0,0,0,0.02)',
-              }}
-            >
-              <span style={{ fontSize: '1.3rem' }}>{activity.icon}</span>
-              <div style={{ flex: 1 }}>
-                <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: '#444' }}>{activity.text}</p>
-                <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#aaa' }}>
-                  {activity.time ? new Date(activity.time).toLocaleString('fr-FR') : ''}
-                </p>
-              </div>
-              <span style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                background: activity.color,
-                flexShrink: 0,
-              }} />
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
     </div>
   );
 };

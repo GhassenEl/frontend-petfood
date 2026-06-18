@@ -7,7 +7,6 @@ import {
   saveExtraVetClient,
 } from '../utils/vetDemoData';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
-import VetClinicalAlertsBar from '../components/VetClinicalAlertsBar';
 import './VetPages.css';
 
 const animalEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', rabbit: '🐰', other: '🐾' };
@@ -108,7 +107,6 @@ const VetClientsPage = () => {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
-      <VetClinicalAlertsBar compact />
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
         <div>
           <h1 style={{ margin: '0 0 8px' }}>👥 Clients & animaux</h1>

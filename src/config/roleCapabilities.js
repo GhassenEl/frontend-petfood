@@ -43,7 +43,6 @@ export const ROLE_CAPABILITIES = [
       { label: 'Gérer le stock', route: '/vendor/products' },
       { label: 'Gérer les commandes', route: '/vendor/orders' },
       { label: 'Consulter les ventes', route: '/vendor/sales' },
-      { label: 'Dashboard BI', route: '/vendor/bi' },
       { label: 'Répondre aux avis', route: '/vendor/communication' },
       { label: 'Gérer les retours', route: '/vendor/returns' },
     ],
@@ -58,9 +57,8 @@ export const ROLE_CAPABILITIES = [
       { label: 'Gérer les rendez-vous', route: '/vet/calendar' },
       { label: 'Dossiers animaux', route: '/vet/medical-dossiers' },
       { label: 'Prescriptions', route: '/vet/prescriptions' },
-      { label: 'Téléconsultations', route: '/vet/teleconsult' },
       { label: 'Conseils nutritionnels', route: '/vet/nutrition' },
-      { label: 'Dashboard BI', route: '/vet/bi' },
+      { label: 'Ma clinique', route: '/vet/clinic' },
     ],
   },
   {
@@ -73,7 +71,7 @@ export const ROLE_CAPABILITIES = [
       { label: 'Consulter les livraisons', route: '/livreur/orders' },
       { label: 'Mettre à jour le statut', route: '/livreur/orders' },
       { label: 'Confirmer la livraison', route: '/livreur/orders' },
-      { label: 'Dashboard BI', route: '/livreur/bi' },
+      { label: 'Mes gains', route: '/livreur/earnings' },
     ],
   },
   {
@@ -88,7 +86,6 @@ export const ROLE_CAPABILITIES = [
       { label: 'Traiter les signalements', route: '/moderator/reports' },
       { label: 'Litiges remboursements', route: '/moderator/refunds' },
       { label: 'Suspendre des comptes clients', route: '/moderator/users' },
-      { label: 'Dashboard BI', route: '/moderator/bi' },
     ],
   },
   {
@@ -107,19 +104,6 @@ export const ROLE_CAPABILITIES = [
       { label: 'Consulter les statistiques', route: '/admin/dashboard' },
       { label: 'Dashboard BI / Power BI', route: '/admin/powerbi' },
       { label: 'Configurer la plateforme', route: '/admin/system' },
-    ],
-  },
-  {
-    id: 'support',
-    icon: '📞',
-    label: 'Service Client',
-    auth: true,
-    role: 'support',
-    features: [
-      { label: 'Gérer les réclamations', route: '/support/complaints' },
-      { label: 'Suivre les tickets', route: '/support/tickets' },
-      { label: 'Assister les utilisateurs', route: '/support/assist' },
-      { label: 'Traiter les retours', route: '/support/returns' },
     ],
   },
 ];

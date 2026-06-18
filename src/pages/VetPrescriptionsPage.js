@@ -4,7 +4,6 @@ import api from '../utils/api';
 import MedicationFormFields from '../components/MedicationFormFields';
 import VetMedicationRecommender from '../components/VetMedicationRecommender';
 import VetPharmacyAlertsPanel from '../components/VetPharmacyAlertsPanel';
-import VetClinicalAlertsBar from '../components/VetClinicalAlertsBar';
 import { fetchPharmacyCatalog } from '../services/vetMedicationService';
 import {
   emptyMedicationRow,
@@ -146,9 +145,6 @@ const VetPrescriptionsPage = () => {
     <div style={{ padding: '24px', maxWidth: '1000px', margin: '0 auto' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 8 }}>
         <h1 style={{ margin: 0 }}>💊 Ordonnances</h1>
-        <Link to="/vet/medication-recommendations" style={{ color: '#7c3aed', fontSize: 14, fontWeight: 600 }}>
-          Recommandations médicaments →
-        </Link>
         <Link to="/vet/pharmacy" style={{ color: '#0ea5e9', fontSize: 14, fontWeight: 600 }}>
           Pharmacie &amp; ruptures →
         </Link>
@@ -160,8 +156,6 @@ const VetPrescriptionsPage = () => {
         compact
         title="Alertes stock — impact ordonnances"
       />
-
-      <VetClinicalAlertsBar compact />
 
       <form
         onSubmit={handleCreate}

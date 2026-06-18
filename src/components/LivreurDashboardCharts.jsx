@@ -17,6 +17,8 @@ import {
   Legend,
 } from 'recharts';
 
+import { DEMO_LIVREUR_STATS } from '../utils/livreurDemoData';
+
 const COLORS = ['#27ae60', '#059669', '#3498db', '#f39c12', '#e74c3c'];
 
 const tooltipStyle = {
@@ -38,8 +40,9 @@ const LivreurDashboardCharts = ({ stats, loading }) => {
 
   if (!stats) return null;
 
-  const dailyChart = stats.dailyChart || [];
-  const statusData = Object.entries(stats.statusBreakdown || {}).map(([name, value]) => ({
+  const dailyChart = stats.dailyChart?.length ? stats.dailyChart : DEMO_LIVREUR_STATS.dailyChart;
+  const statusEntries = Object.entries(stats.statusBreakdown || {}).filter(([, v]) => Number(v) > 0);
+  const statusData = (statusEntries.length ? statusEntries : Object.entries(DEMO_LIVREUR_STATS.statusBreakdown)).map(([name, value]) => ({
     name: { pending: 'En attente', shipped: 'En cours', delivered: 'Livrées', cancelled: 'Annulées', paid: 'Payées' }[name] || name,
     value,
   }));

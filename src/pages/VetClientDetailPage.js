@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api from '../utils/api';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
-import VetClinicalAlertsBar from '../components/VetClinicalAlertsBar';
 import './VetPages.css';
 import {
   DEMO_VET_HISTORY,
@@ -94,8 +93,6 @@ const VetClientDetailPage = () => {
         ← Clients
       </Link>
 
-      <VetClinicalAlertsBar compact />
-
       <header
         style={{
           marginTop: 12,
@@ -112,7 +109,6 @@ const VetClientDetailPage = () => {
         <div className="vet-quick-actions" style={{ marginTop: 16 }}>
           <Link to={`/vet/prescriptions?ownerId=${encodeURIComponent(cid)}`}>💊 Ordonnance</Link>
           <Link to="/vet/calendar">📅 Planifier RDV</Link>
-          <Link to="/vet/teleconsult">📹 Téléconsultation</Link>
           <Link to={`/vet/medical-dossiers?q=${encodeURIComponent(client.name || '')}`}>📁 Dossier médical</Link>
         </div>
       </header>

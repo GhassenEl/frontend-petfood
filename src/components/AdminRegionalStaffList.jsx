@@ -12,14 +12,14 @@ const ROLE_META = {
   moderator: { label: 'Modérateur', emoji: '🛡️', accent: '#d97706' },
 };
 
-const resolveRegion = (person, role) => {
+const resolveRegion = (person, role, index = 0) => {
   if (person.region) return person.region;
   if (role === 'vet' && person.address) {
     const addr = String(person.address).toLowerCase();
     const hit = DEMO_ADMIN_REGIONS.find((r) => addr.includes(r.toLowerCase()));
     if (hit) return hit;
   }
-  return 'Non assignée';
+  return DEMO_ADMIN_REGIONS[index % DEMO_ADMIN_REGIONS.length] || 'Tunis';
 };
 
 const AdminRegionalStaffList = ({ role, title, subtitle }) => {
@@ -53,21 +53,20 @@ const AdminRegionalStaffList = ({ role, title, subtitle }) => {
 
   const regionStats = useMemo(() => {
     const stats = {};
-    regions.forEach((region) => {
-      stats[region] = people.filter((p) => resolveRegion(p, role) === region).length;
+    regions.forEach((region, idx) => {
+      stats[region] = people.filter((p, i) => resolveRegion(p, role, i) === region).length;
     });
-    stats['Non assignée'] = people.filter((p) => resolveRegion(p, role) === 'Non assignée').length;
     return stats;
   }, [people, regions, role]);
 
-  const filtered = useMemo(() => people.filter((person) => {
-    const region = resolveRegion(person, role);
+  const filtered = useMemo(() => people.filter((person, index) => {
+    const region = resolveRegion(person, role, index);
     const matchesRegion = regionFilter === 'all' || region === regionFilter;
     const haystack = `${person.name} ${person.email} ${person.phone || ''} ${person.address || ''} ${region}`.toLowerCase();
     return matchesRegion && haystack.includes(searchTerm.toLowerCase());
   }), [people, regionFilter, searchTerm, role]);
 
-  const regionCards = [...regions, ...(regionStats['Non assignée'] ? ['Non assignée'] : [])];
+  const regionCards = [...regions];
 
   return (
     <div>

@@ -5,7 +5,6 @@ import {
   VET_MOBILE_NAV,
   VENDOR_MOBILE_NAV,
   MODERATOR_MOBILE_NAV,
-  SUPPORT_MOBILE_NAV,
   VISITOR_MOBILE_NAV,
 } from '../components/MobileBottomNav';
 
@@ -16,7 +15,6 @@ const MAP = {
   vet: VET_MOBILE_NAV,
   vendor: VENDOR_MOBILE_NAV,
   moderator: MODERATOR_MOBILE_NAV,
-  support: SUPPORT_MOBILE_NAV,
 };
 
 export const getMobileNavForRole = (role) => MAP[role] || VISITOR_MOBILE_NAV;

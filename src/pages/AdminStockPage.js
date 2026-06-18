@@ -211,7 +211,7 @@ const AdminStockPage = () => {
       >
         <div>
           <h1 style={{ margin: '0 0 6px', fontSize: '1.6rem', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Package size={28} /> Gestion avancée du stock
+            <Package size={28} /> Gestion stock
           </h1>
           <p style={{ margin: 0, opacity: 0.9, fontSize: 14 }}>
             Ajustements, seuils, réapprovisionnement et historique des mouvements

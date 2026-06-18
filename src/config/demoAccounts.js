@@ -72,18 +72,6 @@ export const DEMO_ACCOUNTS = [
     home: ROLE_HOMES.moderator,
     primary: true,
   },
-  {
-    id: 'support',
-    role: 'support',
-    label: 'Service client',
-    icon: '📞',
-    name: 'Sonia Service Client',
-    email: 'support@petfood.tn',
-    password: 'Support2024!',
-    home: ROLE_HOMES.support,
-    primary: true,
-    note: 'Non inclus dans le seed backend — créer le compte via /admin/users si besoin.',
-  },
 ];
 
 /** Comptes secondaires optionnels (tests multi-utilisateurs). */

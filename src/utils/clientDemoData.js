@@ -1133,9 +1133,21 @@ export const getDemoWaterOverview = () => ({
 export const getDemoWaterTracking = (petId) => {
   const key = DEMO_WATER_BY_PET[petId] ? petId : 'demo-pet-1';
   const data = DEMO_WATER_BY_PET[key];
+  return JSON.parse(JSON.stringify(data));
+};
+
+/** Fusionne données API et courbes démo si séries manquantes. */
+export const mergeWaterTrackingWithDemoCurves = (apiData, petId) => {
+  const demo = getDemoWaterTracking(petId);
+  const base = apiData?.tracking && typeof apiData.tracking === 'object'
+    ? { ...demo, ...apiData, ...apiData.tracking }
+    : { ...demo, ...apiData };
   return {
-    ...JSON.parse(JSON.stringify(data)),
-    tracking: undefined,
+    ...base,
+    hourlyToday: base.hourlyToday?.length ? base.hourlyToday : demo.hourlyToday,
+    series: base.series?.length ? base.series : demo.series,
+    stats: base.stats || demo.stats,
+    insights: base.insights?.length ? base.insights : demo.insights,
   };
 };
 
@@ -1444,6 +1456,20 @@ export const DEMO_NEARBY_VETS = [
     rating_avg: 4.4,
     rating_count: 210,
   },
+];
+
+/** Magasins PetfoodTN (démo — page Nos magasins). */
+export const DEMO_STORE_LOCATIONS = [
+  { id: 'store-tunis', name: 'PetfoodTN Tunis Centre', address: 'Av. Habib Bourguiba, Tunis', phone: '+216 71 000 101', hours: 'Lun–Sam 9h–20h', lat: 36.8065, lng: 10.1815 },
+  { id: 'store-marsa', name: 'Animalerie PetfoodTN La Marsa', address: 'Av. Habib Bourguiba, La Marsa', phone: '+216 71 000 102', hours: 'Lun–Dim 10h–19h', lat: 36.878, lng: 10.3247 },
+  { id: 'store-lac', name: 'Animalerie PetfoodTN Lac 2', address: 'Centre commercial Lac 2, Tunis', phone: '+216 71 000 103', hours: 'Lun–Dim 10h–20h', lat: 36.838, lng: 10.241 },
+  { id: 'store-ariana', name: 'PetShop Ariana', address: 'Centre Ariana, Ariana', phone: '+216 71 000 104', hours: 'Lun–Sam 9h–19h', lat: 36.862, lng: 10.195 },
+  { id: 'store-sfax', name: 'PetfoodTN Sfax', address: 'Rue Hedi Chaker, Sfax', phone: '+216 74 000 201', hours: 'Lun–Sam 9h–19h', lat: 34.7406, lng: 10.7603 },
+  { id: 'store-sousse', name: 'PetfoodTN Sousse', address: 'Bd Yahia Ibn Omar, Sousse', phone: '+216 73 000 301', hours: 'Lun–Sam 9h–19h', lat: 35.8256, lng: 10.637 },
+  { id: 'store-nabeul', name: 'PetfoodTN Nabeul', address: 'Av. de la République, Nabeul', phone: '+216 72 000 401', hours: 'Lun–Sam 9h–18h30', lat: 36.4513, lng: 10.7357 },
+  { id: 'store-bizerte', name: 'PetfoodTN Bizerte', address: 'Rue Bourguiba, Bizerte', phone: '+216 72 000 501', hours: 'Lun–Sam 9h–18h', lat: 37.2744, lng: 9.8739 },
+  { id: 'store-monastir', name: 'PetfoodTN Monastir', address: 'Av. de l\'Indépendance, Monastir', phone: '+216 73 000 601', hours: 'Lun–Sam 9h–18h', lat: 35.7643, lng: 10.8113 },
+  { id: 'store-gabes', name: 'PetfoodTN Gabès', address: 'Rue Farhat Hached, Gabès', phone: '+216 75 000 701', hours: 'Lun–Ven 9h–18h', lat: 33.8815, lng: 10.0982 },
 ];
 
 export const DEMO_PARTNER_STORES = [

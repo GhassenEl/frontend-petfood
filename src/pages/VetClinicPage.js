@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import api from '../utils/api';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import RegionSelect from '../components/RegionSelect';
+import VetClinicalAlertsBar from '../components/VetClinicalAlertsBar';
 
 const DAYS = [
   { key: 'mon', label: 'Lundi' },
@@ -70,7 +71,6 @@ const VetClinicPage = () => {
         region: fd.get('region'),
         description: fd.get('description'),
         acceptsHomeVisit: fd.get('acceptsHomeVisit') === 'on',
-        acceptsTeleconsult: fd.get('acceptsTeleconsult') === 'on',
         openingHours,
         services: servicesText.split(',').map((s) => s.trim()).filter(Boolean),
       });
@@ -89,8 +89,10 @@ const VetClinicPage = () => {
     <div style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
       <h1 style={{ margin: '0 0 8px' }}>🏥 Ma clinique</h1>
       <p style={{ color: '#64748b', marginTop: 0 }}>
-        Informations du cabinet visibles pour vos patients et l&apos;équipe.
+        Informations du cabinet, statistiques et alertes cliniques.
       </p>
+
+      <VetClinicalAlertsBar />
 
       {stats && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 24 }}>
@@ -149,10 +151,6 @@ const VetClinicPage = () => {
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600 }}>
             <input type="checkbox" name="acceptsHomeVisit" defaultChecked={profile?.acceptsHomeVisit !== false} />
             Visites à domicile
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600 }}>
-            <input type="checkbox" name="acceptsTeleconsult" defaultChecked={profile?.acceptsTeleconsult !== false} />
-            Téléconsultation
           </label>
         </div>
 

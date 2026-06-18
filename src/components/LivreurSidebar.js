@@ -20,24 +20,26 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
       title: '📊 Statistiques',
       items: [
         { id: 'stats', label: 'Statistiques', icon: '📈' },
-        { id: 'bi', label: 'Dashboard BI', icon: '📊' },
         { id: 'earnings', label: 'Gains', icon: '💰' },
       ]
+    },
+    {
+      title: '🚚 Livraison',
+      items: [
+        { id: 'delivery-cold-chain', label: 'Livraison chaud / froid', icon: '🌡️' },
+      ],
     },
     {
       title: '🤖 Intelligence IA',
       items: [
         { id: 'intelligence', label: 'Intelligence livraison', icon: '🧠' },
-        { id: 'delivery-cold-chain', label: 'Chaîne du froid IoT', icon: '🌡️' },
         { id: 'ml', label: 'Prévisions ML', icon: '📊' },
       ],
     },
     {
       title: '💬 Communications',
       items: [
-        { id: '__open-chat__', label: 'Assistant en ligne', icon: '🤖', action: 'open-chat' },
         { id: 'messages', label: 'Messages', icon: '💬' },
-        { id: 'platform-services', label: 'Catalogue services', icon: '📋' },
       ]
     },
     {
@@ -93,30 +95,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
             <p className="admin-sidebar-section-title">
               {section.title}
             </p>
-            {section.items.map((item) =>
-              item.action === 'open-chat' ? (
-                <button
-                  key={item.id}
-                  type="button"
-                  className="admin-sidebar-item"
-                  style={{
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    border: 'none',
-                    background: 'transparent',
-                    font: 'inherit',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => {
-                    window.dispatchEvent(new CustomEvent('petfood:open-chat'));
-                    onNavigate?.();
-                  }}
-                >
-                  <span className="icon">{item.icon}</span>
-                  <span>{item.label}</span>
-                </button>
-              ) : (
+            {section.items.map((item) => (
                 <NavLink
                   key={item.id}
                   to={`/livreur/${item.id}`}
@@ -128,8 +107,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
                   <span className="icon">{item.icon}</span>
                   <span>{item.label}</span>
                 </NavLink>
-              )
-            )}
+            ))}
           </div>
         ))}
       </nav>

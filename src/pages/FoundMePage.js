@@ -132,7 +132,7 @@ const FoundMePage = () => {
       await loadMine();
       await loadBrowse();
       setTab('mine');
-      window.alert(`Signalement publié. Code Retrouvé Moi : ${created.tagCode}`);
+      window.alert(`Signalement publié. Code Find Me : ${created.tagCode}`);
     } catch (err) {
       window.alert(err.response?.data?.error || 'Publication impossible');
     } finally {
@@ -199,7 +199,7 @@ const FoundMePage = () => {
         }}
       >
         <h1 style={{ margin: '0 0 8px', fontSize: 32, fontWeight: 800, color: '#9f1239' }}>
-          🔍 Retrouvé Moi
+          🔍 Find Me
         </h1>
         <p style={{ margin: 0, color: '#64748b', maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
           Signalez un animal perdu ou trouvé, recevez un code à mettre sur le collier, et laissez la communauté vous aider à le retrouver.

@@ -9,17 +9,13 @@ const btnStyle = {
 };
 
 const ThemeToggles = () => {
-  const { isDark, isMonochrome, toggleDark, toggleMonochrome } = useTheme();
+  const { isDark, toggleDark } = useTheme();
 
   return (
     <div>
       <button type="button" onClick={toggleDark} className="btn btn-outline" style={btnStyle}>
         <span>{isDark ? '☀️' : '🌙'}</span>
         <span>{isDark ? 'Mode clair' : 'Mode sombre'}</span>
-      </button>
-      <button type="button" onClick={toggleMonochrome} className="btn btn-outline" style={btnStyle}>
-        <span>{isMonochrome ? '🎨' : '⬛'}</span>
-        <span>{isMonochrome ? 'Couleurs' : 'Noir & blanc'}</span>
       </button>
     </div>
   );

@@ -29,10 +29,12 @@ const NATURAL_IMAGES = [
 
 export const resolveNaturalProductImage = (product) => {
   const existing = product?.imageUrl || product?.image;
-  if (existing && !existing.startsWith('data:image/svg')) return existing;
-  const name = `${product?.name || ''} ${product?.description || ''} ${product?.category || ''}`;
+  if (existing && typeof existing === 'string' && existing.trim() && !existing.startsWith('data:image/svg')) {
+    return existing;
+  }
+  const name = `${product?.name || ''} ${product?.description || ''} ${product?.category || ''} ${product?.animalType || ''}`;
   const match = NATURAL_IMAGES.find(({ test }) => test(name));
-  return match?.url || existing;
+  return match?.url || 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=600&h=360&fit=crop';
 };
 
 export default resolveNaturalProductImage;

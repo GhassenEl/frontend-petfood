@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
 import api from '../utils/api';
 import { DEMO_ADMIN_USERS, DEMO_ADMIN_VET_RECORDS, withDemoFallback } from '../utils/adminDemoData';
 
@@ -205,9 +206,13 @@ const AdminVeterinary = () => {
                 </td>
                 <td style={styles.td}>{statusBadge(record.status)}</td>
                 <td style={styles.td}>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button style={styles.editBtn} onClick={() => openEdit(record)} title="Modifier">✏️</button>
-                    <button style={styles.deleteBtn} onClick={() => handleDelete(record._id)} title="Supprimer">🗑️</button>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button type="button" style={styles.editBtn} onClick={() => openEdit(record)} title="Modifier">
+                      <Pencil size={14} /> Modifier
+                    </button>
+                    <button type="button" style={styles.deleteBtn} onClick={() => handleDelete(record._id)} title="Supprimer">
+                      <Trash2 size={14} /> Supprimer
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -287,8 +292,8 @@ const styles = {
   tr: { borderBottom: '1px solid #f3f4f6', transition: 'background 0.2s' },
   td: { padding: '12px 16px', fontSize: '14px', color: '#374151', verticalAlign: 'middle' },
   badge: { display: 'inline-block', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: '700' },
-  editBtn: { padding: '6px 10px', background: '#eff6ff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', transition: 'background 0.2s' },
-  deleteBtn: { padding: '6px 10px', background: '#fef2f2', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', transition: 'background 0.2s' },
+  editBtn: { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, transition: 'background 0.2s' },
+  deleteBtn: { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, transition: 'background 0.2s' },
   empty: { textAlign: 'center', padding: '40px', color: '#9ca3af', fontSize: '14px' },
   loader: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '12px' },
   spinner: { width: '32px', height: '32px', border: '3px solid #d1fae5', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin 1s linear infinite' },

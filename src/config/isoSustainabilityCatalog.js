@@ -34,7 +34,7 @@ export const ISO_CORE_FEATURES = [
     id: 'rbac',
     code: 'RBAC',
     label: 'Gestion des accès basée sur les rôles',
-    description: 'Admin, client, vétérinaire, livreur, vendeur, modérateur, support.',
+    description: 'Admin, client, vétérinaire, livreur, vendeur, modérateur.',
     route: '/capabilities',
     controls: ['Routes protégées', 'JWT rôles', 'Capacités par acteur', 'Sessions actives'],
     status: 'actif',

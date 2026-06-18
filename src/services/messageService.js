@@ -20,7 +20,7 @@ export async function getUnreadCount() {
 export async function getMessagePartners() {
   const { data } = await api.get('/users');
   return (data || []).filter((u) =>
-    ['client', 'livreur', 'vet', 'vendor', 'moderator', 'support'].includes(u.role),
+    ['client', 'livreur', 'vet', 'vendor', 'moderator'].includes(u.role),
   );
 }
 

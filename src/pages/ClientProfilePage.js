@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
-import ClientPetsManager from '../components/ClientPetsManager';
 import RegionSelect from '../components/RegionSelect';
 import { CardContent, Button, TextField, Tabs, Tab, Box, CircularProgress, Alert } from '@mui/material';
 import { User } from 'lucide-react';
@@ -23,6 +22,8 @@ const ClientProfilePage = () => {
   useAuth();
   const [value, setValue] = useState(0);
   const [profile, setProfile] = useState({ name: '', email: '', phone: '', address: '', region: '' });
+  const [pwdForm, setPwdForm] = useState({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+  const [pwdSaving, setPwdSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -49,6 +50,28 @@ const ClientProfilePage = () => {
       console.error('Data fetch error', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (pwdForm.newPassword !== pwdForm.confirmNewPassword) {
+      setMessage('❌ Les mots de passe ne correspondent pas');
+      return;
+    }
+    if (pwdForm.newPassword.length < 8) {
+      setMessage('❌ Le nouveau mot de passe doit contenir au moins 8 caractères');
+      return;
+    }
+    setPwdSaving(true);
+    try {
+      await api.put('/auth/change-password', pwdForm);
+      setMessage('✅ Mot de passe modifié !');
+      setPwdForm({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+    } catch (error) {
+      setMessage('❌ Erreur: ' + (error.response?.data?.error || error.message));
+    } finally {
+      setPwdSaving(false);
     }
   };
 
@@ -113,7 +136,7 @@ const ClientProfilePage = () => {
         <Box sx={{ borderRadius: '20px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)' }}>
           <Tabs value={value} onChange={handleChange} variant="fullWidth" className="bg-white">
             <Tab label="👤 Profil Personnel" />
-            <Tab label="🐾 Mes animaux" />
+            <Tab label="🔐 Mot de passe" />
           </Tabs>
 
           {/* Profile Tab */}
@@ -155,8 +178,48 @@ const ClientProfilePage = () => {
           </TabPanel>
 
           <TabPanel value={value} index={1}>
-            <CardContent className="p-6">
-              <ClientPetsManager compact />
+            <CardContent className="p-8">
+              <form onSubmit={handlePasswordSubmit}>
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Mot de passe actuel</label>
+                    <TextField
+                      fullWidth
+                      type="password"
+                      value={pwdForm.currentPassword}
+                      onChange={(e) => setPwdForm({ ...pwdForm, currentPassword: e.target.value })}
+                      required
+                      variant="outlined"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Nouveau mot de passe</label>
+                    <TextField
+                      fullWidth
+                      type="password"
+                      value={pwdForm.newPassword}
+                      onChange={(e) => setPwdForm({ ...pwdForm, newPassword: e.target.value })}
+                      required
+                      variant="outlined"
+                      helperText="Minimum 8 caractères"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Confirmer le nouveau mot de passe</label>
+                    <TextField
+                      fullWidth
+                      type="password"
+                      value={pwdForm.confirmNewPassword}
+                      onChange={(e) => setPwdForm({ ...pwdForm, confirmNewPassword: e.target.value })}
+                      required
+                      variant="outlined"
+                    />
+                  </div>
+                  <Button type="submit" disabled={pwdSaving} variant="contained" size="large" className="bg-gradient-to-r from-emerald-500 to-emerald-600 w-full">
+                    {pwdSaving ? <CircularProgress size={24} /> : '🔐 Mettre à jour le mot de passe'}
+                  </Button>
+                </div>
+              </form>
             </CardContent>
           </TabPanel>
 

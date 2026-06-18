@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   Shield, Link2, MapPin, CheckCircle2, XCircle, Search, RefreshCw,
-  Package, QrCode, Copy, Beaker, AlertTriangle, Cpu,
+  Package, Copy, Beaker, AlertTriangle, Cpu,
 } from 'lucide-react';
 import api from '../utils/api';
 import BlockchainTimeline from '../components/BlockchainTimeline';
@@ -14,7 +14,6 @@ import {
   fetchProductTraceability,
   verifyProductTraceability,
   fetchMyOrderTraces,
-  verifyBatchCode,
 } from '../services/traceabilityService';
 import { getDemoProductTraceability, DEMO_MY_ORDER_TRACES } from '../utils/clientDemoData';
 import { analyzeTraceBlockchain } from '../utils/blockchainEngine';
@@ -34,7 +33,6 @@ const TABS = [
   { id: 'explorer', label: 'Explorateur' },
   { id: 'blocks', label: 'Explorateur blocs' },
   { id: 'orders', label: 'Mes achats' },
-  { id: 'verify', label: 'Vérifier un lot' },
 ];
 
 const certBadge = (verified) => ({
@@ -75,9 +73,6 @@ const ClientTraceabilityPage = () => {
   const [verify, setVerify] = useState(null);
   const [loading, setLoading] = useState(true);
   const [demoMode, setDemoMode] = useState(false);
-  const [batchInput, setBatchInput] = useState('');
-  const [batchResult, setBatchResult] = useState(null);
-  const [batchBusy, setBatchBusy] = useState(false);
   const [copyMsg, setCopyMsg] = useState('');
   const [localAnalysis, setLocalAnalysis] = useState(null);
   const [analysisBusy, setAnalysisBusy] = useState(false);
@@ -100,11 +95,7 @@ const ClientTraceabilityPage = () => {
       setDemoMode(!traces.length && !orders?.orders?.length);
 
       const urlProductId = searchParams.get('productId');
-      const urlBatch = searchParams.get('batch');
-      if (urlBatch) {
-        setTab('verify');
-        setBatchInput(urlBatch);
-      } else if (urlProductId) {
+      if (urlProductId) {
         setSelectedId(urlProductId);
       } else if (traces[0]?.product?.id) {
         setSelectedId(traces[0].product.id);
@@ -162,38 +153,6 @@ const ClientTraceabilityPage = () => {
       });
     return () => { cancelled = true; };
   }, [trace]);
-
-  const runBatchVerify = async () => {
-    const code = batchInput.trim();
-    if (!code) return;
-    setBatchBusy(true);
-    setBatchResult(null);
-    try {
-      const res = await verifyBatchCode(code);
-      setBatchResult(res);
-      if (res.found && res.trace?.product?.id) {
-        setSelectedId(res.trace.product.id);
-        setTrace(res.trace);
-        setVerify(res.verification);
-      }
-    } catch {
-      const demo = getDemoProductTraceability('batch-demo', `Lot ${code}`);
-      demo.batchCode = code;
-      setBatchResult({ found: true, batchCode: code, trace: demo, verification: demo.blockchain?.verification });
-      setTrace(demo);
-      setDemoMode(true);
-    } finally {
-      setBatchBusy(false);
-    }
-  };
-
-  useEffect(() => {
-    const urlBatch = searchParams.get('batch');
-    if (urlBatch && !batchResult) {
-      setBatchInput(urlBatch);
-      runBatchVerify();
-    }
-  }, []);
 
   const bc = trace?.blockchain;
   const valid = localAnalysis?.valid ?? (bc?.isVerified && (bc?.verification?.valid ?? verify?.valid));
@@ -401,51 +360,6 @@ const ClientTraceabilityPage = () => {
         </div>
       )}
 
-      {tab === 'verify' && (
-        <div style={card}>
-          <h3 style={{ margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <QrCode size={20} color="#0f766e" /> Vérifier un numéro de lot
-          </h3>
-          <p style={{ margin: '0 0 12px', fontSize: 14, color: '#64748b' }}>
-            Saisissez le code imprimé sur l&apos;emballage (ex. PF-TN-2026-A042) pour authentifier la chaîne blockchain.
-          </p>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <input
-              value={batchInput}
-              onChange={(e) => setBatchInput(e.target.value)}
-              placeholder="PF-TN-2026-XXXX"
-              style={{ flex: 1, minWidth: 200, padding: 12, borderRadius: 10, border: '1px solid #e2e8f0' }}
-            />
-            <button type="button" onClick={runBatchVerify} disabled={batchBusy} style={btnPrimary}>
-              {batchBusy ? 'Vérification…' : 'Vérifier'}
-            </button>
-          </div>
-          {batchResult && (
-            <div style={{
-              marginTop: 16, padding: 14, borderRadius: 12,
-              background: batchResult.found ? '#ecfdf5' : '#fef2f2',
-              color: batchResult.found ? '#065f46' : '#991b1b',
-            }}
-            >
-              {batchResult.found ? (
-                <>
-                  <CheckCircle2 size={18} style={{ verticalAlign: 'middle' }} /> Lot <strong>{batchResult.batchCode}</strong> authentifié — {batchResult.verification?.reason || 'Chaîne valide'}
-                </>
-              ) : (
-                <>
-                  <XCircle size={18} style={{ verticalAlign: 'middle' }} /> {batchResult.message || 'Lot introuvable'}
-                </>
-              )}
-            </div>
-          )}
-          {batchResult?.found && batchResult.trace && (
-            <div style={{ marginTop: 16 }}>
-              <TraceDetail trace={batchResult.trace} valid={batchResult.verification?.valid} onCopyHash={copyHash} compact />
-            </div>
-          )}
-        </div>
-      )}
-
       <p style={{ fontSize: 13, color: '#94a3b8', marginTop: 8 }}>
         Registre immuable PetfoodTN — transparence alimentaire. Les hash SHA-256 garantissent l&apos;intégrité de chaque étape.
       </p>
@@ -543,14 +457,6 @@ const TraceDetail = ({ trace, valid, trustScore, localAnalysis, analysisBusy, on
           </p>
         )}
       </div>
-
-      {trace.qrPayload && !compact && (
-        <div style={{ ...card, textAlign: 'center' }}>
-          <QrCode size={48} color="#0f766e" style={{ marginBottom: 8 }} />
-          <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>QR Lot {trace.qrPayload.batchCode}</p>
-          <p style={{ margin: '4px 0 0', fontSize: 11, color: '#94a3b8' }}>Scannez pour revérifier sur PetfoodTN</p>
-        </div>
-      )}
     </>
   );
 };
@@ -609,7 +515,6 @@ const StatusBadge = ({ valid }) => (
 );
 
 const btnLight = { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, border: 'none', background: 'rgba(255,255,255,0.15)', color: '#fff', fontWeight: 700, cursor: 'pointer' };
-const btnPrimary = { padding: '12px 20px', borderRadius: 10, border: 'none', background: '#0f766e', color: '#fff', fontWeight: 700, cursor: 'pointer' };
 const navChip = { fontSize: 13, fontWeight: 700, color: '#475569', textDecoration: 'none', padding: '10px 14px', background: '#f8fafc', borderRadius: 10 };
 const li = { padding: '5px 0' };
 const copyBtn = { marginLeft: 8, border: 'none', background: 'transparent', cursor: 'pointer', color: '#0f766e', verticalAlign: 'middle' };

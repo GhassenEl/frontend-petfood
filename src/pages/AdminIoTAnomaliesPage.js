@@ -31,15 +31,14 @@ const AdminIoTAnomaliesPage = () => {
         return merged.slice(0, 30);
       });
     } catch {
-      setAnomalies((prev) => (prev.length ? prev : [
-        mapAnomalyToRow({
-          id: 'iot-a1',
-          type: 'food-quality',
-          deviceName: 'ESP32-CAM Max',
-          message: 'Nourriture altérée — qualité 42 %',
-          severity: 'high',
-        }),
-      ]));
+      setAnomalies([
+        mapAnomalyToRow({ id: 'iot-a1', type: 'food-quality', deviceName: 'ESP32-CAM Max', message: 'Nourriture altérée — qualité 42 %', severity: 'high' }),
+        mapAnomalyToRow({ id: 'iot-a2', type: 'humidity', deviceName: 'Capteur HR Cave', message: 'Humidité 78 % — risque moisissure', severity: 'medium' }),
+        mapAnomalyToRow({ id: 'iot-a3', type: 'temperature', deviceName: 'Frigo Smart #2', message: 'Chaîne du froid 4 °C — OK avec surveillance', severity: 'low' }),
+        mapAnomalyToRow({ id: 'iot-a4', type: 'food-quality', deviceName: 'ESP32-CAM Luna', message: 'Croquettes humides détectées — score 38', severity: 'high' }),
+        mapAnomalyToRow({ id: 'iot-a5', type: 'temperature', deviceName: 'Distributeur Rex', message: 'Température réservoir 31 °C', severity: 'medium' }),
+        mapAnomalyToRow({ id: 'iot-a6', type: 'humidity', deviceName: 'Fontaine connectée', message: 'Humidité ambiante 72 %', severity: 'medium' }),
+      ]);
     }
   }, []);
 
@@ -66,15 +65,11 @@ const AdminIoTAnomaliesPage = () => {
   return (
     <div className="adm-page">
       <header className="adm-hero">
-        <h1><Radar size={24} /> Anomalies IoT — validation IA</h1>
+        <h1><Radar size={24} /> Surveillance IoT &amp; capteurs</h1>
         <p>
-          Détection automatique PetFoodIoT (température, humidité, consommation, ESP32-CAM, MQTT).
+          Alertes PetFoodIoT en temps réel — température, humidité, consommation et ESP32-CAM.
           {' '}
           <Link to="/admin/food-quality-cam">ESP32-CAM →</Link>
-          {' · '}
-          <Link to="/admin/incidents-ml">Incidents ML →</Link>
-          {' · '}
-          <Link to="/intelligence">Plateforme IA →</Link>
         </p>
       </header>
 

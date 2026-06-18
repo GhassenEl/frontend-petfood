@@ -2,17 +2,6 @@ import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
 import ThemeToggles from './ThemeToggles';
-import VisitorRouteLink from './VisitorRouteLink';
-
-const sidebarBtnStyle = {
-  width: '100%',
-  boxSizing: 'border-box',
-  border: 'none',
-  background: 'transparent',
-  font: 'inherit',
-  textAlign: 'left',
-  cursor: 'pointer',
-};
 
 const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
   const [sidebarImageError, setSidebarImageError] = useState(false);
@@ -23,15 +12,11 @@ const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
       title: '🛡️ Modération',
       items: [
         { id: 'dashboard', label: 'Tableau de bord', icon: '📊' },
-        { id: 'intelligence', label: 'Intelligence IA', icon: '🧠' },
-        { id: 'bi', label: 'Dashboard BI', icon: '📈' },
         { id: 'users', label: 'Comptes clients', icon: '👤' },
-        { id: 'vendors', label: 'Vendeurs partenaires', icon: '🏬' },
         { id: 'content', label: 'Contenu & produits', icon: '🏷️' },
         { id: 'fraud', label: 'Centre anti-fraude', icon: '🚨' },
         { id: 'reports', label: 'Signalements & litiges', icon: '⚖️' },
         { id: 'refunds', label: 'Remboursements', icon: '💸' },
-        { id: 'analytics', label: 'Rapports', icon: '📈' },
       ],
     },
     {
@@ -44,31 +29,15 @@ const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
       ],
     },
     {
-      title: '🔗 Espaces publics',
+      title: '📋 Compte',
       items: [
-        { id: '__hub__', label: 'Hub modération public', icon: '👀', route: '/moderator' },
-        { id: '__visitor__', label: 'Hub visiteur', icon: '🐾', route: '/visitor' },
-        { id: '__vendor__', label: 'Hub vendeur', icon: '🏬', route: '/vendor' },
-        { id: '__home__', label: 'Accueil marketing', icon: '🏠', route: '/' },
-      ],
-    },
-    {
-      title: '📋 Référentiel',
-      items: [
-        { id: '__open-chat__', label: 'Assistant IA', icon: '🤖', action: 'open-chat' },
-        { id: 'platform-services', label: 'Catalogue services', icon: '📑' },
         { id: 'profile', label: 'Profil', icon: '👤' },
       ],
     },
   ];
 
-  const isTabActive = (to) => {
-    if (to.includes('?')) {
-      const [path, query] = to.split('?');
-      return location.pathname === path && location.search.includes(query);
-    }
-    return location.pathname === to || location.pathname.startsWith(`${to}/`);
-  };
+  const isTabActive = (to) =>
+    location.pathname === to || location.pathname.startsWith(`${to}/`);
 
   return (
     <aside className="livreur-sidebar moderator-sidebar" aria-label="Navigation modérateur">
@@ -107,38 +76,6 @@ const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
           <div key={section.title} className="admin-sidebar-section">
             <p className="admin-sidebar-section-title">{section.title}</p>
             {section.items.map((item) => {
-              if (item.action === 'open-chat') {
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className="admin-sidebar-item"
-                    style={sidebarBtnStyle}
-                    onClick={() => {
-                      window.dispatchEvent(new CustomEvent('petfood:open-chat'));
-                      onNavigate?.();
-                    }}
-                  >
-                    <span className="icon">{item.icon}</span>
-                    <span>{item.label}</span>
-                  </button>
-                );
-              }
-
-              if (item.route) {
-                return (
-                  <VisitorRouteLink
-                    key={item.id}
-                    route={item.route}
-                    className="admin-sidebar-item"
-                    onClick={() => onNavigate?.()}
-                  >
-                    <span className="icon">{item.icon}</span>
-                    <span>{item.label}</span>
-                  </VisitorRouteLink>
-                );
-              }
-
               const to = `/moderator/${item.id}`;
               return (
                 <NavLink

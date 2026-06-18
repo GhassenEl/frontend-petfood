@@ -14,7 +14,6 @@ import {
   persistVetPharmacyNotification,
 } from '../services/vetPharmacyNotificationService';
 import VetPharmacyAlertsPanel from '../components/VetPharmacyAlertsPanel';
-import VetClinicalAlertsBar from '../components/VetClinicalAlertsBar';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import {
   buildPharmacyAlerts,
@@ -192,8 +191,6 @@ const VetPharmacyPage = () => {
           <p style={{ color: '#64748b', margin: '8px 0 0' }}>
             Stock, ruptures, ordonnances et alertes notifications.{' '}
             <Link to="/vet/prescriptions" style={{ color: '#0ea5e9' }}>Ordonnances →</Link>
-            {' · '}
-            <Link to="/vet/bi" style={{ color: '#0ea5e9' }}>BI →</Link>
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -205,8 +202,6 @@ const VetPharmacyPage = () => {
           </button>
         </div>
       </div>
-
-      <VetClinicalAlertsBar compact />
 
       <div className="vet-pharmacy-kpis">
         <div className="vet-pharmacy-kpi">

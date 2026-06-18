@@ -15,7 +15,7 @@ const VetClinicalAlertsBar = ({ compact = false }) => {
     return (
       <div className={`vet-clinical-bar vet-clinical-bar--ok ${compact ? 'vet-clinical-bar--compact' : ''}`}>
         <span>✅ Aucune alerte clinique urgente</span>
-        <Link to="/vet/intelligence">Hub intelligence →</Link>
+        <Link to="/vet/pharmacy">Voir pharmacie →</Link>
       </div>
     );
   }

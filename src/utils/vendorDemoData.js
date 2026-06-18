@@ -69,13 +69,13 @@ export const DEMO_VENDOR_DASHBOARD = {
     {
       id: 'vp2', name: 'Pâtée chat saumon 12×400 g', categoryId: 'cat-cat',
       stock: 3, price: 42, promotionPercent: 10, description: 'Pâtée humide au saumon pour chat adulte.',
-      imageUrl: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=300&fit=crop',
+      imageUrl: 'https://images.unsplash.com/photo-1574158622682-6d4d4b86bb96?w=400&h=300&fit=crop',
       unitsSold: 29,
     },
     {
       id: 'vp3', name: 'Litière agglomérante 10 L', categoryId: 'cat-hygiene',
       stock: 0, price: 28, promotionPercent: 0, description: 'Litière minérale agglomérante parfumée.',
-      imageUrl: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d4?w=400&h=300&fit=crop',
+      imageUrl: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&h=300&fit=crop',
       unitsSold: 15,
     },
     {
@@ -87,7 +87,7 @@ export const DEMO_VENDOR_DASHBOARD = {
     {
       id: 'vp5', name: 'Fontaine eau chat 2 L', categoryId: 'cat-cat',
       stock: 8, price: 65, promotionPercent: 0, description: 'Fontaine filtrante silencieuse 2 litres.',
-      imageUrl: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=300&fit=crop',
+      imageUrl: 'https://images.unsplash.com/photo-1574158622682-6d4d4b86bb96?w=400&h=300&fit=crop',
       unitsSold: 12,
     },
   ],
@@ -133,10 +133,13 @@ export const DEMO_VENDOR_DASHBOARD = {
     },
   ],
   salesHistory: [
-    { id: 'sh-1', orderId: 'CMD-8842', date: daysAgo(5), total: 125, items: 3, status: 'delivered' },
-    { id: 'sh-2', orderId: 'CMD-8805', date: daysAgo(8), total: 210, items: 4, status: 'delivered' },
-    { id: 'sh-3', orderId: 'CMD-8790', date: daysAgo(12), total: 89, items: 1, status: 'delivered' },
-    { id: 'sh-4', orderId: 'CMD-8775', date: daysAgo(15), total: 156, items: 2, status: 'delivered' },
+    { id: 'sh-1', orderId: 'CMD-8842', date: daysAgo(2), total: 125, items: 3, status: 'delivered', commission: 15, clientName: 'Nadia F.' },
+    { id: 'sh-2', orderId: 'CMD-8805', date: daysAgo(5), total: 210, items: 4, status: 'delivered', commission: 25.2, clientName: 'Youssef T.' },
+    { id: 'sh-3', orderId: 'CMD-8790', date: daysAgo(9), total: 89, items: 1, status: 'delivered', commission: 10.68, clientName: 'Amira B.' },
+    { id: 'sh-4', orderId: 'CMD-8775', date: daysAgo(12), total: 156, items: 2, status: 'delivered', commission: 18.72, clientName: 'Leila S.' },
+    { id: 'sh-5', orderId: 'CMD-8760', date: daysAgo(16), total: 42, items: 1, status: 'paid', commission: 5.04, clientName: 'Karim M.' },
+    { id: 'sh-6', orderId: 'CMD-8744', date: daysAgo(22), total: 198, items: 3, status: 'delivered', commission: 23.76, clientName: 'Salma K.' },
+    { id: 'sh-7', orderId: 'CMD-8720', date: daysAgo(28), total: 65, items: 1, status: 'delivered', commission: 7.8, clientName: 'Omar B.' },
   ],
   returns: [
     {

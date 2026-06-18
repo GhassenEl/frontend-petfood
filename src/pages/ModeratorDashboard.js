@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchModeratorDashboard } from '../services/moderatorService';
-import { DEMO_MODERATOR_QUEUE } from '../utils/moderatorDemoData';
+import {
+  DEMO_MODERATOR_QUEUE,
+  DEMO_MODERATOR_HISTORY,
+  MOD_ACTION_LABELS,
+  withDemoModeratorStats,
+} from '../utils/moderatorDemoData';
 import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
+import ModeratorBiPanel from '../components/ModeratorBiPanel';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import './ModeratorPages.css';
 
@@ -29,7 +35,7 @@ const ModeratorDashboard = () => {
   const load = () => {
     setLoading(true);
     fetchModeratorDashboard().then(({ data, demo: isDemo }) => {
-      setStats(data);
+      setStats(withDemoModeratorStats(data));
       setDemo(isDemo);
       setLoading(false);
     });
@@ -53,20 +59,20 @@ const ModeratorDashboard = () => {
     { label: 'Réclamations ouvertes', value: stats.pendingComplaints, icon: '⚠️', to: '/moderator/complaints' },
     { label: 'Litiges ouverts', value: stats.openDisputes, icon: '⚖️', to: '/moderator/reports' },
     { label: 'Centre anti-fraude', value: stats.fraudCases ?? stats.fakeReviewsFlagged, icon: '🚨', to: '/moderator/fraud' },
-    { label: 'Vendeurs en attente', value: stats.pendingVendors ?? 0, icon: '🏬', to: '/moderator/vendors' },
     { label: 'Remboursements litige', value: stats.pendingRefunds ?? 2, icon: '💸', to: '/moderator/refunds' },
-    { label: 'Faux avis détectés', value: stats.fakeReviewsFlagged, icon: '🤖', to: '/moderator/intelligence?tab=fake-reviews' },
-    { label: 'Cas résolus aujourd\'hui', value: stats.resolvedToday, icon: '✅', to: '/moderator/analytics' },
+    { label: 'Cas résolus aujourd\'hui', value: stats.resolvedToday, icon: '✅', to: '/moderator/dashboard' },
   ];
 
   return (
     <div className="mod-page">
       <header className="mod-hero">
         <h1>🛡️ Tableau de bord modération {demo && <span className="mod-demo-pill">Mode démo</span>}</h1>
-        <p>Contrôle qualité — contenu, avis, signalements et rapports. La gestion des acteurs (visiteur, vendeur, modérateur) est réservée à l&apos;admin.</p>
+        <p>Contrôle qualité — contenu, avis, signalements et synthèse BI intégrée.</p>
       </header>
 
-      <RealtimeStatsCharts role="moderator" />
+      <RealtimeStatsCharts role="moderator" detailLink={null} />
+
+      <ModeratorBiPanel />
 
       <div className="mod-kpi-grid">
         {kpiCards.map((k) => (
@@ -100,21 +106,30 @@ const ModeratorDashboard = () => {
         </section>
 
         <section className="mod-card">
-          <h2>Performance</h2>
-          <p style={{ margin: '0 0 8px', color: '#64748b', fontSize: '0.85rem' }}>Délai moyen de réponse</p>
-          <strong style={{ fontSize: '2rem', color: '#d97706' }}>{stats.avgResponseHours} h</strong>
-          <div className="mod-quick-links">
+          <h2>Activité récente</h2>
+          {DEMO_MODERATOR_HISTORY.map((h) => (
+            <div key={h.id} className="mod-history-item">
+              <span>
+                <strong>{MOD_ACTION_LABELS[h.action] || h.action}</strong> — {h.target}
+                <br /><small style={{ color: '#94a3b8' }}>{h.moderator}</small>
+              </span>
+              <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>
+                {new Date(h.at).toLocaleString('fr-FR')}
+              </span>
+            </div>
+          ))}
+          <div className="mod-quick-links" style={{ marginTop: 16 }}>
             <Link to="/moderator/content">Contenu</Link>
-            <Link to="/moderator/vendors">Vendeurs</Link>
             <Link to="/moderator/fraud">Anti-fraude</Link>
             <Link to="/moderator/messages">Messagerie</Link>
             <Link to="/moderator/refunds">Remboursements</Link>
             <Link to="/moderator/reports">Signalements</Link>
-            <Link to="/moderator/bi">Dashboard BI</Link>
-            <Link to="/moderator/analytics">Rapports</Link>
             <Link to="/moderator/reviews">Avis</Link>
             <Link to="/moderator/complaints">Réclamations</Link>
           </div>
+          <p style={{ margin: '12px 0 0', fontSize: 13, color: '#64748b' }}>
+            Délai moyen de réponse : <strong style={{ color: '#d97706' }}>{stats.avgResponseHours} h</strong>
+          </p>
         </section>
       </div>
     </div>

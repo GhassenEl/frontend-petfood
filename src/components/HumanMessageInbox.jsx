@@ -15,7 +15,7 @@ import {
 import './HumanMessageInbox.css';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
-const ROLE_EMOJI = { admin: '🛡️', livreur: '🚚', client: '🛒', vet: '🩺', vendor: '🏬', moderator: '🛡️', support: '🎧' };
+const ROLE_EMOJI = { admin: '🛡️', livreur: '🚚', client: '🛒', vet: '🩺', vendor: '🏬', moderator: '🛡️' };
 
 const LIVREUR_QUICK = [
   'Commande livrée avec succès ✅',
@@ -455,7 +455,6 @@ const HumanMessageInbox = ({ mode = 'admin', initialPartnerId = '', initialRoleF
                 <option value="vendor">Vendeurs</option>
                 <option value="moderator">Modérateurs</option>
                 <option value="client">Clients</option>
-                <option value="support">Support</option>
               </select>
               )}
               {mode === 'moderator' && (

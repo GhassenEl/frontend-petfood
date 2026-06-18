@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import api from '../utils/api';
 import { withDemoStats, DEMO_LIVREUR_STATS } from '../utils/livreurDemoData';
-import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
-
-const COLORS = ['#27ae60', '#f39c12', '#3498db', '#e74c3c', '#9b59b6'];
 
 const LivreurStatsPage = () => {
   const [stats, setStats] = useState(null);
@@ -41,23 +38,20 @@ const LivreurStatsPage = () => {
     );
   }
 
-  const statusData = Object.entries(stats?.statusBreakdown || {}).map(([name, value]) => ({
-    name: { pending: 'En attente', shipped: 'En cours', delivered: 'Livrées', cancelled: 'Annulées', paid: 'Payées' }[name] || name,
-    value,
-  }));
-  const dailyChart = stats?.dailyChart || [];
-  const tooltipStyle = { borderRadius: 12, border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', fontSize: 13 };
-
   return (
     <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
       <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: 8 }}>
         📈 Mes Statistiques
       </motion.h1>
       {stats?.region && (
-        <p style={{ color: '#64748b', marginBottom: 16 }}>Zone {stats.region} · commission {stats.commissionPerDelivery} DT / livraison</p>
+        <p style={{ color: '#64748b', marginBottom: 8 }}>
+          Zone {stats.region} · commission {stats.commissionPerDelivery} DT / livraison
+        </p>
       )}
-
-      <RealtimeStatsCharts role="livreur" />
+      <p style={{ color: '#94a3b8', fontSize: 14, marginBottom: 24 }}>
+        Les graphiques de performance (livraisons, gains, répartition) sont sur le{' '}
+        <Link to="/livreur/dashboard" style={{ color: '#059669', fontWeight: 700 }}>tableau de bord</Link>.
+      </p>
 
       <div style={{
         display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
@@ -71,40 +65,26 @@ const LivreurStatsPage = () => {
         <Kpi label="Ponctualité" value={`${stats?.onTimeRate ?? 95}%`} color="#e67e22" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="card-animal" style={{ padding: 24 }}>
-          <h3 style={{ margin: '0 0 20px', fontSize: '1rem', fontWeight: 700 }}>Livraisons (7 jours)</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={dailyChart}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(value, name) => [value, name]} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="count" name="Livraisons" fill="#27ae60" radius={[8, 8, 0, 0]} />
-              <Bar dataKey="commission" name="Commission (DT)" fill="#059669" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="card-animal" style={{ padding: 24 }}>
-          <h3 style={{ margin: '0 0 20px', fontSize: '1rem', fontWeight: 700 }}>Répartition des statuts</h3>
-          {statusData.length === 0 ? (
-            <p style={{ textAlign: 'center', color: '#94a3b8', padding: 40 }}>Pas encore de données</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie data={statusData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4} dataKey="value" nameKey="name">
-                  {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={tooltipStyle} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </motion.div>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: 14,
+      }}
+      >
+        {Object.entries(stats?.statusBreakdown || {}).map(([key, value]) => (
+          <div key={key} className="stat-card" style={{ textAlign: 'center', padding: 16 }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#334155' }}>{value}</div>
+            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
+              {{
+                pending: 'En attente',
+                shipped: 'En cours',
+                delivered: 'Livrées',
+                cancelled: 'Annulées',
+                paid: 'Payées',
+              }[key] || key}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

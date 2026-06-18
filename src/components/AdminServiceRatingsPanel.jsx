@@ -10,8 +10,9 @@ import '../pages/ClientComplaintsPage.css';
 const ratingId = (r) => r?.id || r?._id;
 const userOf = (r) => r?.user || r?.userId;
 
-const AdminServiceRatingsPanel = ({ showToast }) => {
-  const [tab, setTab] = useState('delivery');
+const AdminServiceRatingsPanel = ({ showToast, variant = 'admin' }) => {
+  const isModerator = variant === 'moderator';
+  const [tab, setTab] = useState(isModerator ? 'veterinary' : 'delivery');
   const [ratings, setRatings] = useState([]);
   const [regionStats, setRegionStats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -104,7 +105,7 @@ const AdminServiceRatingsPanel = ({ showToast }) => {
           <strong style={{ color: '#16a34a' }}>{stats.five}</strong>
           <span>5 étoiles</span>
         </div>
-        {tab === 'delivery' && regionStats.length > 0 && (
+        {tab === 'delivery' && !isModerator && regionStats.length > 0 && (
           <div className="cc-stat">
             <strong style={{ color: '#7c3aed' }}>{regionStats.length}</strong>
             <span>Régions notées</span>
@@ -113,10 +114,13 @@ const AdminServiceRatingsPanel = ({ showToast }) => {
       </div>
 
       <div className="cc-categories" style={{ marginBottom: 16 }}>
-        {[
-          { id: 'delivery', label: '🚚 Livraison par région' },
-          { id: 'veterinary', label: '🩺 Service vétérinaire' },
-        ].map(({ id, label }) => (
+        {(isModerator
+          ? [{ id: 'veterinary', label: '🩺 Service vétérinaire' }]
+          : [
+            { id: 'delivery', label: '🚚 Livraison par région' },
+            { id: 'veterinary', label: '🩺 Service vétérinaire' },
+          ]
+        ).map(({ id, label }) => (
           <button
             key={id}
             type="button"

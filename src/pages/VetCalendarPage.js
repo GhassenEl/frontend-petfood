@@ -8,7 +8,6 @@ import {
   withDemoFallback,
 } from '../utils/vetDemoData';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
-import VetClinicalAlertsBar from '../components/VetClinicalAlertsBar';
 import './VetPages.css';
 
 const statusLabel = {
@@ -141,7 +140,7 @@ const VetCalendarPage = () => {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
-      <VetClinicalAlertsBar compact />
+
       {toast && (
         <div
           style={{
@@ -166,8 +165,6 @@ const VetCalendarPage = () => {
           <p style={{ color: '#777', margin: 0 }}>
             Semaine du {weekStart.toLocaleDateString('fr-FR')} au {weekEnd.toLocaleDateString('fr-FR')}
             {' · '}{appointmentsInWeek.length} RDV
-            {' · '}
-            <Link to="/vet/teleconsult" style={{ color: '#0ea5e9', fontWeight: 600 }}>Téléconsultations →</Link>
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

@@ -12,6 +12,17 @@ import {
 import { detectContentAnomalies } from '../utils/contentAnomalyDetector';
 import './ModeratorPages.css';
 
+const PRODUCT_IMG_FALLBACK = 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&h=300&fit=crop';
+
+const ProductThumb = ({ src, alt, className }) => (
+  <img
+    src={src || PRODUCT_IMG_FALLBACK}
+    alt={alt}
+    className={className}
+    onError={(e) => { e.currentTarget.src = PRODUCT_IMG_FALLBACK; }}
+  />
+);
+
 const MSG_TIMEOUT_MS = 4000;
 
 const ModeratorContentPage = () => {
@@ -96,7 +107,7 @@ const ModeratorContentPage = () => {
 
       {anomalyFlags.length > 0 && (
         <p className="mod-feedback mod-feedback--error" role="status">
-          🤖 {anomalyFlags.length} contenu(s) signalé(s) automatiquement (langage inapproprié / spam)
+           {anomalyFlags.length} contenu(s) signalé(s) automatiquement (langage inapproprié / spam)
         </p>
       )}
 
@@ -151,7 +162,7 @@ const ModeratorContentPage = () => {
                       <tr key={p.id}>
                         <td>
                           <div className="mod-product-row">
-                            <img src={p.imageUrl} alt={p.name} className="mod-product-thumb" />
+                            <ProductThumb src={p.imageUrl} alt={p.name} className="mod-product-thumb" />
                             <span>{p.name}</span>
                           </div>
                         </td>
@@ -241,7 +252,7 @@ const ModeratorContentPage = () => {
                     {imageQueue.map((p) => (
                       <tr key={p.id}>
                         <td>
-                          <img src={p.imageUrl} alt={p.name} className="mod-product-thumb mod-product-thumb--lg" />
+                          <ProductThumb src={p.imageUrl} alt={p.name} className="mod-product-thumb mod-product-thumb--lg" />
                         </td>
                         <td>{p.name}<br /><small className="mod-flag-item__meta">{p.vendorName}</small></td>
                         <td><span className="mod-badge mod-badge--flagged">{p.imageFlag}</span></td>

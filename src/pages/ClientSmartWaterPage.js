@@ -17,6 +17,7 @@ import WaterIoTAlertsPanel from '../components/WaterIoTAlertsPanel';
 import {
   getDemoWaterOverview,
   getDemoWaterTracking,
+  mergeWaterTrackingWithDemoCurves,
   applyDemoWaterLog,
   applyDemoWaterRefill,
   DEMO_WATER_PETS,
@@ -131,7 +132,8 @@ const ClientSmartWaterPage = () => {
       return;
     }
     try {
-      setTracking(await fetchWaterMonitorTracking(id));
+      const raw = await fetchWaterMonitorTracking(id);
+      setTracking(mergeWaterTrackingWithDemoCurves(raw, id));
       setDemoMode(false);
     } catch (e) {
       applyDemoForPet(id);
@@ -459,7 +461,7 @@ const ClientSmartWaterPage = () => {
       {!tracking && !loading && (
         <div style={{ ...card, textAlign: 'center' }}>
           <p>Aucun animal ou capteur configuré.</p>
-          <Link to="/client-profile" style={{ color: '#0284c7' }}>Ajouter un animal →</Link>
+          <Link to="/change-password" style={{ color: '#0284c7' }}>Gérer mon compte →</Link>
         </div>
       )}
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { PlusCircle, Edit, Trash2, Calendar, Clock, Tag, User, Info, XCircle, Star, MessageSquare, Trophy, Gift } from 'lucide-react';
 import api from '../utils/api';
+import { DEMO_ADMIN_EVENTS } from '../utils/adminDemoData';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { registerForEvent, fetchMyEventPrizes } from '../services/adminOpsService';
 
@@ -139,7 +140,7 @@ const EventsPage = () => {
       // Backend peut retourner un objet ({ appointments: [...] }) ou directement un array.
       // Certains chemins peuvent aussi renvoyer un objet vide : normaliser en array.
       const normalized = Array.isArray(data) ? data : [];
-      setAppointments(normalized);
+      setAppointments(normalized.length ? normalized : DEMO_ADMIN_EVENTS);
 
 
       // Important: on considère une liste vide comme un état valide (pas un 404)
@@ -153,7 +154,7 @@ const EventsPage = () => {
 
       // Treat 404 as empty list for this screen
       if (status === 404) {
-        setAppointments([]);
+        setAppointments(DEMO_ADMIN_EVENTS);
         setError('');
       } else {
         const details = [

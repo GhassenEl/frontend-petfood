@@ -15,19 +15,22 @@ const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString();
 const hoursAgo = (h) => new Date(Date.now() - h * 3600000).toISOString();
 
 export const DEMO_ADMIN_USERS = [
-  { _id: 'demo-admin-1', id: 'demo-admin-1', name: 'Ghassen Admin', email: 'admin@petfood.tn', role: 'admin', phone: '+216 71 000 001', isActive: true, createdAt: daysAgo(400) },
+  { _id: 'demo-admin-1', id: 'demo-admin-1', name: 'El Jezi Ghassen', email: 'admin@petfood.tn', role: 'admin', phone: '+216 71 000 001', isActive: true, createdAt: daysAgo(400) },
   { _id: 'demo-client-1', id: 'demo-client-1', name: 'Sami Ben Ali', email: 'client@petfood.tn', role: 'client', phone: '+216 22 111 222', address: 'La Marsa', isActive: true, createdAt: daysAgo(90) },
   { _id: 'demo-client-2', id: 'demo-client-2', name: 'Ines Trabelsi', email: 'ines.trabelsi@email.tn', role: 'client', phone: '+216 98 333 444', address: 'Ariana', isActive: true, createdAt: daysAgo(60) },
   { _id: 'demo-client-3', id: 'demo-client-3', name: 'Youssef Gharbi', email: 'youssef.gharbi@email.tn', role: 'client', phone: '+216 55 777 888', address: 'Lac 1', isActive: true, createdAt: daysAgo(45) },
   { _id: 'demo-livreur-1', id: 'demo-livreur-1', name: 'Karim Mansouri', email: 'livreur@petfood.tn', role: 'livreur', phone: '+216 20 999 111', region: 'Grand Tunis', isActive: true, createdAt: daysAgo(120) },
   { _id: 'demo-livreur-2', id: 'demo-livreur-2', name: 'Mohamed B.', email: 'mohamed.livreur@petfood.tn', role: 'livreur', phone: '+216 27 456 789', region: 'Ariana', isActive: true, createdAt: daysAgo(80) },
-  { _id: 'demo-vet-1', id: 'demo-vet-1', name: 'Dr. Amira Khelifi', email: 'vet@petfood.tn', role: 'vet', phone: '+216 71 222 333', address: 'Clinique VetCare, Tunis', isActive: true, createdAt: daysAgo(200) },
-  { _id: 'demo-vet-2', id: 'demo-vet-2', name: 'Dr. Hichem Sassi', email: 'hichem.vet@petfood.tn', role: 'vet', phone: '+216 50 123 456', address: 'Carthage Vétérinaire', isActive: true, createdAt: daysAgo(150) },
+  { _id: 'demo-livreur-3', id: 'demo-livreur-3', name: 'Sami Livreur', email: 'sami.livreur@petfood.tn', role: 'livreur', phone: '+216 50 333 444', region: 'Sousse', isActive: true, createdAt: daysAgo(55) },
+  { _id: 'demo-vet-1', id: 'demo-vet-1', name: 'Dr. Amira Khelifi', email: 'vet@petfood.tn', role: 'vet', phone: '+216 71 222 333', address: 'Clinique VetCare, Tunis', region: 'Tunis', isActive: true, createdAt: daysAgo(200) },
+  { _id: 'demo-vet-2', id: 'demo-vet-2', name: 'Dr. Hichem Sassi', email: 'hichem.vet@petfood.tn', role: 'vet', phone: '+216 50 123 456', address: 'Carthage Vétérinaire, Sousse', region: 'Sousse', isActive: true, createdAt: daysAgo(150) },
+  { _id: 'demo-vet-3', id: 'demo-vet-3', name: 'Dr. Salma Khelifi', email: 'salma.vet@petfood.tn', role: 'vet', phone: '+216 22 555 666', address: 'Clinique Sfax Animaux', region: 'Sfax', isActive: true, createdAt: daysAgo(110) },
   { _id: 'demo-vendor-1', id: 'demo-vendor-1', name: 'Leila Mansouri', email: 'vendor@petfood.tn', role: 'vendor', phone: '+216 21 444 555', region: 'Tunis', isActive: true, createdAt: daysAgo(180) },
   { _id: 'demo-vendor-2', id: 'demo-vendor-2', name: 'Ridha Ben Ammar', email: 'ridha.animalerie@email.tn', role: 'vendor', phone: '+216 26 888 999', region: 'Sfax', isActive: true, createdAt: daysAgo(95) },
   { _id: 'demo-vendor-3', id: 'demo-vendor-3', name: 'Nour Haddad', email: 'nour.pets@sousse.tn', role: 'vendor', phone: '+216 29 111 222', region: 'Sousse', isActive: false, createdAt: daysAgo(40) },
-  { _id: 'demo-moderator-1', id: 'demo-moderator-1', name: 'Nour Modération', email: 'moderator@petfood.tn', role: 'moderator', phone: '+216 21 555 666', isActive: true, createdAt: daysAgo(70) },
-  { _id: 'demo-support-1', id: 'demo-support-1', name: 'Sonia Service Client', email: 'support@petfood.tn', role: 'support', phone: '+216 71 888 999', isActive: true, createdAt: daysAgo(50) },
+  { _id: 'demo-moderator-1', id: 'demo-moderator-1', name: 'Nour Modération', email: 'moderator@petfood.tn', role: 'moderator', phone: '+216 21 555 666', region: 'Tunis', isActive: true, createdAt: daysAgo(70) },
+  { _id: 'demo-moderator-2', id: 'demo-moderator-2', name: 'Yassine Ben Salem', email: 'yassine.mod@petfood.tn', role: 'moderator', phone: '+216 29 444 333', region: 'Sfax', isActive: true, createdAt: daysAgo(45) },
+  { _id: 'demo-moderator-3', id: 'demo-moderator-3', name: 'Rania Gharbi', email: 'rania.mod@petfood.tn', role: 'moderator', phone: '+216 98 222 111', region: 'Sousse', isActive: true, createdAt: daysAgo(30) },
 ];
 
 export const DEMO_ADMIN_USER_STATS = {
@@ -41,7 +44,6 @@ export const DEMO_ADMIN_USER_STATS = {
     vet: 2,
     vendor: 3,
     moderator: 1,
-    support: 1,
   },
 };
 
@@ -1047,6 +1049,35 @@ const demoCity = (name, governorate, lat, lng, stats) => ({
 
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
+/** Événements plateforme (démo admin). */
+export const DEMO_ADMIN_EVENTS = [
+  {
+    _id: 'evt-1', id: 'evt-1', title: 'Concours beauté canin — Tunis', eventType: 'concours',
+    description: 'Concours chiens toutes races — inscriptions ouvertes.', date: daysAgo(-14).split('T')[0],
+    time: '10:00', eventVenue: 'Parc du Belvédère', isPublic: true, animalType: 'dog', status: 'published',
+  },
+  {
+    _id: 'evt-2', id: 'evt-2', title: 'Journée adoption — Sfax', eventType: 'journee_adoption',
+    description: 'Refuges partenaires PetfoodTN — adoptions responsables.', date: daysAgo(-7).split('T')[0],
+    time: '09:30', eventVenue: 'Maison de la Culture', isPublic: true, animalType: 'other', status: 'published',
+  },
+  {
+    _id: 'evt-3', id: 'evt-3', title: 'Exposition chats & NAC', eventType: 'exposition',
+    description: 'Exposition féline avec conseils nutritionnels.', date: daysAgo(-21).split('T')[0],
+    time: '14:00', eventVenue: 'Cité de la Culture', isPublic: true, animalType: 'cat', status: 'published',
+  },
+  {
+    _id: 'evt-4', id: 'evt-4', title: 'Atelier toilettage — Sousse', eventType: 'coiffure',
+    description: 'Démonstration toilettage professionnel.', date: daysAgo(-3).split('T')[0],
+    time: '16:00', eventVenue: 'Centre Pet Groom', isPublic: true, animalType: 'dog', status: 'published',
+  },
+  {
+    _id: 'evt-5', id: 'evt-5', title: 'Promo anniversaire PetfoodTN', eventType: 'cadeau',
+    description: 'Réductions -15 % sur croquettes premium.', date: daysAgo(-1).split('T')[0],
+    time: '08:00', eventVenue: 'En ligne', isPublic: true, animalType: 'other', status: 'published',
+  },
+];
+
 /** Réseau multi-villes PetfoodTN (démo). */
 export const DEMO_CITIES_PACK = {
   mode: 'demo',
@@ -1066,15 +1097,15 @@ export const DEMO_CITIES_PACK = {
     demoCity('Sfax', 'Sfax', 34.7406, 10.7603, { livreurs: 2, vendors: 1, vets: 2, relayPoints: 2, coverageScore: 100 }),
     demoCity('Sousse', 'Sousse', 35.8256, 10.637, { livreurs: 2, vendors: 1, vets: 2, relayPoints: 2, coverageScore: 100 }),
     demoCity('Nabeul', 'Nabeul', 36.4513, 10.7357, { livreurs: 1, vendors: 1, vets: 1, relayPoints: 1, coverageScore: 100 }),
-    demoCity('Hammamet', 'Nabeul', 36.4, 10.6167, { livreurs: 1, vendors: 0, vets: 1, relayPoints: 1, coverageScore: 75 }),
-    demoCity('Bizerte', 'Bizerte', 37.2744, 9.8739, { livreurs: 1, vendors: 0, vets: 1, relayPoints: 1, coverageScore: 75 }),
-    demoCity('Monastir', 'Monastir', 35.7643, 10.8113, { livreurs: 1, vendors: 0, vets: 1, relayPoints: 1, coverageScore: 75 }),
-    demoCity('Mahdia', 'Mahdia', 35.5028, 11.0627, { livreurs: 1, vendors: 0, vets: 1, relayPoints: 0, coverageScore: 50 }),
-    demoCity('Gabès', 'Gabès', 33.8815, 10.0982, { livreurs: 1, vendors: 0, vets: 1, relayPoints: 1, coverageScore: 75 }),
-    demoCity('Kairouan', 'Kairouan', 35.6781, 10.0963, { livreurs: 1, vendors: 0, vets: 1, relayPoints: 0, coverageScore: 50 }),
-    demoCity('Gafsa', 'Gafsa', 34.425, 8.7842, { livreurs: 1, vendors: 0, vets: 0, relayPoints: 0, coverageScore: 25 }),
-    demoCity('Djerba', 'Médenine', 33.875, 10.8575, { livreurs: 1, vendors: 0, vets: 1, relayPoints: 1, coverageScore: 75 }),
-    demoCity('Tozeur', 'Tozeur', 33.9197, 8.1335, { livreurs: 1, vendors: 0, vets: 0, relayPoints: 0, coverageScore: 25 }),
+    demoCity('Hammamet', 'Nabeul', 36.4, 10.6167, { livreurs: 1, vendors: 1, vets: 1, relayPoints: 1, coverageScore: 85 }),
+    demoCity('Bizerte', 'Bizerte', 37.2744, 9.8739, { livreurs: 1, vendors: 1, vets: 1, relayPoints: 1, coverageScore: 85 }),
+    demoCity('Monastir', 'Monastir', 35.7643, 10.8113, { livreurs: 1, vendors: 1, vets: 1, relayPoints: 1, coverageScore: 85 }),
+    demoCity('Mahdia', 'Mahdia', 35.5028, 11.0627, { livreurs: 1, vendors: 1, vets: 1, relayPoints: 1, coverageScore: 80 }),
+    demoCity('Gabès', 'Gabès', 33.8815, 10.0982, { livreurs: 1, vendors: 1, vets: 1, relayPoints: 1, coverageScore: 85 }),
+    demoCity('Kairouan', 'Kairouan', 35.6781, 10.0963, { livreurs: 1, vendors: 1, vets: 1, relayPoints: 1, coverageScore: 80 }),
+    demoCity('Gafsa', 'Gafsa', 34.425, 8.7842, { livreurs: 1, vendors: 1, vets: 1, relayPoints: 1, coverageScore: 75 }),
+    demoCity('Djerba', 'Médenine', 33.875, 10.8575, { livreurs: 1, vendors: 1, vets: 1, relayPoints: 1, coverageScore: 85 }),
+    demoCity('Tozeur', 'Tozeur', 33.9197, 8.1335, { livreurs: 1, vendors: 1, vets: 1, relayPoints: 1, coverageScore: 75 }),
   ],
 };
 

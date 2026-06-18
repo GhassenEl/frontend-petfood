@@ -28,8 +28,8 @@ export const ROLE_REALTIME_META = {
     secondaryLabel: 'CA live (DT)',
     accent: '#14b8a6',
     accent2: '#0d9488',
-    detailLink: '/vendor/bi',
-    detailLabel: 'Dashboard BI',
+    detailLink: '/vendor/dashboard',
+    detailLabel: 'Tableau de bord',
   },
   moderator: {
     title: 'Modération — temps réel',
@@ -37,8 +37,8 @@ export const ROLE_REALTIME_META = {
     secondaryLabel: 'Cas résolus',
     accent: '#d97706',
     accent2: '#059669',
-    detailLink: '/moderator/bi',
-    detailLabel: 'Dashboard BI',
+    detailLink: '/moderator/dashboard',
+    detailLabel: 'Tableau de bord',
   },
   livreur: {
     title: 'Livraisons — temps réel',
@@ -46,7 +46,7 @@ export const ROLE_REALTIME_META = {
     secondaryLabel: 'Gains live (DT)',
     accent: '#27ae60',
     accent2: '#059669',
-    detailLink: '/livreur/bi',
+    detailLink: '/livreur/dashboard',
     detailLabel: 'Dashboard BI',
   },
   vet: {
@@ -239,10 +239,11 @@ export const tickRoleRealtimeDemo = (role, prev) => {
   const base = prev || getRoleRealtimeDemo(role);
   if (!base) return null;
   const point = nextLivePoint(base.livePrimary, base.liveSecondary);
+  const liveSeries = [...(base.liveSeries || []), point].slice(-20);
   return {
     ...base,
-    liveSeries: [...(base.liveSeries || []), point].slice(-20),
+    liveSeries: liveSeries.length ? liveSeries : getRoleRealtimeDemo(role)?.liveSeries || [],
     updatedAt: new Date().toISOString(),
-    demo: true,
+    demo: base.demo !== false,
   };
 };

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Package, Calendar, Droplets, Gift, Users, RefreshCw, ChevronRight, AlertTriangle,
+  Package, Calendar, Droplets, Gift, ChevronRight, AlertTriangle,
 } from 'lucide-react';
 import { fetchClientDashboard } from '../services/clientDashboardService';
 import { DEMO_DASHBOARD } from '../utils/clientDemoData';
@@ -90,8 +90,6 @@ const ClientDashboardPage = () => {
   const order = d.activeOrder;
   const appt = d.nextAppointment;
   const alerts = d.iotAlerts || [];
-  const subs = d.subscriptions || [];
-  const household = d.household;
 
   return (
     <div style={{ padding: 24, maxWidth: 1100, margin: '0 auto' }}>
@@ -105,15 +103,14 @@ const ClientDashboardPage = () => {
           🏠 Tableau de bord
         </h1>
         <p style={{ margin: 0, color: '#047857', fontSize: 15 }}>
-          Commandes, santé, IoT, fidélité et foyer — tout en un coup d&apos;œil.
+          Commandes, santé, IoT et fidélité — tout en un coup d&apos;œil.
         </p>
         {d.stats && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 10, marginTop: 20 }}>
             <StatPill label="Commandes actives" value={d.stats.ordersActive} color="#059669" />
             <StatPill label="RDV à venir" value={d.stats.appointmentsUpcoming} color="#2563eb" />
             <StatPill label="Alertes IoT" value={d.stats.iotAlertCount} color="#d97706" />
-            <StatPill label="Abonnements" value={d.stats.subscriptionCount} color="#7c3aed" />
-            <StatPill label="Foyer" value={d.stats.familyMembers} color="#e67e22" />
+            <StatPill label="Points fidélité" value={d.loyalty?.points ?? 0} color="#b45309" />
           </div>
         )}
       </div>
@@ -181,43 +178,6 @@ const ClientDashboardPage = () => {
                 </li>
               ))}
             </ul>
-          )}
-        </DashboardCard>
-
-        <DashboardCard icon={Users} title="Mode famille" to="/client-family" accent="#e67e22">
-          {household ? (
-            <>
-              <p style={{ margin: '0 0 6px', fontWeight: 800 }}>{household.name}</p>
-              <p style={{ margin: '0 0 8px', fontSize: 13, color: '#64748b' }}>
-                {household.members?.length || 1} membre(s) · Code {household.inviteCode}
-              </p>
-              <p style={{ margin: 0, fontSize: 12, color: '#94a3b8' }}>
-                Animaux et commandes partagés entre propriétaires
-              </p>
-            </>
-          ) : (
-            <p style={{ margin: 0, color: '#94a3b8' }}>
-              Créez un foyer pour partager animaux et commandes.
-            </p>
-          )}
-        </DashboardCard>
-
-        <DashboardCard icon={RefreshCw} title="Auto-réappro" to="/client-subscriptions" accent="#0d9488">
-          {subs.length === 0 ? (
-            <p style={{ margin: 0, color: '#94a3b8' }}>
-              Programmez vos croquettes tous les 30 jours.
-            </p>
-          ) : (
-            <>
-              {subs.slice(0, 2).map((s) => (
-                <div key={s.id} style={{ marginBottom: 10, fontSize: 14 }}>
-                  <strong>{s.product?.name || 'Produit'}</strong>
-                  <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: 13 }}>
-                    Tous les {s.frequencyDays} j · Prochaine livraison {formatDate(s.nextDeliveryAt)}
-                  </p>
-                </div>
-              ))}
-            </>
           )}
         </DashboardCard>
       </div>

@@ -9,55 +9,44 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
 
   const sections = [
     {
-      title: '🏛️ Hub Admin',
+      title: '📊 Tableau de bord',
       items: [
-        { id: 'hub', label: 'Fonctionnalités avancées', icon: '🏛️' },
-        { id: 'reports', label: 'Rapports & exports', icon: '📄' },
-        { id: 'iot-anomalies', label: 'Anomalies IoT', icon: '📡' },
-        { id: 'food-quality-cam', label: 'ESP32-CAM PetFoodIoT', icon: '📷' },
-        { id: 'delivery-ops', label: 'Opérations livraison', icon: '🚚' },
-        { id: 'vet-validation', label: 'Validation vétérinaires', icon: '🩺' },
-        { id: 'backups', label: 'Sauvegardes', icon: '💾' },
+        { id: 'dashboard', label: 'Dashboard & BI', icon: '📈' },
       ],
     },
     {
-      title: '🤖 Assistant',
+      title: '📡 PetFoodIoT',
       items: [
-        { id: '__open-chat__', label: 'Chat assistant', icon: '💬', action: 'open-chat' },
-        { id: 'platform-services', label: 'Catalogue services', icon: '📋' },
-        { id: '__capabilities__', label: 'Matrice capacités', icon: '📋', route: '/capabilities' },
+        { id: 'iot-anomalies', label: 'Surveillance IoT & capteurs', icon: '📡' },
+        { id: 'food-quality-cam', label: 'ESP32-CAM PetFoodIoT', icon: '📷' },
+        { id: 'food-quality', label: 'Qualité alimentaire IoT', icon: '🌡️' },
+      ],
+    },
+    {
+      title: '🤖 Assistant IA',
+      items: [
+        { id: '__open-chat__', label: 'Assistant IA', icon: '🤖', action: 'open-chat' },
       ],
     },
     {
       title: '📊 Analytics',
       items: [
-        { id: 'dashboard', label: 'Dashboard', icon: '📈' },
-        { id: 'analytics-decision', label: 'Analyse & décision', icon: '📊' },
         { id: 'business-intelligence', label: 'Business Intelligence', icon: '📈' },
-        { id: 'merchant-intelligence', label: 'Intelligence marchande', icon: '🏪' },
         { id: 'powerbi', label: 'Power BI', icon: '📊' },
-        { id: 'stock-bi', label: 'Stock BI', icon: '📦' },
         { id: 'performance', label: 'Performance plateforme', icon: '⚡' },
-        { id: 'crm', label: 'CRM clients', icon: '🤝' },
-        { id: 'ml-agent', label: 'Agent ML', icon: '🤖' },
-        { id: 'advanced-ai', label: 'IA avancée', icon: '🧠' },
-        { id: 'incidents-ml', label: 'Incidents ML', icon: '🚨' },
         { id: 'nlp-models', label: 'Modèles NLP', icon: '🧠' },
-        { id: 'rehabilitation', label: 'Réhabilitation', icon: '💚' },
-        { id: 'blog-articles', label: 'Blog & articles', icon: '📝' },
         { id: 'history', label: 'Historique', icon: '📜' },
-      ]
+      ],
     },
     {
       title: '👥 Acteurs plateforme',
       items: [
-        { id: 'visitors', label: 'Espace visiteur', icon: '👀' },
         { id: 'live-audience', label: 'Audience temps réel', icon: '📡' },
         { id: 'partners', label: 'Fournisseurs & partenariats', icon: '🤝' },
         { id: 'vendors', label: 'Vendeurs marketplace', icon: '🏬' },
         { id: 'moderators', label: 'Modérateurs', icon: '🛡️' },
         { id: 'vets', label: 'Vétérinaires', icon: '🩺' },
-        { id: 'regional-contacts', label: 'Contacts par région', icon: '📍' },
+        { id: 'livreurs', label: 'Livreurs', icon: '🚚' },
       ],
     },
     {
@@ -67,20 +56,15 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'sales', label: 'Ventes & CA', icon: '💰' },
         { id: 'invoices', label: 'Factures', icon: '🧾' },
         { id: 'products', label: 'Produits', icon: '🏷️' },
-        { id: 'prices', label: 'Gouvernance prix', icon: '💲' },
         { id: 'cities', label: 'Réseau villes', icon: '🏙️' },
-        { id: 'categories', label: 'Catégories', icon: '📁' },
-        { id: 'stock', label: 'Stock avancé', icon: '📦' },
-        { id: 'food-quality', label: 'Qualité alimentaire IoT', icon: '🌡️' },
-        { id: 'delivery-cold-chain', label: 'Livraison chaîne du froid', icon: '🚚' },
+        { id: 'stock', label: 'Gestion stock', icon: '📦' },
         { id: 'promotions', label: 'Promotions & coupons', icon: '🎟️' },
         { id: 'users', label: 'Utilisateurs', icon: '👥' },
-        { id: 'livreurs', label: 'Livreurs', icon: '🚚' },
         { id: 'leave-requests', label: 'Congés / maladie', icon: '🏖️' },
         { id: 'messages', label: 'Messages', icon: '💬' },
-        { id: 'veterinary', label: 'Suivi Vétérinaire', icon: '🩺' },
+        { id: 'veterinary', label: 'Suivi vétérinaire', icon: '🩺' },
         { id: 'events', label: 'Événements', icon: '📅' },
-      ]
+      ],
     },
     {
       title: '💬 Feedback',
@@ -88,7 +72,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'reviews', label: 'Avis', icon: '⭐' },
         { id: 'complaints', label: 'Réclamations', icon: '⚠️' },
         { id: 'refunds', label: 'Remboursements', icon: '💸' },
-      ]
+      ],
     },
     {
       title: '⚙️ Paramètres',
@@ -98,13 +82,12 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'system', label: 'Configuration globale', icon: '🔧' },
         { id: 'activity-logs', label: 'Journaux d\'activité', icon: '📋' },
         { id: 'profile', label: 'Mon Profil', icon: '👤' },
-      ]
-    }
+      ],
+    },
   ];
 
   return (
     <aside className="admin-sidebar" style={{ display: 'flex', flexDirection: 'column' }} aria-label="Navigation administration">
-      {/* Brand Header */}
       <div style={{
         padding: '20px',
         borderBottom: '1px solid rgba(0,0,0,0.06)',
@@ -134,8 +117,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
           </span>
         </div>
       </div>
-      
-      {/* Notification Bar */}
+
       <div
         style={{
           padding: '12px 20px',
@@ -150,14 +132,14 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {!sidebarImageError ? (
-            <img 
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" 
-              alt="Admin Profile" 
-              className="w-8 h-8 rounded-full object-cover ring-2 ring-orange-300/50 hover:scale-110 transition-transform duration-300" 
+            <img
+              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
+              alt="Admin Profile"
+              className="w-8 h-8 rounded-full object-cover ring-2 ring-orange-300/50 hover:scale-110 transition-transform duration-300"
               onError={() => setSidebarImageError(true)}
             />
           ) : (
-            <div className="avatar inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-600 text-white font-bold text-xs rounded-full ring-2 ring-orange-300/50" style={{fontSize: '0.85rem'}}>
+            <div className="avatar inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-600 text-white font-bold text-xs rounded-full ring-2 ring-orange-300/50" style={{ fontSize: '0.85rem' }}>
               👨‍💼 {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
             </div>
           )}
@@ -173,7 +155,6 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         <NotificationBell />
       </div>
 
-      {/* Navigation */}
       <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
         {sections.map((section, idx) => (
           <div key={section.title} className="admin-sidebar-section">
@@ -222,13 +203,12 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
                   <span className="icon">{item.icon}</span>
                   <span>{item.label}</span>
                 </NavLink>
-              )
+              ),
             )}
           </div>
         ))}
       </nav>
 
-      {/* Bottom Actions */}
       <div style={{
         padding: '16px',
         borderTop: '1px solid rgba(0,0,0,0.06)',

@@ -6,8 +6,8 @@ import { livreurCancelOrder } from '../services/orderService';
 import { withDemoDashboard, withDemoStats } from '../utils/livreurDemoData';
 import LivreurMissionPanel from '../components/LivreurMissionPanel';
 import LivreurDashboardCharts from '../components/LivreurDashboardCharts';
-import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
 import DeliveryProofModal from '../components/DeliveryProofModal';
+import { DEMO_LIVREUR_STATS } from '../utils/livreurDemoData';
 import useLivreurGps from '../hooks/useLivreurGps';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
@@ -29,7 +29,7 @@ const LivreurDashboard = () => {
     fetchData();
     const loadCharts = () => api.get('/livreur/stats')
       .then(({ data: s }) => setChartStats(withDemoStats(s)))
-      .catch(console.error)
+      .catch(() => setChartStats(DEMO_LIVREUR_STATS))
       .finally(() => setChartsLoading(false));
     loadCharts();
     const poll = window.setInterval(() => {
@@ -163,12 +163,6 @@ const LivreurDashboard = () => {
           }}>
             📊 Statistiques
           </Link>
-          <Link to="/livreur/bi" style={{
-            padding: '10px 16px', background: '#1d4ed8', color: 'white', borderRadius: 12,
-            fontWeight: 700, textDecoration: 'none', fontSize: 13,
-          }}>
-            📈 Dashboard BI
-          </Link>
           <Link to="/livreur/route" style={{
             padding: '12px 20px', background: '#059669', color: 'white', borderRadius: 12,
             fontWeight: 700, textDecoration: 'none', fontSize: 14,
@@ -177,8 +171,6 @@ const LivreurDashboard = () => {
           </Link>
         </div>
       </motion.div>
-
-      <RealtimeStatsCharts role="livreur" />
 
       <LivreurDashboardCharts stats={chartStats} loading={chartsLoading} />
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Star, Plus, Trash2, Edit3, Search, Send, Sparkles } from 'lucide-react';
 import api from '../utils/api';
 import {
@@ -47,6 +48,8 @@ const StarRow = ({ value, onChange }) => (
 const emptyForm = { userId: '', productId: '', rating: 5, comment: '', emotion: 'neutral' };
 
 const AdminReviews = () => {
+  const location = useLocation();
+  const isModerator = location.pathname.startsWith('/moderator');
   const [pageTab, setPageTab] = useState('products');
   const [reviews, setReviews] = useState([]);
   const [users, setUsers] = useState([]);
@@ -212,8 +215,8 @@ const AdminReviews = () => {
       <div className="cc-tabs-main">
         {[
           { id: 'products', label: '🛍️ Avis produits' },
-          { id: 'services', label: '🚚 Livraison & Vétérinaire' },
-          { id: 'sentiments', label: '🧠 Analyse sentiments' },
+          { id: 'services', label: isModerator ? '🩺 Service vétérinaire' : '🚚 Livraison & Vétérinaire' },
+          ...(!isModerator ? [{ id: 'sentiments', label: '🧠 Analyse sentiments' }] : []),
         ].map(({ id, label }) => (
           <button
             key={id}
@@ -227,7 +230,7 @@ const AdminReviews = () => {
       </div>
 
       {pageTab === 'services' ? (
-        <AdminServiceRatingsPanel showToast={showToast} />
+        <AdminServiceRatingsPanel showToast={showToast} variant={isModerator ? 'moderator' : 'admin'} />
       ) : pageTab === 'sentiments' ? (
         <CommentSentimentPanel variant="admin" />
       ) : (
@@ -245,10 +248,12 @@ const AdminReviews = () => {
               <strong style={{ color: '#16a34a' }}>{stats.five}</strong>
               <span>5 étoiles</span>
             </div>
-            <div className="cc-stat">
-              <strong style={{ color: '#dc2626' }}>{stats.low}</strong>
-              <span>≤ 2 étoiles</span>
-            </div>
+            {!isModerator && (
+              <div className="cc-stat">
+                <strong style={{ color: '#dc2626' }}>{stats.low}</strong>
+                <span>≤ 2 étoiles</span>
+              </div>
+            )}
           </div>
 
           {showForm && (
@@ -346,12 +351,16 @@ const AdminReviews = () => {
                   {n} ★
                 </button>
               ))}
-              <button type="button" className={`cc-filter-btn reviews ${filter === 'low' ? 'active' : ''}`} onClick={() => setFilter('low')}>
-                ≤ 2 ★
-              </button>
-              <button type="button" className={`cc-filter-btn reviews ${filter === 'ai' ? 'active' : ''}`} onClick={() => setFilter('ai')}>
-                ✨ IA
-              </button>
+              {!isModerator && (
+                <>
+                  <button type="button" className={`cc-filter-btn reviews ${filter === 'low' ? 'active' : ''}`} onClick={() => setFilter('low')}>
+                    ≤ 2 ★
+                  </button>
+                  <button type="button" className={`cc-filter-btn reviews ${filter === 'ai' ? 'active' : ''}`} onClick={() => setFilter('ai')}>
+                    ✨ IA
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
@@ -393,7 +402,7 @@ const AdminReviews = () => {
                       <span className="cc-badge" style={{ background: emStyle.bg, color: emStyle.color, textTransform: 'none' }}>
                         {em.emoji} {em.label}
                       </span>
-                      {review.aiSuggested && (
+                      {review.aiSuggested && !isModerator && (
                         <span className="cc-badge" style={{ background: '#ede9fe', color: '#5b21b6' }}>
                           <Sparkles size={12} style={{ verticalAlign: 'middle' }} /> IA
                         </span>

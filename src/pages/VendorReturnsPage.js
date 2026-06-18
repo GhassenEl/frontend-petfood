@@ -10,7 +10,22 @@ import {
   REFUND_STATUS_LABELS,
 } from '../services/refundService';
 import { REFUND_REASON_LABELS, isNoReturnRefund } from '../utils/refundDemoData';
+import { resolveNaturalProductImage } from '../utils/productImages';
 import './VendorPages.css';
+
+const IMG_FALLBACK = 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&h=300&fit=crop';
+
+const ReturnThumb = ({ name, imageUrl }) => {
+  const [src, setSrc] = useState(imageUrl || resolveNaturalProductImage({ name }));
+  return (
+    <img
+      src={src}
+      alt=""
+      className="vnd-product-img"
+      onError={() => setSrc(IMG_FALLBACK)}
+    />
+  );
+};
 
 const VendorReturnsPage = () => {
   const [refunds, setRefunds] = useState([]);
@@ -59,6 +74,7 @@ const VendorReturnsPage = () => {
           <table className="vnd-table">
             <thead>
               <tr>
+                <th>Photo</th>
                 <th>Commande</th><th>Client</th><th>Produit</th><th>Montant</th>
                 <th>Motif</th><th>Statut</th><th>Actions</th>
               </tr>
@@ -66,6 +82,7 @@ const VendorReturnsPage = () => {
             <tbody>
               {refunds.map((r) => (
                 <tr key={r.id}>
+                  <td><ReturnThumb name={r.productName} imageUrl={r.productImageUrl} /></td>
                   <td>{r.orderId}</td>
                   <td>{r.clientName}</td>
                   <td>{r.productName}</td>
@@ -103,7 +120,10 @@ const VendorReturnsPage = () => {
 
       {selected && (
         <div className="vnd-card" style={{ marginTop: 16 }}>
-          <h2 style={{ margin: '0 0 12px', fontSize: '1rem' }}>{selected.orderId} — {selected.productName}</h2>
+          <h2 style={{ margin: '0 0 12px', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <ReturnThumb name={selected.productName} imageUrl={selected.productImageUrl} />
+            <span>{selected.orderId} — {selected.productName}</span>
+          </h2>
           <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 12px' }}>
             Client : {selected.clientName} · {selected.amount} DT
             {(selected.noReturnRequired || isNoReturnRefund(selected.reasonCategory)) && (

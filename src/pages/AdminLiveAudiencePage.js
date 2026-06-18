@@ -67,7 +67,6 @@ const AdminLiveAudiencePage = () => {
           <button type="button" className="adm-btn adm-btn--ghost adm-btn--sm" onClick={reload}>
             <RefreshCw size={14} /> Actualiser
           </button>
-          <Link to="/admin/regional-contacts" className="adm-btn adm-btn--ghost adm-btn--sm">Contacts par région →</Link>
           <Link to="/admin/users" className="adm-btn adm-btn--ghost adm-btn--sm">Tous les comptes →</Link>
         </div>
       </header>

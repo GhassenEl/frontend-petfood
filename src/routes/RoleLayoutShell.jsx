@@ -5,7 +5,6 @@ import LivreurLayout from '../layouts/LivreurLayout';
 import VetLayout from '../layouts/VetLayout';
 import VendorLayout from '../layouts/VendorLayout';
 import ModeratorLayout from '../layouts/ModeratorLayout';
-import ServiceClientLayout from '../layouts/ServiceClientLayout';
 
 const LAYOUT_BY_ROLE = {
   admin: AdminLayout,
@@ -14,7 +13,6 @@ const LAYOUT_BY_ROLE = {
   vet: VetLayout,
   vendor: VendorLayout,
   moderator: ModeratorLayout,
-  support: ServiceClientLayout,
 };
 
 const RoleLayoutShell = ({ user, children }) => {

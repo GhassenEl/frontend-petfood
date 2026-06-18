@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { BookOpen, Stethoscope, HelpCircle, Star } from 'lucide-react';
+import { BookOpen, Stethoscope, Star } from 'lucide-react';
 import VisitorLayout from '../layouts/VisitorLayout';
-import { MARKETING_FAQ, MARKETING_TESTIMONIALS, MARKETING_PARTNERS } from '../config/marketingContent';
+import { MARKETING_TESTIMONIALS, MARKETING_PARTNERS } from '../config/marketingContent';
 import { SERVICE_RATE_CARDS } from '../utils/clientDemoData';
 import './VisitorPages.css';
 
@@ -59,7 +59,7 @@ const VisitorInfoPage = () => {
 
   useEffect(() => {
     const t = searchParams.get('tab');
-    if (t && ['nutrition', 'vet', 'faq', 'reviews'].includes(t)) setTab(t);
+    if (t && ['nutrition', 'vet', 'reviews'].includes(t)) setTab(t);
   }, [searchParams]);
 
   return (
@@ -67,7 +67,7 @@ const VisitorInfoPage = () => {
       <div className="vis-page">
         <header className="vis-hero">
           <h1><BookOpen size={26} /> Informations & contenu</h1>
-          <p>Conseils nutritionnels, services vétérinaires, FAQ et avis clients — accès libre.</p>
+          <p>Conseils nutritionnels, services vétérinaires et avis clients — accès libre.</p>
         </header>
 
         <div className="vis-tabs">
@@ -76,9 +76,6 @@ const VisitorInfoPage = () => {
           </button>
           <button type="button" className={`vis-tab${tab === 'vet' ? ' vis-tab--active' : ''}`} onClick={() => setTab('vet')}>
             <Stethoscope size={14} /> Services véto
-          </button>
-          <button type="button" className={`vis-tab${tab === 'faq' ? ' vis-tab--active' : ''}`} onClick={() => setTab('faq')}>
-            <HelpCircle size={14} /> FAQ
           </button>
           <button type="button" className={`vis-tab${tab === 'reviews' ? ' vis-tab--active' : ''}`} onClick={() => setTab('reviews')}>
             <Star size={14} /> Avis clients
@@ -144,18 +141,6 @@ const VisitorInfoPage = () => {
               <span>Réservez un RDV vétérinaire après inscription.</span>
               <Link to="/register" className="vis-btn vis-btn--primary">Créer un compte</Link>
             </div>
-          </div>
-        )}
-
-        {tab === 'faq' && (
-          <div className="vis-card vis-faq">
-            <h2>Questions fréquentes</h2>
-            {MARKETING_FAQ.map((item) => (
-              <details key={item.q}>
-                <summary>{item.q}</summary>
-                <p>{item.a}</p>
-              </details>
-            ))}
           </div>
         )}
 

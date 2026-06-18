@@ -1,17 +1,14 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-} from 'recharts';
-import {
-  Store, TrendingUp, Package, AlertTriangle, Brain, RefreshCw,
+  Store, TrendingUp, RefreshCw,
   ShoppingCart, Percent, Award, Box, BarChart3,
-} from 'lucide-react';
-import { fetchAdminVendor, fetchVendorDashboard, registerVendor } from '../services/ecosystemService';
+} from 'lucide-react';import { fetchAdminVendor, fetchVendorDashboard, registerVendor } from '../services/ecosystemService';
 import { formatDT } from '../utils/formatCurrency';
 import { getDemoAdminVendorDetail, getDemoVendorDashboard } from '../utils/vendorDemoData';
 import RealtimeStatsCharts from '../components/RealtimeStatsCharts';
+import VendorBiPanel from '../components/VendorBiPanel';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const card = {
@@ -22,10 +19,7 @@ const card = {
   marginBottom: 16,
 };
 
-const h3 = { margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: '#0f172a' };
-
-const Badge = ({ label, bg = '#eef2ff', color = '#4338ca' }) => (
-  <span style={{
+const Badge = ({ label, bg = '#eef2ff', color = '#4338ca' }) => (  <span style={{
     fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 999,
     background: bg, color,
   }}
@@ -50,12 +44,7 @@ const Kpi = ({ label, value, sub, icon: Icon, accent }) => (
   </div>
 );
 
-const trendIcon = (t) => (t === 'up' ? '↑' : t === 'down' ? '↓' : '→');
-
-const priorityColor = (p) => (p === 'high' ? '#dc2626' : p === 'medium' ? '#d97706' : '#64748b');
-
-const VendorDashboardPage = ({ vendorId = null, adminPreview = false }) => {
-  const [dash, setDash] = useState(null);
+const VendorDashboardPage = ({ vendorId = null, adminPreview = false }) => {  const [dash, setDash] = useState(null);
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(true);
   const [shopName, setShopName] = useState('');
@@ -98,17 +87,7 @@ const VendorDashboardPage = ({ vendorId = null, adminPreview = false }) => {
 
   usePlatformRefresh(load);
 
-  const chartData = useMemo(
-    () => (dash?.salesTrend || []).map((s) => ({
-      name: s.label,
-      revenue: s.revenue,
-      orders: s.orders,
-    })),
-    [dash?.salesTrend],
-  );
-
   const kpis = dash?.kpis || {};
-  const ml = dash?.mlAgent;
   const isDemoShop = demoMode || dash?.id === 'demo_vendor' || /démo|demo/i.test(dash?.shopName || '');
 
   if (err && !dash) {
@@ -176,16 +155,11 @@ const VendorDashboardPage = ({ vendorId = null, adminPreview = false }) => {
           {dash.shopName}
         </h1>
         <p style={{ margin: 0, opacity: 0.9 }}>
-          {dash.region || 'Tunisie'}
-          {' · '}
           Commission {(dash.commissionRate * 100).toFixed(0)} %
           {kpis.marketplaceRank ? ` · Rang marketplace #${kpis.marketplaceRank}/${kpis.marketplaceTotal}` : ''}
         </p>
         <div style={{ marginTop: 14, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
           {isDemoShop && <Badge label="Mode démo" bg="#fef9c3" color="#854d0e" />}
-          {ml?.groqPowered && <Badge label="Groq BI" bg="#ecfdf5" color="#059669" />}
-          {ml?.pythonPowered && <Badge label="XGBoost" />}
-          {ml?.mlPowered && <Badge label="Agent ML vendeur" bg="#f0fdfa" color="#0d9488" />}
           <button
             type="button"
             onClick={load}
@@ -197,22 +171,14 @@ const VendorDashboardPage = ({ vendorId = null, adminPreview = false }) => {
           >
             <RefreshCw size={16} /> Actualiser
           </button>
-          {!adminPreview && (
-            <Link
-              to="/vendor/bi"
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10,
-                border: '1px solid rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.2)',
-                color: '#fff', fontWeight: 600, textDecoration: 'none',
-              }}
-            >
-              <BarChart3 size={16} /> Dashboard BI
-            </Link>
-          )}
         </div>
       </motion.div>
 
-      {!adminPreview && <RealtimeStatsCharts role="vendor" />}
+      {!adminPreview && (
+        <RealtimeStatsCharts role="vendor" detailLink={null} hideBreakdown hideMonthly />
+      )}
+
+      {!adminPreview && <VendorBiPanel />}
 
       <div style={{
         display: 'grid',
@@ -262,83 +228,11 @@ const VendorDashboardPage = ({ vendorId = null, adminPreview = false }) => {
         />
       </div>
 
-      {ml && (
-        <div style={{ ...card, border: '1px solid #99f6e4', background: 'linear-gradient(180deg, #f0fdfa 0%, #fff 40%)' }}>
-          <h3 style={{ ...h3, display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between', flexWrap: 'wrap' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Brain size={20} color="#0d9488" />
-              Agent BI / ML vendeur
-            </span>
-            <Link to="/vendor/ml" style={{ fontSize: 13, color: '#0d9488', fontWeight: 600, textDecoration: 'none' }}>
-              Ouvrir l&apos;assistant ML →
-            </Link>
-          </h3>
-          {ml.summary && (
-            <p style={{ margin: '0 0 12px', lineHeight: 1.65, whiteSpace: 'pre-wrap', color: '#134e4a' }}>
-              {ml.summary}
-            </p>
-          )}
-          {ml.tip && (
-            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#0f766e', fontWeight: 600 }}>{ml.tip}</p>
-          )}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-            <div>
-              <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Prévision CA mois prochain</p>
-              <p style={{ margin: '4px 0 0', fontSize: 22, fontWeight: 800 }}>
-                {formatDT(ml.forecast?.nextMonthRevenue ?? 0)}
-              </p>
-              <p style={{ margin: 0, fontSize: 11, color: '#94a3b8' }}>
-                {ml.forecast?.model || 'trend_linear_v1'}
-                {ml.forecast?.confidence ? ` · confiance ${Math.round(ml.forecast.confidence * 100)} %` : ''}
-              </p>
-            </div>
-            <div>
-              <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Taux conversion (proxy)</p>
-              <p style={{ margin: '4px 0 0', fontSize: 22, fontWeight: 800 }}>{kpis.conversionRate ?? 0} %</p>
-            </div>
-          </div>
-          {ml.actionHints?.length > 0 && (
-            <div style={{ marginTop: 16 }}>
-              <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 700 }}>Actions recommandées</p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {ml.actionHints.map((h, i) => (
-                  <span
-                    key={`${h.type}-${i}`}
-                    style={{
-                      fontSize: 12, padding: '6px 12px', borderRadius: 999,
-                      background: '#fff', border: `1px solid ${priorityColor(h.priority)}33`,
-                      color: priorityColor(h.priority), fontWeight: 600,
-                    }}
-                  >
-                    {h.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-          {(ml.stockAlerts?.length > 0) && (
-            <div style={{ marginTop: 16 }}>
-              <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 700, color: '#b45309' }}>
-                <AlertTriangle size={14} style={{ verticalAlign: 'middle' }} /> Alertes stock ML
-              </p>
-              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: '#78350f' }}>
-                {ml.stockAlerts.slice(0, 5).map((a) => (
-                  <li key={a.productId}>
-                    <strong>{a.name}</strong> — stock {a.stock} — {a.action}
-                    {' '}
-                    (risque {(a.riskScore * 100).toFixed(0)} %)
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
-
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         {[
           { to: '/vendor/products', label: '🏷️ Gérer produits' },
           { to: '/vendor/orders', label: '📦 Commandes' },
+          { to: '/vendor/sales', label: '📜 Historique ventes' },
           { to: '/vendor/returns', label: '↩️ Retours' },
           { to: '/vendor/communication', label: '💬 Communication' },
         ].map((l) => (
@@ -354,115 +248,6 @@ const VendorDashboardPage = ({ vendorId = null, adminPreview = false }) => {
           </Link>
         ))}
       </div>
-
-      <>
-          {(dash.productPerformance?.length > 0) && (
-            <div style={card}>
-              <h3 style={h3}><Award size={18} style={{ verticalAlign: 'middle' }} /> Produits les plus vendus (30 j)</h3>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-                <thead>
-                  <tr style={{ textAlign: 'left', borderBottom: '2px solid #f1f5f9' }}>
-                    <th style={{ padding: 8 }}>#</th>
-                    <th style={{ padding: 8 }}>Produit</th>
-                    <th style={{ padding: 8 }}>Unités</th>
-                    <th style={{ padding: 8 }}>CA</th>
-                    <th style={{ padding: 8 }}>Tendance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dash.productPerformance.slice(0, 5).map((p, i) => (
-                    <tr key={p.productId} style={{ borderBottom: '1px solid #f8fafc' }}>
-                      <td style={{ padding: 8, fontWeight: 800, color: i === 0 ? '#d97706' : '#64748b' }}>{i + 1}</td>
-                      <td style={{ padding: 8 }}>{p.name}</td>
-                      <td style={{ padding: 8 }}>{p.unitsSold}</td>
-                      <td style={{ padding: 8 }}>{formatDT(p.revenue)}</td>
-                      <td style={{ padding: 8 }}>{trendIcon(p.trend)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <p style={{ margin: '12px 0 0' }}>
-                <Link to="/vendor/products" style={{ color: '#0d9488', fontWeight: 600 }}>Gérer le catalogue →</Link>
-              </p>
-            </div>
-          )}
-
-          <div style={card}>
-            <h3 style={h3}>Tendance des ventes (6 mois)</h3>
-            {chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip formatter={(v) => [`${v} DT`, 'CA']} />
-                  <Bar dataKey="revenue" fill="#14b8a6" radius={[6, 6, 0, 0]} name="CA" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <p style={{ color: '#94a3b8', margin: 0 }}>Pas encore assez d’historique.</p>
-            )}
-          </div>
-
-          {ml?.productDemand?.length > 0 && (
-            <div style={card}>
-              <h3 style={h3}>
-                <Package size={18} style={{ verticalAlign: 'middle' }} /> Demande prévue (mois prochain)
-              </h3>
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-                  <thead>
-                    <tr style={{ textAlign: 'left', borderBottom: '2px solid #f1f5f9' }}>
-                      <th style={{ padding: 8 }}>Produit</th>
-                      <th style={{ padding: 8 }}>Qté prévue</th>
-                      <th style={{ padding: 8 }}>Mois dernier</th>
-                      <th style={{ padding: 8 }}>Tendance</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ml.productDemand.slice(0, 8).map((row) => (
-                      <tr key={row.productId} style={{ borderBottom: '1px solid #f8fafc' }}>
-                        <td style={{ padding: 8 }}>{row.productName}</td>
-                        <td style={{ padding: 8 }}>{row.predictedUnitsNextMonth}</td>
-                        <td style={{ padding: 8 }}>{row.lastMonthUnits}</td>
-                        <td style={{ padding: 8 }}>{trendIcon(row.trend)} {row.trend}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          <div style={card}>
-            <h3 style={h3}><ShoppingCart size={18} style={{ verticalAlign: 'middle' }} /> Commandes récentes</h3>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-                <thead>
-                  <tr style={{ textAlign: 'left', borderBottom: '2px solid #f1f5f9' }}>
-                    <th style={{ padding: 8 }}>Commande</th>
-                    <th style={{ padding: 8 }}>Total</th>
-                    <th style={{ padding: 8 }}>Commission</th>
-                    <th style={{ padding: 8 }}>Statut</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(dash.recentOrders || []).slice(0, 5).map((c) => (
-                    <tr key={c.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                      <td style={{ padding: 8 }}>{c.orderId || c.id}</td>
-                      <td style={{ padding: 8 }}>{formatDT(c.total ?? 0)}</td>
-                      <td style={{ padding: 8 }}>{formatDT(c.commission ?? 0)}</td>
-                      <td style={{ padding: 8 }}>{c.status}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p style={{ margin: '12px 0 0' }}>
-              <Link to="/vendor/orders" style={{ color: '#0d9488', fontWeight: 600 }}>Gérer toutes les commandes →</Link>
-            </p>
-          </div>
-      </>
     </div>
   );
 };

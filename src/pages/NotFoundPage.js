@@ -9,7 +9,6 @@ const HOME = {
   vet: '/vet/dashboard',
   vendor: '/vendor/dashboard',
   moderator: '/moderator/dashboard',
-  support: '/support/dashboard',
 };
 
 const NotFoundPage = () => {
@@ -27,14 +26,6 @@ const NotFoundPage = () => {
         <Link to={home} className="not-found-page__btn not-found-page__btn--primary">
           Retour à l&apos;accueil
         </Link>
-        <Link to="/contact" className="not-found-page__btn not-found-page__btn--secondary">
-          Contact &amp; questions
-        </Link>
-        {!user && (
-          <Link to="/visitor" className="not-found-page__btn not-found-page__btn--secondary">
-            Espace visiteur
-          </Link>
-        )}
       </div>
     </div>
   );

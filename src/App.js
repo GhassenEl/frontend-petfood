@@ -187,16 +187,10 @@ import LivreurMlPage from './pages/LivreurMlPage';
 import LivreurIntelligenceHubPage from './pages/LivreurIntelligenceHubPage';
 import VetMlAgentPage from './pages/VetMlAgentPage';
 import VetIntelligenceHubPage from './pages/VetIntelligenceHubPage';
-import SupportDashboardPage from './pages/SupportDashboardPage';
 import NotFoundPage from './pages/NotFoundPage';
 import VendorSalesPage from './pages/VendorSalesPage';
 import VetTeleconsultPage from './pages/VetTeleconsultPage';
 import VetNutritionAdvicePage from './pages/VetNutritionAdvicePage';
-import ServiceClientLayout from './layouts/ServiceClientLayout';
-import SupportComplaintsPage from './pages/SupportComplaintsPage';
-import SupportTicketsPage from './pages/SupportTicketsPage';
-import SupportAssistPage from './pages/SupportAssistPage';
-import SupportReturnsPage from './pages/SupportReturnsPage';
 
 import RoleBiDashboardPage from './pages/RoleBiDashboardPage';
 import AuthMobileRoute from './components/AuthMobileRoute';
@@ -484,14 +478,6 @@ const App = () => {
       <Route path="/moderator/messages" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorMessagesPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/platform-services" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><PlatformServicesPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/profile" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><AdminProfilePage /></ModeratorLayout></RoleRoute>} />
-
-      <Route path="/support" element={<Navigate to="/support/dashboard" replace />} />
-      <Route path="/support/complaints" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportComplaintsPage /></ServiceClientLayout></RoleRoute>} />
-      <Route path="/support/tickets" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportTicketsPage /></ServiceClientLayout></RoleRoute>} />
-      <Route path="/support/assist" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportAssistPage /></ServiceClientLayout></RoleRoute>} />
-      <Route path="/support/returns" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportReturnsPage /></ServiceClientLayout></RoleRoute>} />
-      <Route path="/support/profile" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><AdminProfilePage /></ServiceClientLayout></RoleRoute>} />
-      <Route path="/support/dashboard" element={<RoleRoute user={user} roles={['support', 'admin']}><ServiceClientLayout><SupportDashboardPage /></ServiceClientLayout></RoleRoute>} />
 
       <Route path="*" element={<RoleLayoutShell user={user}><NotFoundPage /></RoleLayoutShell>} />
     </Routes>

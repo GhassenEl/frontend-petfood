@@ -21,8 +21,6 @@ export const VISITOR_SIDEBAR_SECTIONS = [
     items: [
       { id: 'nutrition', label: 'Conseils nutritionnels', icon: '🥗', route: '/visitor/info?tab=nutrition' },
       { id: 'vet', label: 'Services vétérinaires', icon: '🩺', route: '/visitor/info?tab=vet' },
-      { id: 'faq', label: 'FAQ', icon: '❓', route: '/visitor/info?tab=faq' },
-      { id: 'contact', label: 'Contact & questions', icon: '📧', route: '/contact' },
       { id: 'reviews', label: 'Avis clients', icon: '⭐', route: '/visitor/info?tab=reviews' },
     ],
   },

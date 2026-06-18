@@ -70,9 +70,6 @@ const AdminModeratorsPage = () => {
         <Link to="/admin/activity-logs?role=moderator" className="adm-btn adm-btn--ghost">
           Voir les logs modération →
         </Link>
-        <Link to="/admin/regional-contacts" className="adm-btn adm-btn--ghost">
-          Contacts par région →
-        </Link>
       </div>
 
       <AdminRegionalStaffList
