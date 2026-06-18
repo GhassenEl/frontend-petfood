@@ -17,6 +17,7 @@ import { fetchMarketingLiveData } from '../services/marketingService';
 import { SERVICE_RATE_CARDS } from '../utils/clientDemoData';
 import MobileBottomNav, { AUTH_PUBLIC_MOBILE_NAV } from '../components/MobileBottomNav';
 import PlatformComplianceBadges from '../components/PlatformComplianceBadges';
+import PetfoodLogo from '../components/PetfoodLogo';
 import './MarketingLandingPage.css';
 import './PlatformCompliancePage.css';
 
@@ -105,8 +106,7 @@ const MarketingLandingPage = () => {
     <div className="mkt-page platform-workspace--with-bottom-nav">
       <nav className="mkt-nav" aria-label="Navigation marketing">
         <Link to="/" className="mkt-nav__brand">
-          <span>🐾</span>
-          <span>PetfoodTN</span>
+          <PetfoodLogo size="xs" showTagline />
         </Link>
         <div className="mkt-nav__links">
           <a href="#services" className="mkt-nav__link mkt-nav__link--hide-mobile">Services</a>
@@ -486,8 +486,8 @@ const MarketingLandingPage = () => {
       <footer className="mkt-footer">
         <div className="mkt-footer__grid">
           <div>
-            <strong className="mkt-footer__brand">🐾 PetfoodTN</strong>
-            <p>Plateforme animaux Tunisie — boutique, santé, IoT & IA.</p>
+            <PetfoodLogo size="sm" showTagline />
+            <p style={{ marginTop: 8 }}>Plateforme animaux Tunisie — boutique, santé, IoT & IA.</p>
           </div>
           <div>
             <strong>Produit</strong>

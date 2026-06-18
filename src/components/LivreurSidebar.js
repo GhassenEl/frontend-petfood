@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
 import ThemeToggles from './ThemeToggles';
+import PetfoodLogo from './PetfoodLogo';
 
 const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
   const [sidebarImageError, setSidebarImageError] = useState(false);
@@ -55,14 +56,8 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
   return (
     <aside className="livreur-sidebar" aria-label="Navigation livreur">
       {/* Brand Header */}
-      <div className="sidebar-header">
-        <div className="sidebar-logo">
-          🚚
-        </div>
-        <div>
-          <h2>Petfood Livreur</h2>
-          <span>Espace Livreur</span>
-        </div>
+      <div className="sidebar-header" style={{ paddingBottom: 12 }}>
+        <PetfoodLogo size="sm" showTagline subtitle="Espace livreur" />
       </div>
 
       {/* User Profile Bar */}

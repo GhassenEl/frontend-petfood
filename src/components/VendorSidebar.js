@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
 import ThemeToggles from './ThemeToggles';
+import PetfoodLogo from './PetfoodLogo';
 
 const VendorSidebar = ({ onLogout, user, onNavigate }) => {
   const [sidebarImageError, setSidebarImageError] = useState(false);
@@ -52,12 +53,8 @@ const VendorSidebar = ({ onLogout, user, onNavigate }) => {
 
   return (
     <aside className="livreur-sidebar vendor-sidebar" aria-label="Navigation vendeur">
-      <div className="sidebar-header">
-        <div className="sidebar-logo">🏬</div>
-        <div>
-          <h2>Petfood Vendeur</h2>
-          <span>Marketplace</span>
-        </div>
+      <div className="sidebar-header" style={{ paddingBottom: 12 }}>
+        <PetfoodLogo size="sm" showTagline subtitle="Marketplace vendeur" />
       </div>
 
       <div className="sidebar-user">

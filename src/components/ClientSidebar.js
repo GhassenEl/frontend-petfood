@@ -5,6 +5,7 @@ import NotificationBell from './NotificationBell';
 import ThemeToggles from './ThemeToggles';
 import ConfigSidebarNav from './platform/ConfigSidebarNav';
 import { CLIENT_SIDEBAR_SECTIONS } from '../config/clientSidebarConfig';
+import PetfoodLogo from './PetfoodLogo';
 
 const petEmojis = {
   dog: '🐶',
@@ -55,33 +56,10 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
   return (
     <aside className="admin-sidebar" style={{ display: 'flex', flexDirection: 'column' }} aria-label="Navigation client">
       <div style={{
-        padding: '20px',
+        padding: '16px 20px',
         borderBottom: '1px solid rgba(0,0,0,0.06)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
       }}>
-        <div style={{
-          width: '44px',
-          height: '44px',
-          borderRadius: '14px',
-          background: 'linear-gradient(135deg, #e67e22, #d35400)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '1.4rem',
-          boxShadow: '0 4px 12px rgba(230,126,34,0.3)',
-        }}>
-          🐾
-        </div>
-        <div>
-          <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, lineHeight: 1.2 }}>
-            PetfoodTN
-          </h2>
-          <span style={{ fontSize: '0.7rem', color: '#888', fontWeight: 500 }}>
-            Espace Client
-          </span>
-        </div>
+        <PetfoodLogo size="sm" showTagline subtitle="Espace client" />
       </div>
 
       <div

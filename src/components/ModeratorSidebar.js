@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
 import ThemeToggles from './ThemeToggles';
+import PetfoodLogo from './PetfoodLogo';
 
 const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
   const [sidebarImageError, setSidebarImageError] = useState(false);
@@ -41,12 +42,8 @@ const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
 
   return (
     <aside className="livreur-sidebar moderator-sidebar" aria-label="Navigation modérateur">
-      <div className="sidebar-header">
-        <div className="sidebar-logo">🛡️</div>
-        <div>
-          <h2>Petfood Modération</h2>
-          <span>Espace modérateur</span>
-        </div>
+      <div className="sidebar-header" style={{ paddingBottom: 12 }}>
+        <PetfoodLogo size="sm" showTagline subtitle="Espace modérateur" />
       </div>
 
       <div className="sidebar-user">

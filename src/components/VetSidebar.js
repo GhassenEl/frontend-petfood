@@ -4,6 +4,7 @@ import ThemeToggles from './ThemeToggles';
 import ConfigSidebarNav from './platform/ConfigSidebarNav';
 import useVetClinicalOverview from '../hooks/useVetClinicalOverview';
 import { VET_SIDEBAR_SECTIONS, getVetSidebarBadge } from '../config/vetSidebarConfig';
+import PetfoodLogo from './PetfoodLogo';
 import '../pages/VetPages.css';
 
 const VetSidebar = ({ onLogout, user, onNavigate }) => {
@@ -12,12 +13,8 @@ const VetSidebar = ({ onLogout, user, onNavigate }) => {
 
   return (
     <aside className="livreur-sidebar vet-sidebar" aria-label="Navigation vétérinaire">
-      <div className="sidebar-header">
-        <div className="sidebar-logo">🩺</div>
-        <div>
-          <h2>Petfood Vétérinaire</h2>
-          <span>Espace Clinique</span>
-        </div>
+      <div className="sidebar-header" style={{ paddingBottom: 12 }}>
+        <PetfoodLogo size="sm" showTagline subtitle="Espace vétérinaire" />
       </div>
 
       <div className="sidebar-user">
