@@ -94,7 +94,7 @@ const AdminIntelligentSecurityPage = () => {
           <>
             <h2 style={{ marginTop: 0, fontSize: 18 }}>Transactions suspectes</h2>
             <FraudDetectionPanel
-              alerts={intel?.fraudAlerts}
+              alerts={pack?.fraudAlerts || intel?.fraudAlerts}
               behavior={intel?.behavior}
               loading={loading}
             />

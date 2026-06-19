@@ -1,5 +1,17 @@
 import api from '../utils/api';
 
+export const normalizeIntrusionResponse = (data) => {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  return data.items || data.events || [];
+};
+
+export const normalizeThreatResponse = (data) => {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  return data.items || data.threats || [];
+};
+
 export const scanTextForThreats = async (text, context = {}) => {
   const response = await api.post('/security/scan', { text, context });
   return response.data;
@@ -22,6 +34,21 @@ export const fetchSecurityStatus = async () => {
 
 export const fetchIntrusionEvents = async (limit = 50) => {
   const response = await api.get('/security/intrusions', { params: { limit } });
+  return response.data;
+};
+
+export const fetchActiveSessions = async () => {
+  const response = await api.get('/security/sessions');
+  return response.data;
+};
+
+export const revokeSecuritySession = async (sessionId) => {
+  const response = await api.delete(`/security/sessions/${sessionId}`);
+  return response.data;
+};
+
+export const fetchPlatformSecurityPack = async () => {
+  const response = await api.get('/security/platform-pack');
   return response.data;
 };
 

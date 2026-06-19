@@ -25,19 +25,30 @@ const LAYOUT_CHAT_PREFIXES = [
   '/contact',
 ];
 
+/** Pages auth sans chatbot flottant */
+const NO_CHAT_EXACT_PATHS = new Set([
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+]);
+
 const pathHasLayoutChat = (pathname) =>
   LAYOUT_CHAT_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`) || pathname.startsWith(prefix),
   );
 
+const pathBlocksGlobalChat = (pathname) => NO_CHAT_EXACT_PATHS.has(pathname);
+
 /**
- * Chatbot global pour les pages sans layout dédié (accueil, login, enterprise, etc.).
+ * Chatbot global pour les pages sans layout dédié (accueil, enterprise, etc.).
+ * Masqué sur login / register / mot de passe.
  */
 const GlobalPlatformChat = () => {
   const { user } = useAuth();
   const { pathname } = useLocation();
 
-  if (pathHasLayoutChat(pathname)) return null;
+  if (pathHasLayoutChat(pathname) || pathBlocksGlobalChat(pathname)) return null;
 
   const role = user?.role || user?.type;
   const variant = ROLE_VARIANT[role] || 'visitor';

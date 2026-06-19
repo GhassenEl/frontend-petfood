@@ -4,6 +4,7 @@ import { DEMO_REVIEWS } from '../utils/clientDemoData';
 import { detectFraudSignals } from '../utils/fraudDetectionEngine';
 import { moderateBatch } from '../utils/autoModerationFilter';
 import { detectBehaviorAnomalies } from '../utils/contentAnomalyDetector';
+import { normalizeIntrusionResponse } from './securityService';
 import {
   VALID_ROLES,
   ROLE_LABELS,
@@ -21,7 +22,7 @@ export async function loadIntelligentSecurityPack() {
 
   const orders = withDemoFallback(ordersRes.data, DEMO_ADMIN_ORDERS);
   const reviews = withDemoFallback(reviewsRes.data, DEMO_REVIEWS);
-  const intrusionEvents = intrusionsRes.data?.events || [];
+  const intrusionEvents = normalizeIntrusionResponse(intrusionsRes.data);
 
   const fraudAlerts = detectFraudSignals({
     orders,

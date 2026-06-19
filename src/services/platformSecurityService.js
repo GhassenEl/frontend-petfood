@@ -1,57 +1,36 @@
-import api from '../utils/api';
-import { fetchSecurityStatus, fetchIntrusionEvents, fetchThreatLog } from './securityService';
+import { fetchPlatformSecurityPack } from './securityService';
 import { loadIntelligentSecurityPack } from './intelligentSecurityService';
 import { getStoredToken } from '../utils/authStorage';
-import { decodeToken, validateTokenClaims, VALID_ROLES, ROLE_LABELS } from '../utils/jwtSecurity';
-
-const DEMO_ACTIVE_SESSIONS = [
-  {
-    id: 'sess-1',
-    user: 'admin@petfood.tn',
-    role: 'admin',
-    device: 'Chrome · Windows',
-    ip: '196.168.*.*',
-    lastActive: new Date(Date.now() - 120000).toISOString(),
-    current: true,
-  },
-  {
-    id: 'sess-2',
-    user: 'client@petfood.tn',
-    role: 'client',
-    device: 'Safari · iPhone',
-    ip: '41.224.*.*',
-    lastActive: new Date(Date.now() - 3600000).toISOString(),
-    current: false,
-  },
-  {
-    id: 'sess-3',
-    user: 'vendor@petfood.tn',
-    role: 'vendor',
-    device: 'Firefox · Linux',
-    ip: '102.168.*.*',
-    lastActive: new Date(Date.now() - 7200000).toISOString(),
-    current: false,
-  },
-];
+import { validateTokenClaims, VALID_ROLES, ROLE_LABELS } from '../utils/jwtSecurity';
 
 export async function loadPlatformSecurityPack() {
-  const [status, intrusions, threats, intel] = await Promise.all([
-    fetchSecurityStatus().catch(() => null),
-    fetchIntrusionEvents(20).catch(() => ({ events: [] })),
-    fetchThreatLog(15).catch(() => ({ threats: [] })),
-    loadIntelligentSecurityPack().catch(() => null),
-  ]);
-
-  let activeSessions = DEMO_ACTIVE_SESSIONS;
   try {
-    const res = await api.get('/security/sessions');
-    if (res.data?.sessions?.length) activeSessions = res.data.sessions;
+    const pack = await fetchPlatformSecurityPack();
+    const intel = await loadIntelligentSecurityPack().catch(() => null);
+    return {
+      ...pack,
+      intelligent: intel,
+      intrusionEvents: pack.intrusionEvents || pack.events || [],
+      threatList: pack.threatList || pack.threats || [],
+      activeSessions: pack.activeSessions || pack.sessions || [],
+      roles: VALID_ROLES.map((r) => ({ id: r, label: ROLE_LABELS[r] || r })),
+      stats: {
+        ...(pack.stats || {}),
+        fraudAlerts: pack.fraudAlerts?.length ?? intel?.fraudAlerts?.length ?? 0,
+        moderationPending: intel?.moderationQueue?.length ?? 0,
+      },
+    };
   } catch {
     const token = getStoredToken();
     const validation = token ? validateTokenClaims(token) : null;
-    if (validation?.valid) {
-      activeSessions = [
-        {
+    const intel = await loadIntelligentSecurityPack().catch(() => null);
+    return {
+      securityScore: 72,
+      checks: [],
+      intrusionEvents: intel ? [] : [],
+      threatList: [],
+      activeSessions: validation?.valid
+        ? [{
           id: 'sess-current',
           user: validation.decoded.email || validation.decoded.sub,
           role: validation.decoded.role,
@@ -59,43 +38,20 @@ export async function loadPlatformSecurityPack() {
           ip: '—',
           lastActive: new Date().toISOString(),
           current: true,
-        },
-        ...DEMO_ACTIVE_SESSIONS.filter((s) => !s.current).slice(0, 2),
-      ];
-    }
+        }]
+        : [],
+      intelligent: intel,
+      fraudAlerts: intel?.fraudAlerts || [],
+      stats: {
+        threats: 0,
+        intrusions: 0,
+        fraudAlerts: intel?.fraudAlerts?.length ?? 0,
+        moderationPending: intel?.moderationQueue?.length ?? 0,
+        activeSessions: validation?.valid ? 1 : 0,
+      },
+      roles: VALID_ROLES.map((r) => ({ id: r, label: ROLE_LABELS[r] || r })),
+    };
   }
-
-  const intrusionEvents = intrusions?.events || intrusions || [];
-  const threatList = threats?.threats || threats || [];
-
-  const checks = [
-    { id: 'jwt', label: 'JWT multi-rôles', ok: VALID_ROLES.length >= 7, detail: `${VALID_ROLES.length} rôles validés` },
-    { id: 'ids', label: 'IDS actif', ok: status?.ids?.enabled !== false, detail: `${status?.ids?.eventsLast24h ?? 0} alertes/24h` },
-    { id: 'av', label: 'Anti-virus applicatif', ok: status?.protection?.antivirus !== false, detail: `${status?.signatureCount ?? 0} signatures` },
-    { id: 'fraud', label: 'Détection fraude', ok: (intel?.fraudAlerts?.length ?? 0) >= 0, detail: `${intel?.fraudAlerts?.length ?? 0} alerte(s)` },
-    { id: 'mod', label: 'Modération auto', ok: true, detail: `${intel?.moderationQueue?.length ?? 0} en file` },
-    { id: 'consent', label: 'Consentement cookies', ok: true, detail: 'RGPD — bannière active' },
-  ];
-
-  const score = Math.round((checks.filter((c) => c.ok).length / checks.length) * 100);
-
-  return {
-    status,
-    intrusionEvents: Array.isArray(intrusionEvents) ? intrusionEvents : [],
-    threatList: Array.isArray(threatList) ? threatList : [],
-    activeSessions,
-    intelligent: intel,
-    checks,
-    securityScore: score,
-    roles: VALID_ROLES.map((r) => ({ id: r, label: ROLE_LABELS[r] || r })),
-    stats: {
-      threats: threatList.length,
-      intrusions: intrusionEvents.length,
-      fraudAlerts: intel?.fraudAlerts?.length ?? 0,
-      moderationPending: intel?.moderationQueue?.length ?? 0,
-      activeSessions: activeSessions.length,
-    },
-  };
 }
 
 export default loadPlatformSecurityPack;
