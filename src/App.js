@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import CookieConsentBanner from './components/CookieConsentBanner';
 import SessionExpiryBanner from './components/SessionExpiryBanner';
+import GlobalPlatformChat from './components/GlobalPlatformChat';
 import LoginPage from './pages/LoginPage.js';
 import RegisterPage from './pages/RegisterPage.jsx';
 import ForgotPasswordPage from './pages/ForgotPasswordPage.js';
@@ -74,6 +75,7 @@ const IntelligencePlatformPage = lazy(() => import('./pages/IntelligencePlatform
 const MobileAppPage = lazy(() => import('./pages/MobileAppPage'));
 const CloudInfrastructurePage = lazy(() => import('./pages/CloudInfrastructurePage'));
 const BigDataPlatformPage = lazy(() => import('./pages/BigDataPlatformPage'));
+const DevOpsPlatformPage = lazy(() => import('./pages/DevOpsPlatformPage'));
 const PremiumFeaturesPage = lazy(() => import('./pages/PremiumFeaturesPage'));
 const AdminAdvancedHubPage = lazy(() => import('./pages/AdminAdvancedHubPage'));
 import LivreurDashboard from './pages/LivreurDashboard';
@@ -187,7 +189,7 @@ import LivreurMlPage from './pages/LivreurMlPage';
 import LivreurIntelligenceHubPage from './pages/LivreurIntelligenceHubPage';
 import VetMlAgentPage from './pages/VetMlAgentPage';
 import VetIntelligenceHubPage from './pages/VetIntelligenceHubPage';
-import NotFoundPage from './pages/NotFoundPage';
+import SafeFallbackRedirect from './routes/SafeFallbackRedirect';
 import VendorSalesPage from './pages/VendorSalesPage';
 import VetTeleconsultPage from './pages/VetTeleconsultPage';
 import VetNutritionAdvicePage from './pages/VetNutritionAdvicePage';
@@ -218,6 +220,7 @@ const App = () => {
       <>
       <CookieConsentBanner />
       <SessionExpiryBanner />
+      <GlobalPlatformChat />
       <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/" element={<MarketingLandingPage />} />
@@ -245,8 +248,9 @@ const App = () => {
         <Route path="/mobile" element={<MobileAppPage />} />
         <Route path="/cloud" element={<CloudInfrastructurePage />} />
         <Route path="/big-data" element={<BigDataPlatformPage />} />
+        <Route path="/devops" element={<DevOpsPlatformPage />} />
         <Route path="/premium" element={<PremiumFeaturesPage />} />
-        <Route path="*" element={<NotFoundPage />} />
+        <Route path="*" element={<SafeFallbackRedirect />} />
       </Routes>
       </Suspense>
       </>
@@ -257,6 +261,7 @@ const App = () => {
     <>
     <CookieConsentBanner />
     <SessionExpiryBanner />
+    <GlobalPlatformChat />
     <Suspense fallback={<PageLoader />}>
     <Routes>
       <Route path="/" element={<Navigate to={userHome} replace />} />
@@ -272,6 +277,7 @@ const App = () => {
       <Route path="/mobile" element={<MobileAppPage />} />
       <Route path="/cloud" element={<CloudInfrastructurePage />} />
       <Route path="/big-data" element={<BigDataPlatformPage />} />
+      <Route path="/devops" element={<DevOpsPlatformPage />} />
       <Route path="/premium" element={<PremiumFeaturesPage />} />
 
       <Route path="/admin/dashboard" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDashboard /></AdminLayout></RoleRoute>} />
@@ -329,6 +335,7 @@ const App = () => {
       <Route path="/admin/incidents-ml" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminIncidentsMlPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/stock-bi" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminStockBiPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/performance" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPlatformPerformancePage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/devops" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><DevOpsPlatformPage adminMode /></AdminLayout></RoleRoute>} />
       <Route path="/admin/partners" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPartnersHubPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/prices" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPriceGovernancePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/cities" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminCitiesHubPage /></AdminLayout></RoleRoute>} />
@@ -381,7 +388,7 @@ const App = () => {
       <Route path="/client-product-packs" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientProductPacksPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-traceability" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientTraceabilityPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-iot" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientIoTHubPage /></ClientLayout></RoleRoute>} />
-      <Route path="/client-esp32cam-food-quality" element={<Navigate to="/client-iot?tab=food-quality" replace />} />
+      <Route path="/client-esp32cam-food-quality" element={<Navigate to="/client-iot?tab=detection" replace />} />
       <Route path="/client-smart-water" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSmartWaterPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-smart-delivery" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSmartDeliveryPage /></ClientLayout></RoleRoute>} />
       <Route path="/contact" element={
@@ -479,7 +486,7 @@ const App = () => {
       <Route path="/moderator/platform-services" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><PlatformServicesPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/profile" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><AdminProfilePage /></ModeratorLayout></RoleRoute>} />
 
-      <Route path="*" element={<RoleLayoutShell user={user}><NotFoundPage /></RoleLayoutShell>} />
+      <Route path="*" element={<SafeFallbackRedirect />} />
     </Routes>
     </Suspense>
     </>

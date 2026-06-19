@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  BarChart3, AlertTriangle, Download, ExternalLink, RefreshCw, Pill, Package,
-  TrendingUp, Users, Receipt,
+  BarChart3, AlertTriangle, Download, ExternalLink, RefreshCw, Pill,
 } from 'lucide-react';
 import useAnalyticsHub from '../hooks/useAnalyticsHub';
+import PowerBiDashboardPanel from '../components/PowerBiDashboardPanel';
 import { fetchDatasetsCatalog } from '../services/analyticsHubService';
 import api from '../utils/api';
 import { getStoredToken } from '../utils/authStorage';
@@ -36,8 +36,6 @@ const AdminPowerBiPage = () => {
       .filter((l) => !/agent\s*ia|incidents?\s*ia/i.test(l.label || '')),
     powerBi: apiData?.powerBi || DEMO_ADMIN_ANALYTICS.powerBi,
   };
-  const viteEmbed = import.meta.env.VITE_POWER_BI_EMBED_URL || '';
-  const embedUrl = apiData?.powerBi?.embedUrl || viteEmbed || '';
 
   useEffect(() => {
     fetchDatasetsCatalog()
@@ -65,7 +63,6 @@ const AdminPowerBiPage = () => {
     }
   };
 
-  const kpi = data?.kpiSummary || DEMO_ADMIN_ANALYTICS.kpiSummary;
   const datasets = catalog?.datasets?.length ? catalog.datasets : DEMO_ADMIN_DATASETS.datasets;
 
   return (
@@ -97,14 +94,7 @@ const AdminPowerBiPage = () => {
         <p style={{ color: '#94a3b8' }}>Chargement du hub analytique…</p>
       ) : (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 24 }}>
-            <Kpi icon={<TrendingUp size={18} />} label="CA du mois" value={`${kpi.revenueMonth} DT`} color="#059669" />
-            <Kpi icon={<Package size={18} />} label="Commandes" value={kpi.ordersMonth} color="#2563eb" />
-            <Kpi icon={<Users size={18} />} label="Clients actifs" value={kpi.activeClients} color="#7c3aed" />
-            <Kpi icon={<Receipt size={18} />} label="Panier moyen" value={`${kpi.avgOrderValue} DT`} color="#e67e22" />
-            <Kpi icon={<Package size={18} />} label="Ponctualité" value={`${kpi.deliveryOnTime}%`} color="#0891b2" />
-            <Kpi icon={<AlertTriangle size={18} />} label="Alertes" value={data?.alertCounts?.total ?? 0} color="#dc2626" />
-          </div>
+          <PowerBiDashboardPanel showHeader={false} className="pbi-panel--page" />
 
           <section style={card} id="alerts">
             <h2 style={h2}>
@@ -146,52 +136,6 @@ const AdminPowerBiPage = () => {
             )}
           </section>
 
-          <section style={card} id="embed">
-            <h2 style={h2}>
-              <BarChart3 size={20} /> Rapport Power BI intégré
-            </h2>
-            {embedUrl ? (
-              <iframe
-                title="Power BI PetfoodTN"
-                src={embedUrl}
-                style={{
-                  width: '100%',
-                  height: 520,
-                  border: '1px solid #e2e8f0',
-                  borderRadius: 12,
-                }}
-                allowFullScreen
-              />
-            ) : (
-              <div style={{ padding: 20, background: '#f8fafc', borderRadius: 12, border: '1px dashed #cbd5e1' }}>
-                <p style={{ margin: '0 0 16px', color: '#475569', fontWeight: 600 }}>
-                  Aperçu des indicateurs (mode démo — intégrez votre rapport Power BI ci-dessous)
-                </p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
-                  {[
-                    { label: 'Ventes', value: `${kpi.revenueMonth} DT`, color: '#059669' },
-                    { label: 'Nouveaux clients', value: '+12', color: '#2563eb' },
-                    { label: 'Taux conversion', value: '3.8%', color: '#7c3aed' },
-                    { label: 'Satisfaction', value: '4.6/5', color: '#f59e0b' },
-                  ].map((item) => (
-                    <div key={item.label} style={{ background: '#fff', borderRadius: 12, padding: 16, textAlign: 'center', border: '1px solid #e2e8f0' }}>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 800, color: item.color }}>{item.value}</div>
-                      <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: 6, fontWeight: 600 }}>{item.label}</div>
-                    </div>
-                  ))}
-                </div>
-                <p style={{ margin: '16px 0 8px', fontSize: 13, color: '#64748b' }}>
-                  Configuration : ajoutez <code>VITE_POWER_BI_EMBED_URL</code> ou <code>POWER_BI_EMBED_URL</code> dans le backend.
-                </p>
-                <ol style={{ marginTop: 8, fontSize: 13, color: '#334155' }}>
-                  {(data?.powerBi?.setupSteps || DEMO_ADMIN_ANALYTICS.powerBi.setupSteps).map((s, i) => (
-                    <li key={i} style={{ marginBottom: 6 }}>{s}</li>
-                  ))}
-                </ol>
-              </div>
-            )}
-          </section>
-
           <section style={card} id="exports">
             <h2 style={h2}>
               <Download size={20} /> Exports pour Power BI Desktop
@@ -226,14 +170,6 @@ const AdminPowerBiPage = () => {
     </div>
   );
 };
-
-const Kpi = ({ icon, label, value, color = '#1e3a8a' }) => (
-  <div style={{ background: '#fff', borderRadius: 12, padding: 16, border: '1px solid #e2e8f0', textAlign: 'center' }}>
-    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8, color: '#94a3b8' }}>{icon}</div>
-    <div style={{ fontSize: 22, fontWeight: 800, color }}>{value}</div>
-    <div style={{ fontSize: 12, color: '#64748b', marginTop: 6, fontWeight: 600 }}>{label}</div>
-  </div>
-);
 
 const card = {
   background: '#fff',

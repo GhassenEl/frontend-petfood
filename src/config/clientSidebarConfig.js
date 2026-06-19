@@ -22,10 +22,11 @@ export const CLIENT_SIDEBAR_SECTIONS = [
     title: '📡 IoT & connecté',
     items: [
       { id: 'client-iot', label: 'Centre IoT', icon: '📡' },
-      { id: 'client-esp32cam-food-quality', label: 'ESP32-CAM qualité', icon: '📷', route: '/client-iot?tab=food-quality' },
-      { id: 'pet-feeder', label: 'Distributeur IoT', icon: '🍽️' },
-      { id: 'client-smart-water', label: 'Fontaine connectée', icon: '💧' },
-      { id: 'client-traceability', label: 'Traçabilité blockchain', icon: '🔗' },
+      { id: 'pet-feeder', label: 'Distributeur ESP32', icon: '🍽️' },
+      { id: 'client-esp32cam-food-quality', label: 'ESP32-CAM & afficheur', icon: '📷', route: '/client-iot?tab=detection' },
+      { id: 'client-smart-water', label: 'Consommation eau', icon: '💧' },
+      { id: 'client-traceability', label: 'Traçabilité', icon: '🔗' },
+      { id: 'mobile-app', label: 'Application mobile', icon: '📱', route: '/mobile#iot' },
     ],
   },
   {

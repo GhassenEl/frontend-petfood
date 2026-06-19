@@ -71,6 +71,8 @@ const EnterpriseFeaturesPage = () => {
         {' · '}
         <Link to="/big-data" style={{ color: '#0f766e', fontWeight: 700 }}>Big Data</Link>
         {' · '}
+        <Link to="/devops" style={{ color: '#0f766e', fontWeight: 700 }}>DevOps</Link>
+        {' · '}
         <Link to="/premium" style={{ color: '#0f766e', fontWeight: 700 }}>Premium PFE</Link>
         {' · '}
         <Link to="/capabilities" style={{ color: '#0f766e', fontWeight: 700 }}>Capacités par rôle</Link>

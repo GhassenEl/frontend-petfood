@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Activity, Cpu, Database, Gauge, RefreshCw, Server, Shield, Wifi, Zap,
@@ -9,6 +9,8 @@ import {
 import { fetchPlatformPerformance } from '../services/platformPerformanceService';
 import { DEMO_PLATFORM_PERFORMANCE } from '../utils/adminDemoData';
 import DemoModePill from '../components/DemoModePill';
+import AdminPrometheusGrafanaPanel from '../components/AdminPrometheusGrafanaPanel';
+import useLivePoll from '../hooks/useLivePoll';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const card = {
@@ -43,25 +45,18 @@ const Kpi = ({ icon: Icon, label, value, sub, color = '#0f172a' }) => (
 );
 
 const AdminPlatformPerformancePage = () => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const load = useCallback(async () => {
-    setLoading(true);
+  const { data, loading, lastUpdatedAt, reload } = useLivePoll(async () => {
     try {
       const metrics = await fetchPlatformPerformance();
-      setData(metrics?.health ? metrics : DEMO_PLATFORM_PERFORMANCE);
+      return metrics?.health ? metrics : DEMO_PLATFORM_PERFORMANCE;
     } catch {
-      setData(DEMO_PLATFORM_PERFORMANCE);
-    } finally {
-      setLoading(false);
+      return DEMO_PLATFORM_PERFORMANCE;
     }
-  }, []);
+  }, 5000);
 
-  useEffect(() => { load(); }, [load]);
-  usePlatformRefresh(load, [load]);
+  usePlatformRefresh(reload, [reload]);
 
-  if (loading) {
+  if (loading && !data) {
     return <div style={{ padding: 48, textAlign: 'center' }}>Chargement des métriques…</div>;
   }
 
@@ -90,7 +85,7 @@ const AdminPlatformPerformancePage = () => {
             {d.mode === 'demo' && <DemoModePill />}
             <button
               type="button"
-              onClick={load}
+              onClick={reload}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -130,7 +125,7 @@ const AdminPlatformPerformancePage = () => {
             <div style={{ fontSize: 12, opacity: 0.85 }}>État global</div>
           </div>
           <div style={{ fontSize: 13, opacity: 0.85, alignSelf: 'center' }}>
-            Uptime {d.uptime?.formatted} · Collecté {d.collectedAt ? new Date(d.collectedAt).toLocaleTimeString('fr-FR') : '—'}
+            Uptime {d.uptime?.formatted} · LIVE {lastUpdatedAt ? new Date(lastUpdatedAt).toLocaleTimeString('fr-FR') : '—'}
           </div>
         </div>
       </header>
@@ -171,6 +166,8 @@ const AdminPlatformPerformancePage = () => {
           </ResponsiveContainer>
         </section>
       </div>
+
+      <AdminPrometheusGrafanaPanel refreshMs={5000} />
 
       <div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
         <section style={card}>

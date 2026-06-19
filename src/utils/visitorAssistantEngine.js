@@ -1,5 +1,5 @@
-/** Assistant conversationnel visiteur — FAQ produits, nutrition, commandes, RDV véto */
-const FAQ = [
+/** Assistant conversationnel visiteur — questions produits, nutrition, commandes, RDV véto */
+const QUESTIONS = [
   {
     keys: ['croquette', 'produit', 'catalogue', 'acheter', 'prix'],
     reply: () =>
@@ -47,10 +47,10 @@ export const VISITOR_CHAT_QUICK = [
 
 export const getVisitorAssistantReply = (message) => {
   const hay = normalize(message);
-  for (const faq of FAQ) {
-    if (faq.keys.some((k) => hay.includes(normalize(k)))) {
+  for (const questionEntry of QUESTIONS) {
+    if (questionEntry.keys.some((k) => hay.includes(normalize(k)))) {
       return {
-        message: faq.reply(),
+        message: questionEntry.reply(),
         quickReplies: ['Autre question', 'Voir les produits', 'Créer un compte'],
       };
     }

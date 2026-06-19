@@ -58,7 +58,7 @@ export const VISITOR_SIDEBAR_SECTIONS = [
     title: '🔑 Compte',
     items: [
       { id: 'register', label: 'Créer un compte', icon: '✨', route: '/register' },
-      { id: 'login', label: 'Se connecter', icon: '🔑', route: '/login' },
+      { id: 'login', label: 'Connexion visiteur (test)', icon: '🔑', route: '/login' },
       { id: 'forgot', label: 'Mot de passe oublié', icon: '🔐', route: '/forgot-password' },
     ],
   },

@@ -6,6 +6,8 @@ import {
   persistAuthToken,
 } from '../utils/authStorage';
 import { mapAuthError } from '../utils/authErrors';
+import { tryDemoLogin } from '../utils/demoAuth';
+import { getDemoAccountByEmail } from '../config/demoAccounts';
 import {
   emitSessionExpiring,
   isTokenExpired,
@@ -176,7 +178,24 @@ export const AuthProvider = ({ children }) => {
       return { success: true, user: sessionUser };
     } catch (error) {
       const st = error.response?.status;
+      const demo = tryDemoLogin(email, password);
+      if (demo.success) {
+        const validation = validateTokenClaims(demo.token);
+        if (validation.valid) {
+          persistAuthToken(demo.token, rememberMe);
+          setToken(demo.token);
+          setUser(demo.user);
+          api.defaults.headers.common.Authorization = `Bearer ${demo.token}`;
+          return { success: true, user: demo.user, demo: true };
+        }
+      }
       if (!error.response || st === 502 || st === 503) {
+        if (demo.success === false && getDemoAccountByEmail(email)) {
+          return {
+            success: false,
+            error: 'Identifiants démo incorrects. Vérifiez email et mot de passe.',
+          };
+        }
         return {
           success: false,
           error:

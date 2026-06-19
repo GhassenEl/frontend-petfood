@@ -377,4 +377,138 @@ export const enrichVetIntelligencePack = (base = {}) => {
   };
 };
 
+const normalizeSymptomText = (s) =>
+  String(s || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+/** Résultat complet pour /vet/diagnostics — local ou fallback API. */
+export const buildClinicalAnalysisResult = ({
+  petName = 'Patient',
+  animalType = 'dog',
+  symptoms = '',
+  vitals = {},
+} = {}) => {
+  const analysis = analyzeSymptomsForDiagnosis({
+    symptoms,
+    pet: { name: petName, type: animalType },
+  });
+  const text = normalizeSymptomText(symptoms);
+  const temp = vitals.temperature != null ? Number(vitals.temperature) : null;
+  const urgent = analysis.urgency === 'urgent'
+    || (temp != null && temp >= 39.5)
+    || text.match(/convulsion|sang|collapse|effondrement/);
+  const digestive = text.match(/vom|diarr|diarrh|anorex|appetit/);
+  const fever = text.match(/fievre|fièvre|hypertherm/) || (temp != null && temp >= 39.2);
+  const lameness = text.match(/boite|boiterie|raideur|articul/);
+  const pruritus = text.match(/gratt|prurit|rougeur|pelage|dermat/);
+
+  let riskLevel = 'low';
+  let riskScore = 22;
+  let diseaseProbability = 0.18;
+  let urgencyScore = 0.15;
+  if (urgent) {
+    riskLevel = 'critical';
+    riskScore = 88;
+    diseaseProbability = 0.82;
+    urgencyScore = 0.91;
+  } else if (fever || digestive) {
+    riskLevel = 'high';
+    riskScore = 72;
+    diseaseProbability = 0.58;
+    urgencyScore = 0.65;
+  } else if (lameness || pruritus) {
+    riskLevel = 'medium';
+    riskScore = 45;
+    diseaseProbability = 0.38;
+    urgencyScore = 0.32;
+  }
+
+  const symptomLines = analysis.symptomsParsed.length
+    ? analysis.symptomsParsed
+    : symptoms.split(/[,;\n]/).map((s) => s.trim()).filter(Boolean);
+
+  const anomalies = symptomLines.slice(0, 5).map((line, i) => ({
+    label: line.slice(0, 48) || `Signe ${i + 1}`,
+    severity: urgent ? 'high' : fever || digestive ? 'medium' : 'low',
+    description: `Signalé : ${line}`,
+    likelyDisease: Boolean(urgent || fever || digestive || pruritus),
+  }));
+
+  const earlyWarnings = [];
+  if (urgent) {
+    earlyWarnings.push({ message: 'Consultation urgente — signes compatibles avec pathologie aiguë.', priority: 'critical' });
+  }
+  if (fever) {
+    earlyWarnings.push({ message: 'Fièvre ou hyperthermie — surveiller hydratation et état général.', priority: 'high' });
+  }
+  if (digestive) {
+    earlyWarnings.push({ message: 'Troubles digestifs — risque déshydratation si persistance > 24 h.', priority: 'medium' });
+  }
+
+  const rx = generatePrescriptionSuggestions({
+    diagnosis: analysis.diagnosticHypotheses[0]?.condition || symptoms,
+    symptoms,
+    animalType,
+    weightKg: vitals.weight ? Number(vitals.weight) : 12,
+  });
+
+  return {
+    earlyDetection: {
+      riskLevel,
+      riskLabel: riskLevel === 'critical' ? 'Risque élevé' : riskLevel === 'high' ? 'Risque important' : riskLevel === 'medium' ? 'Risque modéré' : 'Risque faible',
+      riskColor: riskLevel === 'critical' ? '#dc2626' : riskLevel === 'high' ? '#ea580c' : riskLevel === 'medium' ? '#f59e0b' : '#22c55e',
+      riskScore,
+      diseaseProbability,
+      urgencyScore,
+      recommendedAction: urgent
+        ? 'Consultation d\'urgence recommandée'
+        : analysis.urgency === 'soon'
+          ? 'Consultation sous 48–72 h'
+          : 'Suivi de routine',
+      model: 'Moteur clinique PetfoodTN',
+      summary: analysis.aiSummary,
+      symptomAnalysis: symptomLines.map((symptom) => ({
+        symptom,
+        severity: urgent ? 'Élevée' : fever ? 'Modérée' : 'Légère',
+        source: 'Saisie',
+      })),
+      earlyWarnings,
+      screeningRecommendations: analysis.screeningRecommendations,
+    },
+    urgency: analysis.urgency,
+    urgencyClass: urgent ? 'urgent' : 'non_urgent',
+    diseaseSuspected: diseaseProbability >= 0.45,
+    profile: {
+      pet: {
+        name: petName,
+        type: animalType,
+        weightKg: vitals.weight ? Number(vitals.weight) : undefined,
+      },
+    },
+    anomalies,
+    diagnosticHypotheses: analysis.diagnosticHypotheses,
+    recommendedMedications: (rx.medications || []).slice(0, 4).map((m) => ({
+      name: m.name || m.medication,
+      dosage: m.dosage || '—',
+      frequency: m.frequency || '—',
+      duration: m.duration || '—',
+      notes: m.notes || m.rationale || '',
+    })),
+    recommendedVaccines: [],
+    dietPlan: { summary: rx.dietNote || 'Adapter l\'alimentation selon pathologie suspectée.', recommendedFoods: [] },
+    healthFollowUp: {
+      nextVisitDays: urgent ? 1 : analysis.urgency === 'soon' ? 3 : 14,
+      monitoring: symptomLines.slice(0, 3),
+      warningSigns: ['Fièvre', 'Refus alimentaire', 'Léthargie'],
+    },
+    clinicalNotes: analysis.aiSummary,
+    followUpDays: urgent ? 1 : 14,
+    disclaimer: analysis.disclaimer,
+    analysisId: `demo-analysis-${Date.now()}`,
+    aiSummary: analysis.aiSummary,
+  };
+};
+
 export default enrichVetIntelligencePack;

@@ -33,16 +33,15 @@ async function probeHealth() {
 }
 
 async function probeBusiness() {
+  const apiPrefix = BACKEND.includes('/api') ? BACKEND : `${BACKEND}/api`;
   const endpoints = [
-    { path: '/admin/orders/stats', key: 'orders_total', field: 'total' },
-    { path: '/client/iot/devices/stats', key: 'iot_sensors_active', field: 'active' },
-    { path: '/client/iot/food-quality/stats', key: 'esp32_cam_connected', field: 'connected' },
-    { path: '/ml/metrics/quality', key: 'ml_model_quality_score', field: 'score' },
+    { path: '/orders/stats', key: 'orders_total', field: 'total', auth: true },
+    { path: '/client/iot/food-quality/stats', key: 'esp32_cam_connected', field: 'connected', auth: true },
   ];
 
   for (const ep of endpoints) {
     try {
-      const res = await fetch(`${BACKEND}${ep.path}`, { signal: AbortSignal.timeout(5000) });
+      const res = await fetch(`${apiPrefix}${ep.path}`, { signal: AbortSignal.timeout(5000) });
       if (!res.ok) continue;
       const data = await res.json();
       const val = Number(data?.[ep.field] ?? data?.data?.[ep.field]);

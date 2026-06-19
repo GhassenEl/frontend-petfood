@@ -21,8 +21,8 @@ const AdminSalesPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
     const load = async () => {
-      setLoading(true);
       try {
         const [ordersRes, statsRes] = await Promise.all([
           api.get('/orders').catch(() => ({ data: [] })),
@@ -50,6 +50,11 @@ const AdminSalesPage = () => {
       setLoading(false);
     };
     load();
+    const id = setInterval(load, 5000);
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
   }, []);
 
   if (loading) {

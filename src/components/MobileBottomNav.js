@@ -93,13 +93,13 @@ export const CLIENT_MOBILE_NAV = [
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
-/** Navigation basse contextuelle — parcours IoT (hub, distributeur, fontaine, app mobile). */
+/** Navigation basse contextuelle — parcours IoT client (distribution, eau, mobile). */
 export const CLIENT_IOT_MOBILE_NAV = [
-  { id: 'iot', to: '/client-iot', icon: '📡', label: 'IoT', match: '/client-iot' },
+  { id: 'iot', to: '/client-iot', icon: '📡', label: 'IoT', match: '/client-iot', matchQuery: 'tab=distribution' },
   { id: 'feeder', to: '/pet-feeder', icon: '🍽️', label: 'Distrib.', match: '/pet-feeder' },
-  { id: 'water', to: '/client-smart-water', icon: '💧', label: 'Fontaine', match: '/client-smart-water' },
+  { id: 'cam', to: '/client-iot?tab=detection', icon: '📷', label: 'Caméra', matchQuery: 'tab=detection' },
+  { id: 'water', to: '/client-smart-water', icon: '💧', label: 'Eau', match: '/client-smart-water' },
   { id: 'mobile', to: '/mobile#iot', icon: '📱', label: 'App', match: '/mobile' },
-  { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
 export const LIVREUR_MOBILE_NAV = [
@@ -120,7 +120,7 @@ export const VET_MOBILE_NAV = [
 export const ADMIN_MOBILE_NAV = [
   { id: 'dash', to: '/admin/dashboard', icon: '📊', label: 'Accueil' },
   { id: 'orders', to: '/admin/orders', icon: '📦', label: 'Commandes' },
-  { id: 'products', to: '/admin/powerbi', icon: '📈', label: 'BI' },
+  { id: 'products', to: '/admin/sales', icon: '💰', label: 'Ventes' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 

@@ -7,6 +7,16 @@ import useSocket from '../hooks/useSocket';
 import { useNavigate } from 'react-router-dom';
 import { getEffectiveDiscount, isOnPromotion } from '../utils/productDetails';
 import ChatNlpInsight from './ChatNlpInsight';
+import {
+  CHAT_UI,
+  LANG_LABELS,
+  SUPPORTED_LANGS,
+  detectLanguage,
+  getPlatformChatReply,
+  getRoleGreeting,
+  loadStoredChatLang,
+  saveStoredChatLang,
+} from '../utils/platformChatbotEngine';
 
 const PET_GREETING_LABELS = { dog: 'chien', cat: 'chat', bird: 'oiseau', fish: 'poisson', other: 'animal' };
 
@@ -171,18 +181,22 @@ const mapHistoryRow = (m) => ({
  */
 const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = false }) => {
   const cfg = VARIANT_CONFIG[variant] || VARIANT_CONFIG.client;
-  const displayTitle = titleOverride || cfg.title;
   const { user } = useAuth();
   const skipHistory = !user && ['visitor', 'vendor', 'moderator'].includes(variant);
 
+  const [language, setLanguage] = useState(() => loadStoredChatLang());
+
   const makeGreetingMessage = useMemo(() => {
-    const g = cfg.makeGreeting();
+    const g = getRoleGreeting(variant, language);
     return {
       ...g,
       quickReplies: [...(g.quickReplies || [])],
       products: g.products || [],
     };
-  }, [cfg]);
+  }, [variant, language]);
+
+  const displayTitle = titleOverride || makeGreetingMessage.title || cfg.title;
+  const ui = CHAT_UI[language] || CHAT_UI.fr;
 
   const [isOpen, setIsOpen] = useState(embedded);
   const [messages, setMessages] = useState([]);
@@ -316,10 +330,31 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
   const sendMessage = async (text, context) => {
     if (!text.trim()) return;
 
+    const detected = detectLanguage(text, language);
+    const activeLang = detected !== language ? detected : language;
+    if (detected !== language) {
+      setLanguage(detected);
+      saveStoredChatLang(detected);
+    }
+
     const userMsg = { role: 'user', content: text.trim(), products: [], quickReplies: [] };
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setLoading(true);
+
+    const applyLocalReply = (local) => {
+      const assistantMsg = {
+        role: 'assistant',
+        content: String(local.message || ''),
+        products: local.products || [],
+        quickReplies: local.quickReplies || [],
+        shouldShowVetCTA: !!local.shouldShowVetCTA,
+        nlp: local.nlp || null,
+        isLocal: true,
+      };
+      setMessages((prev) => [...prev, assistantMsg]);
+      setIsBackendOnline(false);
+    };
 
     try {
       const publicRoles = ['visitor', 'vendor', 'moderator'];
@@ -332,11 +367,16 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
       const res = await api.post(chatEndpoint, {
         message: text.trim(),
         role: variant,
-        context: { role: variant, ...(context || {}) },
+        language: activeLang,
+        context: { role: variant, language: activeLang, ...(context || {}) },
       });
 
       const data = res.data || {};
       const assistantText = data.message ?? data.content ?? '';
+      if (!assistantText.trim()) {
+        applyLocalReply(getPlatformChatReply({ message: text.trim(), role: variant, language: activeLang }));
+        return;
+      }
       // Mark the last HTTP assistant reply to ignore the matching socket broadcast.
       lastHttpAssistantContentRef.current = String(assistantText || '');
       lastHttpAssistantAtRef.current = Date.now();
@@ -360,39 +400,50 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
         return [...updated, assistantMsg];
       });
       setIsBackendOnline(true);
-      // Socket emit removed: backend HTTP endpoint already returns the assistant reply,
-      // and the backend socket handler broadcasts the same message to the room,
-      // causing duplicate assistant bubbles on the sender.
     } catch (err) {
       const isOffline = err?.isBackendOffline || !err?.response;
       const isNotFound = err?.isNotFound || err?.response?.status === 404;
-      setIsBackendOnline(false);
 
-      let errorContent =
-        'Désolé, une erreur est survenue. 🙅‍♂️ Réessayez dans un instant.';
-      let errorReplies = ['Réessayer'];
-
-      if (isOffline) {
-        errorContent =
-          '⚠️ Le serveur semble inaccessible.\n\nVérifiez que le backend est démarré :\n`cd backend && npm start`\n\nPuis réessayez.';
-        errorReplies = ['🔄 Réessayer', '❓ Aide'];
-      } else if (isNotFound) {
-        errorContent =
-          "⚠️ La route API n'a pas été trouvée (404).\n\nLe backend est peut-être mal configuré ou redémarre.";
-        errorReplies = ['🔄 Réessayer'];
+      if (isOffline || isNotFound) {
+        applyLocalReply(getPlatformChatReply({ message: text.trim(), role: variant, language: activeLang }));
+      } else {
+        setIsBackendOnline(false);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: pickErrorMessage(activeLang),
+            quickReplies: [retryLabel(activeLang)],
+            products: [],
+          },
+        ]);
       }
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: errorContent,
-          quickReplies: errorReplies,
-          products: [],
-        },
-      ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const pickErrorMessage = (lang) => {
+    const m = {
+      fr: 'Désolé, une erreur est survenue. Réessayez dans un instant.',
+      en: 'Sorry, an error occurred. Please try again shortly.',
+      ar: 'عذراً، حدث خطأ. حاول مرة أخرى.',
+    };
+    return m[lang] || m.fr;
+  };
+
+  const retryLabel = (lang) => {
+    const m = { fr: 'Réessayer', en: 'Retry', ar: 'إعادة المحاولة' };
+    return m[lang] || m.fr;
+  };
+
+  const handleLanguageChange = (lang) => {
+    if (!SUPPORTED_LANGS.includes(lang)) return;
+    setLanguage(lang);
+    saveStoredChatLang(lang);
+    if (messages.length <= 1) {
+      const g = getRoleGreeting(variant, lang);
+      setMessages([{ ...g, quickReplies: [...(g.quickReplies || [])], products: [] }]);
     }
   };
 
@@ -667,26 +718,42 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
             <div
               style={{
                 ...styles.headerSubtitle,
-                color: isBackendOnline ? '#059669' : '#dc2626',
+                color: isBackendOnline ? '#059669' : '#d97706',
               }}
             >
               {historyLoading
-                ? 'Chargement…'
+                ? ui.loading
                 : loading
-                  ? "En train d'écrire..."
+                  ? ui.typing
                   : isBackendOnline
-                    ? 'En ligne'
-                    : 'Hors ligne'}
+                    ? ui.online
+                    : ui.offline}
             </div>
           </div>
         </div>
         <div style={styles.headerActions}>
+          <div style={styles.langSwitch} role="group" aria-label={ui.langLabel}>
+            {SUPPORTED_LANGS.map((code) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => handleLanguageChange(code)}
+                style={{
+                  ...styles.langBtn,
+                  ...(language === code ? styles.langBtnActive : {}),
+                }}
+                aria-pressed={language === code}
+              >
+                {LANG_LABELS[code]}
+              </button>
+            ))}
+          </div>
           <button
             type="button"
             onClick={startNewConversation}
             style={styles.iconActionBtn}
-            title="Nouvelle conversation"
-            aria-label="Nouvelle conversation"
+            title={ui.newChat}
+            aria-label={ui.newChat}
           >
             <MessageSquarePlus size={18} color="#666" />
           </button>
@@ -695,7 +762,7 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
               type="button"
               onClick={() => setIsOpen(false)}
               style={styles.closeBtn}
-              aria-label="Fermer"
+              aria-label={ui.close}
             >
               <X size={18} color="#666" />
             </button>
@@ -706,7 +773,7 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
       <div style={styles.messagesContainer}>
         {historyLoading && messages.length === 0 && (
           <div style={styles.historyLoadingBanner} role="status">
-            Chargement de la conversation…
+            {ui.loading}
           </div>
         )}
         {messages.map((msg, idx) => (
@@ -800,7 +867,7 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-          placeholder="Écrivez un message..."
+          placeholder={ui.placeholder}
           style={styles.input}
         />
         <button
@@ -903,6 +970,30 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '4px',
+  },
+  langSwitch: {
+    display: 'flex',
+    gap: '2px',
+    marginRight: '4px',
+    background: 'rgba(0,0,0,0.04)',
+    borderRadius: '8px',
+    padding: '2px',
+  },
+  langBtn: {
+    border: 'none',
+    background: 'transparent',
+    borderRadius: '6px',
+    padding: '4px 7px',
+    fontSize: '10px',
+    fontWeight: 700,
+    cursor: 'pointer',
+    color: '#6b7280',
+    lineHeight: 1,
+  },
+  langBtnActive: {
+    background: 'white',
+    color: '#d35400',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
   },
   iconActionBtn: {
     background: 'rgba(0,0,0,0.05)',

@@ -670,6 +670,66 @@
   transition: background 0.8s ease;
 }
 
+.iot-fq-viewport__cam--video {
+  height: 220px;
+  background: #000;
+  overflow: hidden;
+}
+
+.iot-fq-viewport__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.iot-fq-viewport__video-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(15, 23, 42, 0.85);
+  z-index: 1;
+}
+
+.iot-fq-viewport__stream-error {
+  position: absolute;
+  bottom: 48px;
+  left: 12px;
+  right: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(220, 38, 38, 0.88);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  z-index: 3;
+}
+
+.iot-fq-viewport__refresh-hint {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #e2e8f0;
+  font-size: 10px;
+  font-weight: 700;
+  z-index: 3;
+}
+
+.iot-fq-viewport__mold--overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
 .iot-fq-viewport__grain {
   position: absolute;
   inset: 0;
@@ -1991,5 +2051,368 @@
   .iot-tab {
     padding: 8px 10px;
     font-size: 11px;
+  }
+}
+
+/* Dual live — nourriture + eau */
+.iot-dual-live {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.iot-dual-live__col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.iot-live-feed__title {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #92400e;
+  letter-spacing: 0.02em;
+}
+
+.iot-live-feed__title--water {
+  color: #0369a1;
+}
+
+.iot-fq-viewport--food .iot-live-feed__title {
+  margin-bottom: 8px;
+}
+
+.iot-fq-viewport__cam--bowl {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px 12px 8px 8px;
+  min-height: 180px;
+}
+
+.iot-fq-viewport__kibble-fill {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 12%;
+  border-radius: 8px 8px 4px 4px;
+  background: linear-gradient(180deg, #d4a574 0%, #a67c52 55%, #8b6914 100%);
+  box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: height 0.6s ease;
+  z-index: 1;
+}
+
+.iot-fq-viewport__cam--bowl .iot-fq-viewport__grain {
+  z-index: 2;
+}
+
+.iot-fq-viewport__cam--bowl .iot-fq-viewport__overlay {
+  z-index: 3;
+}
+
+/* Scène croquettes + compléments (Nourriture LIVE) */
+.iot-fq-viewport__cam--bowl-scene {
+  height: 240px;
+  min-height: 240px;
+  background: #0f172a;
+}
+
+.iot-petfood-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.iot-petfood-scene--live .iot-petfood-scene__kibble-mass {
+  animation: iot-kibble-settle 5s ease-in-out infinite;
+}
+
+@keyframes iot-kibble-settle {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.02); }
+}
+
+.iot-petfood-scene__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.35;
+  filter: blur(1px) saturate(1.1);
+}
+
+.iot-petfood-scene__layout {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  height: 100%;
+  padding: 12px 14px 36px;
+  box-sizing: border-box;
+}
+
+.iot-petfood-scene__bowl-wrap {
+  flex: 1.1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.iot-petfood-scene__bowl-rim {
+  width: 88%;
+  height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #e2e8f0, #94a3b8);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.iot-petfood-scene__bowl-inner {
+  position: relative;
+  width: 88%;
+  height: 130px;
+  border-radius: 0 0 50% 50% / 0 0 35% 35%;
+  background: linear-gradient(180deg, #64748b 0%, #334155 100%);
+  overflow: hidden;
+  box-shadow: inset 0 -8px 16px rgba(0, 0, 0, 0.35);
+}
+
+.iot-petfood-scene__kibble-mass {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 8%;
+  border-radius: 8px 8px 4px 4px;
+  transition: height 0.7s ease, background 0.8s ease;
+  overflow: hidden;
+}
+
+.iot-petfood-scene__kibble-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background-image:
+    radial-gradient(circle at 20% 30%, #fff 1px, transparent 1px),
+    radial-gradient(circle at 70% 60%, #000 1px, transparent 1px);
+  background-size: 7px 7px, 10px 10px;
+}
+
+.iot-petfood-scene__kibble-dot {
+  position: absolute;
+  border-radius: 40% 40% 35% 35%;
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.iot-petfood-scene__mold {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 35% 45%, #14532d 0%, transparent 40%);
+  pointer-events: none;
+}
+
+.iot-petfood-scene__bowl-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #fde68a;
+  letter-spacing: 0.03em;
+}
+
+.iot-petfood-scene__complements {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 4px;
+}
+
+.iot-petfood-scene__complements-title {
+  margin: 0 0 2px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.iot-petfood-scene__complement {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 2px solid;
+  font-size: 10px;
+  color: #f8fafc;
+  animation: iot-complement-pulse 3s ease-in-out infinite;
+}
+
+@keyframes iot-complement-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.88; }
+}
+
+.iot-petfood-scene__complement-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.iot-petfood-scene__complement-label {
+  flex: 1;
+  font-weight: 700;
+}
+
+.iot-petfood-scene__complement-stock {
+  font-size: 9px;
+  font-weight: 800;
+  color: #86efac;
+}
+
+.iot-petfood-scene__tags {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 8px;
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.iot-petfood-scene__tag {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #e2e8f0;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.iot-fq-viewport__cam--bowl-scene .iot-fq-viewport__overlay {
+  z-index: 5;
+}
+
+.iot-fq-viewport__cam--bowl-scene .iot-fq-viewport__refresh-hint {
+  z-index: 5;
+}
+
+@media (max-width: 520px) {
+  .iot-fq-viewport__cam--bowl-scene {
+    height: 220px;
+    min-height: 220px;
+  }
+
+  .iot-petfood-scene__bowl-inner {
+    height: 110px;
+  }
+
+  .iot-petfood-scene__complement-label {
+    font-size: 9px;
+  }
+}
+
+/* Fontaine eau live */
+.iot-water-viewport {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid #bae6fd;
+  background: #f0f9ff;
+}
+
+.iot-water-viewport--offline {
+  opacity: 0.75;
+  border-color: #cbd5e1;
+}
+
+.iot-water-viewport__bowl {
+  position: relative;
+  height: 180px;
+  background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 100%);
+  overflow: hidden;
+}
+
+.iot-water-viewport__water {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(14, 165, 233, 0.55) 0%, rgba(2, 132, 199, 0.85) 100%);
+  transition: height 0.8s ease;
+}
+
+.iot-water-viewport__water--flow {
+  animation: iot-water-shimmer 2s ease-in-out infinite;
+}
+
+@keyframes iot-water-shimmer {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.08); }
+}
+
+.iot-water-viewport__surface {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 28%;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  z-index: 2;
+}
+
+.iot-water-viewport__live {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 4;
+}
+
+.iot-water-viewport__level {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 4;
+  font-size: 12px;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #0369a1;
+}
+
+.iot-water-viewport__meta {
+  padding: 12px 14px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.iot-water-viewport__meta strong {
+  color: #0c4a6e;
+  font-size: 13px;
+}
+
+.iot-water-viewport__stats {
+  font-size: 11px;
+  color: #475569;
+}
+
+.iot-water-viewport__stats strong {
+  color: #0284c7;
+}
+
+@media (max-width: 768px) {
+  .iot-dual-live {
+    grid-template-columns: 1fr;
   }
 }

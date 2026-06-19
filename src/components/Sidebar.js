@@ -24,16 +24,10 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       ],
     },
     {
-      title: '🤖 Assistant IA',
-      items: [
-        { id: '__open-chat__', label: 'Assistant IA', icon: '🤖', action: 'open-chat' },
-      ],
-    },
-    {
       title: '📊 Analytics',
       items: [
         { id: 'business-intelligence', label: 'Business Intelligence', icon: '📈' },
-        { id: 'powerbi', label: 'Power BI', icon: '📊' },
+        { id: 'devops', label: 'DevOps & observabilité', icon: '⚙️' },
         { id: 'performance', label: 'Performance plateforme', icon: '⚡' },
         { id: 'nlp-models', label: 'Modèles NLP', icon: '🧠' },
         { id: 'history', label: 'Historique', icon: '📜' },
@@ -80,6 +74,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       items: [
         { id: 'security', label: 'Centre de sécurité', icon: '🛡️' },
         { id: 'intelligent-security', label: 'Sécurité intelligente', icon: '🧠' },
+        { id: 'backups', label: 'Sauvegardes', icon: '💾' },
         { id: 'system', label: 'Configuration globale', icon: '🔧' },
         { id: 'activity-logs', label: 'Journaux d\'activité', icon: '📋' },
         { id: 'profile', label: 'Mon Profil', icon: '👤' },
@@ -139,30 +134,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
             <p className="admin-sidebar-section-title animate-fade-in" style={{ animationDelay: `${idx * 0.1}s` }}>
               {section.title}
             </p>
-            {section.items.map((item) =>
-              item.action === 'open-chat' ? (
-                <button
-                  key={item.id}
-                  type="button"
-                  className="admin-sidebar-item animate-slide-left"
-                  style={{
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    border: 'none',
-                    background: 'transparent',
-                    font: 'inherit',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => {
-                    window.dispatchEvent(new CustomEvent('petfood:open-chat'));
-                    onNavigate?.(item.id);
-                  }}
-                >
-                  <span className="icon">{item.icon}</span>
-                  <span>{item.label}</span>
-                </button>
-              ) : (
+            {section.items.map((item) => (
                 <NavLink
                   key={item.id}
                   to={item.route || `/admin/${item.id}`}
@@ -181,8 +153,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
                   <span className="icon">{item.icon}</span>
                   <span>{item.label}</span>
                 </NavLink>
-              ),
-            )}
+            ))}
           </div>
         ))}
       </nav>

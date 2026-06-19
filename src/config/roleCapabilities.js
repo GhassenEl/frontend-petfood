@@ -5,7 +5,8 @@ export const ROLE_CAPABILITIES = [
     id: 'visitor',
     icon: '👀',
     label: 'Visiteur',
-    auth: false,
+    auth: true,
+    role: 'visitor',
     features: [
       { label: 'Consulter les produits', route: '/visitor/products' },
       { label: 'Rechercher des produits', route: '/visitor/products' },

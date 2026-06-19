@@ -1,0 +1,227 @@
+.pbi-panel {
+  margin-bottom: 28px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #f3f2f1;
+  border: 1px solid #edebe9;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.pbi-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(90deg, #f2c811 0%, #f2c811 4px, #252423 4px, #323130 100%);
+  color: #fff;
+}
+
+.pbi-panel__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pbi-panel__logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pbi-panel__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.pbi-panel__subtitle {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+.pbi-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pbi-panel__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.pbi-panel__btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.pbi-panel__btn--primary {
+  background: #f2c811;
+  border-color: #f2c811;
+  color: #252423;
+}
+
+.pbi-panel__btn--primary:hover {
+  background: #e0b90f;
+}
+
+.pbi-panel__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  padding: 16px 16px 0;
+}
+
+.pbi-kpi {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #edebe9;
+  border-top: 3px solid #118dff;
+}
+
+.pbi-kpi--blue { border-top-color: #118dff; }
+.pbi-kpi--navy { border-top-color: #12239e; }
+.pbi-kpi--purple { border-top-color: #6b007b; }
+.pbi-kpi--orange { border-top-color: #e66c37; }
+.pbi-kpi--teal { border-top-color: #008272; }
+
+.pbi-kpi svg {
+  color: #605e5c;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pbi-kpi__value {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #252423;
+  line-height: 1.2;
+}
+
+.pbi-kpi__label {
+  font-size: 0.72rem;
+  color: #605e5c;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.pbi-panel__embed-wrap {
+  padding: 16px;
+}
+
+.pbi-panel__iframe {
+  width: 100%;
+  height: 520px;
+  border: none;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px #edebe9;
+}
+
+.pbi-panel--compact .pbi-panel__iframe {
+  height: 420px;
+}
+
+.pbi-panel__embed-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0078d4;
+  text-decoration: none;
+}
+
+.pbi-panel__charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px;
+}
+
+.pbi-chart-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #edebe9;
+  padding: 14px 14px 8px;
+}
+
+.pbi-chart-card--wide {
+  grid-column: 1 / -1;
+}
+
+.pbi-chart-card h3 {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #323130;
+}
+
+.pbi-panel__hint {
+  margin: 0;
+  padding: 12px 16px 16px;
+  font-size: 12px;
+  color: #605e5c;
+  line-height: 1.5;
+}
+
+.pbi-panel__hint code {
+  background: #edebe9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.pbi-panel__hint a {
+  color: #0078d4;
+  font-weight: 700;
+}
+
+.pbi-spin {
+  animation: pbi-spin 0.8s linear infinite;
+}
+
+@keyframes pbi-spin {
+  to { transform: rotate(360deg); }
+}
+
+.pbi-panel__charts--sales {
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 900px) {
+  .pbi-panel__charts--sales {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .pbi-panel__charts {
+    grid-template-columns: 1fr;
+  }
+
+  .pbi-chart-card--wide {
+    grid-column: auto;
+  }
+}

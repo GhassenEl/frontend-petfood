@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Camera } from 'lucide-react';
 import IoTFoodQualityCamPanel from '../components/IoTFoodQualityCamPanel';
+import '../pages/ClientIoTHub.css';
 import './AdminPages.css';
 
 /** Vue admin — surveillance ESP32-CAM PetFoodIoT (scores, alertes, LCD). */

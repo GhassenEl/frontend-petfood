@@ -65,6 +65,13 @@ export const MOBILE_CLOUD_DOMAINS = [
     color: '#1e40af',
     features: [
       {
+        id: 'devops-hub',
+        label: 'Hub DevOps intégré',
+        description: 'CI/CD, monitoring Grafana/Prometheus, sécurité et sauvegardes.',
+        route: '/devops',
+        status: 'implemented',
+      },
+      {
         id: 'cloud-deploy',
         label: 'Déploiement AWS, Azure ou Google Cloud',
         description: 'Docker portable — compatible ECS, AKS, GKE et Render.',

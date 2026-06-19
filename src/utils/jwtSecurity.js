@@ -7,6 +7,7 @@ export const ROLE_LABELS = {
   client: 'Client',
   livreur: 'Livreur',
   moderator: 'Modérateur',
+  visitor: 'Visiteur',
 };
 
 export const AUTH_EVENTS = {
@@ -15,7 +16,7 @@ export const AUTH_EVENTS = {
   SESSION_EXPIRING: 'petfoodtn:auth:session-expiring',
 };
 
-export const VALID_ROLES = ['admin', 'client', 'livreur', 'vet', 'vendor', 'moderator'];
+export const VALID_ROLES = ['admin', 'client', 'livreur', 'vet', 'vendor', 'moderator', 'visitor'];
 
 const ISSUER = import.meta.env.VITE_JWT_ISSUER || '';
 const AUDIENCE = import.meta.env.VITE_JWT_AUDIENCE || '';

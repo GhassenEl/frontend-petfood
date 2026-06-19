@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Wifi, WifiOff, Droplets, Thermometer, Scale, PawPrint,
   Plus, Trash2, Play, Calendar, Copy, Check,
-  RefreshCw, Package, TrendingUp, Lightbulb, ToggleLeft, ToggleRight, Edit2,
+  RefreshCw, Package, TrendingUp, ToggleLeft, ToggleRight, Edit2,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine,
@@ -21,8 +21,6 @@ import {
   DEMO_FEEDER_PETS,
 } from '../utils/clientDemoData';
 import FeederRealtimeAlerts from '../components/FeederRealtimeAlerts';
-import FeederHabitMonitor from '../components/FeederHabitMonitor';
-import { analyzeFeederHabits } from '../utils/feederHabitAnalyzer';
 
 const DEMO_FEEDER_ID = 'demo-feeder-1';
 const isDemoFeederId = (id) => id === DEMO_FEEDER_ID || String(id || '').startsWith('demo-');
@@ -36,9 +34,6 @@ const PetFeederPage = () => {
   const [plan, setPlan] = useState(null);
   const [stats, setStats] = useState(null);
   const [alerts, setAlerts] = useState([]);
-  const [insights, setInsights] = useState([]);
-  const [speciesGuide, setSpeciesGuide] = useState(null);
-  const [feederMlPowered, setFeederMlPowered] = useState(false);
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -60,14 +55,9 @@ const PetFeederPage = () => {
     setPlan(bundle.plan);
     setStats(bundle.stats);
     setAlerts(bundle.alerts);
-    setInsights(bundle.insights);
-    setSpeciesGuide(bundle.speciesGuide);
-    setFeederMlPowered(false);
     setHistory(bundle.history);
     setPets(bundle.pets);
-    if (bundle.speciesGuide?.suggestedPortionGrams) {
-      setGrams(bundle.speciesGuide.suggestedPortionGrams);
-    } else if (bundle.plan?.portionGrams) {
+    if (bundle.plan?.portionGrams) {
       setGrams(bundle.plan.portionGrams);
     }
   }, []);
@@ -104,12 +94,11 @@ const PetFeederPage = () => {
       return;
     }
     try {
-      const [detailRes, planRes, statsRes, alertsRes, insightsRes, historyRes, petsRes, fbLatestRes] = await Promise.all([
+      const [detailRes, planRes, statsRes, alertsRes, historyRes, petsRes, fbLatestRes] = await Promise.all([
         api.get(`/feeder/${id}`),
         api.get(`/feeder/${id}/nutrition-plan`),
         api.get(`/feeder/${id}/stats?days=7`),
         api.get(`/feeder/${id}/alerts`),
-        api.get(`/feeder/${id}/insights`),
         api.get(`/feeder/${id}/history?limit=40`),
         api.get('/pets').catch(() => ({ data: [] })),
         fetchFeederFirebaseLatest(id).catch(() => ({ firebaseEnabled: false, grandeurs: null })),
@@ -122,12 +111,6 @@ const PetFeederPage = () => {
       setPlan(planRes.data);
       setStats(statsRes.data);
       setAlerts(alertsRes.data || []);
-      setInsights(insightsRes.data?.insights || []);
-      setSpeciesGuide(insightsRes.data?.speciesGuide || null);
-      setFeederMlPowered(Boolean(insightsRes.data?.mlPowered));
-      if (insightsRes.data?.speciesGuide?.suggestedPortionGrams) {
-        setGrams(insightsRes.data.speciesGuide.suggestedPortionGrams);
-      }
       setHistory(historyRes.data || []);
       setPets(petsRes.data || []);
       if (planRes.data?.portionGrams) setGrams(planRes.data.portionGrams);
@@ -165,25 +148,7 @@ const PetFeederPage = () => {
     return () => clearInterval(pollRef.current);
   }, [selectedId, loadFeederDetail, demoMode]);
 
-  const habitAnalysis = useMemo(
-    () => analyzeFeederHabits({
-      feeder,
-      stats,
-      plan,
-      history,
-      schedules: feeder?.schedules,
-    }),
-    [feeder, stats, plan, history],
-  );
-
-  const realtimeAlerts = useMemo(() => {
-    const map = new Map();
-    [...alerts, ...habitAnalysis.alerts].forEach((a) => {
-      const key = a.id || a.type || a.title;
-      if (!map.has(key)) map.set(key, { ...a, id: a.id || key });
-    });
-    return [...map.values()];
-  }, [alerts, habitAnalysis]);
+  const realtimeAlerts = alerts;
 
   const registerFeeder = async () => {
     if (demoMode) {
@@ -429,20 +394,23 @@ const PetFeederPage = () => {
         }}
       >
         <h1 style={{ margin: '0 0 8px', fontSize: 32, fontWeight: 800, color: '#1e40af' }}>
-          🍽️ Distributeur IoT
+          🍽️ Distributeur ESP32
         </h1>
         <p style={{ margin: 0, color: '#64748b' }}>
-          Nutrition automatique, capteurs en temps réel et recommandations personnalisées (ESP32)
+          Distribution automatique de nourriture — capteurs niveau, balance et déclenchement IR.
         </p>
         <div style={{ marginTop: 14, display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link to="/client-iot" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: 'white', borderRadius: 10, border: '1px solid #bfdbfe' }}>
             📡 Centre IoT
           </Link>
-          <Link to="/pet-calories" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: 'white', borderRadius: 10, border: '1px solid #bfdbfe' }}>
-            🔥 Calculateur calories
+          <Link to="/client-iot?tab=detection" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: 'white', borderRadius: 10, border: '1px solid #bfdbfe' }}>
+            📷 ESP32-CAM & afficheur
           </Link>
           <Link to="/client-smart-water" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: 'white', borderRadius: 10, border: '1px solid #bfdbfe' }}>
-            💧 Fontaine connectée
+            💧 Consommation eau
+          </Link>
+          <Link to="/mobile#iot" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: 'white', borderRadius: 10, border: '1px solid #bfdbfe' }}>
+            📱 App mobile
           </Link>
         </div>
         {demoMode && (
@@ -497,40 +465,6 @@ const PetFeederPage = () => {
           ) : feeder && (
             <>
               <FeederRealtimeAlerts alerts={realtimeAlerts} realtime />
-
-              <FeederHabitMonitor analysis={habitAnalysis} petName={plan?.pet?.name} />
-
-              {speciesGuide && (
-                <div style={{
-                  marginBottom: 16, padding: '14px 18px', borderRadius: 14,
-                  background: 'linear-gradient(135deg, #ecfdf5, #d1fae5)', border: '1px solid #a7f3d0',
-                  display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between',
-                }}>
-                  <div>
-                    <strong style={{ color: '#065f46' }}>
-                      Espèce : {speciesGuide.label} — {speciesGuide.suggestedPortionGrams} g / repas
-                    </strong>
-                    <p style={{ margin: '4px 0 0', fontSize: 12, color: '#047857' }}>
-                      Objectif {speciesGuide.dailyGrams} g/jour · Recommandations nutritionnelles
-                    </p>
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {[speciesGuide.suggestedPortionGrams - 5, speciesGuide.suggestedPortionGrams, speciesGuide.suggestedPortionGrams + 5]
-                      .filter((g) => g >= 3 && g <= 120)
-                      .map((g) => (
-                        <button key={g} type="button" onClick={() => setGrams(g)} style={{
-                          padding: '6px 12px', borderRadius: 8, border: grams === g ? '2px solid #059669' : '1px solid #86efac',
-                          background: grams === g ? '#d1fae5' : 'white', cursor: 'pointer', fontWeight: 700, fontSize: 12,
-                        }}>
-                          {g} g
-                        </button>
-                      ))}
-                    <Link to="/client-products?category=animaux" style={{ fontSize: 12, color: '#0369a1', fontWeight: 700 }}>
-                      🐾 Adopter un compagnon
-                    </Link>
-                  </div>
-                </div>
-              )}
 
               {/* KPIs */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
@@ -618,22 +552,6 @@ const PetFeederPage = () => {
                       <div style={{ color: '#64748b' }}>{feeder.foodGrams != null ? `${feeder.foodGrams.toFixed(0)} g` : '—'}</div>
                     </div>
                   </div>
-                </Card>
-
-                {/* Insights nutrition */}
-                <Card title="Insights nutrition" icon={<Lightbulb size={18} color="#f59e0b" />} wide={insights.length > 2}>
-                  {insights.length === 0 ? (
-                    <p style={{ color: '#94a3b8', fontSize: 14 }}>Liez un animal pour des recommandations personnalisées.</p>
-                  ) : (
-                    <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
-                      {insights.map((ins, i) => (
-                        <li key={i} style={{ padding: '10px 12px', background: '#fffbeb', borderRadius: 12, marginBottom: 8, fontSize: 13, display: 'flex', gap: 8 }}>
-                          <span>{ins.icon}</span>
-                          <span>{ins.text}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
                 </Card>
 
                 {/* Graphique consommation */}

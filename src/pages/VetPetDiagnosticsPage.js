@@ -8,11 +8,38 @@ import {
   postVetClinicalApplyPrescription,
 } from '../services/mlService';
 import {
-  DEMO_CLINICAL_ANALYSIS,
   DEMO_PATIENT_CONTEXT,
   mergeVetClients,
 } from '../utils/vetDemoData';
+import { buildClinicalAnalysisResult } from '../utils/vetClinicalIntelligenceEngine';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+
+const DEMO_SCENARIOS = [
+  {
+    id: 'dog-urgent',
+    label: '🐕 Chien — urgence',
+    petName: 'Max',
+    animalType: 'dog',
+    symptoms: 'Vomissements répétés, fièvre 39.8 °C, refuse de manger, léthargie depuis 24 h',
+    vitals: { temperature: '39.8', weight: '28', heartRate: '120' },
+  },
+  {
+    id: 'cat-derma',
+    label: '🐈 Chat — dermatite',
+    petName: 'Mimi',
+    animalType: 'cat',
+    symptoms: 'Grattage excessif, rougeurs zone ventrale, perte de poils localisée',
+    vitals: { temperature: '38.5', weight: '4.2', heartRate: '' },
+  },
+  {
+    id: 'dog-lame',
+    label: '🐕 Chien — boiterie',
+    petName: 'Rex',
+    animalType: 'dog',
+    symptoms: 'Boiterie patte arrière droite, raideur au lever, gêne à la marche',
+    vitals: { temperature: '38.9', weight: '22', heartRate: '95' },
+  },
+];
 
 const animalEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', other: '🐾' };
 
@@ -214,6 +241,47 @@ const VetPetDiagnosticsPage = () => {
     }
   };
 
+  const applyScenario = (scenario) => {
+    setSymptoms(scenario.symptoms);
+    setPetName(scenario.petName);
+    setAnimalType(scenario.animalType);
+    setVitals({
+      temperature: scenario.vitals.temperature || '',
+      weight: scenario.vitals.weight || '',
+      heartRate: scenario.vitals.heartRate || '',
+    });
+    setError('');
+    setResult(null);
+  };
+
+  const runScenario = async (scenario) => {
+    applyScenario(scenario);
+    setAnalyzing(true);
+    setResult(null);
+    try {
+      const data = await postVetClinicalAnalyze({
+        petName: scenario.petName,
+        animalType: scenario.animalType,
+        symptoms: scenario.symptoms,
+        vitals: {
+          temperature: scenario.vitals.temperature ? Number(scenario.vitals.temperature) : undefined,
+          weight: scenario.vitals.weight ? Number(scenario.vitals.weight) : undefined,
+          heartRate: scenario.vitals.heartRate ? Number(scenario.vitals.heartRate) : undefined,
+        },
+      });
+      setResult(data);
+    } catch {
+      setResult(buildClinicalAnalysisResult({
+        petName: scenario.petName,
+        animalType: scenario.animalType,
+        symptoms: scenario.symptoms,
+        vitals: scenario.vitals,
+      }));
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   const runAnalysis = async (e) => {
     e.preventDefault();
     setError('');
@@ -246,7 +314,16 @@ const VetPetDiagnosticsPage = () => {
         loadPatientContext(ownerId, petName, petId);
       }
     } catch {
-      setResult(DEMO_CLINICAL_ANALYSIS);
+      setResult(buildClinicalAnalysisResult({
+        petName: petName.trim(),
+        animalType,
+        symptoms: symptoms.trim(),
+        vitals: {
+          temperature: vitals.temperature ? Number(vitals.temperature) : undefined,
+          weight: vitals.weight ? Number(vitals.weight) : undefined,
+          heartRate: vitals.heartRate ? Number(vitals.heartRate) : undefined,
+        },
+      }));
       if (ownerId && petName && !patientCtx) {
         setPatientCtx(DEMO_PATIENT_CONTEXT);
       }
@@ -260,7 +337,7 @@ const VetPetDiagnosticsPage = () => {
       window.alert('Relancez une analyse avant de créer l\'ordonnance.');
       return;
     }
-    if (result.analysisId === 'demo-analysis-1') {
+    if (String(result.analysisId || '').startsWith('demo-analysis')) {
       window.alert('Ordonnance simulée (mode démonstration).');
       navigate('/vet/prescriptions');
       return;
@@ -276,7 +353,7 @@ const VetPetDiagnosticsPage = () => {
 
   const applyDossier = async () => {
     if (!result?.analysisId) return;
-    if (result.analysisId === 'demo-analysis-1') {
+    if (String(result.analysisId || '').startsWith('demo-analysis')) {
       window.alert('Consultation simulée (mode démonstration).');
       navigate('/vet/medical-dossiers');
       return;
@@ -403,6 +480,34 @@ const VetPetDiagnosticsPage = () => {
               }}
             />
           </label>
+
+          <div style={{ marginBottom: 16 }}>
+            <p style={{ margin: '0 0 8px', fontSize: '0.85rem', fontWeight: 700, color: '#475569' }}>
+              Scénarios de test (détection maladie)
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {DEMO_SCENARIOS.map((scenario) => (
+                <button
+                  key={scenario.id}
+                  type="button"
+                  onClick={() => runScenario(scenario)}
+                  disabled={analyzing}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: 10,
+                    border: '1px solid #bfdbfe',
+                    background: '#eff6ff',
+                    color: '#1d4ed8',
+                    fontWeight: 700,
+                    fontSize: 12,
+                    cursor: analyzing ? 'wait' : 'pointer',
+                  }}
+                >
+                  {scenario.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 8px' }}>Signes vitaux (optionnel)</p>
           <div

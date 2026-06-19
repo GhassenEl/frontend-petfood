@@ -39,6 +39,12 @@ const card = {
   boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
 };
 
+const DIAGNOSTIC_EXAMPLES = [
+  'Mon chien vomit depuis 2 jours, fièvre, refuse de manger',
+  'Mon chat se gratte beaucoup avec des rougeurs sur le ventre',
+  'Mon chien boite sur la patte arrière droite depuis hier',
+];
+
 const ClientVetAiPanel = ({ selectedPet, prescriptions = [], consultations = [] }) => {
   const [mode, setMode] = useState('diagnostic');
   const [symptoms, setSymptoms] = useState('');
@@ -138,6 +144,30 @@ const ClientVetAiPanel = ({ selectedPet, prescriptions = [], consultations = [] 
         </div>
 
         <form onSubmit={runAssist}>
+          {mode === 'diagnostic' && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+              {DIAGNOSTIC_EXAMPLES.map((ex) => (
+                <button
+                  key={ex}
+                  type="button"
+                  onClick={() => setSymptoms(ex)}
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: 999,
+                    border: '1px solid #bae6fd',
+                    background: '#f0f9ff',
+                    color: '#0369a1',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  {ex.length > 42 ? `${ex.slice(0, 42)}…` : ex}
+                </button>
+              ))}
+            </div>
+          )}
           <textarea
             value={symptoms}
             onChange={(e) => setSymptoms(e.target.value)}

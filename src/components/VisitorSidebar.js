@@ -7,7 +7,7 @@ const VisitorSidebar = ({ onNavigate }) => (
     variant="visitor"
     logo="👀"
     title="Petfood Visiteur"
-    subtitle="Accès libre"
+    subtitle="Compte test disponible"
     sections={VISITOR_SIDEBAR_SECTIONS}
     onNavigate={onNavigate}
   />

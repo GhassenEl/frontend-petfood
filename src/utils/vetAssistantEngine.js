@@ -1,5 +1,5 @@
-/** Réponses locales FAQ — assistant vétérinaire avant consultation */
-const FAQ = [
+/** Réponses locales questions — assistant vétérinaire avant consultation */
+const QUESTIONS = [
   {
     keys: ['vomit', 'vomir', 'vomissement', 'vomi'],
     reply: (pet) =>
@@ -66,14 +66,14 @@ const normalize = (s) =>
 
 export const getLocalVetAssistantReply = (message, pet = null) => {
   const hay = normalize(message);
-  for (const faq of FAQ) {
-    if (faq.keys.some((k) => hay.includes(normalize(k)))) {
+  for (const questionEntry of QUESTIONS) {
+    if (questionEntry.keys.some((k) => hay.includes(normalize(k)))) {
       return {
-        message: faq.reply(pet),
-        urgent: faq.urgent,
-        source: 'local-faq',
-        shouldShowVetCTA: faq.urgent,
-        quickReplies: faq.urgent
+        message: questionEntry.reply(pet),
+        urgent: questionEntry.urgent,
+        source: 'local-questions',
+        shouldShowVetCTA: questionEntry.urgent,
+        quickReplies: questionEntry.urgent
           ? ['Trouver un vétérinaire urgent', 'Prendre RDV téléconsultation']
           : ['Autre question', 'Prendre RDV préventif'],
       };

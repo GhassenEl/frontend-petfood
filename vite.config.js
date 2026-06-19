@@ -6,6 +6,7 @@ import path from 'path'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:5002'
+  const grafanaProxyTarget = env.VITE_GRAFANA_PROXY_TARGET || 'http://127.0.0.1:3000'
 
   return {
   plugins: [
@@ -76,6 +77,17 @@ export default defineConfig(({ mode }) => {
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/fastapi/, ''),
+      },
+      '/grafana': {
+        target: grafanaProxyTarget,
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/grafana/, ''),
+        configure: (proxyServer) => {
+          proxyServer.on('error', (err) => {
+            console.error(`Vite proxy /grafana -> ${grafanaProxyTarget} error:`, err.message)
+          })
+        },
       },
     },
   },

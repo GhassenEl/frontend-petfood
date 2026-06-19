@@ -15,6 +15,8 @@ export const useAnalyticsHub = () => {
 
   useEffect(() => {
     reload();
+    const id = setInterval(reload, 8000);
+    return () => clearInterval(id);
   }, [reload]);
 
   return { data, loading, reload };

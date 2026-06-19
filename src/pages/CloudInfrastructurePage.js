@@ -69,6 +69,14 @@ const CloudInfrastructurePage = () => {
       </section>
 
       <section className="ef-card" style={{ marginBottom: 24 }}>
+        <h3 style={{ margin: '0 0 8px' }}>Plateforme DevOps</h3>
+        <p style={{ margin: '0 0 12px', fontSize: 14, color: '#475569' }}>
+          CI/CD, Prometheus, Grafana, sauvegardes et interfaces admin — hub unifié{' '}
+          <Link to="/devops">/devops →</Link>
+        </p>
+      </section>
+
+      <section className="ef-card" style={{ marginBottom: 24 }}>
         <h3 style={{ margin: '0 0 8px' }}>Plateforme Big Data</h3>
         <p style={{ margin: '0 0 12px', fontSize: 14, color: '#475569' }}>
           Kafka, Spark et Hadoop pour commandes massives, IoT temps réel et stockage images ESP32-CAM.

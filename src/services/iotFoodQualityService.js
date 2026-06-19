@@ -44,7 +44,14 @@ export async function fetchFoodQualityState() {
       history = data.history || [];
       schedules = data.schedules?.length ? data.schedules : schedules;
       mode = data.mode || 'live';
-      return enrichFoodQualityState({ mode, current, history, device: data.device, schedules });
+      return enrichFoodQualityState({
+        mode,
+        current,
+        history,
+        device: { ...data.device, ...(data.stream || {}) },
+        stream: data.stream || data.device,
+        schedules,
+      });
     }
   } catch {
     /* fallback */
@@ -59,6 +66,9 @@ export async function fetchFoodQualityState() {
     current,
     history,
     schedules,
+    stream: {
+      streamType: 'bowl',
+    },
     device: {
       id: 'demo-esp32cam-1',
       name: 'ESP32-CAM — Récipient Max',
@@ -66,6 +76,7 @@ export async function fetchFoodQualityState() {
       model: 'ESP32-CAM + DHT11 + SSD1306 OLED',
       status: 'online',
       display: 'OLED 128x64',
+      streamType: 'bowl',
     },
   });
 }

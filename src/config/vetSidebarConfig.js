@@ -8,6 +8,7 @@ export const VET_SIDEBAR_SECTIONS = [
       { id: 'calendar', label: 'Calendrier', icon: '📅' },
       { id: 'availability', label: 'Disponibilité', icon: '🟢' },
       { id: 'prescriptions', label: 'Ordonnances', icon: '💊' },
+      { id: 'diagnostics', label: 'Détection maladie', icon: '🔬' },
       { id: 'pharmacy', label: 'Pharmacie', icon: '🏪' },
       { id: 'clinic', label: 'Ma clinique', icon: '🏥' },
       { id: 'medical-dossiers', label: 'Dossiers médicaux', icon: '📁' },
