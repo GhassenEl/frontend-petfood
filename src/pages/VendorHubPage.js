@@ -280,9 +280,9 @@ const VendorHubPage = () => {
       </section>
 
       <div className="vendor-sticky-cta" aria-label="Actions rapides vendeur">
-        <VisitorRouteLink route="/visitor" className="vendor-sticky-cta__btn vendor-sticky-cta__btn--ghost">
-          Visiteur
-        </VisitorRouteLink>
+        <Link to="/contact" className="vendor-sticky-cta__btn vendor-sticky-cta__btn--ghost">
+          Contact
+        </Link>
         <Link to="/login" className="vendor-sticky-cta__btn vendor-sticky-cta__btn--primary">
           Connexion pro
         </Link>
@@ -291,7 +291,6 @@ const VendorHubPage = () => {
       <footer className="vendor-footer">
         <div className="vendor-footer__links">
           <Link to="/">Accueil</Link>
-          <Link to="/visitor">Visiteur</Link>
           <Link to="/moderator">Modération</Link>
           <VisitorRouteLink route="/#partenaires">Partenaires</VisitorRouteLink>
           <Link to="/login">Connexion</Link>

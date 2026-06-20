@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Package, Plus, Pencil, Trash2, Tag, FolderOpen } from 'lucide-react';
 import { formatDT } from '../utils/formatCurrency';
 import { resolveNaturalProductImage } from '../utils/productImages';
+import SafeImage from '../components/SafeImage';
+import { PLATFORM_IMAGES } from '../utils/platformImages';
 import {
   fetchVendorCatalog,
   createVendorProduct,
@@ -15,19 +17,15 @@ import {
 import AdminImageUpload from '../components/AdminImageUpload';
 import './VendorPages.css';
 
-const IMG_FALLBACK = 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&h=300&fit=crop';
-
-const ProductThumb = ({ product }) => {
-  const [src, setSrc] = useState(() => resolveNaturalProductImage(product));
-  return (
-    <img
-      src={src}
-      alt=""
-      className="vnd-product-img"
-      onError={() => setSrc(IMG_FALLBACK)}
-    />
-  );
-};
+const ProductThumb = ({ product }) => (
+  <SafeImage
+    src={resolveNaturalProductImage(product)}
+    fallback={PLATFORM_IMAGES.productDefault}
+    product={product}
+    alt=""
+    className="vnd-product-img"
+  />
+);
 
 const emptyProduct = {
   name: '', categoryId: '', price: '', stock: '', description: '', imageUrl: '', promotionPercent: 0,

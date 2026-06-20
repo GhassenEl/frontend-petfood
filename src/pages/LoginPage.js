@@ -19,6 +19,7 @@ import {
   formatLockoutRemaining,
 } from '../utils/loginAttemptGuard';
 import LoginPetsLogo from '../components/LoginPetsLogo';
+import { HERO_BACKGROUND } from '../utils/platformImages';
 
 const LoginPage = () => {
   const { login, logout } = useAuth();
@@ -169,7 +170,7 @@ const LoginPage = () => {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '16px',
-      backgroundImage: `url('https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=1920&q=80')`,
+      backgroundImage: `url('${HERO_BACKGROUND}')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       position: 'relative',

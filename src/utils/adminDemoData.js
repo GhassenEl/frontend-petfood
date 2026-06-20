@@ -558,6 +558,38 @@ export const DEMO_ADMIN_ANALYTICS = {
     deliveryOnTime: 94,
     pendingInvoices: 2,
   },
+  biCharts: {
+    topMedications: [
+      { name: 'Anti-inflammatoire chien', cases: 12, totalQty: 48 },
+      { name: 'Antiparasitaire chat', cases: 10, totalQty: 10 },
+      { name: 'Amoxicilline 500 mg', cases: 9, totalQty: 36 },
+      { name: 'Shampoing dermatologique', cases: 7, totalQty: 7 },
+      { name: 'Vaccin rage', cases: 6, totalQty: 6 },
+      { name: 'Collyre antibiotique', cases: 5, totalQty: 15 },
+    ],
+    topDiseases: [
+      { name: 'Dermatite allergique', count: 13 },
+      { name: 'Arthrose', count: 8 },
+      { name: 'Parasites externes', count: 7 },
+      { name: 'Otite', count: 6 },
+      { name: 'Typhus / Coryza', count: 5 },
+      { name: 'Infection cutanée', count: 4 },
+    ],
+    animalDistribution: [
+      { name: 'Chien', value: 58, count: 142 },
+      { name: 'Chat', value: 35, count: 86 },
+      { name: 'NAC', value: 5, count: 12 },
+      { name: 'Autre', value: 2, count: 5 },
+    ],
+    regionDistribution: [
+      { name: 'Grand Tunis', value: 42, orders: 198 },
+      { name: 'Ariana', value: 14, orders: 66 },
+      { name: 'Sfax', value: 18, orders: 85 },
+      { name: 'Sousse', value: 12, orders: 57 },
+      { name: 'Nabeul', value: 9, orders: 42 },
+      { name: 'Autres', value: 5, orders: 24 },
+    ],
+  },
 };
 
 export const DEMO_ADMIN_DATASETS = {
@@ -704,6 +736,18 @@ export const buildDemoAdminMessages = (adminId = 'demo-admin-1') => [
 export const withDemoStats = (data) => {
   if (data?.totalOrders > 0 || data?.totalRevenue > 0) return data;
   return DEMO_ADMIN_STATS;
+};
+
+/** Fusionne les graphiques Power BI admin (API ou démo). */
+export const mergeAdminBiCharts = (apiCharts) => {
+  const base = DEMO_ADMIN_ANALYTICS.biCharts;
+  if (!apiCharts) return base;
+  return {
+    topMedications: apiCharts.topMedications?.length ? apiCharts.topMedications : base.topMedications,
+    topDiseases: apiCharts.topDiseases?.length ? apiCharts.topDiseases : base.topDiseases,
+    animalDistribution: apiCharts.animalDistribution?.length ? apiCharts.animalDistribution : base.animalDistribution,
+    regionDistribution: apiCharts.regionDistribution?.length ? apiCharts.regionDistribution : base.regionDistribution,
+  };
 };
 
 export const withDemoUserStats = (data) => {

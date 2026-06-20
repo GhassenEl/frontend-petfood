@@ -151,7 +151,7 @@ export const SUPPORT_MOBILE_NAV = [
 export const MODERATOR_PUBLIC_MOBILE_NAV = [
   { id: 'hub', to: '/moderator', icon: '🛡️', label: 'Hub' },
   { id: 'reviews', to: '/moderator', icon: '⭐', label: 'Avis', match: '/moderator' },
-  { id: 'visitor', to: '/visitor', icon: '👀', label: 'Visiteur' },
+  { id: 'contact', to: '/contact', icon: '📧', label: 'Contact' },
   { id: 'login', to: '/login', icon: '🔑', label: 'Connexion' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
@@ -159,22 +159,14 @@ export const MODERATOR_PUBLIC_MOBILE_NAV = [
 export const VENDOR_PUBLIC_MOBILE_NAV = [
   { id: 'hub', to: '/vendor', icon: '🏬', label: 'Hub' },
   { id: 'commissions', to: '/vendor', icon: '💰', label: 'Commissions', match: '/vendor' },
-  { id: 'visitor', to: '/visitor', icon: '👀', label: 'Visiteur' },
-  { id: 'login', to: '/login', icon: '🔑', label: 'Connexion' },
-  { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
-];
-
-export const VISITOR_MOBILE_NAV = [
-  { id: 'hub', to: '/visitor', icon: '👀', label: 'Découvrir' },
-  { id: 'products', to: '/visitor/products', icon: '🏷️', label: 'Produits' },
   { id: 'contact', to: '/contact', icon: '📧', label: 'Contact' },
-  { id: 'register', to: '/register', icon: '✨', label: 'Inscription' },
+  { id: 'login', to: '/login', icon: '🔑', label: 'Connexion' },
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
 export const AUTH_PUBLIC_MOBILE_NAV = [
   { id: 'home', to: '/', icon: '🏠', label: 'Accueil' },
-  { id: 'visitor', to: '/visitor', icon: '👀', label: 'Visiteur' },
+  { id: 'services', to: '/#services', icon: '📋', label: 'Services' },
   { id: 'contact', to: '/contact', icon: '📧', label: 'Contact' },
   { id: 'login', to: '/login', icon: '🔑', label: 'Connexion' },
   { id: 'register', to: '/register', icon: '✨', label: 'Inscrire' },

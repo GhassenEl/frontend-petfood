@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
 import ThemeToggles from './ThemeToggles';
 import PetfoodLogo from './PetfoodLogo';
+import SidebarAvatar from './SidebarAvatar';
 
 const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
-  const [sidebarImageError, setSidebarImageError] = useState(false);
   const sections = [
     {
       title: '🚚 Activités Principales',
@@ -63,18 +63,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
       {/* User Profile Bar */}
       <div className="sidebar-user">
         <div className="user-info">
-        {!sidebarImageError ? (
-          <img 
-            src="https://images.unsplash.com/photo-1558618047-3c8c76bbb17e?w=100&h=100&fit=crop&crop=face" 
-            alt="Profile" 
-            className="w-12 h-12 rounded-full object-cover ring-2 ring-emerald-300/50 hover:scale-110 transition-transform duration-300" 
-            onError={() => setSidebarImageError(true)}
-          />
-        ) : (
-          <div className="avatar w-12 h-12 flex items-center justify-center bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-bold text-sm rounded-full">
-            🚚 {user?.name ? user.name.charAt(0).toUpperCase() : 'L'}
-          </div>
-        )}
+        <SidebarAvatar user={user} role="livreur" className="w-12 h-12 rounded-full object-cover ring-2 ring-emerald-300/50" />
           <div>
             <p>{user?.name || 'Livreur'}</p>
             <p>{user?.region ? `Zone ${user.region}` : 'Livreur'}</p>

@@ -1,0 +1,128 @@
+.vet-aibi-panel {
+  margin-bottom: 28px;
+  padding: 20px 22px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #f0f9ff 0%, #fff 50%, #ecfdf5 100%);
+  border: 1px solid #bae6fd;
+  box-shadow: 0 4px 24px rgba(14, 165, 233, 0.08);
+}
+
+.vet-aibi-panel--compact {
+  padding: 16px;
+}
+
+.vet-aibi-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.vet-aibi-panel__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.vet-aibi-panel__head h2 {
+  margin: 0 0 6px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0c4a6e;
+}
+
+.vet-aibi-panel__head p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  max-width: 520px;
+}
+
+.vet-aibi-panel__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vet-aibi-link {
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  background: #fff;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.vet-aibi-link--primary {
+  background: #0ea5e9;
+  color: #fff;
+  border-color: #0ea5e9;
+}
+
+.vet-aibi-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #334155;
+}
+
+.vet-aibi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.vet-aibi-chart {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 18px 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+
+.vet-aibi-chart--wide {
+  grid-column: 1 / -1;
+}
+
+.vet-aibi-chart h3 {
+  margin: 0 0 4px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vet-aibi-chart__sub {
+  margin: 0 0 12px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+@media (max-width: 768px) {
+  .vet-aibi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vet-aibi-chart--wide {
+    grid-column: auto;
+  }
+}

@@ -410,6 +410,53 @@ export const DEMO_VET_BI = {
     { id: 'case-3', animalType: 'Chien', petName: 'Max', diagnosis: 'Contrôle annuel', medications: [{ name: 'Vaccin rage', quantity: 1 }], source: 'Vaccination' },
     { id: 'case-4', animalType: 'Chat', petName: 'Luna', diagnosis: 'Parasites externes', medications: [{ name: 'Antiparasitaire spot-on', quantity: 1 }], source: 'Consultation' },
   ],
+  aiMetrics: {
+    analysesDaily: [
+      { label: 'Lun', analyses: 8, urgent: 1 },
+      { label: 'Mar', analyses: 12, urgent: 2 },
+      { label: 'Mer', analyses: 6, urgent: 0 },
+      { label: 'Jeu', analyses: 14, urgent: 3 },
+      { label: 'Ven', analyses: 11, urgent: 1 },
+      { label: 'Sam', analyses: 4, urgent: 0 },
+      { label: 'Dim', analyses: 2, urgent: 0 },
+    ],
+    accuracyByMonth: [
+      { label: 'Jan', precision: 82, rappel: 78 },
+      { label: 'Fév', precision: 84, rappel: 80 },
+      { label: 'Mar', precision: 86, rappel: 83 },
+      { label: 'Avr', precision: 87, rappel: 85 },
+      { label: 'Mai', precision: 89, rappel: 86 },
+      { label: 'Juin', precision: 91, rappel: 88 },
+    ],
+    urgencyBreakdown: [
+      { name: 'Non urgent', value: 62 },
+      { name: 'Surveillance', value: 24 },
+      { name: 'Urgent', value: 14 },
+    ],
+    predictionsByAgent: [
+      { agent: 'Maladie', count: 34 },
+      { agent: 'Nutrition', count: 28 },
+      { agent: 'Anomalies', count: 19 },
+      { agent: 'Pharmacie', count: 15 },
+    ],
+    confidenceTrend: [
+      { label: 'S1', score: 78 },
+      { label: 'S2', score: 81 },
+      { label: 'S3', score: 83 },
+      { label: 'S4', score: 85 },
+      { label: 'S5', score: 87 },
+      { label: 'S6', score: 89 },
+      { label: 'S7', score: 91 },
+    ],
+    topDiseasesMonthly: [
+      { label: 'Jan', dermatite: 4, arthrose: 3, parasites: 2 },
+      { label: 'Fév', dermatite: 5, arthrose: 2, parasites: 3 },
+      { label: 'Mar', dermatite: 3, arthrose: 4, parasites: 2 },
+      { label: 'Avr', dermatite: 6, arthrose: 3, parasites: 4 },
+      { label: 'Mai', dermatite: 5, arthrose: 5, parasites: 3 },
+      { label: 'Juin', dermatite: 7, arthrose: 4, parasites: 3 },
+    ],
+  },
 };
 
 export const mergeVetBiData = (apiData) => {
@@ -427,6 +474,7 @@ export const mergeVetBiData = (apiData) => {
     recentImports: apiData.recentImports?.length ? apiData.recentImports : DEMO_VET_BI.recentImports,
     diseaseTreatments: apiData.diseaseTreatments?.length ? apiData.diseaseTreatments : DEMO_VET_BI.diseaseTreatments,
     casesWithMeds: apiData.casesWithMeds?.length ? apiData.casesWithMeds : DEMO_VET_BI.casesWithMeds,
+    aiMetrics: { ...DEMO_VET_BI.aiMetrics, ...(apiData.aiMetrics || {}) },
   };
 };
 

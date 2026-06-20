@@ -14,6 +14,7 @@ import {
 } from '../utils/loginValidation';
 import RegionSelect from '../components/RegionSelect';
 import { getStoredCity } from '../hooks/usePlatformCity';
+import { HERO_BACKGROUND } from '../utils/platformImages';
 
 const RegisterPage = () => {
   const { register } = useAuth();
@@ -125,7 +126,7 @@ const RegisterPage = () => {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '16px',
-      backgroundImage: `url('https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1920&q=80')`,
+      backgroundImage: `url('${HERO_BACKGROUND}')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       position: 'relative',

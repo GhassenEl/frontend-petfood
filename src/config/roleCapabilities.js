@@ -2,19 +2,6 @@
 
 export const ROLE_CAPABILITIES = [
   {
-    id: 'visitor',
-    icon: '👀',
-    label: 'Visiteur',
-    auth: true,
-    role: 'visitor',
-    features: [
-      { label: 'Consulter les produits', route: '/visitor/products' },
-      { label: 'Rechercher des produits', route: '/visitor/products' },
-      { label: 'Conseils nutritionnels', route: '/visitor/info?tab=nutrition' },
-      { label: "S'inscrire", route: '/register' },
-    ],
-  },
-  {
     id: 'client',
     icon: '🛒',
     label: 'Client',
@@ -102,6 +89,7 @@ export const ROLE_CAPABILITIES = [
       { label: 'Gérer les catégories', route: '/admin/categories' },
       { label: 'Gérer les remboursements', route: '/admin/refunds' },
       { label: 'Gérer les promotions', route: '/admin/promotions' },
+      { label: 'Marketing digital', route: '/admin/digital-marketing' },
       { label: 'Consulter les statistiques', route: '/admin/dashboard' },
       { label: 'Dashboard BI / Power BI', route: '/admin/powerbi' },
       { label: 'Configurer la plateforme', route: '/admin/system' },

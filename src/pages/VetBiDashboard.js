@@ -8,6 +8,7 @@ import api from '../utils/api';
 import { formatDT } from '../utils/formatCurrency';
 import { mergeVetBiData } from '../utils/vetDemoData';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import VetAiBiChartsPanel from '../components/VetAiBiChartsPanel';
 
 const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899', '#84cc16'];
 
@@ -210,6 +211,13 @@ const VetBiDashboard = () => {
           </ul>
         </div>
       )}
+
+      <VetAiBiChartsPanel
+        biData={data}
+        showBiSection={false}
+        showAiSection
+        compact
+      />
 
       {/* Graphiques ligne 1 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20, marginBottom: 24 }}>

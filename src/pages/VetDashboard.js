@@ -14,13 +14,16 @@ import {
   MessageSquare,
   PackageX,
   UtensilsCrossed,
+  Brain,
+  Activity,
 } from 'lucide-react';
 import api from '../utils/api';
 import { fetchPharmacyCatalog } from '../services/vetMedicationService';
 import { summarizePharmacyStock } from '../utils/vetPharmacyAlerts';
 import { notifyNewPharmacyAlerts } from '../services/vetPharmacyNotificationService';
-import { withDemoDashboard } from '../utils/vetDemoData';
+import { withDemoDashboard, DEMO_VET_BI } from '../utils/vetDemoData';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import VetAiBiChartsPanel from '../components/VetAiBiChartsPanel';
 import './VetPages.css';
 
 const VetDashboard = () => {
@@ -153,6 +156,8 @@ const VetDashboard = () => {
     { to: '/vet/pharmacy', icon: Stethoscope, label: 'Pharmacie', desc: 'Stock médicaments' },
     { to: '/vet/clinic', icon: FileText, label: 'Ma clinique', desc: 'Profil & alertes' },
     { to: '/vet/nutrition', icon: UtensilsCrossed, label: 'Conseils nutrition', desc: 'Plans alimentaires' },
+    { to: '/vet/ml-agent', icon: Brain, label: 'Agents IA', desc: 'ML & diagnostic' },
+    { to: '/vet/bi', icon: Activity, label: 'Dashboard BI', desc: 'Courbes & analytics' },
   ];
 
   return (
@@ -291,6 +296,12 @@ const VetDashboard = () => {
           })}
         </div>
       </div>
+
+      <VetAiBiChartsPanel
+        weekChart={data?.weekChart || []}
+        statusChart={data?.statusChart || []}
+        biData={DEMO_VET_BI}
+      />
 
       <div
         style={{

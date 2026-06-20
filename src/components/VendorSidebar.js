@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
 import ThemeToggles from './ThemeToggles';
 import PetfoodLogo from './PetfoodLogo';
+import SidebarAvatar from './SidebarAvatar';
 
 const VendorSidebar = ({ onLogout, user, onNavigate }) => {
-  const [sidebarImageError, setSidebarImageError] = useState(false);
   const location = useLocation();
 
   const sections = [
@@ -59,18 +59,7 @@ const VendorSidebar = ({ onLogout, user, onNavigate }) => {
 
       <div className="sidebar-user">
         <div className="user-info">
-          {!sidebarImageError ? (
-            <img
-              src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=100&h=100&fit=crop&crop=face"
-              alt="Profil vendeur"
-              className="w-12 h-12 rounded-full object-cover ring-2 ring-teal-300/50"
-              onError={() => setSidebarImageError(true)}
-            />
-          ) : (
-            <div className="avatar w-12 h-12 flex items-center justify-center bg-gradient-to-br from-teal-500 to-teal-600 text-white font-bold text-sm rounded-full">
-              🏬 {user?.name ? user.name.charAt(0).toUpperCase() : 'V'}
-            </div>
-          )}
+          <SidebarAvatar user={user} role="vendor" className="w-12 h-12 rounded-full object-cover ring-2 ring-teal-300/50" />
           <div>
             <p>{user?.name || 'Vendeur'}</p>
             <p>Vendeur marketplace</p>

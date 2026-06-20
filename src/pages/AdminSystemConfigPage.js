@@ -207,7 +207,6 @@ const AdminSystemConfigPage = () => {
             {' · '}
             <Link to="/admin/moderators">Modérateurs</Link>
             {' · '}
-            <Link to="/admin/visitors">Espace visiteur</Link>
             {' · '}
             <Link to="/admin/prices">Gouvernance des prix</Link>
           </p>

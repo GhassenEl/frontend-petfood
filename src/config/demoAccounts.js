@@ -72,17 +72,6 @@ export const DEMO_ACCOUNTS = [
     home: ROLE_HOMES.moderator,
     primary: true,
   },
-  {
-    id: 'visitor',
-    role: 'visitor',
-    label: 'Visiteur',
-    icon: '👀',
-    name: 'Invité PetfoodTN',
-    email: 'visitor@petfood.tn',
-    password: 'Visitor2024!',
-    home: ROLE_HOMES.visitor,
-    primary: true,
-  },
 ];
 
 /** Comptes secondaires optionnels (tests multi-utilisateurs). */
@@ -112,16 +101,6 @@ export const SECONDARY_DEMO_ACCOUNTS = [
     home: ROLE_HOMES.livreur,
   },
 ];
-
-/** Visiteur — compte démo pour tests (connexion locale ou backend seed). */
-export const VISITOR_ACCESS = {
-  label: 'Visiteur',
-  icon: '👀',
-  email: 'visitor@petfood.tn',
-  password: 'Visitor2024!',
-  home: '/visitor',
-  note: 'Compte test visiteur — catalogue, outils IA et traçabilité publique.',
-};
 
 export const DEMO_APP_URL = 'http://localhost:3001';
 export const DEMO_LOGIN_URL = '/login';

@@ -1,41 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { TrendingUp } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
-import PowerBiDashboardPanel from '../components/PowerBiDashboardPanel';
 import {
-  DEMO_ADMIN_ORDERS,
-  buildDemoRevenueChart,
-  withDemoFallback,
   withDemoStats,
+  buildDemoRevenueChart,
+  buildDemoOrdersDailyChart,
+  mergeAdminBiCharts,
 } from '../utils/adminDemoData';
+import { DEMO_LIVREUR_STATS } from '../utils/livreurDemoData';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import useAnalyticsHub from '../hooks/useAnalyticsHub';
+import PowerBiDashboardPanel from '../components/PowerBiDashboardPanel';
+import AdminPowerBiInsightsPanel from '../components/AdminPowerBiInsightsPanel';
+import { HERO_BACKGROUND } from '../utils/platformImages';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [stats, setStats] = useState(withDemoStats(null));
-  const [chartData, setChartData] = useState(buildDemoRevenueChart());
   const [loading, setLoading] = useState(true);
+  const { data: analyticsData } = useAnalyticsHub();
 
-  useEffect(() => {
-    fetchStats();
-    fetchChartData();
-    const id = window.setInterval(() => {
-      fetchStats();
-      fetchChartData();
-    }, 5000);
-    return () => window.clearInterval(id);
-  }, []);
-
-  usePlatformRefresh(() => {
-    fetchStats();
-    fetchChartData();
-  });
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const ordersRes = await api.get('/orders/stats').catch(() => ({ data: {} }));
       setStats(withDemoStats({
@@ -49,18 +37,19 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchChartData = async () => {
-    try {
-      const ordersRes = await api.get('/orders');
-      const orders = withDemoFallback(ordersRes.data || [], DEMO_ADMIN_ORDERS);
-      setChartData(buildDemoRevenueChart(orders));
-    } catch (error) {
-      console.error('Chart data error', error);
-      setChartData(buildDemoRevenueChart());
-    }
-  };
+  useEffect(() => {
+    fetchStats();
+    const id = window.setInterval(fetchStats, 5000);
+    return () => window.clearInterval(id);
+  }, [fetchStats]);
+
+  usePlatformRefresh(fetchStats);
+
+  const revenueData = buildDemoRevenueChart();
+  const dailyData = buildDemoOrdersDailyChart();
+  const biCharts = mergeAdminBiCharts(analyticsData?.biCharts);
 
   const statCards = [
     {
@@ -105,7 +94,7 @@ const AdminDashboard = () => {
         transition={{ duration: 0.5 }}
         className="hero-animal"
         style={{
-          backgroundImage: 'linear-gradient(135deg, rgba(15,23,42,0.82) 0%, rgba(30,64,175,0.72) 100%), url(https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1400&q=80)',
+          backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.82) 0%, rgba(30,64,175,0.72) 100%), url(${HERO_BACKGROUND})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           borderRadius: '24px',
@@ -122,8 +111,24 @@ const AdminDashboard = () => {
               Bonjour, {displayName} !
             </h1>
             <p style={{ margin: '8px 0 0', color: 'rgba(255,255,255,0.88)', fontSize: '0.95rem' }}>
-              Tableau de bord — ventes &amp; chiffre d&apos;affaires
+              Tableau de bord Power BI — ventes, pharmacie, maladies &amp; livraisons
             </p>
+            <Link
+              to="/admin/powerbi"
+              style={{
+                display: 'inline-flex',
+                marginTop: 12,
+                padding: '8px 14px',
+                borderRadius: 10,
+                background: 'rgba(242,200,17,0.95)',
+                color: '#252423',
+                fontWeight: 700,
+                fontSize: 13,
+                textDecoration: 'none',
+              }}
+            >
+              Hub Power BI complet →
+            </Link>
           </div>
         </div>
       </motion.div>
@@ -157,37 +162,17 @@ const AdminDashboard = () => {
       </div>
 
       <PowerBiDashboardPanel
-        salesOnly
-        revenueData={chartData}
+        compact
         totalRevenue={stats.totalRevenue}
+        revenueData={revenueData}
+        dailyData={dailyData}
       />
 
-      <motion.button
-        type="button"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        whileHover={{ y: -2 }}
-        onClick={() => navigate('/admin/powerbi')}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '8px',
-          marginTop: '8px',
-          padding: '12px 18px',
-          background: 'white',
-          border: '1px solid #e5e7eb',
-          borderRadius: '14px',
-          fontSize: '0.9rem',
-          fontWeight: 700,
-          color: '#6366f1',
-          cursor: 'pointer',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
-        }}
-      >
-        <TrendingUp size={18} />
-        Analyses avancées Power BI →
-      </motion.button>
+      <AdminPowerBiInsightsPanel
+        biCharts={biCharts}
+        livreurStats={DEMO_LIVREUR_STATS}
+        compact
+      />
     </div>
   );
 };

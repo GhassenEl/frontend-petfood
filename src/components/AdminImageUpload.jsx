@@ -1,5 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { uploadAdminImage, resolveUploadPreviewUrl } from '../services/uploadService';
+import SafeImage from './SafeImage';
+import { PLATFORM_IMAGES } from '../utils/platformImages';
 
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/gif';
 
@@ -42,11 +44,11 @@ const AdminImageUpload = ({
 
       {previewUrl ? (
         <div style={styles.previewRow}>
-          <img
+          <SafeImage
             src={previewUrl}
+            fallback={PLATFORM_IMAGES.productDefault}
             alt="Aperçu"
             style={styles.preview}
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
           <button
             type="button"

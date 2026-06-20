@@ -4,6 +4,8 @@ import api from '../utils/api';
 import { PRODUCT_CATEGORIES } from '../constants/productCategories';
 import AdminImageUpload from '../components/AdminImageUpload';
 import { resolveUploadPreviewUrl } from '../services/uploadService';
+import SafeImage from '../components/SafeImage';
+import { PLATFORM_IMAGES, resolveNaturalProductImage } from '../utils/platformImages';
 
 const emptyForm = {
   name: '',
@@ -247,11 +249,12 @@ const AdminProducts = () => {
                     />
                   </td>
                   <td style={styles.td}>
-                    <img
-                      src={resolveUploadPreviewUrl(product.imageUrl || product.image) || 'https://via.placeholder.com/50?text=🐕'}
+                    <SafeImage
+                      src={resolveUploadPreviewUrl(product.imageUrl || product.image)}
+                      fallback={resolveNaturalProductImage(product)}
+                      product={product}
                       alt={product.name}
                       style={styles.productImg}
-                      onError={(e) => { e.target.src = 'https://via.placeholder.com/50?text=🐕'; }}
                     />
                   </td>
                   <td style={styles.td}>

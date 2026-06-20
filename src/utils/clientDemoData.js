@@ -305,7 +305,7 @@ export const DEMO_FAVORITES = [
     animalType: 'dog',
     category: 'vetements',
     description: 'Manteau imperméable doublé polaire — taille M (25–32 cm dos).',
-    imageUrl: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600&h=360&fit=crop',
+    imageUrl: '/images/placeholders/product-clothing.svg',
   },
   {
     _id: 'demo-fav-2',
@@ -316,7 +316,7 @@ export const DEMO_FAVORITES = [
     animalType: 'dog',
     category: 'nourriture',
     description: 'Formule riche en protéines pour chien actif.',
-    imageUrl: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=600&h=360&fit=crop',
+    imageUrl: '/images/iot/bowl-kibble.jpg',
   },
 ];
 

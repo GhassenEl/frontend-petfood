@@ -2416,3 +2416,287 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Distribution nourriture (panneau enrichi) ── */
+.fd-panel {
+  margin-bottom: 24px;
+  padding: 20px 22px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #f8fafc 0%, #fff 45%, #f0fdf4 100%);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.06);
+}
+
+.fd-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.fd-panel__badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #047857;
+  margin-bottom: 6px;
+}
+
+.fd-panel__head h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.fd-panel__head p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  max-width: 520px;
+  line-height: 1.5;
+}
+
+.fd-panel__kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.fd-kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 14px;
+  min-width: 72px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.fd-kpi strong {
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.fd-kpi span {
+  font-size: 10px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.fd-kpi--score strong {
+  font-size: 22px;
+}
+
+.fd-pipeline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 4px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.fd-pipeline__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 10px;
+  min-width: 72px;
+  text-align: center;
+}
+
+.fd-pipeline__icon {
+  font-size: 20px;
+}
+
+.fd-pipeline__step strong {
+  font-size: 11px;
+  color: #334155;
+}
+
+.fd-pipeline__step small {
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+.fd-pipeline__arrow {
+  color: #cbd5e1;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.fd-panel__grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.fd-panel__side {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fd-schedule-card {
+  flex: 1;
+}
+
+.fd-insights {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.fd-insight {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+}
+
+.fd-insight strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.fd-insight p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.fd-insight--critical,
+.fd-insight--warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.fd-insight--info {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.fd-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.fd-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fd-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+}
+
+.fd-action--primary {
+  background: linear-gradient(135deg, #059669, #047857);
+  border-color: #059669;
+  color: #fff;
+}
+
+.fd-action--primary strong,
+.fd-action--primary small {
+  color: #fff;
+}
+
+.fd-action--primary small {
+  opacity: 0.85;
+}
+
+.fd-action__icon {
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+
+.fd-action strong {
+  display: block;
+  font-size: 14px;
+}
+
+.fd-action small {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.fd-action__chev {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: #94a3b8;
+}
+
+.fd-action--primary .fd-action__chev {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 768px) {
+  .fd-panel {
+    padding: 16px;
+  }
+
+  .fd-panel__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fd-panel__kpis {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .fd-kpi {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .fd-pipeline {
+    justify-content: center;
+  }
+
+  .fd-pipeline__arrow {
+    display: none;
+  }
+
+  .fd-actions {
+    grid-template-columns: 1fr;
+  }
+}

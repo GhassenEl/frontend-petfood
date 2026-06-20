@@ -10,16 +10,17 @@ import {
   approveModeratorImage,
 } from '../services/moderatorService';
 import { detectContentAnomalies } from '../utils/contentAnomalyDetector';
+import SafeImage from '../components/SafeImage';
+import { PLATFORM_IMAGES, resolveNaturalProductImage } from '../utils/platformImages';
 import './ModeratorPages.css';
 
-const PRODUCT_IMG_FALLBACK = 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&h=300&fit=crop';
-
-const ProductThumb = ({ src, alt, className }) => (
-  <img
-    src={src || PRODUCT_IMG_FALLBACK}
+const ProductThumb = ({ src, alt, className, product }) => (
+  <SafeImage
+    src={src}
+    fallback={resolveNaturalProductImage(product || {})}
+    product={product}
     alt={alt}
     className={className}
-    onError={(e) => { e.currentTarget.src = PRODUCT_IMG_FALLBACK; }}
   />
 );
 
@@ -162,7 +163,7 @@ const ModeratorContentPage = () => {
                       <tr key={p.id}>
                         <td>
                           <div className="mod-product-row">
-                            <ProductThumb src={p.imageUrl} alt={p.name} className="mod-product-thumb" />
+                            <ProductThumb src={p.imageUrl} alt={p.name} className="mod-product-thumb" product={p} />
                             <span>{p.name}</span>
                           </div>
                         </td>
@@ -252,7 +253,7 @@ const ModeratorContentPage = () => {
                     {imageQueue.map((p) => (
                       <tr key={p.id}>
                         <td>
-                          <ProductThumb src={p.imageUrl} alt={p.name} className="mod-product-thumb mod-product-thumb--lg" />
+                          <ProductThumb src={p.imageUrl} alt={p.name} className="mod-product-thumb mod-product-thumb--lg" product={p} />
                         </td>
                         <td>{p.name}<br /><small className="mod-flag-item__meta">{p.vendorName}</small></td>
                         <td><span className="mod-badge mod-badge--flagged">{p.imageFlag}</span></td>

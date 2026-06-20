@@ -200,9 +200,9 @@ const ModeratorHubPage = () => {
         </section>
 
         <div className="moderator-sticky-cta" aria-label="Actions rapides modération">
-          <VisitorRouteLink route="/visitor" className="moderator-sticky-cta__btn moderator-sticky-cta__btn--ghost">
-            Visiteur
-          </VisitorRouteLink>
+          <Link to="/contact" className="moderator-sticky-cta__btn moderator-sticky-cta__btn--ghost">
+            Contact
+          </Link>
           <Link to="/login" className="moderator-sticky-cta__btn moderator-sticky-cta__btn--primary">
             Connexion pro
           </Link>
@@ -211,7 +211,6 @@ const ModeratorHubPage = () => {
         <footer className="moderator-footer">
           <div className="moderator-footer__links">
             <Link to="/">Accueil</Link>
-            <Link to="/visitor">Visiteur</Link>
             <Link to="/vendor">Vendeur</Link>
             <Link to="/login">Connexion</Link>
           </div>

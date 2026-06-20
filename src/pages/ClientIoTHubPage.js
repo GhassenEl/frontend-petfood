@@ -16,6 +16,7 @@ import AdvancedIoTDevicesPanel from '../components/AdvancedIoTDevicesPanel';
 import IoTLiveStatusBar from '../components/IoTLiveStatusBar';
 import IoTAnomalyPanel from '../components/IoTAnomalyPanel';
 import IoTMobileBridgePanel from '../components/IoTMobileBridgePanel';
+import FoodDistributionPanel from '../components/FoodDistributionPanel';
 import DemoModePill from '../components/DemoModePill';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import useIoTLive from '../hooks/useIoTLive';
@@ -166,6 +167,8 @@ const ClientIoTHubPage = () => {
         <>
           {tab === 'distribution' && (
             <>
+              <FoodDistributionPanel pack={d} demoMode={d.mode === 'demo'} />
+
               <div className="iot-stats-grid">
                 <Stat value={`${c.feedersOnline || 0}/${c.feeders || 0}`} label="Distributeurs" color="#059669" />
                 <Stat value={`${c.feederCamsOnline ?? 1}/${c.feederCams ?? 1}`} label="ESP32-CAM" color="#7c3aed" />

@@ -105,7 +105,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: url('https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=1600&q=60') center/cover;
+  background: url('/images/heroes/pets-hero.svg') center/cover;
   opacity: 0.12;
   pointer-events: none;
 }

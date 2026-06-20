@@ -7,7 +7,6 @@ export const ROLE_HOMES = {
   vet: '/vet/dashboard',
   vendor: '/vendor/dashboard',
   moderator: '/moderator/dashboard',
-  visitor: '/visitor',
 };
 
 export const getRoleHome = (role) => ROLE_HOMES[role] || '/';

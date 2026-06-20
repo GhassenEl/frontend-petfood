@@ -526,20 +526,20 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
       return;
     }
 
-    const visitorNav = {
-      'Simulateur nutrition': '/visitor/tools?tab=simulator',
-      'Comparer produits': '/visitor/tools?tab=compare',
-      'Catalogue produits': '/visitor/products',
+    const publicNav = {
+      Recommandations: '/register',
+      'Simulateur nutrition': '/register',
+      'Catalogue produits': '/register',
       'Devenir vendeur': '/vendor#devenir-partenaire',
       'Hub vendeur': '/vendor',
       Connexion: '/login',
-      'Hub visiteur': '/visitor',
-      'Packs alimentaires': '/visitor/tools?tab=packs',
-      'Races & besoins': '/visitor/tools?tab=breeds',
+      Accueil: '/',
+      Inscription: '/register',
+      Contact: '/contact',
     };
-    if (variant === 'visitor' && visitorNav[cleanReply]) {
+    if (variant === 'visitor' && publicNav[cleanReply]) {
       setIsOpen(false);
-      navigate(visitorNav[cleanReply]);
+      navigate(publicNav[cleanReply]);
       return;
     }
 

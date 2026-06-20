@@ -35,7 +35,6 @@ import AdminSystemConfigPage from './pages/AdminSystemConfigPage';
 import AdminSecurityPage from './pages/AdminSecurityPage';
 import AdminIntelligentSecurityPage from './pages/AdminIntelligentSecurityPage';
 import AdminModeratorsPage from './pages/AdminModeratorsPage';
-import AdminVisitorsPage from './pages/AdminVisitorsPage';
 import AdminLiveAudiencePage from './pages/AdminLiveAudiencePage';
 import AdminRefundsPage from './pages/AdminRefundsPage';
 import AdminActivityLogsPage from './pages/AdminActivityLogsPage';
@@ -122,12 +121,7 @@ import ClientPetsPage from './pages/ClientPetsPage';
 import ClientPetPassportPage from './pages/ClientPetPassportPage';
 import PlatformServicesPage from './pages/PlatformServicesPage';
 import MarketingLandingPage from './pages/MarketingLandingPage';
-import VisitorHubPage from './pages/VisitorHubPage';
-import VisitorProductsPage from './pages/VisitorProductsPage';
-import VisitorInfoPage from './pages/VisitorInfoPage';
-import VisitorToolsPage from './pages/VisitorToolsPage';
-import VisitorIntelligenceHubPage from './pages/VisitorIntelligenceHubPage';
-import VisitorLayout from './layouts/VisitorLayout';
+import PublicLayout from './layouts/PublicLayout';
 import VendorHubPage from './pages/VendorHubPage';
 import ModeratorHubPage from './pages/ModeratorHubPage';
 import VendorLayout from './layouts/VendorLayout';
@@ -158,6 +152,7 @@ import ClientFamilyPage from './pages/ClientFamilyPage';
 import ClientSubscriptionsPage from './pages/ClientSubscriptionsPage';
 import ClientSmartCommercePage from './pages/ClientSmartCommercePage';
 import AdminCrmPage from './pages/AdminCrmPage';
+import AdminDigitalMarketingPage from './pages/AdminDigitalMarketingPage';
 import AdminMlAgentPage from './pages/AdminMlAgentPage';
 import AdminIncidentsMlPage from './pages/AdminIncidentsMlPage';
 import AdminBlogArticles from './pages/AdminBlogArticles';
@@ -230,12 +225,8 @@ const App = () => {
         <Route path="/forgot-password" element={<AuthMobileRoute title="Mot de passe"><ForgotPasswordPage /></AuthMobileRoute>} />
         <Route path="/reset-password" element={<AuthMobileRoute title="Réinitialiser"><ResetPasswordPage /></AuthMobileRoute>} />
         <Route path="/login" element={<AuthMobileRoute title="Connexion"><LoginPage /></AuthMobileRoute>} />
-        <Route path="/visitor" element={<VisitorHubPage />} />
-        <Route path="/visitor/products" element={<VisitorProductsPage />} />
-        <Route path="/visitor/info" element={<VisitorInfoPage />} />
-        <Route path="/visitor/tools" element={<VisitorToolsPage />} />
-        <Route path="/visitor/intelligence" element={<VisitorIntelligenceHubPage />} />
-        <Route path="/contact" element={<VisitorLayout><ContactPage /></VisitorLayout>} />
+        <Route path="/visitor/*" element={<Navigate to="/" replace />} />
+        <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
         <Route path="/vendor" element={<VendorHubPage />} />
         <Route path="/moderator" element={<ModeratorHubPage />} />
         <Route path="/capabilities" element={<CapabilitiesRoute user={null} />} />
@@ -303,7 +294,6 @@ const App = () => {
       <Route path="/admin/livreurs" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminLivreurs /></AdminLayout></RoleRoute>} />
       <Route path="/admin/vendors" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVendorsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/vendors/:id" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVendorDetailPage /></AdminLayout></RoleRoute>} />
-      <Route path="/admin/visitors" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVisitorsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/live-audience" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminLiveAudiencePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/refunds" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRefundsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/system" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminSystemConfigPage /></AdminLayout></RoleRoute>} />
@@ -325,6 +315,7 @@ const App = () => {
       <Route path="/capabilities" element={<CapabilitiesRoute user={user} />} />
       <Route path="/admin/blog-articles" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminBlogArticles /></AdminLayout></RoleRoute>} />
       <Route path="/admin/crm" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminCrmPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/digital-marketing" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDigitalMarketingPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/rehabilitation" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRehabilitationPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/ml-agent" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminMlAgentPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/intelligence" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><IntelligencePlatformPage /></AdminLayout></RoleRoute>} />
@@ -394,7 +385,7 @@ const App = () => {
       <Route path="/contact" element={
         user?.role === 'client'
           ? <RoleRoute user={user} roles={['client']}><ClientLayout><ContactPage /></ClientLayout></RoleRoute>
-          : <VisitorLayout><ContactPage /></VisitorLayout>
+          : <PublicLayout><ContactPage /></PublicLayout>
       } />
       <Route path="/store-locator" element={<RoleRoute user={user} roles={['client']}><ClientLayout><StoreLocatorPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-cities" element={<RoleRoute user={user} roles={['client']}><ClientLayout><PlatformCitiesPage /></ClientLayout></RoleRoute>} />
@@ -448,11 +439,7 @@ const App = () => {
       <Route path="/vet/intelligence" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetIntelligenceHubPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/rehabilitation" element={<RoleRoute user={user} roles={['vet']}><VetLayout><AdminRehabilitationPage /></VetLayout></RoleRoute>} />
 
-      <Route path="/visitor" element={<VisitorHubPage />} />
-      <Route path="/visitor/products" element={<VisitorProductsPage />} />
-      <Route path="/visitor/info" element={<VisitorInfoPage />} />
-      <Route path="/visitor/tools" element={<VisitorToolsPage />} />
-      <Route path="/visitor/intelligence" element={<VisitorIntelligenceHubPage />} />
+      <Route path="/visitor/*" element={<Navigate to="/" replace />} />
       <Route path="/vendor" element={<VendorHubPage />} />
       <Route path="/moderator" element={<ModeratorHubPage />} />
 

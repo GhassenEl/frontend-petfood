@@ -78,13 +78,10 @@ const PowerBiDashboardPanel = ({
         { label: 'Ponctualité livraison', value: `${kpi.deliveryOnTime ?? '—'}%`, icon: BarChart3, tone: 'pbi-kpi--teal' },
       ];
 
-  const regionData = [
-    { name: 'Grand Tunis', value: 42 },
-    { name: 'Sfax', value: 18 },
-    { name: 'Sousse', value: 14 },
-    { name: 'Nabeul', value: 11 },
-    { name: 'Autres', value: 15 },
-  ];
+  const regionData = (DEMO_ADMIN_ANALYTICS.biCharts?.regionDistribution || []).map((r) => ({
+    name: r.name,
+    value: r.value,
+  }));
 
   return (
     <motion.section
@@ -183,12 +180,12 @@ const PowerBiDashboardPanel = ({
               <article className="pbi-chart-card">
                 <h3>Commandes par jour</h3>
                 <ResponsiveContainer width="100%" height={compact ? 200 : 260}>
-                  <BarChart data={dailyData.length ? dailyData : [{ name: '—', value: 0 }]}>
+                  <BarChart data={dailyData.length ? dailyData : [{ name: '—', commandes: 0 }]}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                     <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                    <YAxis tick={{ fontSize: 11 }} />
-                    <Tooltip contentStyle={tooltipStyle} />
-                    <Bar dataKey="value" fill="#12239E" radius={[6, 6, 0, 0]} />
+                    <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                    <Tooltip contentStyle={tooltipStyle} formatter={(v) => [v, 'Commandes']} />
+                    <Bar dataKey="commandes" fill="#12239E" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </article>

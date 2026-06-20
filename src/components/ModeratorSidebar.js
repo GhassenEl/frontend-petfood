@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
 import ThemeToggles from './ThemeToggles';
 import PetfoodLogo from './PetfoodLogo';
+import SidebarAvatar from './SidebarAvatar';
 
 const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
-  const [sidebarImageError, setSidebarImageError] = useState(false);
   const location = useLocation();
 
   const sections = [
@@ -48,18 +48,7 @@ const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
 
       <div className="sidebar-user">
         <div className="user-info">
-          {!sidebarImageError ? (
-            <img
-              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=face"
-              alt="Profil modérateur"
-              className="w-12 h-12 rounded-full object-cover ring-2 ring-amber-300/50"
-              onError={() => setSidebarImageError(true)}
-            />
-          ) : (
-            <div className="avatar w-12 h-12 flex items-center justify-center bg-gradient-to-br from-amber-500 to-amber-600 text-white font-bold text-sm rounded-full">
-              🛡️ {user?.name ? user.name.charAt(0).toUpperCase() : 'M'}
-            </div>
-          )}
+          <SidebarAvatar user={user} role="moderator" className="w-12 h-12 rounded-full object-cover ring-2 ring-amber-300/50" />
           <div>
             <p>{user?.name || 'Modérateur'}</p>
             <p>Modérateur</p>

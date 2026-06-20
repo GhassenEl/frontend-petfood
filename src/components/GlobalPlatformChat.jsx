@@ -21,7 +21,6 @@ const LAYOUT_CHAT_PREFIXES = [
   '/vet/',
   '/vendor',
   '/moderator',
-  '/visitor',
   '/contact',
 ];
 

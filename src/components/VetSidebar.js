@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import NotificationBell from './NotificationBell';
 import ThemeToggles from './ThemeToggles';
 import ConfigSidebarNav from './platform/ConfigSidebarNav';
 import useVetClinicalOverview from '../hooks/useVetClinicalOverview';
 import { VET_SIDEBAR_SECTIONS, getVetSidebarBadge } from '../config/vetSidebarConfig';
 import PetfoodLogo from './PetfoodLogo';
+import SidebarAvatar from './SidebarAvatar';
 import '../pages/VetPages.css';
 
 const VetSidebar = ({ onLogout, user, onNavigate }) => {
-  const [sidebarImageError, setSidebarImageError] = useState(false);
   const { overview } = useVetClinicalOverview();
 
   return (
@@ -19,18 +19,7 @@ const VetSidebar = ({ onLogout, user, onNavigate }) => {
 
       <div className="sidebar-user">
         <div className="user-info">
-          {!sidebarImageError ? (
-            <img
-              src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop&crop=face"
-              alt="Profil vétérinaire"
-              className="w-12 h-12 rounded-full object-cover ring-2 ring-sky-300/50"
-              onError={() => setSidebarImageError(true)}
-            />
-          ) : (
-            <div className="avatar w-12 h-12 flex items-center justify-center bg-gradient-to-br from-sky-500 to-sky-600 text-white font-bold text-sm rounded-full">
-              🩺 {user?.name ? user.name.charAt(0).toUpperCase() : 'V'}
-            </div>
-          )}
+          <SidebarAvatar user={user} role="vet" className="w-12 h-12 rounded-full object-cover ring-2 ring-sky-300/50" />
           <div>
             <p>{user?.name || 'Vétérinaire'}</p>
             <p>Vétérinaire</p>

@@ -6,6 +6,7 @@ import ThemeToggles from './ThemeToggles';
 import ConfigSidebarNav from './platform/ConfigSidebarNav';
 import { CLIENT_SIDEBAR_SECTIONS } from '../config/clientSidebarConfig';
 import PetfoodLogo from './PetfoodLogo';
+import SidebarAvatar from './SidebarAvatar';
 
 const petEmojis = {
   dog: '🐶',
@@ -24,7 +25,6 @@ const petLabels = {
 };
 
 const ClientSidebar = ({ onLogout, onNavigate }) => {
-  const [sidebarImageError, setSidebarImageError] = useState(false);
   const navigate = useNavigate();
   const [profile, setProfile] = useState({
     name: '',
@@ -75,43 +75,18 @@ const ClientSidebar = ({ onLogout, onNavigate }) => {
         title="Cliquez pour voir votre profil"
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {!sidebarImageError ? (
-            <img 
-              src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=100&h=100&fit=crop&crop=face" 
-              alt="Profile" 
-              style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-                boxShadow: '0 4px 12px rgba(39,174,96,0.25)',
-                flexShrink: 0,
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
-              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-              onError={() => setSidebarImageError(true)}
-            />
-          ) : (
-            <div 
-              style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg,#27ae60,#2ecc71)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.2rem',
-                fontWeight: 700,
-                color: 'white',
-                boxShadow: '0 4px 12px rgba(39,174,96,0.25)',
-                flexShrink: 0
-              }}
-            >
-              🛒 {profile.name ? profile.name.charAt(0).toUpperCase() : 'C'}
-            </div>
-          )}
+          <SidebarAvatar
+            user={profile}
+            role="client"
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              objectFit: 'cover',
+              boxShadow: '0 4px 12px rgba(39,174,96,0.25)',
+              flexShrink: 0,
+            }}
+          />
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: '#333', lineHeight: 1.3 }}>
               {profile.name || 'Client'}

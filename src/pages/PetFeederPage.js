@@ -21,6 +21,15 @@ import {
   DEMO_FEEDER_PETS,
 } from '../utils/clientDemoData';
 import FeederRealtimeAlerts from '../components/FeederRealtimeAlerts';
+import {
+  FeederLiveBowl,
+  FeederScheduleTimeline,
+  FeederPipelineStrip,
+  getScheduleSlots,
+  getNextMeal,
+} from '../components/FoodDistributionPanel';
+import { analyzeFeederHabits } from '../utils/feederHabitAnalyzer';
+import '../pages/ClientIoTHub.css';
 
 const DEMO_FEEDER_ID = 'demo-feeder-1';
 const isDemoFeederId = (id) => id === DEMO_FEEDER_ID || String(id || '').startsWith('demo-');
@@ -369,6 +378,16 @@ const PetFeederPage = () => {
     return log.eventType === logFilter;
   });
 
+  const scheduleSlots = getScheduleSlots(feeder?.schedules || [], history);
+  const nextMeal = getNextMeal(scheduleSlots);
+  const habitAnalysis = feeder ? analyzeFeederHabits({
+    feeder,
+    stats,
+    plan,
+    history,
+    schedules: feeder.schedules || [],
+  }) : null;
+
   const chartData = (stats?.consumptionByDay || []).map((d) => ({
     ...d,
     label: new Date(d.date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' }),
@@ -465,6 +484,36 @@ const PetFeederPage = () => {
           ) : feeder && (
             <>
               <FeederRealtimeAlerts alerts={realtimeAlerts} realtime />
+
+              <FeederPipelineStrip />
+
+              <div className="fd-panel__grid" style={{ marginBottom: 20 }}>
+                <FeederLiveBowl
+                  reservoirPercent={feeder.reservoirPercent}
+                  isLowFood={feeder.isLowFood}
+                  petName={plan?.pet?.name || 'Animal'}
+                  animalPresent={feeder.animalPresent}
+                  todayGrams={stats?.todayGrams ?? 0}
+                  dailyTarget={plan?.dailyGrams || stats?.dailyAverage || 95}
+                  live={feeder.status === 'online'}
+                />
+                <FeederScheduleTimeline slots={scheduleSlots} nextMeal={nextMeal} />
+              </div>
+
+              {habitAnalysis && (habitAnalysis.insights.length > 0 || habitAnalysis.healthScore < 80) && (
+                <div className="fd-insights" style={{ marginBottom: 20 }}>
+                  <div className="fd-insight fd-insight--info">
+                    <span>💚</span>
+                    <p>Score santé alimentation : <strong>{habitAnalysis.healthScore}/100</strong></p>
+                  </div>
+                  {habitAnalysis.insights.slice(0, 2).map((ins, i) => (
+                    <div key={i} className="fd-insight fd-insight--info">
+                      <span>{ins.icon}</span>
+                      <p>{ins.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* KPIs */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>

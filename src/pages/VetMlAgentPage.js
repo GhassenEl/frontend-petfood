@@ -7,6 +7,8 @@ import {
 import useVetMlAgents from '../hooks/useVetMlAgents';
 import useVetClinicalMlAgent from '../hooks/useVetClinicalMlAgent';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import VetAiBiChartsPanel from '../components/VetAiBiChartsPanel';
+import { DEMO_VET_BI } from '../utils/vetDemoData';
 
 const TABS = [
   { id: 'clinical', label: 'Anomalies & maladie', icon: Activity },
@@ -71,6 +73,8 @@ const VetMlAgentPage = () => {
           </button>
         ))}
       </div>
+
+      <VetAiBiChartsPanel biData={DEMO_VET_BI} showBiSection={false} compact />
 
       {isLoading ? (
         <p style={{ color: '#94a3b8' }}>Analyse en cours…</p>

@@ -6,7 +6,7 @@ import VetLayout from '../layouts/VetLayout';
 import VendorLayout from '../layouts/VendorLayout';
 import ModeratorLayout from '../layouts/ModeratorLayout';
 import ServiceClientLayout from '../layouts/ServiceClientLayout';
-import VisitorLayout from '../layouts/VisitorLayout';
+import PublicLayout from '../layouts/PublicLayout';
 import PlatformCapabilitiesPage from '../pages/PlatformCapabilitiesPage';
 
 const LAYOUT_BY_ROLE = {
@@ -23,9 +23,9 @@ const LAYOUT_BY_ROLE = {
 const CapabilitiesRoute = ({ user }) => {
   if (!user) {
     return (
-      <VisitorLayout>
+      <PublicLayout>
         <PlatformCapabilitiesPage />
-      </VisitorLayout>
+      </PublicLayout>
     );
   }
   const Layout = LAYOUT_BY_ROLE[user.role] || ClientLayout;

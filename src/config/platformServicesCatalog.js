@@ -14,7 +14,6 @@ export const PLATFORM_SERVICE_CATEGORIES = [
   { id: 'admin', label: 'Administration', icon: '⚙️' },
   { id: 'livreur', label: 'Livraison (livreur)', icon: '🛵' },
   { id: 'vet', label: 'Espace vétérinaire', icon: '🏥' },
-  { id: 'visiteur', label: 'Visiteur (public)', icon: '👀' },
   { id: 'vendeur', label: 'Vendeur marketplace', icon: '🏬' },
   { id: 'moderateur', label: 'Modération', icon: '🛡️' },
 ];
@@ -103,7 +102,7 @@ export const PLATFORM_SERVICES = [
   {
     id: 'platform-compliance',
     category: 'ecosystem',
-    roles: ['client', 'visitor'],
+    roles: ['client'],
     label: 'Conformité ISO & environnement',
     description: 'Normes ISO, certifications mondiales, engagements écologiques et audits qualité.',
     route: '/compliance',
@@ -497,17 +496,6 @@ export const PLATFORM_SERVICES = [
     serviceKey: 'orderService',
   },
   {
-    id: 'admin-visitors',
-    category: 'admin',
-    roles: ['admin'],
-    label: 'Espace visiteur',
-    description: 'Configuration hub public, sections actives et statistiques.',
-    route: '/admin/visitors',
-    icon: '👀',
-    api: 'GET /api/admin/visitors/config',
-    serviceKey: 'adminService',
-  },
-  {
     id: 'admin-vendors',
     category: 'admin',
     roles: ['admin'],
@@ -572,6 +560,17 @@ export const PLATFORM_SERVICES = [
     icon: '📣',
     api: 'GET /api/admin/crm/overview',
     serviceKey: 'adminOpsService',
+  },
+  {
+    id: 'admin-digital-marketing',
+    category: 'admin',
+    roles: ['admin'],
+    label: 'Marketing digital',
+    description: 'Acquisition, campagnes multicanal, SEO, social et newsletter.',
+    route: '/admin/digital-marketing',
+    icon: '📣',
+    api: 'GET /api/admin/marketing/pack',
+    serviceKey: 'digitalMarketingService',
   },
   {
     id: 'admin-stock-bi',
@@ -745,171 +744,6 @@ export const PLATFORM_SERVICES = [
     serviceKey: 'vetService',
   },
 
-  // —— Visiteur (public, sans compte) ——
-  {
-    id: 'visitor-hub',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Hub visiteur',
-    description: 'Découverte de la plateforme, services publics et inscription.',
-    route: '/visitor',
-    icon: '👀',
-  },
-  {
-    id: 'visitor-marketing',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Page d\'accueil marketing',
-    description: 'Présentation des offres, témoignages et FAQ.',
-    route: '/',
-    icon: '🏠',
-  },
-  {
-    id: 'visitor-services-preview',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Aperçu des services',
-    description: 'Catalogue public boutique, santé, IoT et nutrition.',
-    route: '/#services',
-    icon: '📋',
-  },
-  {
-    id: 'visitor-register',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Créer un compte client',
-    description: 'Inscription gratuite pour débloquer commandes et suivi.',
-    route: '/register',
-    icon: '✨',
-  },
-  {
-    id: 'visitor-events-preview',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Compétitions & cadeaux',
-    description: 'Événements plateforme — inscription après connexion client.',
-    route: '/login',
-    icon: '🏆',
-    badge: 'Client',
-  },
-  {
-    id: 'visitor-testimonials',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Avis & témoignages',
-    description: 'Notes 1–5★ sur produits, toilettage, livraison et vétérinaire.',
-    route: '/visitor/info',
-    icon: '⭐',
-  },
-  {
-    id: 'visitor-iot',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'IoT & connecté',
-    description: 'Distributeur ESP32, fontaine et traçabilité — aperçu public.',
-    route: '/#iot',
-    icon: '📡',
-  },
-  {
-    id: 'visitor-tarifs',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Tarifs soins',
-    description: 'Toilettage, pension, dressage — prix indicatifs avant inscription.',
-    route: '/#tarifs',
-    icon: '💰',
-  },
-  {
-    id: 'visitor-partners',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Partenaires & refuges',
-    description: 'Cliniques, refuges, toiletteurs et fournisseurs du réseau.',
-    route: '/#partenaires',
-    icon: '🤝',
-  },
-  {
-    id: 'visitor-acteurs',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Tous les acteurs',
-    description: 'Client, vétérinaire, livreur, vendeur, modérateur, admin.',
-    route: '/#acteurs',
-    icon: '👥',
-  },
-  {
-    id: 'visitor-how',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Comment ça marche',
-    description: 'Trois étapes pour profiter de toute la plateforme PetfoodTN.',
-    route: '/#comment-ca-marche',
-    icon: '📖',
-  },
-  {
-    id: 'visitor-faq',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'FAQ complète',
-    description: 'Réponses sur inscription, espèces, IoT, livraison et partenaires.',
-    route: '/visitor/info',
-    icon: '❓',
-  },
-  {
-    id: 'visitor-login',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Connexion',
-    description: 'Accédez à votre espace client, pro ou modération.',
-    route: '/login',
-    icon: '🔑',
-  },
-  {
-    id: 'visitor-forgot-password',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Réinitialiser mot de passe',
-    description: 'Récupération de compte par e-mail.',
-    route: '/forgot-password',
-    icon: '🔐',
-  },
-  {
-    id: 'visitor-products',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Catalogue produits',
-    description: 'Parcourir, rechercher, filtrer et consulter les fiches produits.',
-    route: '/visitor/products',
-    icon: '🏷️',
-  },
-  {
-    id: 'visitor-promotions',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Promotions',
-    description: 'Produits en promotion et soldes marketplace.',
-    route: '/visitor/products?tab=promos',
-    icon: '🔥',
-  },
-  {
-    id: 'visitor-info',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Informations & avis',
-    description: 'Conseils nutrition, services véto, FAQ et témoignages clients.',
-    route: '/visitor/info',
-    icon: '📚',
-  },
-  {
-    id: 'visitor-tools',
-    category: 'visiteur',
-    roles: ['visiteur'],
-    label: 'Outils PetFoodTN',
-    description: 'Simulateur nutrition, packs alimentaires et guide des races.',
-    route: '/visitor/tools',
-    icon: '🧪',
-  },
-
   // —— Vendeur (public + espace connecté) ——
   {
     id: 'vendor-hub',
@@ -975,15 +809,6 @@ export const PLATFORM_SERVICES = [
     route: '/login',
     icon: '📊',
     badge: 'Connexion',
-  },
-  {
-    id: 'vendor-visitor-link',
-    category: 'vendeur',
-    roles: ['vendeur'],
-    label: 'Espace visiteur',
-    description: 'Découvrir la plateforme côté client avant de vendre.',
-    route: '/visitor',
-    icon: '👀',
   },
   {
     id: 'vendor-dashboard',
@@ -1117,15 +942,6 @@ export const PLATFORM_SERVICES = [
     route: '/login',
     icon: '📊',
     badge: 'Connexion',
-  },
-  {
-    id: 'moderator-visitor-link',
-    category: 'moderateur',
-    roles: ['moderateur'],
-    label: 'Espace visiteur',
-    description: 'Découvrir la plateforme côté client avant de modérer.',
-    route: '/visitor',
-    icon: '👀',
   },
   {
     id: 'moderator-vendor-link',
@@ -1293,8 +1109,8 @@ export const getPublicMarketingCatalog = () => {
   })).filter((c) => c.services.length > 0);
 };
 
-/** Catalogue services visiteur (accès public sans authentification). */
-export const getVisitorCatalog = () => getServicesByCategory('visiteur');
+/** @deprecated Espace visiteur retiré — retourne un catalogue vide. */
+export const getVisitorCatalog = () => [];
 
 /** Catalogue hub vendeur public (sans authentification). */
 export const getVendorPublicCatalog = () =>
@@ -1316,7 +1132,6 @@ export const getModeratorPublicCatalog = () =>
 
 /** Acteurs affichés sur la landing (tous les rôles métier). */
 export const PLATFORM_ACTOR_ROLES = [
-  { id: 'visiteur', label: 'Visiteur', icon: '👀', publicAccess: true },
   { id: 'client', label: 'Client', icon: '🐾', publicAccess: false },
   { id: 'vet', label: 'Vétérinaire', icon: '🩺', publicAccess: false },
   { id: 'livreur', label: 'Livreur', icon: '🛵', publicAccess: false },

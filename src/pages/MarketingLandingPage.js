@@ -16,9 +16,11 @@ import {
 import { fetchMarketingLiveData } from '../services/marketingService';
 import { SERVICE_RATE_CARDS } from '../utils/clientDemoData';
 import MobileBottomNav, { AUTH_PUBLIC_MOBILE_NAV } from '../components/MobileBottomNav';
+import MarketingNewsletterForm from '../components/MarketingNewsletterForm';
 import PlatformComplianceBadges from '../components/PlatformComplianceBadges';
 import PetfoodLogo from '../components/PetfoodLogo';
 import './MarketingLandingPage.css';
+import './AdminDigitalMarketing.css';
 import './PlatformCompliancePage.css';
 
 const renderStars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
@@ -111,7 +113,6 @@ const MarketingLandingPage = () => {
         <div className="mkt-nav__links">
           <a href="#services" className="mkt-nav__link mkt-nav__link--hide-mobile">Services</a>
           <a href="#acteurs" className="mkt-nav__link mkt-nav__link--hide-mobile">Acteurs</a>
-          <Link to="/visitor" className="mkt-nav__link mkt-nav__link--hide-mobile">Visiteur</Link>
           <Link to="/contact" className="mkt-nav__link mkt-nav__link--hide-mobile">Contact</Link>
           <Link to="/vendor" className="mkt-nav__link mkt-nav__link--hide-mobile">Vendeur</Link>
           <Link to="/moderator" className="mkt-nav__link mkt-nav__link--hide-mobile">Modération</Link>
@@ -245,9 +246,6 @@ const MarketingLandingPage = () => {
           ))}
         </div>
         <div className="mkt-actors-footer">
-          <Link to="/visitor" className="mkt-btn mkt-btn--ghost">
-            👀 Explorer en tant que visiteur
-          </Link>
           <Link to="/vendor" className="mkt-btn mkt-btn--ghost">
             🏬 Découvrir l&apos;espace vendeur
           </Link>
@@ -470,6 +468,12 @@ const MarketingLandingPage = () => {
             );
           })}
         </div>
+      </section>
+
+      <section className="mkt-section-newsletter" aria-labelledby="newsletter-title">
+        <h2 id="newsletter-title">Newsletter PetfoodTN</h2>
+        <p>Promotions, conseils nutrition et nouveautés IoT — directement dans votre boîte mail.</p>
+        <MarketingNewsletterForm />
       </section>
 
       <section className="mkt-cta-band">

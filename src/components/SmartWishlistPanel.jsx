@@ -12,7 +12,7 @@ const SmartWishlistPanel = ({ suggestions = [] }) => (
     {!suggestions.length ? (
       <p className="vis-intel-muted">
         Parcourez le catalogue pour activer les suggestions — ou{' '}
-        <Link to="/visitor/products">voir les produits</Link>.
+        <Link to="/register">créer un compte</Link>.
       </p>
     ) : (
       <div className="vis-intel-product-grid">

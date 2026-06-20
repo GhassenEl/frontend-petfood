@@ -371,7 +371,7 @@ const ContactPage = () => {
             Poser une question à l&apos;équipe
           </button>
           <Link
-            to="/visitor/info?tab=faq"
+            to="/#faq"
             style={{
               padding: '12px 18px',
               borderRadius: 12,

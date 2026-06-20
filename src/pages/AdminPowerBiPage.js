@@ -6,11 +6,19 @@ import {
 } from 'lucide-react';
 import useAnalyticsHub from '../hooks/useAnalyticsHub';
 import PowerBiDashboardPanel from '../components/PowerBiDashboardPanel';
+import AdminPowerBiInsightsPanel from '../components/AdminPowerBiInsightsPanel';
 import { fetchDatasetsCatalog } from '../services/analyticsHubService';
 import api from '../utils/api';
 import { getStoredToken } from '../utils/authStorage';
 import { isValidToken } from '../utils/jwtSecurity';
-import { DEMO_ADMIN_ANALYTICS, DEMO_ADMIN_DATASETS } from '../utils/adminDemoData';
+import {
+  DEMO_ADMIN_ANALYTICS,
+  DEMO_ADMIN_DATASETS,
+  mergeAdminBiCharts,
+  buildDemoRevenueChart,
+  buildDemoOrdersDailyChart,
+} from '../utils/adminDemoData';
+import { DEMO_LIVREUR_STATS } from '../utils/livreurDemoData';
 
 const severityStyle = {
   high: { bg: '#fee2e2', color: '#991b1b', border: '#fecaca' },
@@ -94,7 +102,17 @@ const AdminPowerBiPage = () => {
         <p style={{ color: '#94a3b8' }}>Chargement du hub analytique…</p>
       ) : (
         <>
-          <PowerBiDashboardPanel showHeader={false} className="pbi-panel--page" />
+          <PowerBiDashboardPanel
+            showHeader={false}
+            className="pbi-panel--page"
+            revenueData={buildDemoRevenueChart()}
+            dailyData={buildDemoOrdersDailyChart()}
+          />
+
+          <AdminPowerBiInsightsPanel
+            biCharts={mergeAdminBiCharts(apiData?.biCharts)}
+            livreurStats={DEMO_LIVREUR_STATS}
+          />
 
           <section style={card} id="alerts">
             <h2 style={h2}>

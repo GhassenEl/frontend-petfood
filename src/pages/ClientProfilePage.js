@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import RegionSelect from '../components/RegionSelect';
+import SidebarAvatar from '../components/SidebarAvatar';
 import { CardContent, Button, TextField, Tabs, Tab, Box, CircularProgress, Alert } from '@mui/material';
 import { User } from 'lucide-react';
 
@@ -103,18 +104,17 @@ const ClientProfilePage = () => {
         {/* Header */}
         <div className="text-center">
           <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-xl px-8 py-4 rounded-3xl shadow-2xl border border-white/50">
-            <img 
-              src="https://images.unsplash.com/photo-1552053831-71594a27632d?w=300&h=300&fit=crop&crop=face" 
-              alt="Client Profile" 
-              className="w-20 h-20 rounded-full object-cover shadow-2xl ring-4 ring-emerald-200/50 hover:scale-105 transition-transform duration-300 cursor-pointer drop-shadow-lg" 
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'flex';
+            <SidebarAvatar
+              user={profile}
+              role="client"
+              style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                boxShadow: '0 8px 24px rgba(16,185,129,0.35)',
               }}
             />
-            <div style={{display: 'none'}} className="flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full shadow-2xl drop-shadow-lg">
-              <User size={28} className="text-white" />
-            </div>
             <div>
               <h1 className="text-4xl font-black bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent mb-1">
                 Mon Profil

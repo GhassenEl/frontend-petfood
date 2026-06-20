@@ -65,7 +65,7 @@ const CookieConsentBanner = () => {
             <p>
               PetfoodTN utilise des cookies essentiels et, avec votre accord, des cookies de préférences,
               analytique et marketing. Consultez notre{' '}
-              <a href="/visitor/info" target="_blank" rel="noopener noreferrer">politique de confidentialité</a>.
+              <a href="/compliance" target="_blank" rel="noopener noreferrer">politique de confidentialité</a>.
             </p>
           </div>
         </div>

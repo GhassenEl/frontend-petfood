@@ -236,17 +236,17 @@ const ROLE_QUESTIONS = {
     {
       keys: ['croquette', 'produit', 'catalogue', 'acheter', 'prix', 'product', 'catalog', 'price', 'منتج', 'سعر'],
       reply: {
-        fr: 'Catalogue : croquettes, pâtées, friandises et accessoires. Parcourez /visitor/products ou la recherche intelligente. Compte client requis pour commander.',
-        en: 'Catalog: kibble, wet food, treats and accessories. Browse /visitor/products or smart search. Client account required to order.',
-        ar: 'الكتalog: croquettes ومعاليب ووجبات خفيفة. تصفح /visitor/products. حساب عميل مطلوب للطلب.',
+        fr: 'Catalogue : croquettes, pâtées, friandises et accessoires. Créez un compte client (/register) pour parcourir la boutique et commander.',
+        en: 'Catalog: kibble, wet food, treats and accessories. Create a client account (/register) to browse and order.',
+        ar: 'الكتalog: croquettes ومعاليب ووجبات خفيفة. أنشئ حساب عميل (/register) للتصفح والطلب.',
       },
     },
     {
       keys: ['nutrition', 'simul', 'calorie', 'kcal', 'race', 'poids', 'weight', 'تغذية', 'سعرات'],
       reply: {
-        fr: 'Simulateur nutrition : /visitor/tools?tab=simulator — besoins caloriques selon poids, race et activité. Comparateur produits disponible aussi.',
-        en: 'Nutrition simulator: /visitor/tools?tab=simulator — calorie needs by weight, breed and activity. Product comparator also available.',
-        ar: 'محاكي التغذية: /visitor/tools?tab=simulator — احتياجات السعرات حسب الوزن والسلالة.',
+        fr: 'Besoins nutritionnels : renseignez le profil de votre animal après inscription (/register). Recommandations IA dans l\'espace client.',
+        en: 'Nutrition needs: set up your pet profile after signup (/register). AI recommendations in the client area.',
+        ar: 'احتياجات التغذية: أضف ملف حيوانك بعد التسجيل (/register). توصيات الذكاء الاصطناعي في مساحة العميل.',
       },
     },
     {
@@ -352,8 +352,8 @@ const ROLE_QUESTIONS = {
     {
       keys: ['utilisateur', 'user', 'client', 'livreur', 'مستخدم'],
       reply: {
-        fr: 'Utilisateurs /admin/users, livreurs /admin/livreurs, vendeurs /admin/vendors, visiteurs /admin/visitors.',
-        en: 'Users /admin/users, couriers /admin/livreurs, vendors /admin/vendors, visitors /admin/visitors.',
+        fr: 'Utilisateurs /admin/users, livreurs /admin/livreurs, vendeurs /admin/vendors.',
+        en: 'Users /admin/users, couriers /admin/livreurs, vendors /admin/vendors.',
         ar: 'المستخدمون /admin/users، السائقون /admin/livreurs، البائعون /admin/vendors.',
       },
     },

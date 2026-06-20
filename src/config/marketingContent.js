@@ -227,14 +227,12 @@ export const MARKETING_FAQ = [
   },
 ];
 
-/** Raccourcis cliquables — hub visiteur (toutes sections publiques). */
+/** Raccourcis — pages publiques (landing, inscription, contact). */
 export const VISITOR_QUICK_LINKS = [
-  { id: 'products', icon: '🏷️', label: 'Produits', route: '/visitor/products' },
-  { id: 'promos', icon: '🔥', label: 'Promotions', route: '/visitor/products?tab=promos' },
-  { id: 'tools', icon: '🧪', label: 'Outils nutrition', route: '/visitor/tools' },
-  { id: 'info', icon: '📚', label: 'Infos & FAQ', route: '/visitor/info' },
+  { id: 'home', icon: '🏠', label: 'Accueil', route: '/' },
+  { id: 'services', icon: '📋', label: 'Services', route: '/#services' },
+  { id: 'faq', icon: '❓', label: 'FAQ', route: '/#faq' },
   { id: 'contact', icon: '📧', label: 'Contact', route: '/contact' },
-  { id: 'reviews', icon: '⭐', label: 'Avis clients', route: '/visitor/info' },
   { id: 'vendor', icon: '🏬', label: 'Espace vendeur', route: '/vendor' },
   { id: 'register', icon: '✨', label: 'Inscription', route: '/register' },
   { id: 'login', icon: '🔑', label: 'Connexion', route: '/login' },
@@ -247,7 +245,6 @@ export const VENDOR_QUICK_LINKS = [
   { id: 'ml', icon: '🤖', label: 'ML vendeur', route: '/vendor#ml-vendeur' },
   { id: 'onboarding', icon: '✨', label: 'Devenir partenaire', route: '/vendor#devenir-partenaire' },
   { id: 'partners', icon: '🤝', label: 'Réseau', route: '/#partenaires' },
-  { id: 'visitor', icon: '👀', label: 'Espace visiteur', route: '/visitor' },
   { id: 'login', icon: '🔑', label: 'Connexion pro', route: '/login' },
   { id: 'register', icon: '📝', label: 'Demande accès', route: '/vendor#devenir-partenaire' },
 ];
@@ -258,26 +255,13 @@ export const MODERATOR_QUICK_LINKS = [
   { id: 'complaints', icon: '⚠️', label: 'Réclamations', route: '/moderator#reclamations' },
   { id: 'events', icon: '🎪', label: 'Événements', route: '/moderator#evenements' },
   { id: 'nlp', icon: '🤖', label: 'Analyse NLP', route: '/moderator#nlp' },
-  { id: 'visitor', icon: '👀', label: 'Espace visiteur', route: '/visitor' },
+  { id: 'home', icon: '🏠', label: 'Accueil', route: '/' },
   { id: 'login', icon: '🔑', label: 'Connexion pro', route: '/login' },
   { id: 'access', icon: '📝', label: 'Demande accès', route: '/moderator#devenir-moderateur' },
 ];
 
-/** Acteurs de la plateforme — section marketing (visiteur & modérateur mis en avant). */
+/** Acteurs de la plateforme — section marketing. */
 export const MARKETING_PLATFORM_ACTORS = [
-  {
-    id: 'visiteur',
-    icon: '👀',
-    title: 'Visiteur',
-    tagline: 'Découvrir sans compte',
-    description:
-      'Parcourez le catalogue public, les témoignages et la présentation IoT. Inscrivez-vous quand vous êtes prêt à commander ou réserver.',
-    highlights: ['Aperçu services', 'FAQ & avis', 'Inscription en 2 min'],
-    ctaLabel: 'Espace visiteur',
-    ctaRoute: '/visitor',
-    accent: '#0ea5e9',
-    featured: true,
-  },
   {
     id: 'client',
     icon: '🐾',

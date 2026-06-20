@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
 import ThemeToggles from './ThemeToggles';
 import PetfoodLogo from './PetfoodLogo';
+import SidebarAvatar from './SidebarAvatar';
 
 const Sidebar = ({ onNavigate, onLogout, user }) => {
-  const [sidebarImageError, setSidebarImageError] = useState(false);
   const navigate = useNavigate();
 
   const sections = [
     {
       title: '📊 Tableau de bord',
       items: [
-        { id: 'dashboard', label: 'Dashboard & BI', icon: '📈' },
+        { id: 'dashboard', label: 'Dashboard', icon: '📈' },
       ],
     },
     {
@@ -26,7 +26,6 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
     {
       title: '📊 Analytics',
       items: [
-        { id: 'business-intelligence', label: 'Business Intelligence', icon: '📈' },
         { id: 'devops', label: 'DevOps & observabilité', icon: '⚙️' },
         { id: 'performance', label: 'Performance plateforme', icon: '⚡' },
         { id: 'nlp-models', label: 'Modèles NLP', icon: '🧠' },
@@ -54,6 +53,8 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'cities', label: 'Réseau villes', icon: '🏙️' },
         { id: 'stock', label: 'Gestion stock', icon: '📦' },
         { id: 'promotions', label: 'Promotions & coupons', icon: '🎟️' },
+        { id: 'digital-marketing', label: 'Marketing digital', icon: '📣' },
+        { id: 'crm', label: 'CRM clients', icon: '🤝' },
         { id: 'users', label: 'Utilisateurs', icon: '👥' },
         { id: 'leave-requests', label: 'Congés / maladie', icon: '🏖️' },
         { id: 'messages', label: 'Messages', icon: '💬' },
@@ -104,18 +105,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         title="Cliquez pour voir votre profil"
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {!sidebarImageError ? (
-            <img
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
-              alt="Admin Profile"
-              className="w-8 h-8 rounded-full object-cover ring-2 ring-orange-300/50 hover:scale-110 transition-transform duration-300"
-              onError={() => setSidebarImageError(true)}
-            />
-          ) : (
-            <div className="avatar inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-600 text-white font-bold text-xs rounded-full ring-2 ring-orange-300/50" style={{ fontSize: '0.85rem' }}>
-              👨‍💼 {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
-            </div>
-          )}
+          <SidebarAvatar user={user} role="admin" />
           <div>
             <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 700, color: '#333' }}>
               {user?.name || 'Admin'}
