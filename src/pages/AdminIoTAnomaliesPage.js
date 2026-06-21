@@ -19,11 +19,13 @@ const mapAnomalyToRow = (a) => ({
 
 const AdminIoTAnomaliesPage = () => {
   const [anomalies, setAnomalies] = useState([]);
+  const [security, setSecurity] = useState(null);
   const [busy, setBusy] = useState(null);
 
   const refresh = useCallback(async () => {
     try {
       const pack = await fetchIoTPack();
+      setSecurity(pack.security || null);
       const detected = (pack.anomalies || buildIoTAnomalies(pack)).map(mapAnomalyToRow);
       setAnomalies((prev) => {
         const validated = prev.filter((a) => a.validated);
@@ -70,6 +72,8 @@ const AdminIoTAnomaliesPage = () => {
           Alertes PetFoodIoT en temps réel — température, humidité, consommation et ESP32-CAM.
           {' '}
           <Link to="/admin/food-quality-cam">ESP32-CAM →</Link>
+          {' · '}
+          <Link to="/client-iot?tab=security">Sécurité IoT →</Link>
         </p>
       </header>
 
@@ -86,6 +90,18 @@ const AdminIoTAnomaliesPage = () => {
           <strong>{anomalies.filter((a) => a.severity === 'high').length}</strong>
           <span>Critiques</span>
         </div>
+        {security && (
+          <>
+            <div className="adm-hub-kpi">
+              <strong>{security.overallScore ?? '—'}</strong>
+              <span>Score sécurité</span>
+            </div>
+            <div className={`adm-hub-kpi${(security.threats?.length || 0) > 0 ? ' adm-hub-kpi--warn' : ''}`}>
+              <strong>{security.threats?.length || 0}</strong>
+              <span>Menaces IoT</span>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="adm-card">

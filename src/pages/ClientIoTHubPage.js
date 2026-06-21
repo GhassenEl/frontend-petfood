@@ -21,6 +21,7 @@ import IoTCommandCenter from '../components/IoTCommandCenter';
 import IoTDevicesRegistryPanel from '../components/IoTDevicesRegistryPanel';
 import IoTNetworkTopologyPanel from '../components/IoTNetworkTopologyPanel';
 import IoTEnvironmentPanel from '../components/IoTEnvironmentPanel';
+import IoTSecurityPanel from '../components/IoTSecurityPanel';
 import DemoModePill from '../components/DemoModePill';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import useIoTLive from '../hooks/useIoTLive';
@@ -42,6 +43,7 @@ const TABS = [
   { id: 'devices', label: 'Appareils', shortLabel: 'Appareils' },
   { id: 'detection', label: 'ESP32-CAM & afficheur', shortLabel: 'Caméra' },
   { id: 'environment', label: 'Environnement', shortLabel: 'Env.' },
+  { id: 'security', label: 'Sécurité', shortLabel: 'Sécu.' },
   { id: 'advanced', label: 'IoT avancé', shortLabel: 'Avancé' },
   { id: 'intelligence', label: 'Intelligence IA', shortLabel: 'IA' },
   { id: 'alerts', label: 'Alertes', shortLabel: 'Alertes' },
@@ -97,6 +99,7 @@ const ClientIoTHubPage = () => {
   useEffect(() => {
     const t = searchParams.get('tab');
     if (t === 'food-quality') setTab('detection');
+    else if (t === 'security') setTab('security');
     else if (t && TABS.some((x) => x.id === t)) setTab(t);
   }, [searchParams]);
 
@@ -139,6 +142,11 @@ const ClientIoTHubPage = () => {
                     <strong>{d.networkHealth.score}</strong> Réseau
                   </span>
                 )}
+                {d.security?.overallScore != null && (
+                  <span className="iot-hub-hero__score">
+                    <strong>{d.security.overallScore}</strong> Sécurité
+                  </span>
+                )}
                 <span className="iot-hub-hero__score">
                   <strong>{c.feedersOnline + (c.feederCamsOnline ?? 0) + (c.waterOnline || 0)}</strong> En ligne
                 </span>
@@ -172,6 +180,9 @@ const ClientIoTHubPage = () => {
             className={`iot-tab${tab === t.id ? ' is-active' : ''}`}
           >
             {isMobile ? t.shortLabel : t.label}
+            {t.id === 'security' && (d.security?.threats?.length || 0) > 0 && (
+              <span className="iot-tab-badge">{d.security.threats.length}</span>
+            )}
             {t.id === 'devices' && (d.devices?.length || 0) > 0 && (
               <span className="iot-tab-badge">{d.devices.length}</span>
             )}
@@ -357,6 +368,12 @@ const ClientIoTHubPage = () => {
                 <IoTNetworkTopologyPanel networkHealth={d.networkHealth} mqtt={d.mqtt} />
               </div>
             </>
+          )}
+
+          {tab === 'security' && (
+            <div className="iot-card">
+              <IoTSecurityPanel />
+            </div>
           )}
 
           {tab === 'advanced' && (

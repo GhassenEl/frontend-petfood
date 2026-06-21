@@ -1,0 +1,383 @@
+.iot-sec-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.iot-sec-hero {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 22px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #0f766e 100%);
+  color: #fff;
+}
+
+.iot-sec-hero h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.iot-sec-hero p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.88;
+  max-width: 480px;
+}
+
+.iot-sec-score-ring {
+  text-align: center;
+  padding: 12px 20px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.iot-sec-score-ring strong {
+  display: block;
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.iot-sec-score-ring span {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+
+.iot-sec-threats {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+.iot-sec-threats h4 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.iot-sec-threat {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  border-left: 4px solid;
+}
+
+.iot-sec-threat--high {
+  background: #fef2f2;
+  border-color: #dc2626;
+  color: #991b1b;
+}
+
+.iot-sec-threat--medium {
+  background: #fffbeb;
+  border-color: #d97706;
+  color: #92400e;
+}
+
+.iot-sec-threat--low {
+  background: #f8fafc;
+  border-color: #64748b;
+  color: #475569;
+}
+
+.iot-sec-threat strong {
+  display: block;
+  font-size: 13px;
+}
+
+.iot-sec-threat small {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.iot-sec-empty {
+  padding: 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  color: #166534;
+  font-size: 13px;
+  margin: 0;
+}
+
+.iot-sec-devices {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px 18px;
+  overflow-x: auto;
+}
+
+.iot-sec-devices h4 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.iot-sec-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 640px;
+}
+
+.iot-sec-table th,
+.iot-sec-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.iot-sec-table th {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.iot-sec-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.iot-sec-badge--ok {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.iot-sec-badge--warn {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.iot-sec-badge--bad {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.iot-sec-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.iot-sec-btn {
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.iot-sec-btn:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.iot-sec-btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.iot-sec-btn--danger {
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.iot-sec-checklist {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+.iot-sec-checklist h4 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.iot-sec-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f8fafc;
+  font-size: 13px;
+}
+
+.iot-sec-check:last-child {
+  border-bottom: none;
+}
+
+.iot-sec-check__icon {
+  font-size: 16px;
+  width: 22px;
+  text-align: center;
+}
+
+.iot-sec-prefs {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+.iot-sec-prefs h4 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.iot-sec-prefs > p {
+  margin: 0 0 14px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.iot-sec-pref-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.iot-sec-pref-row:last-child {
+  border-bottom: none;
+}
+
+.iot-sec-pref-row input {
+  margin-top: 3px;
+  accent-color: #4f46e5;
+  width: 18px;
+  height: 18px;
+}
+
+.iot-sec-pref-row strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.iot-sec-pref-row small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.iot-sec-audit {
+  background: #0f172a;
+  border-radius: 14px;
+  padding: 16px 18px;
+  color: #e2e8f0;
+}
+
+.iot-sec-audit h4 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.iot-sec-audit-item {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #1e293b;
+  font-size: 12px;
+}
+
+.iot-sec-audit-item:last-child {
+  border-bottom: none;
+}
+
+.iot-sec-audit-item time {
+  color: #94a3b8;
+  white-space: nowrap;
+  min-width: 72px;
+}
+
+.iot-sec-audit-item--warning {
+  color: #fbbf24;
+}
+
+.iot-sec-pillars {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.iot-sec-pillar {
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  font-size: 12px;
+}
+
+.iot-sec-pillar span {
+  font-size: 20px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.iot-sec-pillar strong {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.iot-sec-pillar p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.iot-sec-feedback {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.iot-sec-feedback--ok {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #6ee7b7;
+}
+
+.iot-sec-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .iot-sec-grid2 {
+    grid-template-columns: 1fr;
+  }
+}

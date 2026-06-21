@@ -13,6 +13,16 @@ const DEFAULTS = {
   decidedAt: null,
 };
 
+const SECURITY_DEFAULTS = {
+  mqttTlsEnabled: true,
+  encryptTelemetry: true,
+  blockUnknownDevices: true,
+  localProcessingOnly: false,
+  twoFactorPairing: false,
+};
+
+const SECURITY_STORAGE_KEY = 'petfoodtn:security:iot';
+
 const read = () => {
   if (!isCategoryAllowed('preferences')) return { ...DEFAULTS };
   try {
@@ -50,10 +60,49 @@ export const setVetAlertSharingEnabled = (enabled) =>
 
 export const hasIoTPrivacyDecision = () => Boolean(read().decidedAt);
 
+const readSecurity = () => {
+  if (!isCategoryAllowed('preferences')) return { ...SECURITY_DEFAULTS };
+  try {
+    const raw = localStorage.getItem(SECURITY_STORAGE_KEY);
+    if (!raw) return { ...SECURITY_DEFAULTS };
+    return { ...SECURITY_DEFAULTS, ...JSON.parse(raw) };
+  } catch {
+    return { ...SECURITY_DEFAULTS };
+  }
+};
+
+const writeSecurity = (patch) => {
+  if (!isCategoryAllowed('preferences')) return readSecurity();
+  const next = { ...readSecurity(), ...patch };
+  try {
+    localStorage.setItem(SECURITY_STORAGE_KEY, JSON.stringify(next));
+  } catch { /* quota */ }
+  window.dispatchEvent(new Event('petfood:privacy-preferences'));
+  return next;
+};
+
+export const getIoTSecurityPreferences = () => readSecurity();
+
+export const setMqttTlsEnabled = (enabled) => writeSecurity({ mqttTlsEnabled: Boolean(enabled) });
+
+export const setEncryptTelemetry = (enabled) => writeSecurity({ encryptTelemetry: Boolean(enabled) });
+
+export const setBlockUnknownDevices = (enabled) => writeSecurity({ blockUnknownDevices: Boolean(enabled) });
+
+export const setLocalProcessingOnly = (enabled) => writeSecurity({ localProcessingOnly: Boolean(enabled) });
+
+export const setTwoFactorPairing = (enabled) => writeSecurity({ twoFactorPairing: Boolean(enabled) });
+
 export default {
   getIoTPrivacyPreferences,
   isCameraCaptureAllowed,
   isVetAlertSharingAllowed,
   setCameraCaptureEnabled,
   setVetAlertSharingEnabled,
+  getIoTSecurityPreferences,
+  setMqttTlsEnabled,
+  setEncryptTelemetry,
+  setBlockUnknownDevices,
+  setLocalProcessingOnly,
+  setTwoFactorPairing,
 };
