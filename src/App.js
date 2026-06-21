@@ -171,6 +171,8 @@ import AdminCitiesHubPage from './pages/AdminCitiesHubPage';
 import PlatformCitiesPage from './pages/PlatformCitiesPage';
 import ClientEcosystemHubPage from './pages/ClientEcosystemHubPage';
 import ClientAdvancedAiPage from './pages/ClientAdvancedAiPage';
+import ClientIntelligenceAutomationPage from './pages/ClientIntelligenceAutomationPage';
+import RecommendationHubPage from './pages/RecommendationHubPage';
 import ClientAIAgentPage from './pages/ClientAIAgentPage';
 import ClientMlAgentPage from './pages/ClientMlAgentPage';
 import ClientWellnessPage from './pages/ClientWellnessPage';
@@ -282,6 +284,7 @@ const App = () => {
       <Route path="/admin/powerbi" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPowerBiPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/bi" element={<Navigate to="/admin/powerbi" replace />} />
       <Route path="/admin/nlp-models" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminNlpModelsPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/recommendations" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><RecommendationHubPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/orders" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminOrders /></AdminLayout></RoleRoute>} />
       <Route path="/admin/reviews" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminReviews /></AdminLayout></RoleRoute>} />
       <Route path="/admin/complaints" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminComplaints /></AdminLayout></RoleRoute>} />
@@ -370,6 +373,8 @@ const App = () => {
       <Route path="/client-emotions" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientOwnerEmotionsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAIAgentPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-advanced-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAdvancedAiPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-intelligence" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientIntelligenceAutomationPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-recommendations" element={<RoleRoute user={user} roles={['client']}><ClientLayout><RecommendationHubPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-explainable-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientExplainableAiPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-ml-agent" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientMlAgentPage /></ClientLayout></RoleRoute>} />
       <Route path="/smart-food-agent" element={<RoleRoute user={user} roles={['client']}><ClientLayout><SmartFoodAgentPage /></ClientLayout></RoleRoute>} />
@@ -404,6 +409,7 @@ const App = () => {
       <Route path="/livreur/leave-requests" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><StaffLeavePage roleLabel="Livreur" demoFallback /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/ml" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMlPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/intelligence" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurIntelligenceHubPage /></LivreurLayout></RoleRoute>} />
+      <Route path="/livreur/recommendations" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><RecommendationHubPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/delivery-cold-chain" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><DeliveryColdChainSurveillancePage role="livreur" /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/stats" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurStatsPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/bi" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><RoleBiDashboardPage role="livreur" /></LivreurLayout></RoleRoute>} />
@@ -431,6 +437,7 @@ const App = () => {
       <Route path="/vet/history" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetHistoryPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/contact-requests" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetContactRequestsPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/profile" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetProfilePage /></VetLayout></RoleRoute>} />
+      <Route path="/vet/recommendations" element={<RoleRoute user={user} roles={['vet']}><VetLayout><RecommendationHubPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/leave-requests" element={<RoleRoute user={user} roles={['vet']}><VetLayout><StaffLeavePage roleLabel="Vétérinaire" demoFallback /></VetLayout></RoleRoute>} />
       <Route path="/vet/platform-services" element={<RoleRoute user={user} roles={['vet']}><VetLayout><PlatformServicesPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/teleconsult" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetTeleconsultPage /></VetLayout></RoleRoute>} />
@@ -455,9 +462,11 @@ const App = () => {
       <Route path="/vendor/bi" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RoleBiDashboardPage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/platform-services" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><PlatformServicesPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/profile" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><AdminProfilePage /></VendorLayout></RoleRoute>} />
+      <Route path="/vendor/recommendations" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RecommendationHubPage /></VendorLayout></RoleRoute>} />
 
       <Route path="/moderator/dashboard" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorDashboard /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/intelligence" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorIntelligenceHubPage /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/recommendations" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><RecommendationHubPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/users" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorUsersPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/vendors" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorVendorsPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/fraud" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorFraudCenterPage /></ModeratorLayout></RoleRoute>} />

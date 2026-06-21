@@ -29,6 +29,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'devops', label: 'DevOps & observabilité', icon: '⚙️' },
         { id: 'performance', label: 'Performance plateforme', icon: '⚡' },
         { id: 'nlp-models', label: 'Modèles NLP', icon: '🧠' },
+        { id: 'recommendations', label: 'Pipeline recommandations', icon: '🎯' },
         { id: 'history', label: 'Historique', icon: '📜' },
       ],
     },

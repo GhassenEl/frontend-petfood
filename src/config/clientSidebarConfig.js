@@ -52,6 +52,8 @@ export const CLIENT_SIDEBAR_SECTIONS = [
   {
     title: '🤖 IA & Premium',
     items: [
+      { id: 'client-intelligence', label: 'NLP & automatisations', icon: '🧠' },
+      { id: 'client-recommendations', label: 'Recommandations IA', icon: '🎯' },
       { id: 'client-advanced-ai', label: 'IA avancée', icon: '✨' },
       { id: 'client-explainable-ai', label: 'Explainable AI', icon: '🔬' },
       { id: 'client-product-packs', label: 'Packs produits', icon: '📦' },

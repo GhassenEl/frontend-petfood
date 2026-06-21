@@ -34,6 +34,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
       title: '🤖 Intelligence IA',
       items: [
         { id: 'intelligence', label: 'Intelligence livraison', icon: '🧠' },
+        { id: 'recommendations', label: 'Recommandations IA', icon: '🎯' },
         { id: 'ml', label: 'Prévisions ML', icon: '📊' },
       ],
     },

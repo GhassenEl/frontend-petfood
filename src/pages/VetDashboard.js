@@ -16,6 +16,7 @@ import {
   UtensilsCrossed,
   Brain,
   Activity,
+  Target,
 } from 'lucide-react';
 import api from '../utils/api';
 import { fetchPharmacyCatalog } from '../services/vetMedicationService';
@@ -24,6 +25,7 @@ import { notifyNewPharmacyAlerts } from '../services/vetPharmacyNotificationServ
 import { withDemoDashboard, DEMO_VET_BI } from '../utils/vetDemoData';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import VetAiBiChartsPanel from '../components/VetAiBiChartsPanel';
+import RecommendationPipelinePanel from '../components/RecommendationPipelinePanel';
 import './VetPages.css';
 
 const VetDashboard = () => {
@@ -156,6 +158,7 @@ const VetDashboard = () => {
     { to: '/vet/pharmacy', icon: Stethoscope, label: 'Pharmacie', desc: 'Stock médicaments' },
     { to: '/vet/clinic', icon: FileText, label: 'Ma clinique', desc: 'Profil & alertes' },
     { to: '/vet/nutrition', icon: UtensilsCrossed, label: 'Conseils nutrition', desc: 'Plans alimentaires' },
+    { to: '/vet/recommendations', icon: Target, label: 'Recommandations IA', desc: 'Contenu + similaires' },
     { to: '/vet/ml-agent', icon: Brain, label: 'Agents IA', desc: 'ML & diagnostic' },
     { to: '/vet/bi', icon: Activity, label: 'Dashboard BI', desc: 'Courbes & analytics' },
   ];
@@ -263,6 +266,8 @@ const VetDashboard = () => {
           </div>
         ))}
       </div>
+
+      <RecommendationPipelinePanel role="vet" limit={4} compact hubLink="/vet/recommendations" />
 
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ margin: '0 0 12px', fontSize: '1rem', fontWeight: 700, color: '#334155' }}>Accès rapide</h2>

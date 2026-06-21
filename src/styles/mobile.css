@@ -149,7 +149,11 @@
     align-items: stretch !important;
   }
 
-  .auth-mobile-shell .login-page-root > div:first-child {
+  .auth-mobile-shell .login-page-overlay {
+    display: none;
+  }
+
+  .auth-mobile-shell .login-page-paw {
     display: none;
   }
 

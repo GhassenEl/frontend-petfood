@@ -3,6 +3,12 @@ import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, Flame, Sparkles, ShoppingCart, Search, Eye } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import RecommendationPipelinePanel from '../components/RecommendationPipelinePanel';
+import {
+  loadRecommendationPipeline,
+  enrichRecommendationsWithCatalog,
+} from '../services/recommendationPipelineService';
 import {
   getProducts,
   getProductRecommendations,
@@ -35,6 +41,7 @@ const PET_LABELS = {
 };
 
 const ClientProductsPage = () => {
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [recommendations, setRecommendations] = useState([]);
   const [nearby, setNearby] = useState([]);
@@ -82,7 +89,18 @@ const ClientProductsPage = () => {
     }
 
     try {
-      setRecommendations(dedupeProducts(((await getProductRecommendations()) || []).map(normalizeProduct)));
+      const apiRecs = dedupeProducts(((await getProductRecommendations()) || []).map(normalizeProduct));
+      let merged = apiRecs;
+      try {
+        const pack = await loadRecommendationPipeline('client', user?.id || user?._id);
+        const pipelineRecs = enrichRecommendationsWithCatalog(pack.recommendations || [], list)
+          .map(normalizeProduct)
+          .filter((p) => Number(p?.stock || 0) > 0);
+        merged = dedupeProducts([...pipelineRecs, ...apiRecs]);
+      } catch (pipeErr) {
+        console.warn('Pipeline recommendations:', pipeErr);
+      }
+      setRecommendations(merged);
     } catch (err) {
       console.error('Recommendations error:', err);
     }
@@ -140,7 +158,9 @@ const ClientProductsPage = () => {
   const inStock = (p) => Number(p?.stock || 0) > 0;
   const inStockFilteredProducts = filteredProducts.filter(inStock);
   const inStockSoldes = soldes.filter(inStock);
-  const inStockRecommendations = recommendations.filter(inStock);
+  const inStockRecommendations = recommendations
+    .filter(inStock)
+    .sort((a, b) => (b.hybridScore || 0) - (a.hybridScore || 0));
   const inStockNearby = nearby.filter(inStock);
 
   const sortedAllProducts = [...inStockFilteredProducts].sort((a, b) => {
@@ -261,6 +281,16 @@ const ClientProductsPage = () => {
           </p>
         </motion.div>
       )}
+
+      <RecommendationPipelinePanel
+        role="client"
+        limit={6}
+        catalog={products}
+        onSelectItem={(item) => {
+          const match = products.find((p) => productId(p) === String(item.id || item._id));
+          if (match) setSelectedProduct(match);
+        }}
+      />
 
       {frequent.length > 0 && !promoOnly && (
         <Section title="🔄 Vos achats fréquents" titleColor="#0369a1" icon={<Sparkles size={20} />}>
@@ -404,7 +434,7 @@ const ClientProductsPage = () => {
 
       {/* Recommendations */}
       {inStockRecommendations.length > 0 && (
-        <Section title="✨ Recommandés pour vous" titleColor="#059669" icon={<Sparkles size={20} />}>
+        <Section title="✨ Recommandés pour vous (contenu + similaires)" titleColor="#059669" icon={<Sparkles size={20} />}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
             {inStockRecommendations.map(product => (
               <ProductCard key={`rec-${productId(product)}`} product={product} onAdd={addToCart} onLike={likeProduct} isLiked={favoriteIds.has(productId(product))} getPrice={getPrice} isRec onView={setSelectedProduct} />
@@ -645,13 +675,26 @@ const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearb
               margin: '0 0 4px',
               padding: '4px 10px',
               background: isRec ? 'rgba(5,150,105,0.08)' : 'rgba(139,92,246,0.08)',
-              borderRadius: '8px',
+              borderRadius: 8,
               display: 'inline-block',
             }}>
               {product.recommendedReason}
             </p>
+            {product.hybridScore != null && (
+              <span style={{
+                fontSize: 10,
+                fontWeight: 800,
+                color: '#5b21b6',
+                background: '#ede9fe',
+                padding: '3px 8px',
+                borderRadius: 999,
+                marginLeft: 6,
+              }}>
+                IA hybride {(product.hybridScore * 100).toFixed(0)}%
+              </span>
+            )}
             {Array.isArray(product.reasons) && product.reasons.length > 1 && (
-              <p style={{ fontSize: '11px', color: '#9ca3af', margin: 0 }}>
+              <p style={{ fontSize: '11px', color: '#9ca3af', margin: '6px 0 0' }}>
                 {product.reasons.slice(1, 3).join(' · ')}
               </p>
             )}

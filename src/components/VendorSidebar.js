@@ -42,6 +42,14 @@ const VendorSidebar = ({ onLogout, user, onNavigate }) => {
       ],
     },
     {
+      title: '📊 Analytics',
+      items: [
+        { to: '/vendor/bi', label: 'Business Intelligence', icon: '📈' },
+        { to: '/vendor/recommendations', label: 'Recommandations IA', icon: '🎯' },
+        { to: '/vendor/ml', label: 'Prévisions ML', icon: '🤖' },
+      ],
+    },
+    {
       title: '👤 Compte',
       items: [
         { id: 'profile', label: 'Profil', icon: '👤' },

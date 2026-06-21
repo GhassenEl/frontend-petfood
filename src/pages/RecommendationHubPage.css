@@ -1,0 +1,140 @@
+.rechub-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.rechub-hero {
+  margin-bottom: 24px;
+  padding: 28px 24px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #1e3a8a, #312e81, #4c1d95);
+  color: #fff;
+}
+
+.rechub-hero h1 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.rechub-hero p {
+  margin: 0;
+  opacity: 0.92;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.rechub-pipeline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 24px;
+}
+
+.rechub-step {
+  flex: 1;
+  min-width: 140px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 12px;
+}
+
+.rechub-step strong {
+  display: block;
+  font-size: 13px;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.rechub-step--done {
+  border-color: #6ee7b7;
+  background: #ecfdf5;
+}
+
+.rechub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.rechub-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.rechub-card h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.rechub-scores {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+.rechub-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.rechub-badge--hybrid {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.rechub-badge--content {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.rechub-badge--collab {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.rechub-reasons {
+  margin: 8px 0 0;
+  padding-left: 16px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.rechub-similar {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 13px;
+}
+
+.rechub-refresh {
+  margin-top: 12px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rechub-empty {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+}

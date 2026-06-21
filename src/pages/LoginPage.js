@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Link } from 'react-router-dom';
 import {
   getRememberedEmail,
   isRememberMeEnabled,
@@ -18,22 +17,21 @@ import {
   getLoginDelayMs,
   formatLockoutRemaining,
 } from '../utils/loginAttemptGuard';
-import LoginPetsLogo from '../components/LoginPetsLogo';
-import { HERO_BACKGROUND } from '../utils/platformImages';
+import { LOGIN_BACKGROUND } from '../utils/platformImages';
+import './LoginPage.css';
 
 const LoginPage = () => {
   const { login, logout } = useAuth();
   const formRef = useRef(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe] = useState(() => isRememberMeEnabled());
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({ email: '', password: '' });
   const [touched, setTouched] = useState({ email: false, password: false });
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [capsLockOn, setCapsLockOn] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [signOutDone, setSignOutDone] = useState(false);
   const [loginGuard, setLoginGuard] = useState(() => getLoginAttemptState());
@@ -42,7 +40,6 @@ const LoginPage = () => {
     setMounted(true);
     const savedEmail = getRememberedEmail();
     if (savedEmail) setEmail(savedEmail);
-    setRememberMe(isRememberMeEnabled());
   }, []);
 
   const runFieldValidation = useCallback((field, value) => {
@@ -70,6 +67,29 @@ const LoginPage = () => {
     if (touched.password) runFieldValidation('password', value);
     if (error) setError('');
     if (signOutDone) setSignOutDone(false);
+  };
+
+  const handleSignInFocus = () => {
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('login-email')?.focus();
+  };
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    setError('');
+    setSignOutDone(false);
+    try {
+      await logout();
+      setEmail(getRememberedEmail() || '');
+      setPassword('');
+      setFieldErrors({ email: '', password: '' });
+      setTouched({ email: false, password: false });
+      setSignOutDone(true);
+    } catch {
+      setError('Impossible de se déconnecter. Réessayez.');
+    } finally {
+      setSigningOut(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -117,374 +137,122 @@ const LoginPage = () => {
     setLoading(false);
   };
 
-  const handleSignInFocus = () => {
-    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    document.getElementById('login-email')?.focus();
-  };
-
-  const handleSignOut = async () => {
-    setSigningOut(true);
-    setError('');
-    setSignOutDone(false);
-    try {
-      await logout();
-      setEmail(getRememberedEmail() || '');
-      setPassword('');
-      setFieldErrors({ email: '', password: '' });
-      setTouched({ email: false, password: false });
-      setSignOutDone(true);
-    } catch {
-      setError('Impossible de se déconnecter. Réessayez.');
-    } finally {
-      setSigningOut(false);
-    }
-  };
-
-  const inputStyle = (field) => {
-    const hasError = touched[field] && fieldErrors[field];
-    const base = {
-      width: '100%',
-      borderRadius: '14px',
-      border: `2px solid ${hasError ? '#f87171' : '#e5e7eb'}`,
-      background: 'rgba(255, 255, 255, 0.9)',
-      fontSize: '14px',
-      color: '#1f2937',
-      outline: 'none',
-      transition: 'all 0.3s ease',
-      boxSizing: 'border-box',
-    };
-    if (field === 'email') {
-      return { ...base, padding: '14px 16px 14px 42px' };
-    }
-    return { ...base, padding: '14px 44px 14px 16px' };
-  };
-
-  const handlePasswordKeyEvent = (e) => {
-    if (e.getModifierState) setCapsLockOn(e.getModifierState('CapsLock'));
-  };
-
-  const styles = {
-    container: {
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '16px',
-      backgroundImage: `url('${HERO_BACKGROUND}')`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    overlay: {
-      position: 'absolute',
-      inset: 0,
-      background: 'linear-gradient(135deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.25) 100%)',
-      zIndex: 0,
-    },
-    paw1: { display: 'none' },
-    paw2: { display: 'none' },
-    paw3: { display: 'none' },
-    paw4: { display: 'none' },
-    paw5: { display: 'none' },
-    card: {
-      background: 'rgba(255, 255, 255, 0.92)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      borderRadius: '24px',
-      padding: '36px 32px 40px',
-      width: '100%',
-      maxWidth: '440px',
-      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255,255,255,0.5) inset',
-      transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-      position: 'relative',
-      zIndex: 1,
-    },
-    logoSection: { textAlign: 'center', marginBottom: '8px' },
-    title: { fontSize: '24px', fontWeight: 800, color: '#065f46', margin: '4px 0 4px', letterSpacing: '-0.5px' },
-    subtitle: { fontSize: '13px', color: '#6b7280', margin: '0 0 20px' },
-    errorBox: {
-      background: 'rgba(254, 226, 226, 0.9)',
-      border: '1px solid rgba(252, 165, 165, 0.5)',
-      color: '#b91c1c',
-      padding: '12px 16px',
-      borderRadius: '12px',
-      fontSize: '13px',
-      marginBottom: '16px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-    },
-    fieldError: { color: '#dc2626', fontSize: '12px', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' },
-    form: { display: 'flex', flexDirection: 'column', gap: '14px' },
-    inputGroup: { position: 'relative' },
-    label: { display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '6px' },
-    inputWrap: { position: 'relative' },
-    inputIcon: {
-      position: 'absolute',
-      left: '14px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      fontSize: '14px',
-      color: '#9ca3af',
-      pointerEvents: 'none',
-    },
-    eyeBtn: {
-      position: 'absolute',
-      right: '12px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      background: 'none',
-      border: 'none',
-      cursor: 'pointer',
-      fontSize: '16px',
-      padding: '4px',
-    },
-    rememberRow: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '12px',
-      flexWrap: 'wrap',
-    },
-    rememberLabel: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      fontSize: '13px',
-      color: '#4b5563',
-      cursor: 'pointer',
-      userSelect: 'none',
-    },
-    forgotLink: {
-      fontSize: '13px',
-      color: '#10b981',
-      fontWeight: 600,
-      textDecoration: 'none',
-    },
-    cookieHint: { fontSize: '11px', color: '#9ca3af', lineHeight: 1.4, margin: 0 },
-    submitBtn: {
-      width: '100%',
-      padding: '14px',
-      background: 'linear-gradient(135deg, #10b981, #059669)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '14px',
-      fontSize: '15px',
-      fontWeight: '700',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      boxShadow: '0 8px 20px rgba(16, 185, 129, 0.3)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '8px',
-      marginTop: '4px',
-    },
-    spinner: {
-      width: '18px',
-      height: '18px',
-      border: '2px solid rgba(255,255,255,0.3)',
-      borderTopColor: 'white',
-      borderRadius: '50%',
-      animation: 'spin 0.8s linear infinite',
-      display: 'inline-block',
-    },
-    registerHint: { textAlign: 'center', color: '#475569', fontSize: '14px', margin: '18px 0 0' },
-    registerLink: { color: '#10b981', fontWeight: 700, textDecoration: 'none' },
-    signInBtn: {
-      padding: '10px 18px',
-      borderRadius: '12px',
-      border: 'none',
-      background: 'linear-gradient(135deg, #10b981, #059669)',
-      color: 'white',
-      fontSize: '14px',
-      fontWeight: 700,
-      cursor: 'pointer',
-      boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
-      flex: 1,
-    },
-    signOutBtn: {
-      padding: '10px 18px',
-      borderRadius: '12px',
-      border: '2px solid #d1d5db',
-      background: '#f9fafb',
-      color: '#374151',
-      fontSize: '14px',
-      fontWeight: 700,
-      cursor: 'pointer',
-      flex: 1,
-    },
-    authActionsRow: {
-      display: 'flex',
-      gap: '10px',
-      marginTop: '12px',
-    },
-    capsHint: {
-      fontSize: '12px',
-      color: '#b45309',
-      marginTop: '6px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '4px',
-    },
-  };
-
-  const formInvalid =
-    !!fieldErrors.email ||
-    !!fieldErrors.password;
+  const formInvalid = !!fieldErrors.email || !!fieldErrors.password;
 
   return (
-    <div className="login-page-root" style={styles.container}>
-      <div style={styles.overlay} />
+    <div
+      className="login-page-root"
+      style={{ backgroundImage: `url('${LOGIN_BACKGROUND}')` }}
+    >
+      <div className="login-page-overlay" />
 
       <div
         ref={formRef}
-        className="login-page-card"
-        style={{
-          ...styles.card,
-          opacity: mounted ? 1 : 0,
-          transform: mounted ? 'translateY(0)' : 'translateY(30px)',
-        }}
+        className={`login-page-card ${mounted ? 'login-page-card--mounted' : 'login-page-card--enter'}`}
       >
-        <div style={styles.logoSection}>
-          <LoginPetsLogo />
-          <p style={styles.subtitle}>Bienvenue sur votre espace</p>
+        <div className="login-page-logo-section">
+          <div className="login-page-logo-circle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white" aria-hidden>
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+            </svg>
+          </div>
+          <h1 className="login-page-title">PetfoodTN</h1>
+          <p className="login-page-subtitle">Bienvenue sur votre espace</p>
         </div>
 
         {signOutDone && !error && (
-          <div style={{ ...styles.errorBox, background: 'rgba(209, 250, 229, 0.9)', borderColor: '#6ee7b7', color: '#065f46' }} role="status">
+          <div className="login-page-error login-page-error--success" role="status">
             <span>✓</span> Session fermée — vous pouvez vous reconnecter.
           </div>
         )}
 
         {loginGuard.requiresCaptcha && !loginGuard.locked && (
-          <div style={{ ...styles.errorBox, background: 'rgba(254, 243, 199, 0.95)', borderColor: '#fcd34d', color: '#92400e' }} role="status">
-            <span>🛡️</span> Plusieurs tentatives échouées — connexion surveillée pour protéger votre compte.
+          <div className="login-page-error login-page-error--warn" role="status">
+            <span>🛡️</span> Plusieurs tentatives échouées — connexion surveillée.
           </div>
         )}
 
         {error && (
-          <div style={styles.errorBox} role="alert">
+          <div className="login-page-error" role="alert">
             <span>⚠</span> {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={styles.form} noValidate>
-          <div style={styles.inputGroup}>
-            <label htmlFor="login-email" style={styles.label}>
+        <form className="login-page-form" onSubmit={handleSubmit} noValidate>
+          <div className="login-page-input-group">
+            <label htmlFor="login-email" className="login-page-label">
               Adresse email
             </label>
-            <div style={styles.inputWrap}>
+            <div className="login-page-input-wrap">
               <input
                 id="login-email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              inputMode="email"
-              maxLength={254}
-              value={email}
-              onChange={handleEmailChange}
-              onBlur={() => handleBlur('email')}
-              style={inputStyle('email')}
-              placeholder="nom@domaine.tn"
-              aria-invalid={touched.email && !!fieldErrors.email}
-              aria-describedby={fieldErrors.email ? 'login-email-error' : undefined}
-            />
-            <span style={styles.inputIcon}>✉</span>
+                name="email"
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+                maxLength={254}
+                value={email}
+                onChange={handleEmailChange}
+                onBlur={() => handleBlur('email')}
+                className={`login-page-input login-page-input--email${touched.email && fieldErrors.email ? ' login-page-input--error' : ''}`}
+                placeholder="nom@domaine.tn"
+                aria-invalid={touched.email && !!fieldErrors.email}
+              />
+              <span className="login-page-input-icon">✉</span>
             </div>
             {touched.email && fieldErrors.email && (
-              <p id="login-email-error" style={styles.fieldError} role="alert">
-                ⚠ {fieldErrors.email}
-              </p>
+              <p className="login-page-field-error" role="alert">⚠ {fieldErrors.email}</p>
             )}
           </div>
 
-          <div style={styles.inputGroup}>
-            <label htmlFor="login-password" style={styles.label}>
+          <div className="login-page-input-group">
+            <label htmlFor="login-password" className="login-page-label">
               Mot de passe
             </label>
-            <div style={styles.inputWrap}>
+            <div className="login-page-input-wrap">
               <input
                 id="login-password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              minLength={6}
-              maxLength={128}
-              value={password}
-              onChange={handlePasswordChange}
-              onBlur={() => handleBlur('password')}
-              onKeyDown={handlePasswordKeyEvent}
-              onKeyUp={handlePasswordKeyEvent}
-              style={inputStyle('password')}
-              placeholder="••••••••"
-              aria-invalid={touched.password && !!fieldErrors.password}
-              aria-describedby={fieldErrors.password ? 'login-password-error' : undefined}
-            />
-            <button
-              type="button"
-              style={styles.eyeBtn}
-              onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
-            >
-              {showPassword ? '🙈' : '👁'}
-            </button>
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                minLength={6}
+                maxLength={128}
+                value={password}
+                onChange={handlePasswordChange}
+                onBlur={() => handleBlur('password')}
+                className={`login-page-input${touched.password && fieldErrors.password ? ' login-page-input--error' : ''}`}
+                placeholder="••••••••"
+                aria-invalid={touched.password && !!fieldErrors.password}
+              />
+              <button
+                type="button"
+                className="login-page-eye-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+              >
+                {showPassword ? '🙈' : '👁'}
+              </button>
             </div>
             {touched.password && fieldErrors.password && (
-              <p id="login-password-error" style={styles.fieldError} role="alert">
-                ⚠ {fieldErrors.password}
-              </p>
-            )}
-            {capsLockOn && (
-              <p style={styles.capsHint} role="status">
-                ⇪ Verrouillage majuscules activé
-              </p>
+              <p className="login-page-field-error" role="alert">⚠ {fieldErrors.password}</p>
             )}
           </div>
-
-          <div style={styles.rememberRow}>
-            <label style={styles.rememberLabel}>
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-              Se souvenir de moi
-            </label>
-            <Link to="/forgot-password" style={styles.forgotLink}>
-              Mot de passe oublié ?
-            </Link>
-          </div>
-          {rememberMe && (
-            <p style={styles.cookieHint}>
-              Un cookie sécurisé (30 jours) mémorise votre email et votre session sur cet appareil.
-            </p>
-          )}
 
           <button
             type="submit"
+            className="login-page-submit"
             disabled={loading || (touched.email && touched.password && formInvalid)}
-            style={{
-              ...styles.submitBtn,
-              opacity: loading ? 0.65 : 1,
-              cursor: loading ? 'not-allowed' : 'pointer',
-            }}
           >
-            {loading ? <span style={styles.spinner} /> : 'Se connecter →'}
+            {loading ? <span className="login-page-spinner" /> : 'Se connecter →'}
           </button>
 
-          <div style={styles.authActionsRow}>
-            <button type="button" style={styles.signInBtn} onClick={handleSignInFocus}>
+          <div className="login-page-auth-actions">
+            <button type="button" className="login-page-sign-in-btn" onClick={handleSignInFocus}>
               Sign in
             </button>
             <button
               type="button"
-              style={{
-                ...styles.signOutBtn,
-                opacity: signingOut ? 0.7 : 1,
-                cursor: signingOut ? 'not-allowed' : 'pointer',
-              }}
+              className="login-page-sign-out-btn"
               onClick={handleSignOut}
               disabled={signingOut}
             >
@@ -492,10 +260,6 @@ const LoginPage = () => {
             </button>
           </div>
         </form>
-
-        <p style={styles.registerHint}>
-          Pas de compte ? <Link to="/register" style={styles.registerLink}>Créer un compte</Link>
-        </p>
       </div>
     </div>
   );

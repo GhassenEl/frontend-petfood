@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:5002'
   const grafanaProxyTarget = env.VITE_GRAFANA_PROXY_TARGET || 'http://127.0.0.1:3000'
+  const n8nProxyTarget = env.VITE_N8N_PROXY_TARGET || 'http://127.0.0.1:5678'
 
   return {
   plugins: [
@@ -89,6 +90,23 @@ export default defineConfig(({ mode }) => {
           })
         },
       },
+      '/n8n-webhook': {
+        target: n8nProxyTarget,
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/n8n-webhook/, '/webhook'),
+        configure: (proxyServer) => {
+          proxyServer.on('error', (err) => {
+            console.error(`Vite proxy /n8n-webhook -> ${n8nProxyTarget} error:`, err.message)
+          })
+        },
+      },
+      '/n8n-health': {
+        target: n8nProxyTarget,
+        changeOrigin: true,
+        secure: false,
+        rewrite: () => '/healthz',
+      },
     },
   },
   css: {
@@ -102,6 +120,12 @@ export default defineConfig(({ mode }) => {
         target: apiProxyTarget,
         changeOrigin: true,
         secure: false,
+      },
+      '/n8n-webhook': {
+        target: n8nProxyTarget,
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/n8n-webhook/, '/webhook'),
       },
     },
   },

@@ -706,6 +706,69 @@ img {
   transition: transform 0.2s ease;
 }
 
+/* Arrière-plan animé — empreintes page login */
+.login-page-paw {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+.login-page-paw--1 {
+  font-size: 3rem;
+  opacity: 0.15;
+  top: 10%;
+  left: 8%;
+  animation: loginPawFloat1 6s ease-in-out infinite;
+}
+
+.login-page-paw--2 {
+  font-size: 2.2rem;
+  opacity: 0.12;
+  top: 70%;
+  left: 15%;
+  animation: loginPawFloat2 8s ease-in-out infinite;
+}
+
+.login-page-paw--3 {
+  font-size: 2.8rem;
+  opacity: 0.14;
+  top: 20%;
+  right: 12%;
+  animation: loginPawFloat3 7s ease-in-out infinite;
+}
+
+.login-page-paw--4 {
+  font-size: 2rem;
+  opacity: 0.1;
+  bottom: 15%;
+  right: 20%;
+  animation: loginPawFloat1 9s ease-in-out infinite;
+}
+
+.login-page-paw--5 {
+  font-size: 3.5rem;
+  opacity: 0.08;
+  top: 45%;
+  left: 5%;
+  animation: loginPawFloat2 10s ease-in-out infinite;
+}
+
+@keyframes loginPawFloat1 {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+@keyframes loginPawFloat2 {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(15px) rotate(-5deg); }
+}
+
+@keyframes loginPawFloat3 {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10px) scale(1.1); }
+}
+
 .login-brand-link:hover {
   transform: scale(1.02);
 }

@@ -3,6 +3,8 @@ import { resolveUploadPreviewUrl } from '../services/uploadService';
 /** Images locales — toujours disponibles sans dépendance externe */
 export const PLATFORM_IMAGES = {
   hero: '/images/heroes/pets-hero.svg',
+  /** Golden retriever — arrière-plan page login */
+  loginBackground: '/images/login-hero-dog.jpg',
   productDefault: '/images/placeholders/product-default.svg',
   productFood: '/images/iot/bowl-kibble.jpg',
   productCare: '/images/iot/complements.jpg',
@@ -107,5 +109,6 @@ export const getPetPhoto = (type, breed) => {
 };
 
 export const HERO_BACKGROUND = PLATFORM_IMAGES.hero;
+export const LOGIN_BACKGROUND = PLATFORM_IMAGES.loginBackground;
 
 export default PLATFORM_IMAGES;
