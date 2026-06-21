@@ -132,6 +132,7 @@ import VendorProductsPage from './pages/VendorProductsPage';
 import VendorOrdersPage from './pages/VendorOrdersPage';
 import VendorReturnsPage from './pages/VendorReturnsPage';
 import VendorCommunicationPage from './pages/VendorCommunicationPage';
+import VendorMarketingPage from './pages/VendorMarketingPage';
 import VendorPurchaseNeedsPage from './pages/VendorPurchaseNeedsPage';
 import ModeratorLayout from './layouts/ModeratorLayout';
 import ModeratorDashboard from './pages/ModeratorDashboard';
@@ -466,6 +467,7 @@ const App = () => {
       <Route path="/vendor/sales" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorSalesPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/returns" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorReturnsPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/communication" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorCommunicationPage /></VendorLayout></RoleRoute>} />
+      <Route path="/vendor/marketing" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorMarketingPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/purchase-needs" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorPurchaseNeedsPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/ml" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorMlPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/food-quality" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><FoodQualitySurveillancePage role="vendor" /></VendorLayout></RoleRoute>} />
