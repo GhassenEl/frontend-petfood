@@ -13,6 +13,9 @@ export const CLIENT_BOOKABLE_SERVICE_TYPES = [
   'home_sitting',
   'boarding',
   'training',
+  'walking',
+  'home_visit',
+  'evaluation',
   'daycare',
 ];
 

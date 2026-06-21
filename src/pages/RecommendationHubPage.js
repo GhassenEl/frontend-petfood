@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { loadRecommendationPipeline } from '../services/recommendationPipelineService';
 import { ROLE_PIPELINE_META } from '../utils/recommendationDemoData';
+import { getVendorPetProfileRecommendations } from '../utils/vendorPetRecommendationEngine';
 import './RecommendationHubPage.css';
 
 const RecommendationHubPage = () => {
@@ -28,6 +29,16 @@ const RecommendationHubPage = () => {
     load();
   }, [load]);
 
+  const topRecommendations = useMemo(
+    () => [...(data?.recommendations || [])].sort((a, b) => (b.hybridScore || 0) - (a.hybridScore || 0)).slice(0, 3),
+    [data?.recommendations],
+  );
+
+  const petProfileRecos = useMemo(
+    () => (role === 'vendor' ? getVendorPetProfileRecommendations(data?.recommendations || []) : []),
+    [role, data?.recommendations],
+  );
+
   if (loading) {
     return <div className="rechub-page rechub-empty">Pipeline de recommandation en cours…</div>;
   }
@@ -49,6 +60,42 @@ const RecommendationHubPage = () => {
           Actualiser le pipeline
         </button>
       </header>
+
+      {topRecommendations.length > 0 && (
+        <section className="rechub-top">
+          <h2>⭐ Top recommandations</h2>
+          <div className="rechub-grid">
+            {topRecommendations.map((item, i) => (
+              <article key={item.id} className="rechub-card rechub-card--top">
+                <span className="rechub-rank">#{i + 1}</span>
+                <h3>{item.name}</h3>
+                <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>
+                  Score hybride {(item.hybridScore * 100).toFixed(0)}%
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {petProfileRecos.length > 0 && (
+        <section className="rechub-top" style={{ marginTop: 16 }}>
+          <h2>🐾 Recommandations selon profil animal</h2>
+          {petProfileRecos.map((profile) => (
+            <div key={profile.id} style={{ marginBottom: 12 }}>
+              <strong style={{ fontSize: 14 }}>{profile.label}</strong>
+              <div className="rechub-grid" style={{ marginTop: 8 }}>
+                {profile.recommendations.map((r) => (
+                  <article key={`${profile.id}-${r.id}`} className="rechub-card">
+                    <h3>{r.name}</h3>
+                    <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>{r.reason || r.reasons?.[0]}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
 
       <div className="rechub-pipeline">
         {data.pipeline.steps.map((step) => (

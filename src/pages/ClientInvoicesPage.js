@@ -6,6 +6,7 @@ import { DEMO_INVOICES, withDemoFallback } from '../utils/clientDemoData';
 import InvoicePayModal from '../components/InvoicePayModal';
 import { getPaymentLabel } from '../constants/paymentMethods';
 import { downloadInvoicePdf } from '../utils/invoicePdf';
+import { downloadInvoicesCsv } from '../utils/invoiceCsv';
 
 const ClientInvoicesPage = () => {
   const [searchParams] = useSearchParams();
@@ -52,9 +53,14 @@ const ClientInvoicesPage = () => {
         <div>
           <h1 style={{ fontSize: '34px', marginTop: 0, marginBottom: '10px' }}>Mes Factures</h1>
           <p style={{ color: '#6b7280', marginBottom: 0 }}>
-            Le client peut consulter sa facture et choisir sa methode de paiement.
+            Consultez vos factures et exportez en PDF ou CSV.
           </p>
         </div>
+        {invoices.length > 0 && (
+          <button type="button" style={csvButtonStyle} onClick={() => downloadInvoicesCsv(invoices)}>
+            📊 Exporter CSV
+          </button>
+        )}
       </div>
 
       {invoices.length === 0 ? (
@@ -130,6 +136,20 @@ const heroStyle = {
   padding: '24px',
   marginBottom: '24px',
   boxShadow: '0 10px 28px rgba(0,0,0,0.06)',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  gap: '12px',
+};
+
+const csvButtonStyle = {
+  padding: '10px 18px',
+  borderRadius: '12px',
+  border: '1px solid #e5e7eb',
+  background: 'white',
+  fontWeight: 700,
+  cursor: 'pointer',
 };
 
 const emptyStyle = {

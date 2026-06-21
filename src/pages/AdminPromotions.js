@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Package, Tag } from 'lucide-react';
 import AdminProductPromotions from './AdminProductPromotions';
 import AdminCouponsPanel from '../components/AdminCouponsPanel';
+import AdminAutoDiscountPanel from '../components/AdminAutoDiscountPanel';
 
 const AdminPromotions = () => {
   const [tab, setTab] = useState('products');
@@ -32,6 +33,7 @@ const AdminPromotions = () => {
         {[
           { id: 'products', label: 'Promotions produits', icon: Package },
           { id: 'coupons', label: 'Coupons & codes', icon: Tag },
+          { id: 'auto', label: 'Remises auto IA', icon: Tag },
         ].map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -54,7 +56,7 @@ const AdminPromotions = () => {
         ))}
       </div>
 
-      {tab === 'products' ? <AdminProductPromotions /> : <AdminCouponsPanel />}
+      {tab === 'products' ? <AdminProductPromotions /> : tab === 'coupons' ? <AdminCouponsPanel /> : <AdminAutoDiscountPanel />}
     </div>
   );
 };

@@ -21,7 +21,15 @@ export const VET_SIDEBAR_SECTIONS = [
     items: [
       { id: 'clients', label: 'Clients', icon: '👥' },
       { id: 'history', label: 'Historique', icon: '📜' },
+      { id: 'teleconsult', label: 'Téléconsultations', icon: '📹' },
       { id: 'contact-requests', label: 'Demandes contact', icon: '📩' },
+    ],
+  },
+  {
+    title: '📊 BI & contenu',
+    items: [
+      { id: 'bi', label: 'Dashboard BI Santé', icon: '📈' },
+      { id: 'content', label: 'Gestion du contenu', icon: '📝' },
     ],
   },
   {

@@ -1,0 +1,27 @@
+.vtrace-page { padding: 24px; max-width: 1100px; margin: 0 auto; }
+.vtrace-hero { margin-bottom: 20px; }
+.vtrace-hero h1 { margin: 0 0 8px; font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.vtrace-hero p { margin: 0; color: #64748b; font-size: 14px; }
+.vtrace-toolbar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.vtrace-search { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+.vtrace-search input { border: none; outline: none; flex: 1; font-size: 14px; }
+.vtrace-btn { padding: 10px 16px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.vtrace-layout { display: grid; grid-template-columns: 280px 1fr; gap: 16px; }
+.vtrace-list h3 { margin: 0 0 10px; font-size: 14px; }
+.vtrace-batch { display: block; width: 100%; text-align: left; padding: 12px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; }
+.vtrace-batch.is-active { border-color: #059669; background: #ecfdf5; }
+.vtrace-batch strong { display: block; font-size: 13px; }
+.vtrace-batch span { font-size: 12px; color: #059669; font-weight: 700; }
+.vtrace-batch small { display: block; font-size: 11px; color: #64748b; margin-top: 4px; }
+.vtrace-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.vtrace-card { padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; }
+.vtrace-card h4 { margin: 0 0 8px; font-size: 12px; color: #64748b; text-transform: uppercase; }
+.vtrace-mono { font-family: monospace; font-size: 12px; word-break: break-all; }
+.vtrace-ok { color: #059669; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+.vtrace-warn { color: #d97706; font-weight: 700; }
+.vtrace-sha { padding: 16px; border-radius: 14px; border: 1px solid #e2e8f0; background: #fff; margin-bottom: 16px; }
+.vtrace-sha-row { display: flex; gap: 8px; margin: 10px 0; }
+.vtrace-sha-row input { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; }
+.vtrace-sha-row button { padding: 10px 16px; border-radius: 10px; border: none; background: #059669; color: #fff; font-weight: 700; cursor: pointer; }
+.vtrace-copy { margin-left: 8px; border: none; background: transparent; cursor: pointer; vertical-align: middle; }
+@media (max-width: 768px) { .vtrace-layout { grid-template-columns: 1fr; } }

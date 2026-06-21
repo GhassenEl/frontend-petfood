@@ -120,6 +120,10 @@ import ClientGeoServicesPage from './pages/ClientGeoServicesPage';
 import ClientDigitalTwinPage from './pages/ClientDigitalTwinPage';
 import ClientVetIntelligencePage from './pages/ClientVetIntelligencePage';
 import ClientPetHealthRecommendationPage from './pages/ClientPetHealthRecommendationPage';
+import ClientWalletPage from './pages/ClientWalletPage';
+import VetContentPage from './pages/VetContentPage';
+import VendorTraceabilityPage from './pages/VendorTraceabilityPage';
+import VendorFeederIoTPage from './pages/VendorFeederIoTPage';
 import ClientPetsPage from './pages/ClientPetsPage';
 import ClientPetPassportPage from './pages/ClientPetPassportPage';
 import PlatformServicesPage from './pages/PlatformServicesPage';
@@ -370,6 +374,7 @@ const App = () => {
       <Route path="/client-digital-twin" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientDigitalTwinPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-vet-intelligence" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientVetIntelligencePage /></ClientLayout></RoleRoute>} />
       <Route path="/client-pet-health-recommendations" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetHealthRecommendationPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-wallet" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientWalletPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-orders" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientOrdersPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-reviews" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientReviewsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-complaints" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientComplaintsPage /></ClientLayout></RoleRoute>} />
@@ -386,7 +391,6 @@ const App = () => {
       <Route path="/client-purchase-needs" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPurchaseNeedsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-services" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientServicesPage /></ClientLayout></RoleRoute>} />
       <Route path="/platform-services" element={<RoleRoute user={user} roles={['client']}><ClientLayout><PlatformServicesPage /></ClientLayout></RoleRoute>} />
-      <Route path="/client-wallet" element={<Navigate to="/checkout" replace />} />
       <Route path="/client-vaccines" element={<Navigate to="/medical-dossier" replace />} />
       <Route path="/pet-advice" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetAdvicePage /></ClientLayout></RoleRoute>} />
       <Route path="/pet-calories" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetCaloriesPage /></ClientLayout></RoleRoute>} />
@@ -469,6 +473,7 @@ const App = () => {
       <Route path="/vet/nutrition" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetNutritionAdvicePage /></VetLayout></RoleRoute>} />
       <Route path="/vet/ml-agent" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetMlAgentPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/intelligence" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetIntelligenceHubPage /></VetLayout></RoleRoute>} />
+      <Route path="/vet/content" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetContentPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/rehabilitation" element={<RoleRoute user={user} roles={['vet']}><VetLayout><AdminRehabilitationPage /></VetLayout></RoleRoute>} />
 
       <Route path="/visitor/*" element={<Navigate to="/" replace />} />
@@ -490,6 +495,8 @@ const App = () => {
       <Route path="/vendor/rse" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RseEcologyHubPage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/profile" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorProfilePage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/recommendations" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RecommendationHubPage /></VendorLayout></RoleRoute>} />
+      <Route path="/vendor/traceability" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorTraceabilityPage /></VendorLayout></RoleRoute>} />
+      <Route path="/vendor/feeder-iot" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorFeederIoTPage /></VendorLayout></RoleRoute>} />
 
       <Route path="/moderator/dashboard" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorDashboard /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/intelligence" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorIntelligenceHubPage /></ModeratorLayout></RoleRoute>} />

@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, Trash2, Check, Image, Star } from 'lucide-react';
+import { Package, Trash2, Check, Image, Star, Search, Filter } from 'lucide-react';
 import {
   fetchModeratorPendingProducts,
   approveModeratorProduct,
@@ -35,6 +35,9 @@ const ModeratorContentPage = () => {
   const [msg, setMsg] = useState('');
   const [msgType, setMsgType] = useState('success');
   const [busyId, setBusyId] = useState(null);
+  const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [animalFilter, setAnimalFilter] = useState('');
 
   const showMsg = useCallback((text, type = 'success') => {
     setMsg(text);
@@ -82,8 +85,36 @@ const ModeratorContentPage = () => {
     }
   };
 
-  const pendingProducts = products.filter((p) => p.status === 'pending');
-  const imageQueue = products.filter((p) => p.imageFlag);
+  const inferAnimal = (p) => {
+    if (p.animalType) return p.animalType;
+    const n = (p.name || '').toLowerCase();
+    if (n.includes('chat') || n.includes('litière')) return 'cat';
+    if (n.includes('chien') || n.includes('chiot')) return 'dog';
+    if (n.includes('aquarium') || n.includes('poisson')) return 'fish';
+    return 'other';
+  };
+
+  const filterProducts = (list) => list.filter((p) => {
+    const q = search.toLowerCase();
+    const matchSearch = !q || [p.name, p.vendorName, p.category].some((f) => String(f || '').toLowerCase().includes(q));
+    const matchCat = !categoryFilter || p.category === categoryFilter;
+    const matchAnimal = !animalFilter || inferAnimal(p) === animalFilter;
+    return matchSearch && matchCat && matchAnimal;
+  });
+
+  const pendingProducts = filterProducts(products.filter((p) => p.status === 'pending'));
+  const imageQueue = filterProducts(products.filter((p) => p.imageFlag));
+  const categories = [...new Set(products.map((p) => p.category).filter(Boolean))];
+  const topRecommendations = useMemo(() => (
+    [...products]
+      .filter((p) => p.status === 'pending')
+      .map((p) => ({
+        ...p,
+        priorityScore: (p.imageFlag === 'misleading' ? 95 : p.imageFlag ? 80 : 60) + (p.price < 10 ? 15 : 0),
+      }))
+      .sort((a, b) => b.priorityScore - a.priorityScore)
+      .slice(0, 3)
+  ), [products]);
   const openReports = inappropriate.filter((i) => i.status === 'open').length;
   const anomalyFlags = inappropriate.map((item) => ({
     item,
@@ -144,6 +175,44 @@ const ModeratorContentPage = () => {
           <Star size={14} /> Modérer les avis →
         </Link>
       </div>
+
+      <div className="mod-filters" style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 200, padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: 10, background: '#fff' }}>
+          <Search size={16} />
+          <input type="search" placeholder="Barre de recherche…" value={search} onChange={(e) => setSearch(e.target.value)} style={{ border: 'none', outline: 'none', flex: 1, fontSize: 14 }} />
+        </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700 }}>
+          <Filter size={14} /> Catégorie
+          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+            <option value="">Toutes</option>
+            {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700 }}>
+          Animal
+          <select value={animalFilter} onChange={(e) => setAnimalFilter(e.target.value)} style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+            <option value="">Tous</option>
+            <option value="dog">Chien</option>
+            <option value="cat">Chat</option>
+            <option value="fish">Poisson</option>
+            <option value="other">Autre</option>
+          </select>
+        </label>
+      </div>
+
+      {topRecommendations.length > 0 && (
+        <div className="mod-card" style={{ marginBottom: 16, background: '#fefce8', borderColor: '#fde68a' }}>
+          <h3 style={{ margin: '0 0 10px', fontSize: 15 }}>⭐ Top recommandations modération</h3>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            {topRecommendations.map((p) => (
+              <div key={p.id} style={{ flex: '1 1 200px', padding: 12, borderRadius: 10, background: '#fff', border: '1px solid #fde68a' }}>
+                <strong style={{ fontSize: 13 }}>{p.name}</strong>
+                <p style={{ margin: '4px 0 0', fontSize: 11, color: '#64748b' }}>Priorité {p.priorityScore} · {p.vendorName}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="mod-card">
         {loading ? (

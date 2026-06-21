@@ -1,0 +1,7 @@
+.autodisc-panel { padding: 20px; border-radius: 14px; border: 1px solid #e2e8f0; background: #fff; }
+.autodisc-panel h3 { margin: 0 0 6px; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+.autodisc-lead { margin: 0 0 16px; color: #64748b; font-size: 13px; }
+.autodisc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.autodisc-table th { text-align: left; padding: 10px 8px; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+.autodisc-table td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+.autodisc-pct { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; background: #fff7ed; color: #c2410c; font-weight: 800; }

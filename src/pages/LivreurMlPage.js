@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Brain, TrendingUp, AlertTriangle, Package, Route } from 'lucide-react';
+import { Brain, TrendingUp, AlertTriangle, Package, Route, MapPin } from 'lucide-react';
 import useLivreurMlRisk from '../hooks/useLivreurMlRisk';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import { buildLivreurProductDemandAnalysis, LIVREUR_REGIONS } from '../utils/livreurProductDemandEngine';
 
 const LivreurMlPage = () => {
   const { data, loading, pythonPowered, poolPriority, reload } = useLivreurMlRisk();
+  const [region, setRegion] = useState('Tunis');
+  const demandAnalysis = useMemo(() => buildLivreurProductDemandAnalysis(region), [region]);
 
   usePlatformRefresh(reload);
 
@@ -122,6 +125,46 @@ const LivreurMlPage = () => {
           </ul>
         </div>
       )}
+
+      <div style={{ marginTop: 24, padding: 20, background: 'white', borderRadius: 16, border: '1px solid #e5e7eb' }}>
+        <h3 style={{ margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <TrendingUp size={20} color="#059669" /> Analyse produits demandés
+        </h3>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, fontSize: 13, fontWeight: 700 }}>
+          <MapPin size={14} /> Région
+          <select value={region} onChange={(e) => setRegion(e.target.value)} style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+            {LIVREUR_REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+          </select>
+        </label>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+          <div style={{ padding: 14, borderRadius: 12, background: '#ecfdf5' }}>
+            <strong>Produits populaires — {region}</strong>
+            <ul style={{ margin: '10px 0 0', paddingLeft: 18, fontSize: 13 }}>
+              {demandAnalysis.popularProducts.map((p) => (
+                <li key={p.id}>{p.name} · {p.orders} cmd · {p.trend}</li>
+              ))}
+            </ul>
+          </div>
+          <div style={{ padding: 14, borderRadius: 12, background: '#fef3c7' }}>
+            <strong>Produits lourds</strong>
+            <ul style={{ margin: '10px 0 0', paddingLeft: 18, fontSize: 13 }}>
+              {demandAnalysis.heavyProducts.map((p) => (
+                <li key={p.id}>{p.name} ({p.avgWeightKg} kg) — {p.tip}</li>
+              ))}
+            </ul>
+          </div>
+          <div style={{ padding: 14, borderRadius: 12, background: '#eff6ff' }}>
+            <strong>Demandes par région</strong>
+            <ul style={{ margin: '10px 0 0', paddingLeft: 18, fontSize: 13 }}>
+              {demandAnalysis.byRegion.map((r) => (
+                <li key={r.region} style={{ fontWeight: r.isCurrentZone ? 800 : 400 }}>
+                  {r.region}: {r.ordersWeek} cmd/sem · top: {r.topProduct} · lourds {r.heavySharePct}%
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

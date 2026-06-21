@@ -409,6 +409,9 @@ export const SERVICE_RATE_CARDS = [
   { type: 'training', label: 'Dressage', icon: '🎓', basePrice: 60, unit: 'session', avgRating: 4.5, reviewCount: 42, description: 'Éducation positive — chiot ou rappel.' },
   { type: 'rehabilitation', label: 'Réhabilitation refuges', icon: '💚', basePrice: 0, unit: 'don', avgRating: 5.0, reviewCount: 38, description: 'Soutien aux refuges partenaires.' },
   { type: 'daycare', label: 'Garderie journée', icon: '🌞', basePrice: 28, unit: 'jour', avgRating: 4.7, reviewCount: 51, description: 'Garde de jour avec socialisation.' },
+  { type: 'walking', label: 'Promenade canine', icon: '🦮', basePrice: 25, unit: 'session', avgRating: 4.8, reviewCount: 64, description: 'Promenade 45 min — chien sociable, laisse incluse.' },
+  { type: 'home_visit', label: 'Visite à domicile', icon: '🏠', basePrice: 35, unit: 'visite', avgRating: 4.7, reviewCount: 38, description: 'Visite soins, nourriture et contrôle bien-être à domicile.' },
+  { type: 'evaluation', label: 'Évaluation comportementale', icon: '📋', basePrice: 70, unit: 'session', avgRating: 4.9, reviewCount: 29, description: 'Bilan comportement, conseils éducation positive et rapport écrit.' },
   { type: 'veterinary', label: 'Consultation véto', icon: '🩺', basePrice: 55, unit: 'consultation', avgRating: 4.8, reviewCount: 210, description: 'Sur rendez-vous — espace Santé vétérinaire.' },
   { type: 'delivery', label: 'Livraison', icon: '🚚', basePrice: 0, unit: 'commande', avgRating: 4.7, reviewCount: 156, description: 'Notez la livraison après réception de votre commande.' },
 ];

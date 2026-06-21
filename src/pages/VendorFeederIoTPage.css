@@ -1,0 +1,26 @@
+.vfeeder-page { padding: 24px; max-width: 960px; margin: 0 auto; }
+.vfeeder-hero h1 { margin: 0 0 8px; font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.vfeeder-hero p { margin: 0 0 12px; color: #64748b; font-size: 14px; }
+.vfeeder-btn { padding: 8px 14px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.vfeeder-btn--primary { background: #059669; color: #fff; border: none; }
+.vfeeder-fleet { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.vfeeder-chip { padding: 8px 14px; border-radius: 999px; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; font-size: 13px; font-weight: 700; }
+.vfeeder-chip.is-active { border-color: #059669; background: #ecfdf5; }
+.vfeeder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.vfeeder-card { padding: 16px; border-radius: 14px; border: 1px solid #e2e8f0; background: #f8fafc; }
+.vfeeder-card h3 { margin: 0 0 10px; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+.vfeeder-mono { font-family: monospace; font-size: 11px; color: #64748b; }
+.vfeeder-gauge { height: 10px; border-radius: 999px; background: #e2e8f0; overflow: hidden; margin: 8px 0; }
+.vfeeder-gauge div { height: 100%; background: #059669; border-radius: 999px; }
+.vfeeder-alert { color: #dc2626; font-weight: 700; font-size: 12px; }
+.vfeeder-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.vfeeder-panel { padding: 16px; border-radius: 14px; border: 1px solid #e2e8f0; background: #fff; }
+.vfeeder-panel h3 { margin: 0 0 12px; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+.vfeeder-row { display: flex; align-items: center; gap: 10px; }
+.vfeeder-row input { width: 80px; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; }
+.vfeeder-msg { margin: 8px 0 0; font-size: 13px; color: #059669; font-weight: 700; }
+.vfeeder-schedule { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.8; }
+.vfeeder-log { list-style: none; margin: 0; padding: 0; }
+.vfeeder-log li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+.vfeeder-log small { margin-left: auto; color: #94a3b8; font-size: 11px; }
+@media (max-width: 640px) { .vfeeder-actions { grid-template-columns: 1fr; } }
