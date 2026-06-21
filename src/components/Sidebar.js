@@ -72,6 +72,13 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       ],
     },
     {
+      title: '🌱 RSE & Environnement',
+      items: [
+        { id: 'rse', label: 'Hub RSE & écologie', icon: '🌿' },
+        { id: 'compliance', label: 'Conformité ISO', icon: '✅', route: '/compliance' },
+      ],
+    },
+    {
       title: '⚙️ Paramètres',
       items: [
         { id: 'security', label: 'Centre de sécurité', icon: '🛡️' },

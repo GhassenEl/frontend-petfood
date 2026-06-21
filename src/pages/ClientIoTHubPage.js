@@ -17,6 +17,10 @@ import IoTLiveStatusBar from '../components/IoTLiveStatusBar';
 import IoTAnomalyPanel from '../components/IoTAnomalyPanel';
 import IoTMobileBridgePanel from '../components/IoTMobileBridgePanel';
 import FoodDistributionPanel from '../components/FoodDistributionPanel';
+import IoTCommandCenter from '../components/IoTCommandCenter';
+import IoTDevicesRegistryPanel from '../components/IoTDevicesRegistryPanel';
+import IoTNetworkTopologyPanel from '../components/IoTNetworkTopologyPanel';
+import IoTEnvironmentPanel from '../components/IoTEnvironmentPanel';
 import DemoModePill from '../components/DemoModePill';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import useIoTLive from '../hooks/useIoTLive';
@@ -35,7 +39,9 @@ const card = {
 
 const TABS = [
   { id: 'distribution', label: 'Distribution nourriture', shortLabel: 'Distrib.' },
+  { id: 'devices', label: 'Appareils', shortLabel: 'Appareils' },
   { id: 'detection', label: 'ESP32-CAM & afficheur', shortLabel: 'Caméra' },
+  { id: 'environment', label: 'Environnement', shortLabel: 'Env.' },
   { id: 'advanced', label: 'IoT avancé', shortLabel: 'Avancé' },
   { id: 'intelligence', label: 'Intelligence IA', shortLabel: 'IA' },
   { id: 'alerts', label: 'Alertes', shortLabel: 'Alertes' },
@@ -118,11 +124,26 @@ const ClientIoTHubPage = () => {
       >
         <div className="iot-hub-hero__inner">
           <div className="iot-hub-hero__copy">
-            <h1>🍽️ IoT — Distribution nourriture</h1>
+            <h1>📡 Centre IoT PetfoodTN</h1>
             <p>
-              Distributeur ESP32 · ESP32-CAM (détection nourriture réelle + afficheur OLED) ·
-              consommation eau, traçabilité, alertes et synchronisation app mobile.
+              Distributeur ESP32 · ESP32-CAM (détection nourriture + OLED) · fontaines connectées,
+              environnement, registre appareils et commandes à distance.
             </p>
+            {!loading && d.healthScore != null && (
+              <div className="iot-hub-hero__scores">
+                <span className="iot-hub-hero__score">
+                  <strong>{d.healthScore}</strong> Santé IoT
+                </span>
+                {d.networkHealth?.score != null && (
+                  <span className="iot-hub-hero__score">
+                    <strong>{d.networkHealth.score}</strong> Réseau
+                  </span>
+                )}
+                <span className="iot-hub-hero__score">
+                  <strong>{c.feedersOnline + (c.feederCamsOnline ?? 0) + (c.waterOnline || 0)}</strong> En ligne
+                </span>
+              </div>
+            )}
           </div>
           <div className="iot-hub-hero__actions">
             {d.mode === 'demo' && <DemoModePill />}
@@ -151,6 +172,9 @@ const ClientIoTHubPage = () => {
             className={`iot-tab${tab === t.id ? ' is-active' : ''}`}
           >
             {isMobile ? t.shortLabel : t.label}
+            {t.id === 'devices' && (d.devices?.length || 0) > 0 && (
+              <span className="iot-tab-badge">{d.devices.length}</span>
+            )}
             {t.id === 'alerts' && (c.alerts > 0 || (d.anomalies?.length || 0) > 0) && (
               <span className="iot-tab-badge">{Math.max(c.alerts || 0, d.anomalies?.length || 0)}</span>
             )}
@@ -167,6 +191,8 @@ const ClientIoTHubPage = () => {
         <>
           {tab === 'distribution' && (
             <>
+              <IoTCommandCenter pack={d} onRefresh={load} />
+
               <FoodDistributionPanel pack={d} demoMode={d.mode === 'demo'} />
 
               <div className="iot-stats-grid">
@@ -296,6 +322,10 @@ const ClientIoTHubPage = () => {
                 />
               </div>
 
+              <section style={{ marginBottom: 20 }}>
+                <IoTNetworkTopologyPanel networkHealth={d.networkHealth} mqtt={d.mqtt} />
+              </section>
+
               <section style={card}>
                 <h3 style={{ margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 8, fontSize: 16 }}>
                   <Cpu size={20} color="#1e40af" /> Connecter un ESP32
@@ -310,10 +340,23 @@ const ClientIoTHubPage = () => {
             </>
           )}
 
+          {tab === 'devices' && (
+            <IoTDevicesRegistryPanel devices={d.devices || []} demoMode={d.mode === 'demo'} />
+          )}
+
           {tab === 'detection' && (
             <div className="iot-card">
               <IoTFoodQualityCamPanel loading={loading} />
             </div>
+          )}
+
+          {tab === 'environment' && (
+            <>
+              <IoTEnvironmentPanel environment={d.environment} telemetry={d.telemetry} />
+              <div style={{ marginTop: 16 }}>
+                <IoTNetworkTopologyPanel networkHealth={d.networkHealth} mqtt={d.mqtt} />
+              </div>
+            </>
           )}
 
           {tab === 'advanced' && (

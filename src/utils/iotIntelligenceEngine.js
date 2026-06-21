@@ -4,6 +4,7 @@ import {
   forecastConsumption,
   detectConsumptionSpike,
 } from './iotAnomalyEngine';
+import { computeNetworkHealth } from './iotEcosystemEngine';
 
 const hoursAgo = (h) => new Date(Date.now() - h * 3600000).toISOString();
 
@@ -334,6 +335,16 @@ export const enrichIoTPack = (pack) => {
     : null;
   const feederSpike = detectConsumptionSpike(base.telemetry?.feederGrams7d, 'Croquettes');
 
+  const mqtt = {
+    connected: base.mqtt?.connected ?? base.mode === 'live',
+    broker: base.mqtt?.broker || 'mqtt://localhost:1883',
+    topicPrefix: base.mqtt?.topicPrefix || 'petfood/',
+    devicesSubscribed: base.mqtt?.devicesSubscribed ?? devices.filter((d) => d.status === 'online').length,
+  };
+
+  const partial = { ...enriched, healthScore, mqtt };
+  const networkHealth = computeNetworkHealth(partial);
+
   return {
     ...enriched,
     healthScore,
@@ -344,12 +355,8 @@ export const enrichIoTPack = (pack) => {
     environment,
     consumptionForecast,
     consumptionSpike: feederSpike,
-    mqtt: {
-      connected: base.mqtt?.connected ?? base.mode === 'live',
-      broker: base.mqtt?.broker || 'mqtt://localhost:1883',
-      topicPrefix: base.mqtt?.topicPrefix || 'petfood/',
-      devicesSubscribed: base.mqtt?.devicesSubscribed ?? devices.filter((d) => d.status === 'online').length,
-    },
+    mqtt,
+    networkHealth,
     intelligence: {
       insightCount: insights.length,
       anomalyCount: anomalies.length,

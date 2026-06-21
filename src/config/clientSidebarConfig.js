@@ -39,6 +39,7 @@ export const CLIENT_SIDEBAR_SECTIONS = [
   {
     title: '🐾 Services PetfoodTN',
     items: [
+      { id: 'client-rse', label: 'RSE & Écologie', icon: '🌱' },
       { id: 'client-events', label: 'Compétitions & cadeaux', icon: '🏆' },
       { id: 'pet-advice', label: 'Conseils pour pets', icon: '💡' },
       { id: 'found-me', label: 'Find Me', icon: '🔍' },

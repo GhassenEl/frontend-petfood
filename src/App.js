@@ -149,6 +149,7 @@ import VendorProfilePage from './pages/VendorProfilePage';
 import ModeratorProfilePage from './pages/ModeratorProfilePage';
 import ServiceClientProfilePage from './pages/ServiceClientProfilePage';
 import ServiceClientLayout from './layouts/ServiceClientLayout';
+import RseEcologyHubPage from './pages/RseEcologyHubPage';
 import VendorMlPage from './pages/VendorMlPage';
 import AdminCategoriesPage from './pages/AdminCategoriesPage';
 import AdminVetsPage from './pages/AdminVetsPage';
@@ -243,6 +244,8 @@ const App = () => {
         <Route path="/moderator" element={<ModeratorHubPage />} />
         <Route path="/capabilities" element={<CapabilitiesRoute user={null} />} />
         <Route path="/compliance" element={<PlatformCompliancePage />} />
+        <Route path="/rse" element={<PublicLayout><RseEcologyHubPage role="public" /></PublicLayout>} />
+        <Route path="/ecologie" element={<Navigate to="/rse" replace />} />
         <Route path="/qualite-iso" element={<PlatformCompliancePage />} />
         <Route path="/enterprise" element={<EnterpriseFeaturesPage />} />
         <Route path="/fonctionnalites" element={<EnterpriseFeaturesPage />} />
@@ -277,6 +280,8 @@ const App = () => {
       <Route path="/cookies" element={<CookiesPolicyPage />} />
 
       <Route path="/compliance" element={<PlatformCompliancePage />} />
+      <Route path="/rse" element={<PublicLayout><RseEcologyHubPage role="public" /></PublicLayout>} />
+      <Route path="/ecologie" element={<Navigate to="/rse" replace />} />
       <Route path="/qualite-iso" element={<PlatformCompliancePage />} />
       <Route path="/enterprise" element={<EnterpriseFeaturesPage />} />
       <Route path="/fonctionnalites" element={<EnterpriseFeaturesPage />} />
@@ -348,6 +353,7 @@ const App = () => {
       <Route path="/admin/partners" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPartnersHubPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/prices" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPriceGovernancePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/cities" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminCitiesHubPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/rse" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><RseEcologyHubPage role="admin" /></AdminLayout></RoleRoute>} />
       <Route path="/admin/profile" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminProfilePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/platform-services" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><PlatformServicesPage /></AdminLayout></RoleRoute>} />
 
@@ -366,6 +372,7 @@ const App = () => {
       <Route path="/client-reviews" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientReviewsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-complaints" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientComplaintsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-returns" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientReturnsPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-rse" element={<RoleRoute user={user} roles={['client']}><ClientLayout><RseEcologyHubPage role="client" /></ClientLayout></RoleRoute>} />
       <Route path="/client-profile" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientProfilePage /></ClientLayout></RoleRoute>} />
       <Route path="/client-pets" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-pet-passport" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetPassportPage /></ClientLayout></RoleRoute>} />
@@ -432,6 +439,7 @@ const App = () => {
       <Route path="/livreur/earnings" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurEarningsPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/history" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurHistoryPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/platform-services" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><PlatformServicesPage /></LivreurLayout></RoleRoute>} />
+      <Route path="/livreur/rse" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><RseEcologyHubPage role="livreur" /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/profile" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurProfilePage /></LivreurLayout></RoleRoute>} />
 
       <Route path="/vet/dashboard" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetDashboard /></VetLayout></RoleRoute>} />
@@ -477,6 +485,7 @@ const App = () => {
       <Route path="/vendor/food-quality" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><FoodQualitySurveillancePage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/bi" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RoleBiDashboardPage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/platform-services" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><PlatformServicesPage /></VendorLayout></RoleRoute>} />
+      <Route path="/vendor/rse" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RseEcologyHubPage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/profile" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorProfilePage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/recommendations" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RecommendationHubPage /></VendorLayout></RoleRoute>} />
 

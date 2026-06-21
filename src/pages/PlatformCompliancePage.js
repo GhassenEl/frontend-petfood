@@ -58,6 +58,7 @@ const PlatformCompliancePage = () => {
   return (
     <div className="pcmp-page">
       <header className="pcmp-hero">
+        <Link to="/rse" className="pcmp-back" style={{ marginRight: 16 }}>🌱 Hub RSE &amp; écologie</Link>
         <Link to="/" className="pcmp-back">← Accueil PetfoodTN</Link>
         <h1>Conformité ISO &amp; développement durable</h1>
         <p>

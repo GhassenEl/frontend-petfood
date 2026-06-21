@@ -1,6 +1,7 @@
 import api from '../utils/api';
 import { DEMO_IOT_PACK } from '../utils/clientDemoData';
 import { enrichIoTPack } from '../utils/iotIntelligenceEngine';
+import { simulateIoTCommand } from '../utils/iotEcosystemEngine';
 
 export async function fetchIoTPack() {
   try {
@@ -12,6 +13,16 @@ export async function fetchIoTPack() {
     /* fallback démo */
   }
   return enrichIoTPack({ ...DEMO_IOT_PACK, mode: 'demo' });
+}
+
+export async function sendIoTCommand(commandId, pack) {
+  try {
+    const { data } = await api.post('/client/iot/commands', { commandId });
+    if (data?.message) return data;
+  } catch {
+    /* démo */
+  }
+  return simulateIoTCommand(commandId, pack);
 }
 
 export async function toggleIoTAutomation(automationId, enabled) {

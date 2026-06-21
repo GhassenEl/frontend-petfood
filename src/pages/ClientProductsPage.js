@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, Flame, Sparkles, ShoppingCart, Search, Eye } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -18,6 +18,7 @@ import { getProfile } from '../services/userService';
 import { getFavoriteIds, addFavorite, removeFavorite, getFrequentProducts } from '../services/favoriteService';
 import ProductDetailModal from '../components/ProductDetailModal';
 import VerifiedPriceBadge from '../components/VerifiedPriceBadge';
+import RseEcoBadge from '../components/RseEcoBadge';
 import {
   matchProductSearch,
   CATEGORY_FILTERS,
@@ -254,9 +255,27 @@ const ClientProductsPage = () => {
           <h1 style={{ fontSize: '36px', fontWeight: 800, color: '#065f46', margin: '0 0 8px' }}>
             🛒 Nos Produits
           </h1>
-          <p style={{ fontSize: '16px', color: '#6b7280', margin: 0 }}>
+          <p style={{ fontSize: '16px', color: '#6b7280', margin: '0 0 10px' }}>
             Découvrez notre sélection premium pour vos animaux
           </p>
+          <Link
+            to="/client-rse"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: 13,
+              fontWeight: 700,
+              color: '#047857',
+              textDecoration: 'none',
+              padding: '6px 12px',
+              background: 'rgba(255,255,255,0.7)',
+              borderRadius: 20,
+              border: '1px solid #6ee7b7',
+            }}
+          >
+            🌱 Produits éco-responsables &amp; hub RSE
+          </Link>
         </div>
       </motion.div>
 
@@ -654,6 +673,9 @@ const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearb
 
       <div style={{ padding: '18px' }}>
         <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>{product.name}</h3>
+        <div style={{ marginBottom: 8 }}>
+          <RseEcoBadge product={product} size="xs" showScore />
+        </div>
         <p style={{ fontSize: '13px', color: '#6b7280', margin: '0 0 12px', lineHeight: '1.4', minHeight: '36px' }}>
           {product.description || 'Nourriture premium pour animaux'}
         </p>
