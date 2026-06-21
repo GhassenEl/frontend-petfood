@@ -3126,3 +3126,138 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Nutrition & hydratation — distribution / eau */
+.fd-panel__charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.nh-profile__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.nh-score-ring {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(var(--ring-color, #059669) calc(var(--score, 0) * 1%), #e2e8f0 calc(var(--score, 0) * 1%));
+  position: relative;
+  flex-shrink: 0;
+}
+
+.nh-score-ring::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.nh-score-ring span {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.nh-score-ring strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--ring-color, #059669);
+}
+
+.nh-score-ring small {
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+.nh-macros {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nh-macro__head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.nh-macro__head strong {
+  color: #0f172a;
+}
+
+.nh-macro__track {
+  height: 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.nh-macro__fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.nh-synergy--dehydration_risk {
+  border-left: 4px solid #0284c7;
+  background: #f0f9ff;
+}
+
+.nh-synergy--low_food {
+  border-left: 4px solid #d97706;
+  background: #fffbeb;
+}
+
+.nh-synergy--optimal {
+  border-left: 4px solid #059669;
+  background: #ecfdf5;
+}
+
+.nh-synergy__bars {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.nh-synergy__bars > div span {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.nh-synergy__track {
+  height: 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+  margin: 4px 0;
+}
+
+.nh-synergy__track div {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.nh-synergy__bars small {
+  font-size: 11px;
+  color: #475569;
+  font-weight: 700;
+}
+
+.nh-tips {
+  margin-bottom: 16px;
+}

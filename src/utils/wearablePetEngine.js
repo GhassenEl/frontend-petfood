@@ -1,6 +1,8 @@
 import {
   VITAL_THRESHOLDS,
   WEARABLE_ANIMAL_STATES,
+  ACTIVITY_GOALS,
+  SLEEP_TARGETS,
 } from '../config/wearablePetCatalog';
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
@@ -61,6 +63,239 @@ export const computeAnimalState = (metrics = {}, petType = 'dog') => {
   if (m.activityLevel === 'alert') return 'alert';
   if (m.activityLevel === 'resting') return 'resting';
   return 'calm';
+};
+
+/** Plages normales affichables pour le propriétaire. */
+export const getVitalRangesDisplay = (petType = 'dog') => {
+  const t = getThresholds(petType);
+  return {
+    spo2: `${t.spo2.min}–${t.spo2.max} %`,
+    heartRate: `${t.heartRate.restingMin}–${t.heartRate.restingMax} bpm (repos)`,
+    respiratory: `${t.respiratory.min}–${t.respiratory.max} /min`,
+    bodyTemp: `${t.bodyTemp.min}–${t.bodyTemp.max} °C`,
+    stress: `< ${t.stressIndex.warn} /100`,
+  };
+};
+
+/** Score bien-être 0–100. */
+export const computeWellnessScore = ({ metrics = {}, vitalsStatus = {}, petType = 'dog' } = {}) => {
+  let score = 100;
+  const vs = vitalsStatus;
+  Object.values(vs).forEach((s) => {
+    if (s === 'warn') score -= 12;
+    if (s === 'critical') score -= 28;
+  });
+
+  const goal = ACTIVITY_GOALS[petType] || ACTIVITY_GOALS.dog;
+  const steps = metrics.stepsToday ?? 0;
+  const stepPct = Math.min(100, Math.round((steps / goal.steps) * 100));
+  if (stepPct >= 80) score += 5;
+  else if (stepPct < 40) score -= 8;
+
+  const sleep = metrics.sleepQuality ?? 80;
+  if (sleep >= 80) score += 4;
+  else if (sleep < 60) score -= 10;
+
+  if ((metrics.stressIndex ?? 0) > 50) score -= 6;
+
+  return clamp(Math.round(score), 0, 100);
+};
+
+/** Résumé sommeil (nuit précédente). */
+export const buildSleepSummary = (metrics = {}, petType = 'dog') => {
+  const target = SLEEP_TARGETS[petType] || SLEEP_TARGETS.dog;
+  const minutes = metrics.sleepMinutesTonight ?? (petType === 'cat' ? 420 : 380);
+  const hours = Math.round((minutes / 60) * 10) / 10;
+  const quality = metrics.sleepQuality ?? 82;
+  const inRange = hours >= target.hoursMin && hours <= target.hoursMax;
+  return {
+    minutes,
+    hours,
+    quality,
+    inRange,
+    targetHours: `${target.hoursMin}–${target.hoursMax} h`,
+    status: quality >= target.qualityMin && inRange ? 'good' : quality >= 60 ? 'fair' : 'poor',
+  };
+};
+
+/** Timeline activité 24 h (barres par heure). */
+export const buildActivityTimeline = (device, hours = 24) => {
+  const petType = device.petType || 'dog';
+  const seed = (device.id || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  const points = [];
+  const now = Date.now();
+
+  for (let i = hours - 1; i >= 0; i -= 1) {
+    const ts = new Date(now - i * 3600000);
+    const h = ts.getHours();
+    let level = 'rest';
+    let intensity = 25 + ((seed + h) % 15);
+
+    if (h >= 23 || h < 6) {
+      level = 'sleep';
+      intensity = 8 + (h % 5);
+    } else if (petType === 'dog' && (h === 7 || h === 8 || h === 18 || h === 19)) {
+      level = 'active';
+      intensity = 55 + ((seed + h * 3) % 40);
+    } else if (petType === 'cat' && (h === 6 || h === 7 || h === 20 || h === 21)) {
+      level = 'play';
+      intensity = 50 + ((seed + h) % 35);
+    } else if ((seed + h) % 5 === 0) {
+      level = 'active';
+      intensity = 40 + ((seed + h) % 30);
+    }
+
+    points.push({
+      at: ts.toISOString(),
+      label: `${String(h).padStart(2, '0')}h`,
+      level,
+      intensity: clamp(intensity, 5, 95),
+    });
+  }
+  return points;
+};
+
+const DAY_LABELS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+
+/** Tendance 7 jours (moyennes journalières). */
+export const buildWeeklyTrend = (device) => {
+  const petType = device.petType || 'dog';
+  const base = device.metrics || {};
+  const seed = (device.petId || device.id || '').length;
+  const points = [];
+
+  for (let i = 6; i >= 0; i -= 1) {
+    const d = new Date(Date.now() - i * 86400000);
+    const day = DAY_LABELS[d.getDay()];
+    const avgHr = Math.round(
+      clamp(
+        (base.heartRateBpm ?? 90) + ((seed + i) % 7) * 3 - 9 + rnd(-5, 5),
+        getThresholds(petType).heartRate.restingMin,
+        getThresholds(petType).heartRate.activeMax,
+      ),
+    );
+    const avgSpo2 = Math.round(clamp((base.spo2Percent ?? 97) + rnd(-0.8, 0.8), 94, 100) * 10) / 10;
+    const steps = Math.round((base.stepsToday ?? 3000) * (0.7 + ((seed + i) % 5) * 0.08) + rnd(-200, 400));
+    const wellness = computeWellnessScore({
+      metrics: { ...base, stepsToday: steps, sleepQuality: 70 + ((seed + i) % 20) },
+      vitalsStatus: {
+        spo2: assessVitalStatus('spo2', avgSpo2, petType),
+        heartRate: assessVitalStatus('heartRate', avgHr, petType),
+        respiratory: 'ok',
+        bodyTemp: 'ok',
+        stress: 'ok',
+      },
+      petType,
+    });
+    points.push({ day, avgHr, avgSpo2, steps, wellness });
+  }
+  return points;
+};
+
+/** Conseils IA personnalisés par collier. */
+export const generateWearableInsights = (collar = {}) => {
+  const m = collar.metrics || {};
+  const vs = collar.vitalsStatus || {};
+  const petType = collar.petType || 'dog';
+  const goal = ACTIVITY_GOALS[petType] || ACTIVITY_GOALS.dog;
+  const tips = [];
+
+  if (vs.heartRate === 'warn' || vs.heartRate === 'critical') {
+    tips.push({
+      id: `${collar.id}-hr-tip`,
+      icon: '❤️',
+      priority: vs.heartRate === 'critical' ? 'high' : 'medium',
+      title: 'Rythme cardiaque élevé',
+      message: `La FC de ${collar.petName} est hors norme. Laissez-le se reposer et surveillez 15 min. Consultez un véto si persistant.`,
+    });
+  }
+  if (vs.spo2 === 'warn' || vs.spo2 === 'critical') {
+    tips.push({
+      id: `${collar.id}-spo2-tip`,
+      icon: '🫁',
+      priority: 'high',
+      title: 'SpO₂ basse',
+      message: `Oxygénation à ${m.spo2Percent} %. Vérifiez que le collier est bien ajusté et que ${collar.petName} respire normalement.`,
+    });
+  }
+  if ((m.stepsToday ?? 0) < goal.steps * 0.5) {
+    tips.push({
+      id: `${collar.id}-activity-tip`,
+      icon: '🏃',
+      priority: 'low',
+      title: 'Activité insuffisante',
+      message: `${Math.round(((m.stepsToday ?? 0) / goal.steps) * 100)} % de l'objectif pas (${goal.steps.toLocaleString('fr-FR')}). Une promenade ou session de jeu est recommandée.`,
+    });
+  }
+  if ((m.stressIndex ?? 0) >= getThresholds(petType).stressIndex.warn) {
+    tips.push({
+      id: `${collar.id}-stress-tip`,
+      icon: '😰',
+      priority: 'medium',
+      title: 'Stress détecté',
+      message: `Indice stress ${m.stressIndex}/100. Réduisez les stimuli (bruit, visiteurs) et favorisez un environnement calme.`,
+    });
+  }
+  const sleep = buildSleepSummary(m, petType);
+  if (sleep.status === 'poor') {
+    tips.push({
+      id: `${collar.id}-sleep-tip`,
+      icon: '😴',
+      priority: 'medium',
+      title: 'Sommeil perturbé',
+      message: `${sleep.hours} h de sommeil (qualité ${sleep.quality} %). Objectif ${sleep.targetHours} pour un ${petType === 'cat' ? 'chat' : 'chien'}.`,
+    });
+  }
+  if (collar.batteryPercent != null && collar.batteryPercent < 30) {
+    tips.push({
+      id: `${collar.id}-batt-tip`,
+      icon: '🔋',
+      priority: 'medium',
+      title: 'Batterie faible',
+      message: `Collier à ${collar.batteryPercent} %. Rechargez avant la nuit pour un suivi continu.`,
+    });
+  }
+  if (!tips.length) {
+    tips.push({
+      id: `${collar.id}-ok-tip`,
+      icon: '✅',
+      priority: 'low',
+      title: 'Tout va bien',
+      message: `${collar.petName} présente des signes vitaux stables. Continuez le suivi régulier.`,
+    });
+  }
+  return tips;
+};
+
+/** Enrichit un collier avec scores, timeline et conseils. */
+export const enrichCollar = (collar, historyExtra) => {
+  const petType = collar.petType || 'dog';
+  const metrics = {
+    ...collar.metrics,
+    animalState: collar.metrics?.animalState || computeAnimalState(collar.metrics, petType),
+  };
+  const vitalsStatus = collar.vitalsStatus || {
+    spo2: assessVitalStatus('spo2', metrics.spo2Percent, petType),
+    heartRate: assessVitalStatus('heartRate', metrics.heartRateBpm, petType),
+    respiratory: assessVitalStatus('respiratory', metrics.respiratoryRate, petType),
+    bodyTemp: assessVitalStatus('bodyTemp', metrics.bodyTempC, petType),
+    stress: assessVitalStatus('stress', metrics.stressIndex, petType),
+  };
+  const enriched = {
+    ...collar,
+    metrics,
+    vitalsStatus,
+    stateMeta: WEARABLE_ANIMAL_STATES[metrics.animalState] || WEARABLE_ANIMAL_STATES.calm,
+    wellnessScore: computeWellnessScore({ metrics, vitalsStatus, petType }),
+    sleep: buildSleepSummary(metrics, petType),
+    activityTimeline: buildActivityTimeline(collar),
+    weeklyTrend: buildWeeklyTrend(collar),
+    vitalRanges: getVitalRangesDisplay(petType),
+    activityGoal: ACTIVITY_GOALS[petType] || ACTIVITY_GOALS.dog,
+  };
+  enriched.insights = generateWearableInsights(enriched);
+  if (historyExtra) enriched.historyPoints = historyExtra;
+  return enriched;
 };
 
 const buildHistoryPoint = (device, at) => {
@@ -162,13 +397,13 @@ export const mergeWearableReading = (state, reading) => {
   if (!reading?.deviceId) return state;
   const collars = (state?.collars || []).map((c) => {
     if (c.id !== reading.deviceId) return c;
-    const metrics = { ...c.metrics, ...reading.metrics };
-    return {
+    const merged = {
       ...c,
-      metrics,
+      metrics: { ...c.metrics, ...reading.metrics },
       lastSeen: reading.at || new Date().toISOString(),
       vitalsStatus: reading.vitalsStatus,
     };
+    return enrichCollar(merged, state?.history?.[reading.deviceId]);
   });
 
   const history = { ...(state?.history || {}) };
@@ -184,32 +419,14 @@ export const mergeWearableReading = (state, reading) => {
 
 /** Construit le pack wearable depuis les appareils IoT. */
 export const buildWearablePack = (devices = [], extra = {}) => {
-  const collars = devices
-    .filter((d) => d.type === 'wearable-collar')
-    .map((d) => {
-      const petType = d.petType || 'dog';
-      const metrics = {
-        ...d.metrics,
-        animalState: d.metrics?.animalState || computeAnimalState(d.metrics, petType),
-      };
-      return {
-        ...d,
-        metrics,
-        vitalsStatus: {
-          spo2: assessVitalStatus('spo2', metrics.spo2Percent, petType),
-          heartRate: assessVitalStatus('heartRate', metrics.heartRateBpm, petType),
-          respiratory: assessVitalStatus('respiratory', metrics.respiratoryRate, petType),
-          bodyTemp: assessVitalStatus('bodyTemp', metrics.bodyTempC, petType),
-          stress: assessVitalStatus('stress', metrics.stressIndex, petType),
-        },
-        stateMeta: WEARABLE_ANIMAL_STATES[metrics.animalState] || WEARABLE_ANIMAL_STATES.calm,
-      };
-    });
-
   const history = {};
-  collars.forEach((c) => {
-    history[c.id] = extra.history?.[c.id] || buildWearableHistory(c);
+  const rawCollars = devices.filter((d) => d.type === 'wearable-collar');
+
+  rawCollars.forEach((d) => {
+    history[d.id] = extra.history?.[d.id] || buildWearableHistory(d);
   });
+
+  const collars = rawCollars.map((d) => enrichCollar(d, history[d.id]));
 
   const alerts = collars.flatMap((c) => {
     const issues = [];
@@ -248,6 +465,9 @@ export const buildWearablePack = (devices = [], extra = {}) => {
   });
 
   const online = collars.filter((c) => c.status === 'online').length;
+  const avgWellness = collars.length
+    ? Math.round(collars.reduce((s, c) => s + (c.wellnessScore ?? 0), 0) / collars.length)
+    : null;
 
   return {
     mode: extra.mode || 'demo',
@@ -259,6 +479,7 @@ export const buildWearablePack = (devices = [], extra = {}) => {
       online,
       critical: collars.filter((c) => c.metrics.animalState === 'critical').length,
       stressed: collars.filter((c) => c.metrics.animalState === 'stressed').length,
+      avgWellness,
     },
     lastSyncAt: extra.lastSyncAt || new Date().toISOString(),
   };
@@ -267,6 +488,13 @@ export const buildWearablePack = (devices = [], extra = {}) => {
 export default {
   assessVitalStatus,
   computeAnimalState,
+  getVitalRangesDisplay,
+  computeWellnessScore,
+  buildSleepSummary,
+  buildActivityTimeline,
+  buildWeeklyTrend,
+  generateWearableInsights,
+  enrichCollar,
   buildWearableHistory,
   simulateWearableReading,
   mergeWearableReading,

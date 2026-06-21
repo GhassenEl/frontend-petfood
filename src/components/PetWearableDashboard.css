@@ -410,6 +410,310 @@
   50% { opacity: 0.7; }
 }
 
+.wear-kpi--wellness {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wear-kpi--wellness strong {
+  font-size: 18px;
+}
+
+.wear-wellness-ring {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(
+    var(--ring-color, #059669) calc(var(--score, 0) * 1%),
+    #e2e8f0 calc(var(--score, 0) * 1%)
+  );
+  position: relative;
+  flex-shrink: 0;
+}
+
+.wear-wellness-ring::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.wear-wellness-ring span {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.wear-wellness-ring strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--ring-color, #059669);
+}
+
+.wear-wellness-ring small {
+  font-size: 9px;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.wear-pulse-wave {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 28px;
+  margin: 0 0 12px;
+  opacity: 0.35;
+}
+
+.wear-pulse-wave.is-live {
+  opacity: 1;
+}
+
+.wear-pulse-wave__bar {
+  flex: 1;
+  max-width: 6px;
+  height: 40%;
+  background: #fecaca;
+  border-radius: 2px;
+  animation: wear-ecg 1.2s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.08s);
+}
+
+.wear-pulse-wave.is-live .wear-pulse-wave__bar {
+  background: #dc2626;
+}
+
+.wear-collar-card__toggle {
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.wear-collar-card.is-expanded {
+  border-color: #93c5fd;
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+}
+
+.wear-collar-detail {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.wear-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.wear-detail-panel {
+  padding: 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.wear-detail-panel h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wear-detail-stat {
+  margin: 0 0 4px;
+}
+
+.wear-detail-stat strong {
+  font-size: 22px;
+  font-weight: 900;
+  color: #0f172a;
+  margin-right: 6px;
+}
+
+.wear-detail-stat span {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.wear-detail-meta {
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.wear-detail-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0ea5e9;
+  text-decoration: none;
+}
+
+.wear-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.wear-progress__fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.wear-detail-section {
+  margin-bottom: 16px;
+}
+
+.wear-detail-section h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #334155;
+}
+
+.wear-activity-timeline__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 64px;
+  padding: 0 2px;
+}
+
+.wear-activity-timeline__bar {
+  flex: 1;
+  min-height: 4px;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.3s ease;
+}
+
+.wear-activity-timeline__bar--sleep { background: #6366f1; }
+.wear-activity-timeline__bar--rest { background: #94a3b8; }
+.wear-activity-timeline__bar--active { background: #d97706; }
+.wear-activity-timeline__bar--play { background: #059669; }
+
+.wear-activity-timeline__labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.wear-activity-timeline__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.wear-activity-timeline__legend i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.wear-vital__range {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.wear-insights {
+  margin-bottom: 16px;
+}
+
+.wear-insights h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #334155;
+}
+
+.wear-insight {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 8px;
+}
+
+.wear-insight span:first-child {
+  font-size: 20px;
+}
+
+.wear-insight strong {
+  display: block;
+  font-size: 13px;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.wear-insight p {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.wear-insight--high {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.wear-insight--medium {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.wear-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.wear-btn--vet {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1e40af;
+  text-decoration: none;
+}
+
+.wear-batt-low {
+  color: #dc2626;
+  font-weight: 800;
+}
+
+@keyframes wear-ecg {
+  0%, 100% { height: 20%; }
+  20% { height: 90%; }
+  40% { height: 30%; }
+  55% { height: 100%; }
+  70% { height: 25%; }
+}
+
 @media (max-width: 640px) {
   .wear-collar-grid {
     grid-template-columns: 1fr;

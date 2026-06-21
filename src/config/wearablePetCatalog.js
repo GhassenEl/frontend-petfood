@@ -34,7 +34,26 @@ export const WEARABLE_FEATURES = [
   { id: 'bodyTemp', label: 'Température', icon: '🌡️', unit: '°C', desc: 'Température corporelle' },
   { id: 'activity', label: 'Activité', icon: '📊', unit: '', desc: 'Niveau d\'activité journalier' },
   { id: 'stress', label: 'Indice stress', icon: '😰', unit: '/100', desc: 'Estimation du stress physiologique' },
+  { id: 'sleep', label: 'Sommeil', icon: '😴', unit: '', desc: 'Durée et qualité du repos nocturne' },
+  { id: 'gps', label: 'Localisation', icon: '📍', unit: '', desc: 'Zone de présence (Find Me)' },
 ];
+
+export const ACTIVITY_GOALS = {
+  dog: { steps: 5000, calories: 350, activeMinutes: 60 },
+  cat: { steps: 1200, calories: 120, activeMinutes: 30 },
+};
+
+export const SLEEP_TARGETS = {
+  dog: { hoursMin: 10, hoursMax: 14, qualityMin: 75 },
+  cat: { hoursMin: 12, hoursMax: 16, qualityMin: 70 },
+};
+
+export const ACTIVITY_LEVELS = {
+  sleep: { label: 'Sommeil', color: '#6366f1' },
+  rest: { label: 'Repos', color: '#94a3b8' },
+  active: { label: 'Actif', color: '#d97706' },
+  play: { label: 'Jeu', color: '#059669' },
+};
 
 export const WEARABLE_FIRMWARE = 'PetCollar Vital v2.1';
 
@@ -42,5 +61,8 @@ export default {
   WEARABLE_ANIMAL_STATES,
   VITAL_THRESHOLDS,
   WEARABLE_FEATURES,
+  ACTIVITY_GOALS,
+  SLEEP_TARGETS,
+  ACTIVITY_LEVELS,
   WEARABLE_FIRMWARE,
 };

@@ -2,8 +2,11 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Play, Calendar, Package, ChevronRight, AlertTriangle, CheckCircle2, Clock,
-  Wifi, Scale, Thermometer,
+  Wifi, Scale, Thermometer, Droplets,
 } from 'lucide-react';
+import {
+  BarChart, Bar, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine, Cell,
+} from 'recharts';
 import { analyzeFeederHabits } from '../utils/feederHabitAnalyzer';
 import {
   DEMO_FEEDER_SCHEDULE,
@@ -11,8 +14,17 @@ import {
   DEMO_FEEDER_STATS,
   DEMO_FEEDER_HISTORY_LOGS,
   getDemoFeederBundle,
+  getDemoWaterTracking,
 } from '../utils/clientDemoData';
 import { predictFoodDepletion } from '../utils/iotIntelligenceEngine';
+import {
+  estimateDailyMacros,
+  computeNutritionScore,
+  buildMealBalance,
+  buildNutritionWeeklyChart,
+  buildNutritionWaterSynergy,
+  generateNutritionTips,
+} from '../utils/nutritionHydrationEngine';
 import { PLATFORM_IMAGES } from '../utils/platformImages';
 
 const COMPLEMENTS = [
@@ -245,6 +257,77 @@ const QuickAction = ({ to, icon, label, sub, primary }) => (
   </Link>
 );
 
+const NutritionScoreRing = ({ score }) => {
+  const color = score >= 80 ? '#059669' : score >= 60 ? '#d97706' : '#dc2626';
+  return (
+    <div className="nh-score-ring" style={{ '--score': score, '--ring-color': color }}>
+      <span><strong>{score}</strong><small>/100</small></span>
+    </div>
+  );
+};
+
+const MacroBar = ({ label, value, unit, pct, color }) => (
+  <div className="nh-macro">
+    <div className="nh-macro__head">
+      <span>{label}</span>
+      <strong>{value}{unit}</strong>
+    </div>
+    <div className="nh-macro__track">
+      <div className="nh-macro__fill" style={{ width: `${pct}%`, background: color }} />
+    </div>
+  </div>
+);
+
+/** Macros + score nutrition. */
+export const NutritionProfilePanel = ({ macros, score, dailyTarget, todayGrams }) => (
+  <div style={card} className="nh-profile">
+    <div className="nh-profile__head">
+      <div>
+        <h3 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 800 }}>Profil nutritionnel</h3>
+        <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>
+          {todayGrams} g / {dailyTarget} g · <strong>{macros.totalKcal} kcal</strong> estimées
+        </p>
+      </div>
+      <NutritionScoreRing score={score} />
+    </div>
+    <div className="nh-macros">
+      <MacroBar label="Protéines" value={macros.proteinG} unit=" g" pct={macros.split.protein} color="#dc2626" />
+      <MacroBar label="Lipides" value={macros.fatG} unit=" g" pct={macros.split.fat} color="#d97706" />
+      <MacroBar label="Glucides" value={macros.carbsG} unit=" g" pct={macros.split.carbs} color="#2563eb" />
+      <MacroBar label="Fibres" value={macros.fiberG} unit=" g" pct={Math.min(100, macros.split.fiber * 8)} color="#059669" />
+    </div>
+  </div>
+);
+
+/** Synergie alimentation + eau. */
+export const NutritionWaterSynergyCard = ({ synergy, petName }) => (
+  <div style={{ ...card, marginTop: 12 }} className={`nh-synergy nh-synergy--${synergy.status}`}>
+    <h3 style={{ margin: '0 0 8px', fontSize: 14, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+      <Droplets size={16} color="#0284c7" /> Synergie nutrition &amp; hydratation — {petName}
+    </h3>
+    <p style={{ margin: '0 0 10px', fontSize: 13, color: '#475569', lineHeight: 1.45 }}>{synergy.message}</p>
+    <div className="nh-synergy__bars">
+      <div>
+        <span>🍽️ Alimentation</span>
+        <div className="nh-synergy__track"><div style={{ width: `${synergy.foodPct}%`, background: '#059669' }} /></div>
+        <small>{synergy.foodPct} %</small>
+      </div>
+      <div>
+        <span>💧 Hydratation</span>
+        <div className="nh-synergy__track"><div style={{ width: `${synergy.waterPct}%`, background: '#0284c7' }} /></div>
+        <small>{synergy.waterPct} %</small>
+      </div>
+    </div>
+    <p style={{ margin: '10px 0 0', fontSize: 12, color: '#64748b' }}>
+      Score combiné : <strong>{synergy.combinedScore}/100</strong>
+      {' · '}Ratio eau/nourriture : {synergy.ratio} ml/g (cible ~{synergy.idealRatio})
+    </p>
+    <Link to="/client-smart-water" style={{ fontSize: 12, fontWeight: 700, color: '#0284c7', marginTop: 8, display: 'inline-block' }}>
+      Voir consommation eau →
+    </Link>
+  </div>
+);
+
 /**
  * Panneau principal — onglet Distribution nourriture (Centre IoT).
  */
@@ -288,6 +371,62 @@ const FoodDistributionPanel = ({ pack = {}, demoMode = false }) => {
 
   const dailyTarget = plan?.dailyGrams || stats.dailyAverage || 95;
   const petName = plan?.pet?.name || feederDevice?.petName || 'Animal';
+  const petType = plan?.pet?.type || 'dog';
+  const petId = plan?.pet?.id || 'demo-pet-1';
+
+  const waterTracking = useMemo(() => {
+    if (demoMode) return getDemoWaterTracking(petId);
+    const wd = (pack.devices || []).find((d) => d.type === 'water' && (d.petName === petName || d.petId === petId));
+    if (!wd?.metrics) return null;
+    return {
+      todayMl: wd.metrics.todayMl,
+      targetMl: wd.metrics.targetMl,
+      percentOfTarget: wd.metrics.percentOfTarget,
+    };
+  }, [demoMode, petId, petName, pack.devices]);
+
+  const adherencePct = dailyTarget > 0 ? Math.round((stats.todayGrams / dailyTarget) * 100) : 0;
+  const macros = useMemo(
+    () => estimateDailyMacros(stats.todayGrams, petType),
+    [stats.todayGrams, petType],
+  );
+  const nutritionScore = useMemo(
+    () => computeNutritionScore({
+      todayGrams: stats.todayGrams,
+      dailyTarget,
+      adherencePct,
+      missedMeals: habit.missedMealsCount,
+      qualityScore,
+      reservoirLow: feeder?.isLowFood,
+    }),
+    [stats.todayGrams, dailyTarget, adherencePct, habit.missedMealsCount, qualityScore, feeder?.isLowFood],
+  );
+  const mealBalance = useMemo(
+    () => buildMealBalance(history, schedules, plan),
+    [history, schedules, plan],
+  );
+  const weeklyChart = useMemo(
+    () => buildNutritionWeeklyChart(
+      demoBundle?.stats?.consumptionByDay || stats.consumptionByDay || DEMO_FEEDER_STATS.consumptionByDay,
+      dailyTarget,
+    ),
+    [demoBundle, stats.consumptionByDay, dailyTarget],
+  );
+  const synergy = useMemo(
+    () => buildNutritionWaterSynergy({
+      petName,
+      todayGrams: stats.todayGrams,
+      dailyTarget,
+      todayMl: waterTracking?.todayMl ?? 0,
+      targetMl: waterTracking?.targetMl ?? 550,
+      petType,
+    }),
+    [petName, stats.todayGrams, dailyTarget, waterTracking, petType],
+  );
+  const nutritionTips = useMemo(
+    () => generateNutritionTips(habit, plan, synergy),
+    [habit, plan, synergy],
+  );
 
   return (
     <section className="fd-panel">
@@ -317,8 +456,8 @@ const FoodDistributionPanel = ({ pack = {}, demoMode = false }) => {
             <span>Ambiance</span>
           </div>
           <div className="fd-kpi fd-kpi--score">
-            <strong style={{ color: habit.healthScore >= 70 ? '#059669' : '#d97706' }}>{habit.healthScore}</strong>
-            <span>Score santé</span>
+            <strong style={{ color: nutritionScore >= 70 ? '#059669' : '#d97706' }}>{nutritionScore}</strong>
+            <span>Score nutrition</span>
           </div>
         </div>
       </div>
@@ -349,8 +488,65 @@ const FoodDistributionPanel = ({ pack = {}, demoMode = false }) => {
               )}
             </div>
           )}
+          {waterTracking && (
+            <NutritionWaterSynergyCard synergy={synergy} petName={petName} />
+          )}
         </div>
       </div>
+
+      <div className="fd-panel__charts">
+        <NutritionProfilePanel
+          macros={macros}
+          score={nutritionScore}
+          dailyTarget={dailyTarget}
+          todayGrams={stats.todayGrams}
+        />
+        <div style={card}>
+          <h3 style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 800 }}>Répartition repas du jour</h3>
+          {mealBalance.length > 0 ? (
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart data={mealBalance}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} unit=" g" />
+                <Tooltip formatter={(v) => [`${v} g`, 'Portion']} />
+                <Bar dataKey="grams" radius={[6, 6, 0, 0]}>
+                  {mealBalance.map((_, i) => (
+                    <Cell key={i} fill={['#059669', '#2563eb', '#7c3aed'][i % 3]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p style={{ fontSize: 13, color: '#94a3b8' }}>Aucun repas enregistré aujourd&apos;hui.</p>
+          )}
+        </div>
+        <div style={card}>
+          <h3 style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 800 }}>Consommation — 7 jours</h3>
+          <ResponsiveContainer width="100%" height={160}>
+            <BarChart data={weeklyChart}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis dataKey="day" tick={{ fontSize: 10 }} />
+              <YAxis tick={{ fontSize: 10 }} />
+              <Tooltip formatter={(v, name) => [name === 'grams' ? `${v} g` : v, name === 'grams' ? 'Consommé' : 'Objectif']} />
+              <ReferenceLine y={dailyTarget} stroke="#94a3b8" strokeDasharray="4 4" />
+              <Bar dataKey="grams" fill="#059669" radius={[4, 4, 0, 0]} name="grams" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {nutritionTips.length > 0 && (
+        <div className="fd-insights nh-tips">
+          <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 800, gridColumn: '1 / -1' }}>Conseils nutrition</h3>
+          {nutritionTips.map((tip, i) => (
+            <div key={tip.id || i} className={`fd-insight fd-insight--${tip.priority === 'high' ? 'warning' : 'info'}`}>
+              <span>{tip.icon}</span>
+              <p>{tip.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {(habit.alerts.length > 0 || habit.insights.length > 0) && (
         <div className="fd-insights">
@@ -376,6 +572,7 @@ const FoodDistributionPanel = ({ pack = {}, demoMode = false }) => {
         <QuickAction to="/pet-feeder" icon={<Play size={18} />} label="Distribuer maintenant" sub={`Portion suggérée ${plan?.portionGrams || 30} g`} primary />
         <QuickAction to="/pet-feeder" icon={<Package size={18} />} label="Recharger le réservoir" sub="Enregistrer une recharge" />
         <QuickAction to="/client-iot?tab=detection" icon="📷" label="Contrôle qualité ESP32-CAM" sub={qualityScore != null ? `Score ${qualityScore}/100` : 'Surveillance bac'} />
+        <QuickAction to="/client-smart-water" icon={<Droplets size={18} />} label="Hydratation liée" sub={waterTracking ? `${waterTracking.todayMl} ml · ${waterTracking.percentOfTarget ?? synergy.waterPct} % objectif` : 'Fontaine connectée'} />
         <QuickAction to="/pet-adaptive-nutrition" icon="🥗" label="Plan nutritionnel IA" sub={`${dailyTarget} g/jour · ${plan?.mealsPerDay || 3} repas`} />
       </div>
     </section>
