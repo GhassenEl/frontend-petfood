@@ -25,6 +25,7 @@ export const CLIENT_SIDEBAR_SECTIONS = [
       { id: 'pet-feeder', label: 'Distributeur ESP32', icon: '🍽️' },
       { id: 'client-esp32cam-food-quality', label: 'ESP32-CAM & afficheur', icon: '📷', route: '/client-iot?tab=detection' },
       { id: 'client-smart-water', label: 'Consommation eau', icon: '💧' },
+      { id: 'client-wearable', label: 'Colliers santé', icon: '📿', route: '/client-iot?tab=wearable' },
       { id: 'client-traceability', label: 'Traçabilité', icon: '🔗' },
       { id: 'mobile-app', label: 'Application mobile', icon: '📱', route: '/mobile#iot' },
     ],

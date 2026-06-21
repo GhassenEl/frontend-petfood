@@ -57,6 +57,7 @@ export const simulateIoTCommand = (commandId, pack = {}) => {
     'firmware-check': 'Tous les firmwares sont à jour',
     'mqtt-ping': pack.mqtt?.connected ? `MQTT OK — ${pack.mqtt.broker} (42 ms)` : 'MQTT hors ligne',
     'water-purge': 'Cycle purge fontaine démarré (60 s)',
+    'wearable-sync': 'Vitaux colliers synchronisés — SpO₂ & rythme cardiaque',
   };
   return {
     ok: true,

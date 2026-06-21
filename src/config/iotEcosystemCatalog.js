@@ -13,6 +13,7 @@ export const IOT_DEVICE_TYPES = [
   { type: 'water', icon: '💧', label: 'Fontaine connectée', firmware: 'SmartWater v1.2' },
   { type: 'scale', icon: '⚖️', label: 'Balance connectée', firmware: 'PetScale v1.0' },
   { type: 'smart-fridge', icon: '🧊', label: 'Réfrigérateur IoT', firmware: 'ColdChain v1.1' },
+  { type: 'wearable-collar', icon: '📿', label: 'Collier PetCollar Vital', firmware: 'PetCollar Vital v2.1' },
 ];
 
 export const IOT_SETUP_STEPS = [
@@ -30,10 +31,11 @@ export const IOT_QUICK_COMMANDS = [
   { id: 'firmware-check', icon: '⬆️', label: 'Vérifier firmware', desc: 'Contrôle versions OTA', roles: ['all'] },
   { id: 'mqtt-ping', icon: '📡', label: 'Ping MQTT', desc: 'Test latence broker', roles: ['all'] },
   { id: 'water-purge', icon: '💧', label: 'Purge fontaine', desc: 'Cycle nettoyage 60 s', roles: ['water'] },
+  { id: 'wearable-sync', icon: '📿', label: 'Sync colliers', desc: 'Rafraîchir vitaux SpO₂ & FC', roles: ['wearable-collar'] },
 ];
 
 export const IOT_NETWORK_LAYERS = [
-  { id: 'edge', label: 'Edge — ESP32', icon: '🔌', items: ['Distributeur', 'ESP32-CAM', 'Fontaine', 'Capteurs'] },
+  { id: 'edge', label: 'Edge — ESP32', icon: '🔌', items: ['Distributeur', 'ESP32-CAM', 'Fontaine', 'Colliers', 'Capteurs'] },
   { id: 'transport', label: 'Transport', icon: '📡', items: ['Wi-Fi 2.4 GHz', 'MQTT 1883', 'TLS optionnel'] },
   { id: 'platform', label: 'Plateforme', icon: '☁️', items: ['API PetfoodTN', 'WebSocket live', 'IA qualité'] },
   { id: 'client', label: 'Client', icon: '📱', items: ['Dashboard web', 'App mobile', 'Push alertes'] },

@@ -6,6 +6,7 @@ import {
 } from './iotAnomalyEngine';
 import { computeNetworkHealth } from './iotEcosystemEngine';
 import { buildIoTSecurityPack } from './iotSecurityEngine';
+import { assessVitalStatus, computeAnimalState } from './wearablePetEngine';
 
 const hoursAgo = (h) => new Date(Date.now() - h * 3600000).toISOString();
 
@@ -185,6 +186,55 @@ export const generateIoTInsights = (pack = {}) => {
     }
   });
 
+  devices.filter((d) => d.type === 'wearable-collar').forEach((d) => {
+    const m = d.metrics || {};
+    const petType = d.petType || 'dog';
+    const spo2Status = assessVitalStatus('spo2', m.spo2Percent, petType);
+    const hrStatus = assessVitalStatus('heartRate', m.heartRateBpm, petType);
+    const state = m.animalState || computeAnimalState(m, petType);
+
+    if (spo2Status === 'critical' || spo2Status === 'warn') {
+      insights.push({
+        id: `wear-spo2-${d.id}`,
+        icon: '🫁',
+        priority: spo2Status === 'critical' ? 'high' : 'medium',
+        title: `SpO₂ ${d.petName}`,
+        message: `Saturation oxygène ${m.spo2Percent ?? '—'} % — surveiller le collier connecté.`,
+        link: '/client-iot?tab=wearable',
+      });
+    }
+    if (hrStatus === 'critical' || hrStatus === 'warn') {
+      insights.push({
+        id: `wear-hr-${d.id}`,
+        icon: '❤️',
+        priority: hrStatus === 'critical' ? 'high' : 'medium',
+        title: `Rythme cardiaque ${d.petName}`,
+        message: `${m.heartRateBpm ?? '—'} bpm — hors plage habituelle pour un ${petType === 'cat' ? 'chat' : 'chien'}.`,
+        link: '/client-iot?tab=wearable',
+      });
+    }
+    if (state === 'stressed' || state === 'critical') {
+      insights.push({
+        id: `wear-state-${d.id}`,
+        icon: state === 'critical' ? '🚨' : '😰',
+        priority: state === 'critical' ? 'high' : 'medium',
+        title: `État ${d.petName}`,
+        message: `Collier : état ${state} — indices physiologiques à vérifier.`,
+        link: '/veterinary',
+      });
+    }
+    if (d.batteryPercent != null && d.batteryPercent < 25) {
+      insights.push({
+        id: `wear-batt-${d.id}`,
+        icon: '🔋',
+        priority: 'medium',
+        title: `Batterie collier ${d.petName}`,
+        message: `Batterie à ${d.batteryPercent} % — recharger le collier.`,
+        link: '/client-iot?tab=wearable',
+      });
+    }
+  });
+
   const offline = devices.filter((d) => d.status !== 'online');
   offline.forEach((d) => {
     insights.push({
@@ -311,10 +361,13 @@ export const enrichIoTPack = (pack) => {
   const devices = (base.devices || []).map((d, i) => ({
     ...d,
     signalStrength: d.signalStrength ?? (d.status === 'online' ? 68 + (i * 7) % 25 : 0),
-    batteryPercent: d.batteryPercent ?? (d.type === 'feeder' ? null : 78 + (i * 5) % 18),
+    batteryPercent: d.batteryPercent ?? (d.type === 'feeder' ? null : d.type === 'wearable-collar' ? 70 + (i * 3) % 25 : 78 + (i * 5) % 18),
     lastSeen: d.lastSeen || hoursAgo(d.status === 'online' ? 0.05 : 3),
     metrics: {
       ...d.metrics,
+      ...(d.type === 'wearable-collar' && d.metrics ? {
+        animalState: d.metrics.animalState || computeAnimalState(d.metrics, d.petType || 'dog'),
+      } : {}),
       percentOfTarget:
         d.metrics?.percentOfTarget ??
         (d.metrics?.todayMl != null && d.metrics?.targetMl

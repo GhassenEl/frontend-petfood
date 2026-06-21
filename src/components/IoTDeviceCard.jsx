@@ -8,6 +8,7 @@ const TYPE_META = {
   water: { icon: '💧', color: '#0ea5e9', label: 'Fontaine' },
   scale: { icon: '⚖️', color: '#059669', label: 'Balance' },
   'smart-fridge': { icon: '🧊', color: '#0369a1', label: 'Réfrigérateur' },
+  'wearable-collar': { icon: '📿', color: '#dc2626', label: 'Collier santé' },
 };
 
 const QUALITY_CHIP = {
@@ -93,6 +94,15 @@ const IoTDeviceCard = ({ device }) => {
         )}
         {device.type === 'smart-fridge' && m.temperatureC != null && (
           <MetricChip label="Frigo" value={`${m.temperatureC}°C`} warn={m.temperatureC > 6} />
+        )}
+        {device.type === 'wearable-collar' && m.spo2Percent != null && (
+          <MetricChip label="SpO₂" value={`${m.spo2Percent}%`} warn={m.spo2Percent < 94} />
+        )}
+        {device.type === 'wearable-collar' && m.heartRateBpm != null && (
+          <MetricChip label="FC" value={`${m.heartRateBpm} bpm`} warn={m.heartRateBpm > 160 || m.heartRateBpm < 50} />
+        )}
+        {device.type === 'wearable-collar' && m.animalState && (
+          <MetricChip label="État" value={m.animalState} warn={m.animalState === 'stressed' || m.animalState === 'critical'} />
         )}
         {(device.type === 'feeder-cam' || device.type === 'smart-fridge') && m.humidityPct != null && (
           <MetricChip label="HR" value={`${m.humidityPct}%`} warn={m.humidityPct > 75} />

@@ -22,6 +22,7 @@ import IoTDevicesRegistryPanel from '../components/IoTDevicesRegistryPanel';
 import IoTNetworkTopologyPanel from '../components/IoTNetworkTopologyPanel';
 import IoTEnvironmentPanel from '../components/IoTEnvironmentPanel';
 import IoTSecurityPanel from '../components/IoTSecurityPanel';
+import PetWearableDashboard from '../components/PetWearableDashboard';
 import DemoModePill from '../components/DemoModePill';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import useIoTLive from '../hooks/useIoTLive';
@@ -42,6 +43,7 @@ const TABS = [
   { id: 'distribution', label: 'Distribution nourriture', shortLabel: 'Distrib.' },
   { id: 'devices', label: 'Appareils', shortLabel: 'Appareils' },
   { id: 'detection', label: 'ESP32-CAM & afficheur', shortLabel: 'Caméra' },
+  { id: 'wearable', label: 'Colliers santé', shortLabel: 'Colliers' },
   { id: 'environment', label: 'Environnement', shortLabel: 'Env.' },
   { id: 'security', label: 'Sécurité', shortLabel: 'Sécu.' },
   { id: 'advanced', label: 'IoT avancé', shortLabel: 'Avancé' },
@@ -100,6 +102,7 @@ const ClientIoTHubPage = () => {
     const t = searchParams.get('tab');
     if (t === 'food-quality') setTab('detection');
     else if (t === 'security') setTab('security');
+    else if (t === 'wearable') setTab('wearable');
     else if (t && TABS.some((x) => x.id === t)) setTab(t);
   }, [searchParams]);
 
@@ -129,7 +132,7 @@ const ClientIoTHubPage = () => {
           <div className="iot-hub-hero__copy">
             <h1>📡 Centre IoT PetfoodTN</h1>
             <p>
-              Distributeur ESP32 · ESP32-CAM (détection nourriture + OLED) · fontaines connectées,
+              Distributeur ESP32 · ESP32-CAM · colliers santé (SpO₂, rythme cardiaque) · fontaines connectées,
               environnement, registre appareils et commandes à distance.
             </p>
             {!loading && d.healthScore != null && (
@@ -148,7 +151,7 @@ const ClientIoTHubPage = () => {
                   </span>
                 )}
                 <span className="iot-hub-hero__score">
-                  <strong>{c.feedersOnline + (c.feederCamsOnline ?? 0) + (c.waterOnline || 0)}</strong> En ligne
+                  <strong>{c.feedersOnline + (c.feederCamsOnline ?? 0) + (c.waterOnline || 0) + (c.wearablesOnline || 0)}</strong> En ligne
                 </span>
               </div>
             )}
@@ -180,6 +183,9 @@ const ClientIoTHubPage = () => {
             className={`iot-tab${tab === t.id ? ' is-active' : ''}`}
           >
             {isMobile ? t.shortLabel : t.label}
+            {t.id === 'wearable' && (c.wearablesOnline || 0) > 0 && (
+              <span className="iot-tab-badge" style={{ background: '#ecfdf5', color: '#059669' }}>{c.wearablesOnline}</span>
+            )}
             {t.id === 'security' && (d.security?.threats?.length || 0) > 0 && (
               <span className="iot-tab-badge">{d.security.threats.length}</span>
             )}
@@ -210,6 +216,7 @@ const ClientIoTHubPage = () => {
                 <Stat value={`${c.feedersOnline || 0}/${c.feeders || 0}`} label="Distributeurs" color="#059669" />
                 <Stat value={`${c.feederCamsOnline ?? 1}/${c.feederCams ?? 1}`} label="ESP32-CAM" color="#7c3aed" />
                 <Stat value={`${c.waterOnline || 0}/${c.waterMonitors || 0}`} label="Fontaines" color="#0ea5e9" />
+                <Stat value={`${c.wearablesOnline || 0}/${c.wearables || 0}`} label="Colliers santé" color="#dc2626" />
                 <Stat value={c.alerts || 0} label="Alertes actives" color="#f59e0b" />
                 {d.consumptionForecast?.daysUntilEmpty != null && (
                   <Stat
@@ -299,6 +306,15 @@ const ClientIoTHubPage = () => {
                   statusColor="#7c3aed"
                 />
                 <IoTModuleCard
+                  to="/client-iot?tab=wearable"
+                  icon="📿"
+                  title="Colliers santé connectés"
+                  subtitle="SpO₂, rythme cardiaque, respiration et état de l'animal en live."
+                  status={`${c.wearablesOnline || 0} en ligne`}
+                  statusColor="#dc2626"
+                  badge="Temps réel"
+                />
+                <IoTModuleCard
                   to="/client-smart-water"
                   icon="💧"
                   title="Consommation eau"
@@ -358,6 +374,12 @@ const ClientIoTHubPage = () => {
           {tab === 'detection' && (
             <div className="iot-card">
               <IoTFoodQualityCamPanel loading={loading} />
+            </div>
+          )}
+
+          {tab === 'wearable' && (
+            <div className="iot-card">
+              <PetWearableDashboard />
             </div>
           )}
 

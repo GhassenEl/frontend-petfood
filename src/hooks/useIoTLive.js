@@ -31,6 +31,7 @@ export default function useIoTLive({ enabled = true, onTelemetry } = {}) {
     };
     const onDevice = (p) => handleTelemetry({ ...p, channel: 'device' });
     const onFoodQuality = (p) => handleTelemetry({ ...p, channel: 'food-quality' });
+    const onWearable = (p) => handleTelemetry({ ...p, channel: 'wearable' });
 
     if (socket.connected) onConnect();
     socket.on('connect', onConnect);
@@ -40,6 +41,8 @@ export default function useIoTLive({ enabled = true, onTelemetry } = {}) {
     socket.on('iot:device:update', onDevice);
     socket.on('iot:telemetry', onDevice);
     socket.on('iot:food-quality:reading', onFoodQuality);
+    socket.on('iot:wearable:reading', onWearable);
+    socket.on('wearable:vitals', onWearable);
 
     return () => {
       socket.off('connect', onConnect);
@@ -49,6 +52,8 @@ export default function useIoTLive({ enabled = true, onTelemetry } = {}) {
       socket.off('iot:device:update', onDevice);
       socket.off('iot:telemetry', onDevice);
       socket.off('iot:food-quality:reading', onFoodQuality);
+      socket.off('iot:wearable:reading', onWearable);
+      socket.off('wearable:vitals', onWearable);
     };
   }, [enabled, handleTelemetry]);
 
