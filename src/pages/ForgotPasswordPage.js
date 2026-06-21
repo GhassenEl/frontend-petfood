@@ -81,6 +81,11 @@ const ForgotPasswordPage = () => {
           <>
             <div className="login-page-error login-page-error--success" role="status">
               <span>✓</span> {success.message}
+              {success.emailSent && (
+                <span style={{ display: 'block', marginTop: 6, fontSize: 12, fontWeight: 600 }}>
+                  E-mail envoyé à {email.trim().toLowerCase()}
+                </span>
+              )}
             </div>
             {success.devNote && devResetLink && (
               <div className="login-page-dev-note">
