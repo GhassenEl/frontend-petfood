@@ -274,6 +274,92 @@
   cursor: not-allowed;
 }
 
+.login-page-forgot {
+  margin: 8px 0 0;
+  text-align: right;
+}
+
+.login-page-forgot a,
+.login-page-back-link a,
+.login-page-forgot-link {
+  font-size: 13px;
+  font-weight: 700;
+  color: #059669;
+  text-decoration: none;
+}
+
+.login-page-forgot a:hover,
+.login-page-back-link a:hover,
+.login-page-forgot-link:hover {
+  text-decoration: underline;
+}
+
+.login-page-back-link {
+  text-align: center;
+  margin: 16px 0 0;
+  font-size: 14px;
+}
+
+.login-page-dev-note {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.login-page-dev-note .login-page-forgot-link {
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.auth-legal-footer {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+.auth-legal-footer__forgot,
+.auth-legal-footer__register {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.auth-legal-footer__forgot a,
+.auth-legal-footer__register a {
+  color: #059669;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-legal-footer__links {
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+
+.auth-legal-footer__links a {
+  color: #4b5563;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-legal-footer__links a:hover {
+  color: #059669;
+  text-decoration: underline;
+}
+
+.auth-legal-footer__hint {
+  margin: 0;
+  font-size: 11px;
+  color: #9ca3af;
+  line-height: 1.45;
+}
+
 @keyframes loginSpin {
   to { transform: rotate(360deg); }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   getRememberedEmail,
@@ -18,6 +19,7 @@ import {
   formatLockoutRemaining,
 } from '../utils/loginAttemptGuard';
 import { LOGIN_BACKGROUND } from '../utils/platformImages';
+import AuthLegalFooter from '../components/AuthLegalFooter';
 import './LoginPage.css';
 
 const LoginPage = () => {
@@ -236,6 +238,9 @@ const LoginPage = () => {
             {touched.password && fieldErrors.password && (
               <p className="login-page-field-error" role="alert">⚠ {fieldErrors.password}</p>
             )}
+            <p className="login-page-forgot">
+              <Link to="/forgot-password">Mot de passe oublié ?</Link>
+            </p>
           </div>
 
           <button
@@ -260,6 +265,8 @@ const LoginPage = () => {
             </button>
           </div>
         </form>
+
+        <AuthLegalFooter showRegister />
       </div>
     </div>
   );

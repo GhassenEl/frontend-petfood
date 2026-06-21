@@ -1,5 +1,5 @@
 /** Styles partagés pages login / mot de passe oublié */
-import { HERO_BACKGROUND } from './platformImages';
+import { LOGIN_BACKGROUND } from './platformImages';
 
 export const authPageStyles = {
   container: {
@@ -8,7 +8,7 @@ export const authPageStyles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '16px',
-    backgroundImage: `url('${HERO_BACKGROUND}')`,
+    backgroundImage: `url('${LOGIN_BACKGROUND}')`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     position: 'relative',

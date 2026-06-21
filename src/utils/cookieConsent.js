@@ -126,6 +126,12 @@ export const clearCookieConsent = () => {
   removeCookie(CONSENT_COOKIE);
 };
 
+/** Réaffiche la bannière cookies pour modifier les préférences */
+export const reopenCookiePreferences = () => {
+  clearCookieConsent();
+  window.dispatchEvent(new Event('petfood:cookie-consent'));
+};
+
 export const listActiveCookieTypes = () => {
   const consent = getCookieConsent();
   return Object.values(COOKIE_CATEGORIES)

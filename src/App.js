@@ -8,6 +8,8 @@ import LoginPage from './pages/LoginPage.js';
 import RegisterPage from './pages/RegisterPage.jsx';
 import ForgotPasswordPage from './pages/ForgotPasswordPage.js';
 import ResetPasswordPage from './pages/ResetPasswordPage.js';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage.js';
+import CookiesPolicyPage from './pages/CookiesPolicyPage.js';
 import AdminLayout from './layouts/AdminLayout';
 import ClientLayout from './layouts/ClientLayout';
 import LivreurLayout from './layouts/LivreurLayout';
@@ -226,6 +228,9 @@ const App = () => {
         <Route path="/register" element={<AuthMobileRoute title="Inscription"><RegisterPage /></AuthMobileRoute>} />
         <Route path="/forgot-password" element={<AuthMobileRoute title="Mot de passe"><ForgotPasswordPage /></AuthMobileRoute>} />
         <Route path="/reset-password" element={<AuthMobileRoute title="Réinitialiser"><ResetPasswordPage /></AuthMobileRoute>} />
+        <Route path="/politique-confidentialite" element={<PrivacyPolicyPage />} />
+        <Route path="/privacy" element={<Navigate to="/politique-confidentialite" replace />} />
+        <Route path="/cookies" element={<CookiesPolicyPage />} />
         <Route path="/login" element={<AuthMobileRoute title="Connexion"><LoginPage /></AuthMobileRoute>} />
         <Route path="/visitor/*" element={<Navigate to="/" replace />} />
         <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
@@ -260,6 +265,11 @@ const App = () => {
       <Route path="/" element={<Navigate to={userHome} replace />} />
       <Route path="/login" element={<Navigate to={userHome} replace />} />
       <Route path="/register" element={<Navigate to={userHome} replace />} />
+      <Route path="/forgot-password" element={<AuthMobileRoute title="Mot de passe"><ForgotPasswordPage /></AuthMobileRoute>} />
+      <Route path="/reset-password" element={<AuthMobileRoute title="Réinitialiser"><ResetPasswordPage /></AuthMobileRoute>} />
+      <Route path="/politique-confidentialite" element={<PrivacyPolicyPage />} />
+      <Route path="/privacy" element={<Navigate to="/politique-confidentialite" replace />} />
+      <Route path="/cookies" element={<CookiesPolicyPage />} />
 
       <Route path="/compliance" element={<PlatformCompliancePage />} />
       <Route path="/qualite-iso" element={<PlatformCompliancePage />} />

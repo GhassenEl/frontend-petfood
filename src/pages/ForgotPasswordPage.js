@@ -3,7 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { validateEmail } from '../utils/loginValidation';
 import { mapAuthError } from '../utils/authErrors';
-import { authPageStyles as s, authInputStyle } from '../utils/authPageStyles';
+import { LOGIN_BACKGROUND } from '../utils/platformImages';
+import AuthLegalFooter from '../components/AuthLegalFooter';
+import './LoginPage.css';
 
 const ForgotPasswordPage = () => {
   const navigate = useNavigate();
@@ -37,8 +39,8 @@ const ForgotPasswordPage = () => {
       setError(
         mapAuthError(
           err.response?.data?.error,
-          'Impossible d\'envoyer le lien. Réessayez dans quelques minutes.'
-        )
+          'Impossible d\'envoyer le lien. Réessayez dans quelques minutes.',
+        ),
       );
     } finally {
       setLoading(false);
@@ -50,77 +52,92 @@ const ForgotPasswordPage = () => {
     : null;
 
   return (
-    <div style={s.container}>
-      <div style={s.overlay} />
-      <div
-        style={{
-          ...s.card,
-          opacity: mounted ? 1 : 0,
-          transform: mounted ? 'translateY(0)' : 'translateY(20px)',
-          transition: 'all 0.5s ease',
-        }}
-      >
-        <h1 style={s.title}>🔑 Mot de passe oublié</h1>
-        <p style={s.subtitle}>
-          Saisissez votre email. Nous vous enverrons un lien pour réinitialiser votre mot de passe
-          (valide 15 minutes).
-        </p>
+    <div
+      className="login-page-root"
+      style={{ backgroundImage: `url('${LOGIN_BACKGROUND}')` }}
+    >
+      <div className="login-page-overlay" />
 
-        {error && <div style={s.errorBox} role="alert">⚠ {error}</div>}
+      <div
+        className={`login-page-card ${mounted ? 'login-page-card--mounted' : 'login-page-card--enter'}`}
+      >
+        <div className="login-page-logo-section">
+          <div className="login-page-logo-circle">
+            <span style={{ fontSize: 20 }} aria-hidden>🔑</span>
+          </div>
+          <h1 className="login-page-title">Mot de passe oublié</h1>
+          <p className="login-page-subtitle">
+            Saisissez votre e-mail — nous vous enverrons un lien valide 15 minutes.
+          </p>
+        </div>
+
+        {error && (
+          <div className="login-page-error" role="alert">
+            <span>⚠</span> {error}
+          </div>
+        )}
 
         {success ? (
           <>
-            <div style={s.successBox} role="status">
-              ✅ {success.message}
+            <div className="login-page-error login-page-error--success" role="status">
+              <span>✓</span> {success.message}
             </div>
             {success.devNote && devResetLink && (
-              <div style={s.infoBox}>
+              <div className="login-page-dev-note">
                 <strong>{success.devNote}</strong>
-                <br />
-                <Link to={devResetLink} style={s.link}>
+                <Link to={devResetLink} className="login-page-forgot-link">
                   Réinitialiser mon mot de passe →
                 </Link>
               </div>
             )}
             <button
               type="button"
-              style={{ ...s.submitBtn, marginTop: '16px' }}
+              className="login-page-submit"
               onClick={() => navigate('/login')}
             >
               Retour à la connexion
             </button>
           </>
         ) : (
-          <form onSubmit={handleSubmit} noValidate>
-            <label htmlFor="forgot-email" style={s.label}>
-              Adresse email
-            </label>
-            <input
-              id="forgot-email"
-              type="email"
-              autoComplete="email"
-              maxLength={254}
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (fieldError) setFieldError('');
-                if (error) setError('');
-              }}
-              style={authInputStyle(!!fieldError)}
-              placeholder="nom@domaine.tn"
-              aria-invalid={!!fieldError}
-            />
-            {fieldError && <p style={s.fieldError}>⚠ {fieldError}</p>}
+          <form className="login-page-form" onSubmit={handleSubmit} noValidate>
+            <div className="login-page-input-group">
+              <label htmlFor="forgot-email" className="login-page-label">
+                Adresse email
+              </label>
+              <div className="login-page-input-wrap">
+                <input
+                  id="forgot-email"
+                  type="email"
+                  autoComplete="email"
+                  maxLength={254}
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (fieldError) setFieldError('');
+                    if (error) setError('');
+                  }}
+                  className={`login-page-input login-page-input--email${fieldError ? ' login-page-input--error' : ''}`}
+                  placeholder="nom@domaine.tn"
+                  aria-invalid={!!fieldError}
+                />
+                <span className="login-page-input-icon">✉</span>
+              </div>
+              {fieldError && (
+                <p className="login-page-field-error" role="alert">⚠ {fieldError}</p>
+              )}
+            </div>
 
-            <button type="submit" disabled={loading} style={{ ...s.submitBtn, opacity: loading ? 0.7 : 1 }}>
-              {loading ? <span style={s.spinner} /> : 'Envoyer le lien'}
+            <button type="submit" disabled={loading} className="login-page-submit">
+              {loading ? <span className="login-page-spinner" /> : 'Envoyer le lien →'}
             </button>
           </form>
         )}
 
-        <p style={s.linkRow}>
-          <Link to="/login" style={s.link}>← Retour à la connexion</Link>
+        <p className="login-page-back-link">
+          <Link to="/login">← Retour à la connexion</Link>
         </p>
+
+        <AuthLegalFooter />
       </div>
     </div>
   );
