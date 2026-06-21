@@ -145,6 +145,10 @@ import ModeratorVendorsPage from './pages/ModeratorVendorsPage';
 import ModeratorFraudCenterPage from './pages/ModeratorFraudCenterPage';
 import ModeratorMessagesPage from './pages/ModeratorMessagesPage';
 import ModeratorIntelligenceHubPage from './pages/ModeratorIntelligenceHubPage';
+import VendorProfilePage from './pages/VendorProfilePage';
+import ModeratorProfilePage from './pages/ModeratorProfilePage';
+import ServiceClientProfilePage from './pages/ServiceClientProfilePage';
+import ServiceClientLayout from './layouts/ServiceClientLayout';
 import VendorMlPage from './pages/VendorMlPage';
 import AdminCategoriesPage from './pages/AdminCategoriesPage';
 import AdminVetsPage from './pages/AdminVetsPage';
@@ -473,7 +477,7 @@ const App = () => {
       <Route path="/vendor/food-quality" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><FoodQualitySurveillancePage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/bi" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RoleBiDashboardPage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/platform-services" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><PlatformServicesPage /></VendorLayout></RoleRoute>} />
-      <Route path="/vendor/profile" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><AdminProfilePage /></VendorLayout></RoleRoute>} />
+      <Route path="/vendor/profile" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorProfilePage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/recommendations" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RecommendationHubPage /></VendorLayout></RoleRoute>} />
 
       <Route path="/moderator/dashboard" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorDashboard /></ModeratorLayout></RoleRoute>} />
@@ -492,7 +496,8 @@ const App = () => {
       <Route path="/moderator/events" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><EventsPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/messages" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorMessagesPage /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/platform-services" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><PlatformServicesPage /></ModeratorLayout></RoleRoute>} />
-      <Route path="/moderator/profile" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><AdminProfilePage /></ModeratorLayout></RoleRoute>} />
+      <Route path="/moderator/profile" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorProfilePage /></ModeratorLayout></RoleRoute>} />
+      <Route path="/support/profile" element={<RoleRoute user={user} roles={['support']}><ServiceClientLayout><ServiceClientProfilePage /></ServiceClientLayout></RoleRoute>} />
 
       <Route path="*" element={<SafeFallbackRedirect />} />
     </Routes>

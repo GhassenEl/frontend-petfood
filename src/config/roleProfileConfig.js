@@ -1,0 +1,158 @@
+/** Configuration visuelle et métier des pages profil par rôle. */
+export const ROLE_PROFILE_CONFIG = {
+  admin: {
+    title: 'Mon profil administrateur',
+    badge: 'Administration',
+    icon: '⚙️',
+    accent: { primary: '#10b981', secondary: '#059669', light: '#ecfdf5', badgeBg: '#fef3c7', badgeColor: '#92400e' },
+    regionLabel: 'Région / ville',
+    regionHint: 'Utilisée pour le filtrage régional et les statistiques par zone.',
+    addressLabel: 'Adresse professionnelle',
+    addressPlaceholder: 'Siège, bureau ou site principal…',
+    extraFields: [
+      { key: 'department', label: 'Département / service', placeholder: 'Ex. Logistique, RH, IT…', type: 'text' },
+      { key: 'internalId', label: 'Matricule interne', placeholder: 'ADM-0000', type: 'text' },
+    ],
+    quickLinks: [
+      { to: '/admin/dashboard', label: 'Tableau de bord', icon: '📊' },
+      { to: '/admin/security', label: 'Sécurité plateforme', icon: '🔒' },
+      { to: '/admin/recommendations', label: 'Recommandations IA', icon: '🤖' },
+    ],
+  },
+  client: {
+    title: 'Mon profil client',
+    badge: 'Client PetfoodTN',
+    icon: '🐾',
+    accent: { primary: '#10b981', secondary: '#0284c7', light: '#ecfdf5', badgeBg: '#dbeafe', badgeColor: '#1d4ed8' },
+    regionLabel: 'Région / zone de livraison',
+    regionHint: 'Pour trouver le vétérinaire le plus proche et filtrer les offres locales.',
+    addressLabel: 'Adresse de livraison',
+    addressPlaceholder: 'Rue, code postal, ville…',
+    extraFields: [
+      { key: 'petPreference', label: 'Type d\'animal principal', placeholder: 'Chien, chat, NAC…', type: 'text' },
+      { key: 'bio', label: 'À propos de moi', placeholder: 'Quelques mots sur vous et vos compagnons…', type: 'textarea' },
+    ],
+    quickLinks: [
+      { to: '/client-dashboard', label: 'Mon espace', icon: '🏠' },
+      { to: '/client-pets', label: 'Mes animaux', icon: '🐕' },
+      { to: '/client-recommendations', label: 'Recommandations', icon: '✨' },
+      { to: '/client-orders', label: 'Mes commandes', icon: '📦' },
+    ],
+  },
+  vet: {
+    title: 'Mon profil vétérinaire',
+    badge: 'Vétérinaire',
+    icon: '🩺',
+    accent: { primary: '#0ea5e9', secondary: '#0284c7', light: '#e0f2fe', badgeBg: '#dbeafe', badgeColor: '#1e40af' },
+    regionLabel: 'Région d\'exercice',
+    regionHint: 'Zone où vous consultez — visible pour les clients à la recherche d\'un vétérinaire.',
+    addressLabel: 'Adresse du cabinet',
+    addressPlaceholder: 'Rue, ville, code postal…',
+    extraFields: [
+      { key: 'clinicName', label: 'Nom du cabinet', placeholder: 'Clinique vétérinaire…', type: 'text' },
+      { key: 'specialty', label: 'Spécialité', placeholder: 'Généraliste, chirurgie, NAC…', type: 'text' },
+      { key: 'licenseNumber', label: 'N° ordre vétérinaires', placeholder: 'ORDV-TN-…', type: 'text' },
+      { key: 'openingHours', label: 'Horaires d\'ouverture', placeholder: 'Lun–Ven 9h–18h, Sam 9h–13h', type: 'text' },
+    ],
+    quickLinks: [
+      { to: '/vet/dashboard', label: 'Tableau de bord', icon: '📊' },
+      { to: '/vet/calendar', label: 'Agenda', icon: '📅' },
+      { to: '/vet/clinic', label: 'Mon cabinet', icon: '🏥' },
+      { to: '/vet/recommendations', label: 'Recommandations', icon: '🤖' },
+    ],
+  },
+  vendor: {
+    title: 'Mon profil vendeur',
+    badge: 'Partenaire vendeur',
+    icon: '🏪',
+    accent: { primary: '#8b5cf6', secondary: '#6d28d9', light: '#ede9fe', badgeBg: '#f3e8ff', badgeColor: '#6b21a8' },
+    regionLabel: 'Région d\'activité',
+    regionHint: 'Zone de couverture de votre boutique ou entrepôt.',
+    addressLabel: 'Adresse du point de vente',
+    addressPlaceholder: 'Magasin, entrepôt ou siège…',
+    extraFields: [
+      { key: 'shopName', label: 'Nom de la boutique', placeholder: 'Animalerie / marque…', type: 'text' },
+      { key: 'category', label: 'Catégorie principale', placeholder: 'Croquettes, accessoires, pharmacie…', type: 'text' },
+      { key: 'siret', label: 'Identifiant fiscal / SIRET', placeholder: '1234567A/B/C/000', type: 'text' },
+      { key: 'website', label: 'Site web ou page sociale', placeholder: 'https://…', type: 'text' },
+    ],
+    quickLinks: [
+      { to: '/vendor/dashboard', label: 'Tableau de bord', icon: '📊' },
+      { to: '/vendor/products', label: 'Mes produits', icon: '📦' },
+      { to: '/vendor/marketing', label: 'Marketing', icon: '📣' },
+      { to: '/vendor/recommendations', label: 'Recommandations', icon: '🤖' },
+    ],
+  },
+  livreur: {
+    title: 'Mon profil livreur',
+    badge: 'Livreur PetfoodTN',
+    icon: '🚚',
+    accent: { primary: '#22c55e', secondary: '#16a34a', light: '#dcfce7', badgeBg: '#d1fae5', badgeColor: '#047857' },
+    regionLabel: 'Zone de livraison',
+    regionHint: 'Région où vous effectuez vos livraisons — visible par l\'administration.',
+    addressLabel: 'Adresse de base',
+    addressPlaceholder: 'Point de départ habituel…',
+    extraFields: [
+      { key: 'vehicleType', label: 'Type de véhicule', placeholder: 'Moto, voiture, camionnette…', type: 'text' },
+      { key: 'vehiclePlate', label: 'Immatriculation', placeholder: '123 TU 4567', type: 'text' },
+      { key: 'coldChainCert', label: 'Certification chaîne du froid', placeholder: 'Oui / Non / En cours', type: 'text' },
+    ],
+    quickLinks: [
+      { to: '/livreur/dashboard', label: 'Tableau de bord', icon: '📊' },
+      { to: '/livreur/availability', label: 'Disponibilités', icon: '🕐' },
+      { to: '/livreur/route', label: 'Ma tournée', icon: '🗺️' },
+      { to: '/livreur/earnings', label: 'Gains', icon: '💰' },
+    ],
+  },
+  moderator: {
+    title: 'Mon profil modérateur',
+    badge: 'Modération',
+    icon: '🛡️',
+    accent: { primary: '#f59e0b', secondary: '#d97706', light: '#fffbeb', badgeBg: '#fef3c7', badgeColor: '#b45309' },
+    regionLabel: 'Zone géographique',
+    regionHint: 'Région(s) que vous supervisez pour la modération de contenu.',
+    addressLabel: 'Adresse',
+    addressPlaceholder: 'Bureau ou site de modération…',
+    extraFields: [
+      { key: 'moderationZones', label: 'Zones de modération', placeholder: 'Tunis, Sfax, national…', type: 'text' },
+      { key: 'languages', label: 'Langues maîtrisées', placeholder: 'Français, Arabe, Anglais…', type: 'text' },
+    ],
+    quickLinks: [
+      { to: '/moderator/dashboard', label: 'Tableau de bord', icon: '📊' },
+      { to: '/moderator/content', label: 'Contenu', icon: '📝' },
+      { to: '/moderator/fraud', label: 'Fraude', icon: '🚨' },
+      { to: '/moderator/recommendations', label: 'Recommandations', icon: '🤖' },
+    ],
+  },
+  support: {
+    title: 'Mon profil support client',
+    badge: 'Service client',
+    icon: '🎧',
+    accent: { primary: '#3b82f6', secondary: '#2563eb', light: '#eff6ff', badgeBg: '#dbeafe', badgeColor: '#1d4ed8' },
+    regionLabel: 'Région / site',
+    regionHint: 'Site ou région de prise en charge des tickets.',
+    addressLabel: 'Adresse du centre',
+    addressPlaceholder: 'Centre d\'appels ou bureau…',
+    extraFields: [
+      { key: 'team', label: 'Équipe / shift', placeholder: 'Équipe A, matin…', type: 'text' },
+      { key: 'extension', label: 'Poste / extension', placeholder: 'Ext. 1234', type: 'text' },
+    ],
+    quickLinks: [
+      { to: '/support/dashboard', label: 'Tableau de bord', icon: '📊' },
+      { to: '/support/tickets', label: 'Tickets', icon: '🎫' },
+      { to: '/support/complaints', label: 'Réclamations', icon: '⚠️' },
+    ],
+  },
+};
+
+export const DEFAULT_PROFILE_PREFS = {
+  emailNotifications: true,
+  smsNotifications: false,
+  marketingEmails: true,
+  orderUpdates: true,
+  language: 'fr',
+};
+
+export function getRoleProfileConfig(role) {
+  return ROLE_PROFILE_CONFIG[role] || ROLE_PROFILE_CONFIG.client;
+}
