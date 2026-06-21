@@ -446,6 +446,8 @@ export const DEMO_NUTRITION_PETS = [
     sex: 'M',
     isNeutered: true,
     allergies: 'Poulet',
+    chronicConditions: [],
+    overdueVaccines: [],
   },
   {
     id: 'demo-nut-2',
@@ -458,6 +460,8 @@ export const DEMO_NUTRITION_PETS = [
     birthDate: daysAgo(Math.round(3 * 365.25)),
     sex: 'F',
     isNeutered: true,
+    chronicConditions: ['Dermatite allergique'],
+    overdueVaccines: ['Vaccin Rage', 'Typhus chat'],
   },
   {
     id: 'demo-nut-3',
@@ -470,7 +474,9 @@ export const DEMO_NUTRITION_PETS = [
     birthDate: daysAgo(Math.round(8 * 365.25)),
     sex: 'M',
     isNeutered: true,
+    chronicConditions: ['Arthrose'],
     chronicDiseases: 'Arthrose légère',
+    overdueVaccines: [],
   },
   {
     id: 'demo-nut-4',

@@ -119,6 +119,7 @@ import ClientCommunityPage from './pages/ClientCommunityPage';
 import ClientGeoServicesPage from './pages/ClientGeoServicesPage';
 import ClientDigitalTwinPage from './pages/ClientDigitalTwinPage';
 import ClientVetIntelligencePage from './pages/ClientVetIntelligencePage';
+import ClientPetHealthRecommendationPage from './pages/ClientPetHealthRecommendationPage';
 import ClientPetsPage from './pages/ClientPetsPage';
 import ClientPetPassportPage from './pages/ClientPetPassportPage';
 import PlatformServicesPage from './pages/PlatformServicesPage';
@@ -368,6 +369,7 @@ const App = () => {
       <Route path="/client-geo-services" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientGeoServicesPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-digital-twin" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientDigitalTwinPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-vet-intelligence" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientVetIntelligencePage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-pet-health-recommendations" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientPetHealthRecommendationPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-orders" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientOrdersPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-reviews" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientReviewsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-complaints" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientComplaintsPage /></ClientLayout></RoleRoute>} />

@@ -1,0 +1,256 @@
+.phr-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.phr-header h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.phr-header p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.phr-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.phr-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.phr-form select,
+.phr-form textarea {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.phr-symptom-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.phr-symptom-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+}
+
+.phr-symptom-chip.is-selected {
+  border-color: #dc2626;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.phr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: none;
+  background: #dc2626;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.phr-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.phr-urgency {
+  display: inline-flex;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.phr-urgency--urgent { background: #dc2626; }
+.phr-urgency--soon { background: #d97706; }
+.phr-urgency--routine { background: #0ea5e9; }
+
+.phr-section {
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.phr-section h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.phr-chronic-card {
+  padding: 12px;
+  border-radius: 10px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  margin-bottom: 8px;
+}
+
+.phr-chronic-card strong {
+  display: block;
+  font-size: 14px;
+  color: #92400e;
+}
+
+.phr-chronic-card p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.phr-chronic-card small {
+  font-size: 11px;
+  color: #b45309;
+  font-weight: 700;
+}
+
+.phr-treatment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.phr-treatment-card {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.phr-treatment-card--high {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.phr-treatment-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.phr-treatment-card h4 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.phr-treatment-card p {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.phr-vaccine-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.phr-vaccine-row.is-late {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.phr-disclaimer {
+  padding: 12px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.phr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.phr-link {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2563eb;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+}
+
+.phr-hypothesis-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.phr-hypothesis-list li {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.phr-hypothesis-list strong {
+  color: #0f172a;
+}
+
+.phr-hypothesis-list span {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7c3aed;
+  margin-left: 8px;
+}

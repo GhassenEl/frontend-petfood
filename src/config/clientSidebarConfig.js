@@ -46,6 +46,7 @@ export const CLIENT_SIDEBAR_SECTIONS = [
       { id: 'found-me', label: 'Find Me', icon: '🔍' },
       { id: 'veterinary', label: 'Santé & Vétérinaire', icon: '🩺' },
       { id: 'client-vet-intelligence', label: 'IA vétérinaire', icon: '💬' },
+      { id: 'client-pet-health-recommendations', label: 'Symptômes & traitements', icon: '💊' },
       { id: 'medical-dossier', label: 'Dossier médical', icon: '📁' },
       { id: 'store-locator', label: 'Nos magasins', icon: '🏪' },
       { id: 'contact', label: 'Contact', icon: '📧' },

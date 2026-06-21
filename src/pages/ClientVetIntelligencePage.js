@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Stethoscope, MessageCircle, Store, TrendingUp, RefreshCw } from 'lucide-react';
+import { Stethoscope, MessageCircle, Store, TrendingUp, RefreshCw, Pill } from 'lucide-react';
+import PetHealthRecommendationPanel from '../components/PetHealthRecommendationPanel';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import { loadVetIntelligencePack } from '../services/vetIntelligenceService';
 import { getMarketplaceRecommendation } from '../utils/intelligentVetMarketplace';
@@ -11,6 +12,7 @@ import './ClientVetIntelligence.css';
 
 const TABS = [
   { id: 'assistant', label: 'Assistant IA', icon: MessageCircle },
+  { id: 'health', label: 'Symptômes & traitements', icon: Pill },
   { id: 'marketplace', label: 'Marketplace véto', icon: Store },
   { id: 'predictions', label: 'Besoins futurs', icon: TrendingUp },
 ];
@@ -90,6 +92,10 @@ const ClientVetIntelligencePage = () => {
           pets={pack?.pets || []}
           quickQuestions={pack?.quickQuestions || []}
         />
+      )}
+
+      {tab === 'health' && (
+        <PetHealthRecommendationPanel compact />
       )}
 
       {tab === 'marketplace' && (
