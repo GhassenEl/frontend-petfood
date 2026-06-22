@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Plus, Trash2, X, Check } from 'lucide-react';
 import api from '../utils/api';
 import { DEMO_ADMIN_USERS, DEMO_ADMIN_VET_RECORDS, withDemoFallback } from '../utils/adminDemoData';
 
@@ -34,6 +34,52 @@ const formatDate = (value) => {
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('fr-TN');
 };
+
+const CRUD_ICON_STYLES = {
+  view: { background: '#f0fdf4', borderColor: '#bbf7d0', color: '#15803d' },
+  edit: { background: '#eff6ff', borderColor: '#bfdbfe', color: '#1d4ed8' },
+  delete: { background: '#fee2e2', borderColor: '#ef4444', color: '#dc2626' },
+  create: { background: '#ecfdf5', borderColor: '#6ee7b7', color: '#059669' },
+};
+
+const CrudIconButton = ({ action, label, onClick, size, style = {} }) => {
+  const icons = { view: Eye, edit: Pencil, delete: Trash2, create: Plus };
+  const Icon = icons[action];
+  const palette = CRUD_ICON_STYLES[action] || CRUD_ICON_STYLES.edit;
+  const iconSize = size || (action === 'delete' ? 18 : 16);
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={label}
+      aria-label={label}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 36,
+        height: 36,
+        minWidth: 36,
+        minHeight: 36,
+        padding: 0,
+        borderRadius: 10,
+        border: `1.5px solid ${palette.borderColor}`,
+        background: palette.background,
+        color: palette.color,
+        cursor: 'pointer',
+        flexShrink: 0,
+        lineHeight: 0,
+        ...style,
+      }}
+    >
+      <Icon size={iconSize} color={palette.color} strokeWidth={action === 'delete' ? 2.5 : 2.25} aria-hidden />
+      <span className="sr-only">{label}</span>
+    </button>
+  );
+};
+
+const getRecordId = (record) => record?._id || record?.id;
 
 const AdminVeterinary = () => {
   const [records, setRecords] = useState([]);
@@ -157,15 +203,18 @@ const AdminVeterinary = () => {
     try {
       if (!demoMode) await api.delete(`/veterinary/${id}`);
       else throw new Error('demo');
+      if (getRecordId(viewRecord) === id) setViewRecord(null);
+      if (getRecordId(editingRecord) === id) closeModal();
       fetchRecords();
     } catch (error) {
       if (error.message !== 'demo' && error.response?.status !== 404 && !demoMode) {
         window.alert(error.response?.data?.error || 'Erreur suppression fiche');
         return;
       }
-      setRecords((prev) => prev.filter((r) => r._id !== id));
+      setRecords((prev) => prev.filter((r) => getRecordId(r) !== id));
       setDemoMode(true);
-      if (viewRecord?._id === id) setViewRecord(null);
+      if (getRecordId(viewRecord) === id) setViewRecord(null);
+      if (getRecordId(editingRecord) === id) closeModal();
     }
   };
 
@@ -191,9 +240,7 @@ const AdminVeterinary = () => {
             {records.length} fiche(s){demoMode ? ' · mode démo (CRUD local)' : ''}
           </p>
         </div>
-        <button type="button" style={styles.addBtn} onClick={openCreate}>
-          <Plus size={16} /> Créer
-        </button>
+        <CrudIconButton action="create" label="Créer une fiche" onClick={openCreate} />
       </div>
 
       <div style={styles.searchBar}>
@@ -221,12 +268,14 @@ const AdminVeterinary = () => {
               <th style={styles.th}>Visite</th>
               <th style={styles.th}>Prochaine</th>
               <th style={styles.th}>Statut</th>
-              <th style={styles.th}>Actions CRUD</th>
+              <th style={styles.thActions}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredRecords.map((record) => (
-              <tr key={record._id} style={styles.tr}>
+            {filteredRecords.map((record) => {
+              const recordId = getRecordId(record);
+              return (
+              <tr key={recordId} style={styles.tr}>
                 <td style={styles.td}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '20px' }}>{animalEmojis[record.animalType] || '🐾'}</span>
@@ -251,21 +300,15 @@ const AdminVeterinary = () => {
                   )}
                 </td>
                 <td style={styles.td}>{statusBadge(record.status)}</td>
-                <td style={styles.td}>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    <button type="button" style={styles.viewBtn} onClick={() => openView(record)} title="Voir">
-                      <Eye size={14} /> Voir
-                    </button>
-                    <button type="button" style={styles.editBtn} onClick={() => openEdit(record)} title="Modifier">
-                      <Pencil size={14} /> Modifier
-                    </button>
-                    <button type="button" style={styles.deleteBtn} onClick={() => handleDelete(record._id)} title="Supprimer">
-                      <Trash2 size={14} /> Supprimer
-                    </button>
+                <td style={styles.tdActions}>
+                  <div style={styles.actionGroup} role="group" aria-label={`Actions pour ${record.petName}`}>
+                    <CrudIconButton action="view" label={`Consulter la fiche de ${record.petName}`} onClick={() => openView(record)} />
+                    <CrudIconButton action="edit" label={`Modifier la fiche de ${record.petName}`} onClick={() => openEdit(record)} />
+                    <CrudIconButton action="delete" label={`Supprimer la fiche de ${record.petName}`} onClick={() => handleDelete(recordId)} />
                   </div>
                 </td>
               </tr>
-            ))}
+            );})}
           </tbody>
         </table>
         {filteredRecords.length === 0 && (
@@ -291,13 +334,11 @@ const AdminVeterinary = () => {
               <DetailRow label="Statut" value={statusBadge(viewRecord.status)} />
             </dl>
             <div style={styles.modalActions}>
-              <button type="button" style={styles.cancelBtn} onClick={() => setViewRecord(null)}>Fermer</button>
-              <button type="button" style={styles.editBtn} onClick={() => openEdit(viewRecord)}>
-                <Pencil size={14} /> Modifier
+              <button type="button" style={styles.cancelBtn} onClick={() => setViewRecord(null)} title="Fermer" aria-label="Fermer">
+                <X size={16} color="#4b5563" strokeWidth={2.25} aria-hidden />
               </button>
-              <button type="button" style={styles.deleteBtn} onClick={() => handleDelete(viewRecord._id)}>
-                <Trash2 size={14} /> Supprimer
-              </button>
+              <CrudIconButton action="edit" label="Modifier cette fiche" onClick={() => openEdit(viewRecord)} />
+              <CrudIconButton action="delete" label="Supprimer cette fiche" onClick={() => handleDelete(getRecordId(viewRecord))} />
             </div>
           </div>
         </div>
@@ -344,8 +385,20 @@ const AdminVeterinary = () => {
                 <option value="cancelled">🔴 Annulé</option>
               </select>
               <div style={styles.modalActions}>
-                <button type="button" style={styles.cancelBtn} onClick={closeModal}>Annuler</button>
-                <button type="submit" style={styles.saveBtn}>{editingRecord ? '💾 Enregistrer' : '✅ Créer'}</button>
+                {editingRecord ? (
+                  <CrudIconButton
+                    action="delete"
+                    label={`Supprimer la fiche de ${editingRecord.petName}`}
+                    onClick={() => handleDelete(getRecordId(editingRecord))}
+                    style={{ marginRight: 'auto' }}
+                  />
+                ) : null}
+                <button type="button" style={styles.cancelBtn} onClick={closeModal} title="Annuler" aria-label="Annuler">
+                  <X size={16} color="#4b5563" strokeWidth={2.25} aria-hidden />
+                </button>
+                <button type="submit" style={styles.saveBtn} title={editingRecord ? 'Enregistrer' : 'Créer'} aria-label={editingRecord ? 'Enregistrer' : 'Créer'}>
+                  <Check size={16} color="#059669" strokeWidth={2.25} aria-hidden />
+                </button>
               </div>
             </form>
           </div>
@@ -363,23 +416,55 @@ const DetailRow = ({ label, value }) => (
 );
 
 const styles = {
-  page: { padding: '24px', maxWidth: '1200px', margin: '0 auto' },
+  page: { padding: '24px', maxWidth: '100%', margin: '0 auto', boxSizing: 'border-box' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' },
   title: { fontSize: '24px', fontWeight: '800', color: '#065f46', margin: 0 },
   subtitle: { fontSize: '14px', color: '#6b7280', margin: '4px 0 0 0' },
-  addBtn: { display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 20px', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '700', fontSize: '14px', cursor: 'pointer', boxShadow: '0 4px 14px rgba(16,185,129,0.3)' },
+  actionGroup: { display: 'flex', gap: 6, flexWrap: 'nowrap', alignItems: 'center', justifyContent: 'center' },
   searchBar: { display: 'flex', alignItems: 'center', gap: '12px', background: 'white', padding: '12px 18px', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', marginBottom: '20px', border: '1px solid #e5e7eb' },
   searchInput: { flex: 1, border: 'none', outline: 'none', fontSize: '14px', background: 'transparent' },
   searchCount: { fontSize: '12px', color: '#9ca3af', whiteSpace: 'nowrap' },
-  tableWrapper: { background: 'white', borderRadius: '18px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', overflow: 'hidden' },
-  table: { width: '100%', borderCollapse: 'collapse' },
-  th: { textAlign: 'left', padding: '14px 16px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#6b7280', borderBottom: '2px solid #f3f4f6', fontWeight: '700', background: '#f9fafb' },
+  tableWrapper: {
+    background: 'white',
+    borderRadius: '18px',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+    overflowX: 'auto',
+    WebkitOverflowScrolling: 'touch',
+  },
+  table: { width: '100%', minWidth: 960, borderCollapse: 'separate', borderSpacing: 0 },
+  th: { textAlign: 'left', padding: '14px 12px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#6b7280', borderBottom: '2px solid #f3f4f6', fontWeight: '700', background: '#f9fafb', whiteSpace: 'nowrap' },
+  thActions: {
+    textAlign: 'center',
+    padding: '14px 12px',
+    fontSize: '12px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    color: '#6b7280',
+    borderBottom: '2px solid #f3f4f6',
+    fontWeight: '700',
+    background: '#f9fafb',
+    position: 'sticky',
+    right: 0,
+    zIndex: 3,
+    minWidth: 132,
+    width: 132,
+    boxShadow: '-8px 0 12px rgba(15, 23, 42, 0.06)',
+  },
   tr: { borderBottom: '1px solid #f3f4f6' },
-  td: { padding: '12px 16px', fontSize: '14px', color: '#374151', verticalAlign: 'middle' },
+  td: { padding: '12px 12px', fontSize: '14px', color: '#374151', verticalAlign: 'middle' },
+  tdActions: {
+    padding: '12px 10px',
+    fontSize: '14px',
+    verticalAlign: 'middle',
+    position: 'sticky',
+    right: 0,
+    zIndex: 2,
+    minWidth: 132,
+    width: 132,
+    background: '#fff',
+    boxShadow: '-8px 0 12px rgba(15, 23, 42, 0.06)',
+  },
   badge: { display: 'inline-block', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: '700' },
-  viewBtn: { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 },
-  editBtn: { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 },
-  deleteBtn: { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 },
   empty: { textAlign: 'center', padding: '40px', color: '#9ca3af', fontSize: '14px' },
   loader: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '12px' },
   spinner: { width: '32px', height: '32px', border: '3px solid #d1fae5', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin 1s linear infinite' },
@@ -390,9 +475,9 @@ const styles = {
   form: { display: 'flex', flexDirection: 'column', gap: '12px' },
   input: { width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' },
   row2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' },
-  modalActions: { display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px', flexWrap: 'wrap' },
-  cancelBtn: { padding: '10px 18px', background: '#f3f4f6', border: 'none', borderRadius: '10px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', color: '#4b5563' },
-  saveBtn: { padding: '10px 18px', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', fontSize: '14px', boxShadow: '0 4px 14px rgba(16,185,129,0.3)' },
+  modalActions: { display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px', flexWrap: 'wrap', alignItems: 'center' },
+  cancelBtn: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, minWidth: 36, minHeight: 36, background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '10px', cursor: 'pointer', color: '#4b5563', lineHeight: 0 },
+  saveBtn: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, minWidth: 36, minHeight: 36, background: '#ecfdf5', border: '1px solid #6ee7b7', borderRadius: '10px', cursor: 'pointer', color: '#059669', lineHeight: 0 },
 };
 
 export default AdminVeterinary;
