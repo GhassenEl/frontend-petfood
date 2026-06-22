@@ -51,6 +51,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
         { id: 'history', label: 'Historique', icon: '📜' },
         { id: 'leave-requests', label: 'Congés / maladie', icon: '🏖️' },
         { id: 'profile', label: 'Profil', icon: '👤' },
+        { id: 'security', label: 'Sécurité', icon: '🛡️' },
       ]
     }
   ];

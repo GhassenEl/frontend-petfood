@@ -49,6 +49,10 @@ const AdminSecurityPage = () => {
             Sécurité intelligente (posture, sessions, fraude, JWT) →
           </Link>
           {' · '}
+          <Link to="/admin/database-security" style={{ color: '#2563eb', fontWeight: 700 }}>
+            Sécurité base de données →
+          </Link>
+          {' · '}
           <Link to="/admin/system" style={{ color: '#0ea5e9' }}>Configuration globale →</Link>
         </p>
       </header>
@@ -98,6 +102,9 @@ const AdminSecurityPage = () => {
             <li><strong>Anti-virus</strong> — signatures EICAR, scripts, webshells, fichiers exécutables, URLs de phishing</li>
             <li><strong>Scan corps API</strong> — analyse automatique des POST/PUT/PATCH entrants</li>
             <li><strong>Rate limiting</strong> — limitation des tentatives login / inscription</li>
+            <li><strong>Base PostgreSQL</strong> — TLS, Prisma ORM, chiffrement au repos, sauvegardes chiffrées —{' '}
+              <Link to="/admin/database-security">vue détaillée →</Link>
+            </li>
           </ul>
           <p style={{ fontSize: '0.82rem', color: '#64748b', marginTop: 12 }}>
             Variables serveur : <code>IDS_ENABLED</code>, <code>BLOCK_INTRUSIONS</code>, <code>BLOCK_THREATS</code>

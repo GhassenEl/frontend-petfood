@@ -36,6 +36,7 @@ export const VET_SIDEBAR_SECTIONS = [
     items: [
       { id: 'leave-requests', label: 'Congés / maladie', icon: '🏖️' },
       { id: 'profile', label: 'Profil', icon: '👤' },
+      { id: 'security', label: 'Sécurité', icon: '🛡️' },
     ],
   },
 ];

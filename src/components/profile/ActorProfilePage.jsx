@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../utils/api';
 import RegionSelect from '../RegionSelect';
@@ -35,6 +35,7 @@ const PREFS_ITEMS = [
 const ActorProfilePage = ({ role: roleProp }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const fileRef = useRef(null);
 
   const role = roleProp || user?.role || 'client';
@@ -94,6 +95,13 @@ const ActorProfilePage = ({ role: roleProp }) => {
   useEffect(() => {
     loadProfile();
   }, [loadProfile]);
+
+  useEffect(() => {
+    const requestedTab = searchParams.get('tab');
+    if (requestedTab && TABS.some((t) => t.id === requestedTab)) {
+      setTab(requestedTab);
+    }
+  }, [searchParams]);
 
   usePlatformRefresh(loadProfile);
 

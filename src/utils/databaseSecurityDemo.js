@@ -1,0 +1,91 @@
+const hoursAgo = (h) => new Date(Date.now() - h * 3600000).toISOString();
+
+export const DEMO_DATABASE_SECURITY = {
+  mode: 'demo',
+  score: 91,
+  status: 'healthy',
+  engine: { name: 'PostgreSQL', version: '16.2' },
+  provider: 'Render Managed PostgreSQL',
+  connection: {
+    ok: true,
+    latencyMs: 3,
+    ssl: true,
+    sslMode: 'require',
+    poolMin: 2,
+    poolMax: 10,
+    activeConnections: 4,
+    maxConnections: 100,
+  },
+  protections: [
+    { id: 'ssl', label: 'Connexion TLS', ok: true, detail: 'sslmode=require sur DATABASE_URL' },
+    { id: 'orm', label: 'ORM Prisma (requêtes paramétrées)', ok: true, detail: 'Aucune concaténation SQL brute côté API' },
+    { id: 'ids', label: 'IDS anti-injection SQL', ok: true, detail: 'Blocage UNION SELECT, DROP TABLE, commentaires malveillants' },
+    { id: 'least_privilege', label: 'Moindre privilège', ok: true, detail: 'Rôle applicatif dédié — pas de superuser en production' },
+    { id: 'encryption_rest', label: 'Chiffrement au repos', ok: true, detail: 'AES-256 géré par le fournisseur cloud' },
+    { id: 'backup_encrypt', label: 'Sauvegardes chiffrées', ok: true, detail: 'pg_dump compressé + chiffrement AES-256-GCM' },
+    { id: 'audit', label: 'Journalisation actions sensibles', ok: true, detail: 'Connexions admin, migrations, exports massifs' },
+    { id: 'rotation', label: 'Rotation des credentials', ok: true, detail: 'Politique de renouvellement tous les 90 jours' },
+  ],
+  accessRoles: [
+    {
+      name: 'petfood_app',
+      type: 'application',
+      privileges: 'SELECT, INSERT, UPDATE, DELETE',
+      scope: 'Schéma public (tables métier)',
+      lastUsed: hoursAgo(0.1),
+    },
+    {
+      name: 'petfood_readonly',
+      type: 'reporting',
+      privileges: 'SELECT',
+      scope: 'Vues BI & analytics',
+      lastUsed: hoursAgo(2),
+    },
+    {
+      name: 'petfood_migrate',
+      type: 'migration',
+      privileges: 'DDL (migrations Prisma)',
+      scope: 'Déploiements CI/CD uniquement',
+      lastUsed: hoursAgo(48),
+    },
+  ],
+  sqlInjection: {
+    blocked24h: 2,
+    blockedTotal: 14,
+    lastBlockedAt: hoursAgo(5),
+  },
+  audit: {
+    enabled: true,
+    events24h: 842,
+    sensitiveActions24h: 12,
+  },
+  backups: {
+    encrypted: true,
+    lastAt: hoursAgo(8),
+    retentionDays: 30,
+    nextScheduled: new Date(Date.now() + 16 * 3600000).toISOString(),
+  },
+  migrations: {
+    status: 'up_to_date',
+    pending: 0,
+    lastApplied: hoursAgo(72),
+  },
+  recentSqlEvents: [
+    {
+      id: 'sq-1',
+      at: hoursAgo(5),
+      ip: '203.0.113.44',
+      detail: "Tentative UNION SELECT sur GET /api/products?q=",
+      severity: 'high',
+      blocked: true,
+    },
+    {
+      id: 'sq-2',
+      at: hoursAgo(18),
+      ip: '198.51.100.9',
+      detail: "Pattern DROP TABLE détecté sur POST /api/auth/login",
+      severity: 'critical',
+      blocked: true,
+    },
+  ],
+};

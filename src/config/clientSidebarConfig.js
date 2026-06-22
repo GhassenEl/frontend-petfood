@@ -70,6 +70,7 @@ export const CLIENT_SIDEBAR_SECTIONS = [
     title: '⚙️ Compte',
     items: [
       { id: 'client-profile', label: 'Mon profil', icon: '👤' },
+      { id: 'client-security', label: 'Sécurité', icon: '🛡️' },
       { id: 'change-password', label: 'Mot de passe', icon: '🔐' },
     ],
   },

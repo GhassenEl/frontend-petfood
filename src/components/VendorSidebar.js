@@ -57,6 +57,7 @@ const VendorSidebar = ({ onLogout, user, onNavigate }) => {
       title: '👤 Compte',
       items: [
         { id: 'profile', label: 'Profil', icon: '👤' },
+        { id: 'security', label: 'Sécurité', icon: '🛡️' },
       ],
     },
   ];

@@ -52,6 +52,11 @@ export const fetchPlatformSecurityPack = async () => {
   return response.data;
 };
 
+export const fetchDatabaseSecurity = async () => {
+  const response = await api.get('/security/database');
+  return response.data;
+};
+
 export const scanFileForThreats = async (fileMeta) => {
   const response = await api.post('/security/scan/file', fileMeta);
   return response.data;

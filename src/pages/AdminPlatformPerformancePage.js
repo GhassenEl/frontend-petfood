@@ -208,6 +208,7 @@ const AdminPlatformPerformancePage = () => {
           </ul>
           <div style={{ marginTop: 14, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             <Link to="/admin/security" style={linkBtn}>Sécurité &amp; IDS</Link>
+            <Link to="/admin/database-security" style={linkBtn}>Sécurité DB</Link>
             <Link to="/admin/powerbi" style={linkBtn}>Power BI</Link>
             <Link to="/admin/activity-logs" style={linkBtn}>Journaux</Link>
           </div>

@@ -158,6 +158,14 @@ export const ENTERPRISE_DOMAINS = [
         status: 'implemented',
       },
       {
+        id: 'database-security',
+        label: 'Sécurité base de données PostgreSQL',
+        description: 'TLS, Prisma ORM, chiffrement, rôles d\'accès et journal anti-injection.',
+        route: '/admin/database-security',
+        roles: ['admin'],
+        status: 'implemented',
+      },
+      {
         id: 'activity-logs',
         label: 'Journalisation activités sensibles',
         description: 'Audit trail connexions, modifications et actions admin.',

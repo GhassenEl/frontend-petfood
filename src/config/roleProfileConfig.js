@@ -16,6 +16,8 @@ export const ROLE_PROFILE_CONFIG = {
     quickLinks: [
       { to: '/admin/dashboard', label: 'Tableau de bord', icon: '📊' },
       { to: '/admin/security', label: 'Sécurité plateforme', icon: '🔒' },
+      { to: '/admin/database-security', label: 'Sécurité base de données', icon: '🗄️' },
+      { to: '/admin/account-security', label: 'Mon compte & session', icon: '🛡️' },
       { to: '/admin/digital-marketing', label: 'Marketing digital', icon: '📣' },
     ],
   },
@@ -34,6 +36,7 @@ export const ROLE_PROFILE_CONFIG = {
     ],
     quickLinks: [
       { to: '/client-dashboard', label: 'Mon espace', icon: '🏠' },
+      { to: '/client-security', label: 'Sécurité', icon: '🛡️' },
       { to: '/client-pets', label: 'Mes animaux', icon: '🐕' },
       { to: '/client-recommendations', label: 'Recommandations', icon: '✨' },
       { to: '/client-orders', label: 'Mes commandes', icon: '📦' },
@@ -56,6 +59,7 @@ export const ROLE_PROFILE_CONFIG = {
     ],
     quickLinks: [
       { to: '/vet/dashboard', label: 'Tableau de bord', icon: '📊' },
+      { to: '/vet/security', label: 'Sécurité', icon: '🛡️' },
       { to: '/vet/calendar', label: 'Agenda', icon: '📅' },
       { to: '/vet/clinic', label: 'Mon cabinet', icon: '🏥' },
       { to: '/vet/recommendations', label: 'Recommandations', icon: '🤖' },
@@ -78,6 +82,7 @@ export const ROLE_PROFILE_CONFIG = {
     ],
     quickLinks: [
       { to: '/vendor/dashboard', label: 'Tableau de bord', icon: '📊' },
+      { to: '/vendor/security', label: 'Sécurité', icon: '🛡️' },
       { to: '/vendor/products', label: 'Mes produits', icon: '📦' },
       { to: '/vendor/marketing', label: 'Marketing', icon: '📣' },
       { to: '/vendor/recommendations', label: 'Recommandations', icon: '🤖' },
@@ -99,6 +104,7 @@ export const ROLE_PROFILE_CONFIG = {
     ],
     quickLinks: [
       { to: '/livreur/dashboard', label: 'Tableau de bord', icon: '📊' },
+      { to: '/livreur/security', label: 'Sécurité', icon: '🛡️' },
       { to: '/livreur/availability', label: 'Disponibilités', icon: '🕐' },
       { to: '/livreur/route', label: 'Ma tournée', icon: '🗺️' },
       { to: '/livreur/earnings', label: 'Gains', icon: '💰' },
@@ -119,6 +125,7 @@ export const ROLE_PROFILE_CONFIG = {
     ],
     quickLinks: [
       { to: '/moderator/dashboard', label: 'Tableau de bord', icon: '📊' },
+      { to: '/moderator/security', label: 'Sécurité', icon: '🛡️' },
       { to: '/moderator/content', label: 'Contenu', icon: '📝' },
       { to: '/moderator/fraud', label: 'Fraude', icon: '🚨' },
       { to: '/moderator/recommendations', label: 'Recommandations', icon: '🤖' },

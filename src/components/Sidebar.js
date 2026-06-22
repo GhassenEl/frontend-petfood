@@ -77,13 +77,20 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       ],
     },
     {
-      title: '⚙️ Paramètres',
+      title: '🛡️ Sécurité',
       items: [
         { id: 'security', label: 'Centre de sécurité', icon: '🛡️' },
         { id: 'intelligent-security', label: 'Sécurité intelligente', icon: '🧠' },
+        { id: 'database-security', label: 'Sécurité base de données', icon: '🗄️' },
         { id: 'backups', label: 'Sauvegardes', icon: '💾' },
-        { id: 'system', label: 'Configuration globale', icon: '🔧' },
         { id: 'activity-logs', label: 'Journaux d\'activité', icon: '📋' },
+        { id: 'account-security', label: 'Mon compte & session', icon: '🔐', route: '/admin/account-security' },
+      ],
+    },
+    {
+      title: '⚙️ Paramètres',
+      items: [
+        { id: 'system', label: 'Configuration globale', icon: '🔧' },
         { id: 'profile', label: 'Mon Profil', icon: '👤' },
       ],
     },
