@@ -125,6 +125,14 @@ export const ENTERPRISE_DOMAINS = [
     color: '#dc2626',
     features: [
       {
+        id: 'security-framework',
+        label: 'Cadre de sécurité (12 piliers)',
+        description: 'Authentification, RBAC, attaques web, paiement, chiffrement, IA, audit, API, cloud, surveillance, blockchain.',
+        route: '/admin/security-framework',
+        roles: ['admin'],
+        status: 'implemented',
+      },
+      {
         id: 'jwt-refresh',
         label: 'JWT avec renouvellement automatique des tokens',
         description: 'Refresh token, expiration session et bannière de reconnexion.',
@@ -144,10 +152,10 @@ export const ENTERPRISE_DOMAINS = [
       {
         id: 'bcrypt',
         label: 'Chiffrement mots de passe (BCrypt)',
-        description: 'Hachage sécurisé côté serveur — politique de mots de passe forts.',
-        route: '/admin/intelligent-security',
+        description: 'Hachage sécurisé côté serveur — politique de mots de passe forts (8+ car.).',
+        route: '/admin/security-framework',
         roles: ['admin'],
-        status: 'partial',
+        status: 'implemented',
       },
       {
         id: 'sql-xss',

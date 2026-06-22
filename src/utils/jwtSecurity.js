@@ -2,6 +2,7 @@ import { jwtDecode } from 'jwt-decode';
 
 export const ROLE_LABELS = {
   admin: 'Administrateur',
+  stock_manager: 'Gestionnaire de stock',
   vendor: 'Vendeur',
   vet: 'Vétérinaire',
   client: 'Client',
@@ -16,7 +17,7 @@ export const AUTH_EVENTS = {
   SESSION_EXPIRING: 'petfoodtn:auth:session-expiring',
 };
 
-export const VALID_ROLES = ['admin', 'client', 'livreur', 'vet', 'vendor', 'moderator', 'visitor'];
+export const VALID_ROLES = ['admin', 'stock_manager', 'client', 'livreur', 'vet', 'vendor', 'moderator', 'visitor'];
 
 const ISSUER = import.meta.env.VITE_JWT_ISSUER || '';
 const AUDIENCE = import.meta.env.VITE_JWT_AUDIENCE || '';

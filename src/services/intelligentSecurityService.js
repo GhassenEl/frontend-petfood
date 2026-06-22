@@ -57,7 +57,7 @@ export async function loadIntelligentSecurityPack() {
       roleLabel: ROLE_LABELS[decoded?.role] || decoded?.role || '—',
       exp: decoded?.exp ? new Date(decoded.exp * 1000).toISOString() : null,
       roles: VALID_ROLES.filter((r) =>
-        ['admin', 'vendor', 'vet', 'client', 'moderator', 'livreur'].includes(r),
+        ['admin', 'stock_manager', 'vendor', 'vet', 'client', 'moderator', 'livreur'].includes(r),
       ),
       roleLabels: ROLE_LABELS,
     },

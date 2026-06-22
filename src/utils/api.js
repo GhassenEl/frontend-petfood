@@ -25,6 +25,14 @@ api.defaults.headers.common = api.defaults.headers.common || {};
 
 let refreshPromise = null;
 
+const getCsrfToken = () => {
+  if (typeof document === 'undefined') return null;
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  if (meta?.content) return meta.content.trim();
+  const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+};
+
 const attachBearer = (config, token) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -86,6 +94,12 @@ api.interceptors.request.use(async (config) => {
   config.headers = config.headers || {};
   config.headers['X-Client-Platform'] = 'petfoodtn-web';
   config.headers['X-Requested-With'] = 'XMLHttpRequest';
+
+  const method = (config.method || 'get').toLowerCase();
+  if (['post', 'put', 'patch', 'delete'].includes(method)) {
+    const csrf = getCsrfToken();
+    if (csrf) config.headers['X-CSRF-Token'] = csrf;
+  }
 
   const token = await resolveRequestToken(config);
 

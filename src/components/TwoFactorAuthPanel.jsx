@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Smartphone, Key, Copy, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Smartphone, Key, Copy, CheckCircle2, Mail, MessageSquare } from 'lucide-react';
+
+const CHANNELS = [
+  { id: 'totp', label: 'Application (TOTP)', icon: Smartphone, detail: 'Google Authenticator, Authy' },
+  { id: 'email', label: 'Email', icon: Mail, detail: 'Code à 6 chiffres par email' },
+  { id: 'sms', label: 'SMS', icon: MessageSquare, detail: 'Code par SMS au numéro enregistré' },
+];
 
 const TwoFactorAuthPanel = ({ enabled: initialEnabled = false }) => {
   const [enabled, setEnabled] = useState(initialEnabled);
+  const [channel, setChannel] = useState('totp');
   const [step, setStep] = useState('idle');
   const [code, setCode] = useState('');
   const [copyMsg, setCopyMsg] = useState('');
@@ -34,6 +41,8 @@ const TwoFactorAuthPanel = ({ enabled: initialEnabled = false }) => {
     });
   };
 
+  const activeChannel = CHANNELS.find((c) => c.id === channel) || CHANNELS[0];
+
   return (
     <div id="2fa" className="ais-card" style={{ marginTop: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
@@ -43,7 +52,7 @@ const TwoFactorAuthPanel = ({ enabled: initialEnabled = false }) => {
             Authentification à deux facteurs (2FA)
           </h3>
           <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
-            TOTP compatible Google Authenticator / Authy — couche supplémentaire après mot de passe BCrypt.
+            TOTP, email ou SMS — couche supplémentaire après mot de passe BCrypt.
           </p>
         </div>
         <button
@@ -58,36 +67,70 @@ const TwoFactorAuthPanel = ({ enabled: initialEnabled = false }) => {
         </button>
       </div>
 
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14 }}>
+        {CHANNELS.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setChannel(id)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 12px',
+              borderRadius: 10,
+              border: `1px solid ${channel === id ? '#7c3aed' : '#e2e8f0'}`,
+              background: channel === id ? '#f5f3ff' : '#fff',
+              fontWeight: 600,
+              fontSize: 12,
+              cursor: 'pointer',
+              color: channel === id ? '#5b21b6' : '#475569',
+            }}
+          >
+            <Icon size={14} aria-hidden />
+            {label}
+          </button>
+        ))}
+      </div>
+
       {enabled && step === 'active' && (
         <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: '#ecfdf5', color: '#065f46', fontSize: 13 }}>
           <CheckCircle2 size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-          2FA active — connexion protégée par code à 6 chiffres.
+          2FA active via {activeChannel.label} — connexion protégée.
         </div>
       )}
 
       {step === 'setup' && !enabled && (
         <div style={{ marginTop: 16, display: 'grid', gap: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Smartphone size={32} color="#64748b" />
-            <div>
-              <strong style={{ fontSize: 13 }}>1. Scannez le QR ou saisissez le secret</strong>
-              <p style={{ margin: '4px 0 0', fontFamily: 'monospace', fontSize: 12, color: '#0f766e' }}>
-                {secret}
-                <button type="button" onClick={copySecret} style={{ marginLeft: 8, border: 'none', background: 'transparent', cursor: 'pointer' }}>
-                  <Copy size={12} />
-                </button>
-              </p>
-              {copyMsg && <span style={{ fontSize: 11, color: '#059669' }}>{copyMsg}</span>}
+          {channel === 'totp' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <Smartphone size={32} color="#64748b" />
+              <div>
+                <strong style={{ fontSize: 13 }}>1. Scannez le QR ou saisissez le secret</strong>
+                <p style={{ margin: '4px 0 0', fontFamily: 'monospace', fontSize: 12, color: '#0f766e' }}>
+                  {secret}
+                  <button type="button" onClick={copySecret} style={{ marginLeft: 8, border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                    <Copy size={12} />
+                  </button>
+                </p>
+                {copyMsg && <span style={{ fontSize: 11, color: '#059669' }}>{copyMsg}</span>}
+              </div>
             </div>
-          </div>
+          )}
+          {(channel === 'email' || channel === 'sms') && (
+            <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
+              Un code à 6 chiffres sera envoyé par {channel === 'email' ? 'email' : 'SMS'} à l&apos;adresse enregistrée sur votre compte.
+            </p>
+          )}
           <div>
-            <strong style={{ fontSize: 13 }}>2. Entrez le code TOTP</strong>
+            <strong style={{ fontSize: 13 }}>2. Entrez le code reçu</strong>
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
               <input
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="000000"
                 maxLength={6}
+                aria-label="Code 2FA"
                 style={{ width: 120, padding: 10, borderRadius: 8, border: '1px solid #e2e8f0', fontFamily: 'monospace', letterSpacing: 4 }}
               />
               <button type="button" onClick={verify} disabled={code.length < 6} style={{ padding: '10px 16px', borderRadius: 8, border: 'none', background: '#7c3aed', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
@@ -112,7 +155,7 @@ const TwoFactorAuthPanel = ({ enabled: initialEnabled = false }) => {
       <ul style={{ margin: '14px 0 0', paddingLeft: 18, fontSize: 12, color: '#64748b', lineHeight: 1.7 }}>
         <li>BCrypt (cost 12) pour le hachage des mots de passe côté serveur</li>
         <li>JWT access + refresh avec rotation automatique</li>
-        <li>2FA obligatoire recommandée pour admin et vétérinaires</li>
+        <li>2FA recommandée pour admin, gestionnaire stock et vétérinaires</li>
       </ul>
     </div>
   );

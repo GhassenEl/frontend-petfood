@@ -49,6 +49,10 @@ const AdminSecurityPage = () => {
             Sécurité intelligente (posture, sessions, fraude, JWT) →
           </Link>
           {' · '}
+          <Link to="/admin/security-framework" style={{ color: '#2563eb', fontWeight: 700 }}>
+            Cadre sécurité (12 piliers) →
+          </Link>
+          {' · '}
           <Link to="/admin/database-security" style={{ color: '#2563eb', fontWeight: 700 }}>
             Sécurité base de données →
           </Link>

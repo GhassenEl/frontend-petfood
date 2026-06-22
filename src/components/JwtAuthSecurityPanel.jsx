@@ -8,7 +8,7 @@ const JwtAuthSecurityPanel = ({ jwt, loading }) => {
   }
 
   const roles = (jwt?.roles || VALID_ROLES).filter((r) =>
-    ['admin', 'vendor', 'vet', 'client', 'moderator', 'livreur'].includes(r),
+    ['admin', 'stock_manager', 'vendor', 'vet', 'client', 'moderator', 'livreur'].includes(r),
   );
 
   return (

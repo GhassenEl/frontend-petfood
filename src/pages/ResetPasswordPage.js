@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
-import { validatePassword, validateResetPasswordForm, getPasswordStrength } from '../utils/loginValidation';
+import { validateStrongPassword, validateResetPasswordForm, getPasswordStrength } from '../utils/loginValidation';
 import { mapAuthError } from '../utils/authErrors';
 import { authPageStyles as s, authInputStyle, authPasswordInputStyle } from '../utils/authPageStyles';
 
@@ -117,7 +117,7 @@ const ResetPasswordPage = () => {
                     if (fieldErrors.password) {
                       setFieldErrors((prev) => ({
                         ...prev,
-                        password: validatePassword(e.target.value),
+                        password: validateStrongPassword(e.target.value),
                       }));
                     }
                   }}

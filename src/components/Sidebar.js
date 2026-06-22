@@ -80,6 +80,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       title: '🛡️ Sécurité',
       items: [
         { id: 'security', label: 'Centre de sécurité', icon: '🛡️' },
+        { id: 'security-framework', label: 'Cadre sécurité (12 piliers)', icon: '📜' },
         { id: 'intelligent-security', label: 'Sécurité intelligente', icon: '🧠' },
         { id: 'database-security', label: 'Sécurité base de données', icon: '🗄️' },
         { id: 'backups', label: 'Sauvegardes', icon: '💾' },

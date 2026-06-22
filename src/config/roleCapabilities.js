@@ -77,6 +77,19 @@ export const ROLE_CAPABILITIES = [
     ],
   },
   {
+    id: 'stock_manager',
+    icon: '📦',
+    label: 'Gestionnaire de stock',
+    auth: true,
+    role: 'stock_manager',
+    features: [
+      { label: 'Gérer le stock', route: '/admin/stock' },
+      { label: 'Alertes rupture', route: '/admin/stock-bi' },
+      { label: 'Réapprovisionnement', route: '/admin/stock' },
+      { label: 'Inventaire produits', route: '/admin/products' },
+    ],
+  },
+  {
     id: 'admin',
     icon: '⚙️',
     label: 'Administrateur',

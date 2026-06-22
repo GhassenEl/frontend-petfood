@@ -5,7 +5,7 @@ import api from '../../utils/api';
 import RegionSelect from '../RegionSelect';
 import SidebarAvatar from '../SidebarAvatar';
 import usePlatformRefresh from '../../hooks/usePlatformRefresh';
-import { validatePassword, getPasswordStrength, validateName } from '../../utils/loginValidation';
+import { validatePassword, validateStrongPassword, getPasswordStrength, validateName } from '../../utils/loginValidation';
 import { mapAuthError } from '../../utils/authErrors';
 import { DEFAULT_PROFILE_PREFS, getRoleProfileConfig } from '../../config/roleProfileConfig';
 import {
@@ -149,7 +149,7 @@ const ActorProfilePage = ({ role: roleProp }) => {
     e.preventDefault();
     setMessage(null);
     const currentErr = !passwordForm.currentPassword ? 'Mot de passe actuel requis.' : '';
-    const newErr = validatePassword(passwordForm.newPassword);
+    const newErr = validateStrongPassword(passwordForm.newPassword);
     let confirmErr = '';
     if (!passwordForm.confirmPassword) confirmErr = 'Confirmez le nouveau mot de passe.';
     else if (passwordForm.newPassword !== passwordForm.confirmPassword) {

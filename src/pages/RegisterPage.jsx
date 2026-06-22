@@ -9,8 +9,9 @@ import {
 import {
   validateName,
   validateEmail,
-  validatePassword,
+  validateStrongPassword,
   validateRegisterForm,
+  PASSWORD_POLICY,
 } from '../utils/loginValidation';
 import RegionSelect from '../components/RegionSelect';
 import { getStoredCity } from '../hooks/usePlatformCity';
@@ -42,7 +43,7 @@ const RegisterPage = () => {
     let msg = '';
     if (field === 'name') msg = validateName(values.name);
     else if (field === 'email') msg = validateEmail(values.email);
-    else msg = validatePassword(values.password);
+    else msg = validateStrongPassword(values.password);
     setFieldErrors((prev) => ({ ...prev, [field]: msg }));
     return !msg;
   }, []);
@@ -333,6 +334,11 @@ const RegisterPage = () => {
                 ⚠ {fieldErrors.password}
               </p>
             )}
+            <ul style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 11, color: '#64748b', lineHeight: 1.5 }}>
+              {PASSWORD_POLICY.rules.map((rule) => (
+                <li key={rule}>{rule}</li>
+              ))}
+            </ul>
           </div>
 
           <label style={styles.rememberLabel}>

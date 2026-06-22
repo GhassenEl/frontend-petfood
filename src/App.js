@@ -38,6 +38,8 @@ import AdminSecurityPage from './pages/AdminSecurityPage';
 import AdminIntelligentSecurityPage from './pages/AdminIntelligentSecurityPage';
 import AdminDatabaseSecurityPage from './pages/AdminDatabaseSecurityPage';
 import AccountSecurityPage from './pages/AccountSecurityPage';
+import PlatformSecurityFrameworkPage from './pages/PlatformSecurityFrameworkPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import AdminModeratorsPage from './pages/AdminModeratorsPage';
 import AdminLiveAudiencePage from './pages/AdminLiveAudiencePage';
 import AdminRefundsPage from './pages/AdminRefundsPage';
@@ -238,6 +240,7 @@ const App = () => {
         <Route path="/services" element={<MarketingLandingPage />} />
         <Route path="/register" element={<AuthMobileRoute title="Inscription"><RegisterPage /></AuthMobileRoute>} />
         <Route path="/forgot-password" element={<AuthMobileRoute title="Mot de passe"><ForgotPasswordPage /></AuthMobileRoute>} />
+        <Route path="/verify-email" element={<AuthMobileRoute title="Vérification email"><VerifyEmailPage /></AuthMobileRoute>} />
         <Route path="/reset-password" element={<AuthMobileRoute title="Réinitialiser"><ResetPasswordPage /></AuthMobileRoute>} />
         <Route path="/politique-confidentialite" element={<PrivacyPolicyPage />} />
         <Route path="/privacy" element={<Navigate to="/politique-confidentialite" replace />} />
@@ -279,6 +282,7 @@ const App = () => {
       <Route path="/login" element={<Navigate to={userHome} replace />} />
       <Route path="/register" element={<Navigate to={userHome} replace />} />
       <Route path="/forgot-password" element={<AuthMobileRoute title="Mot de passe"><ForgotPasswordPage /></AuthMobileRoute>} />
+      <Route path="/verify-email" element={<AuthMobileRoute title="Vérification email"><VerifyEmailPage /></AuthMobileRoute>} />
       <Route path="/reset-password" element={<AuthMobileRoute title="Réinitialiser"><ResetPasswordPage /></AuthMobileRoute>} />
       <Route path="/politique-confidentialite" element={<PrivacyPolicyPage />} />
       <Route path="/privacy" element={<Navigate to="/politique-confidentialite" replace />} />
@@ -327,6 +331,7 @@ const App = () => {
       <Route path="/admin/security" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminSecurityPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/intelligent-security" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminIntelligentSecurityPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/database-security" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDatabaseSecurityPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/security-framework" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><PlatformSecurityFrameworkPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/account-security" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AccountSecurityPage role="admin" /></AdminLayout></RoleRoute>} />
       <Route path="/admin/moderators" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminModeratorsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/activity-logs" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminActivityLogsPage /></AdminLayout></RoleRoute>} />

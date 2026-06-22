@@ -26,6 +26,7 @@ export const getPasswordChangeRoute = (role) => {
 export const SECURITY_QUICK_LINKS = {
   admin: [
     { to: '/admin/security', label: 'Centre de sécurité', icon: '🛡️' },
+    { to: '/admin/security-framework', label: 'Cadre sécurité (12 piliers)', icon: '📜' },
     { to: '/admin/database-security', label: 'Sécurité base de données', icon: '🗄️' },
     { to: '/admin/intelligent-security', label: 'Sécurité intelligente', icon: '🧠' },
     { to: '/admin/backups', label: 'Sauvegardes', icon: '💾' },

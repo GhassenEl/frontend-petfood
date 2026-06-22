@@ -6,6 +6,7 @@ import {
   validateEmail,
   validateName,
   validatePassword,
+  validateStrongPassword,
 } from '../utils/loginValidation';
 
 const emptyForm = { name: '', email: '', phone: '', address: '', role: 'client', password: '' };
@@ -98,10 +99,10 @@ const AdminUsers = () => {
     if (nameErr) errors.name = nameErr;
     if (emailErr) errors.email = emailErr;
     if (!editingUser) {
-      const passErr = validatePassword(formData.password);
+      const passErr = validateStrongPassword(formData.password);
       if (passErr) errors.password = passErr;
     } else if (formData.password) {
-      const passErr = validatePassword(formData.password);
+      const passErr = validateStrongPassword(formData.password);
       if (passErr) errors.password = passErr;
     }
     setFormErrors(errors);
