@@ -307,7 +307,6 @@ const App = () => {
       <Route path="/admin/powerbi" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminPowerBiPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/bi" element={<Navigate to="/admin/powerbi" replace />} />
       <Route path="/admin/nlp-models" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminNlpModelsPage /></AdminLayout></RoleRoute>} />
-      <Route path="/admin/recommendations" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><RecommendationHubPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/orders" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminOrders /></AdminLayout></RoleRoute>} />
       <Route path="/admin/reviews" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminReviews /></AdminLayout></RoleRoute>} />
       <Route path="/admin/complaints" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminComplaints /></AdminLayout></RoleRoute>} />

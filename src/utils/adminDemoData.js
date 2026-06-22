@@ -274,6 +274,7 @@ export const DEMO_ADMIN_VET_RECORDS = [
     diagnosis: 'Contrôle annuel — bon état général',
     treatment: 'Vaccin rage + vermifuge',
     vetNotes: 'Prochain rappel dans 12 mois',
+    visitDate: daysAgo(45),
     nextVisit: daysAgo(-30),
     weight: 28,
     temperature: 38.5,
@@ -288,6 +289,7 @@ export const DEMO_ADMIN_VET_RECORDS = [
     diagnosis: 'Dermatite légère',
     treatment: 'Crème apaisante + croquettes hypoallergéniques',
     vetNotes: 'Amélioration constatée après 2 semaines',
+    visitDate: daysAgo(21),
     nextVisit: daysAgo(-14),
     weight: 4.2,
     temperature: 38.2,
@@ -302,6 +304,7 @@ export const DEMO_ADMIN_VET_RECORDS = [
     diagnosis: 'Entorse patte avant',
     treatment: 'Repos + anti-inflammatoire 5 jours',
     vetNotes: 'Suivi réhabilitation terminé',
+    visitDate: daysAgo(60),
     nextVisit: null,
     weight: 22,
     temperature: 38.4,
@@ -462,6 +465,27 @@ export const DEMO_PARTNERS_OVERVIEW = {
     { id: 'pc-2', displayName: 'Promenade & Co', types: 'walking', region: 'Ariana', certified: false, isActive: true },
   ],
   marketplaceVendors: DEMO_ADMIN_VENDORS,
+};
+
+/** Fusionne la réponse API partenaires avec les données démo si listes vides. */
+export const mergePartnersOverview = (overview) => {
+  if (!overview || typeof overview !== 'object') return DEMO_PARTNERS_OVERVIEW;
+  const pickList = (key) => {
+    const fromApi = overview[key];
+    return Array.isArray(fromApi) && fromApi.length > 0 ? fromApi : DEMO_PARTNERS_OVERVIEW[key];
+  };
+  return {
+    ...DEMO_PARTNERS_OVERVIEW,
+    ...overview,
+    mode: overview.mode || 'api',
+    counts: { ...DEMO_PARTNERS_OVERVIEW.counts, ...(overview.counts || {}) },
+    supplySuppliers: pickList('supplySuppliers'),
+    vetPartners: pickList('vetPartners'),
+    shelters: pickList('shelters'),
+    relayPoints: pickList('relayPoints'),
+    petCareProviders: pickList('petCareProviders'),
+    marketplaceVendors: pickList('marketplaceVendors'),
+  };
 };
 
 export const DEMO_ADMIN_ADVANCED_AI = {

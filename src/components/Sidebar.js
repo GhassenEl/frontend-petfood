@@ -13,6 +13,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       title: '📊 Tableau de bord',
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: '📈' },
+        { id: 'digital-marketing', label: 'Marketing digital', icon: '📣' },
       ],
     },
     {
@@ -29,7 +30,6 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'devops', label: 'DevOps & observabilité', icon: '⚙️' },
         { id: 'performance', label: 'Performance plateforme', icon: '⚡' },
         { id: 'nlp-models', label: 'Modèles NLP', icon: '🧠' },
-        { id: 'recommendations', label: 'Pipeline recommandations', icon: '🎯' },
         { id: 'history', label: 'Historique', icon: '📜' },
       ],
     },
@@ -54,7 +54,6 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'cities', label: 'Réseau villes', icon: '🏙️' },
         { id: 'stock', label: 'Gestion stock', icon: '📦' },
         { id: 'promotions', label: 'Promotions & coupons', icon: '🎟️' },
-        { id: 'digital-marketing', label: 'Marketing digital', icon: '📣' },
         { id: 'users', label: 'Utilisateurs', icon: '👥' },
         { id: 'leave-requests', label: 'Congés / maladie', icon: '🏖️' },
         { id: 'messages', label: 'Messages', icon: '💬' },

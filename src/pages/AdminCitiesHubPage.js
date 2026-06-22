@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, MapPin, RefreshCw, Save, Truck, Store, Stethoscope } from 'lucide-react';
+import { Building2, MapPin, RefreshCw, Truck, Store } from 'lucide-react';
 import {
   fetchCitiesPack,
   updatePlatformCity,
@@ -282,17 +282,6 @@ const AdminCitiesHubPage = () => {
         </table>
       </div>
 
-      <div className="adm-card" style={{ marginTop: 16 }}>
-        <h2><Stethoscope size={18} style={{ verticalAlign: 'middle' }} /> Déploiement national</h2>
-        <p style={{ color: '#64748b', fontSize: 14 }}>
-          PetfoodTN couvre le Grand Tunis, la côte (Sfax, Sousse, Nabeul, Hammamet), le nord (Bizerte),
-          le centre (Kairouan, Gafsa) et le sud (Gabès, Djerba, Tozeur). Chaque ville dispose d&apos;un point
-          PetfoodTN avec livraison et retrait partenaires.
-        </p>
-        <button type="button" className="adm-btn adm-btn--primary" disabled={busy} onClick={load}>
-          <Save size={15} /> Synchroniser les stats
-        </button>
-      </div>
     </div>
   );
 };

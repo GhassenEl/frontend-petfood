@@ -10,7 +10,7 @@ import {
   upsertShelter,
   upsertRelayPoint,
 } from '../services/adminPartnersService';
-import { DEMO_PARTNERS_OVERVIEW } from '../utils/adminDemoData';
+import { DEMO_PARTNERS_OVERVIEW, mergePartnersOverview } from '../utils/adminDemoData';
 import DemoModePill from '../components/DemoModePill';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
@@ -85,7 +85,7 @@ const AdminPartnersHubPage = () => {
     setMsg('');
     try {
       const overview = await fetchPartnersOverview();
-      setData(overview?.counts ? overview : DEMO_PARTNERS_OVERVIEW);
+      setData(mergePartnersOverview(overview));
     } catch {
       setData(DEMO_PARTNERS_OVERVIEW);
     } finally {
@@ -316,10 +316,17 @@ const AdminPartnersHubPage = () => {
                   {(d.supplySuppliers || []).slice(0, 5).map((s) => (
                     <tr key={s.id}>
                       <td style={tdStyle}>{s.name}</td>
-                      <td style={tdStyle}>{s.region}</td>
+                      <td style={tdStyle}>{s.region || '—'}</td>
                       <td style={tdStyle}>{s.rating ? `${s.rating}/5` : '—'}</td>
                     </tr>
                   ))}
+                  {(d.supplySuppliers || []).length === 0 && (
+                    <tr>
+                      <td colSpan={3} style={{ ...tdStyle, color: '#94a3b8', textAlign: 'center' }}>
+                        Aucun fournisseur enregistré
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

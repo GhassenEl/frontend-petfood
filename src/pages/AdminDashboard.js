@@ -7,13 +7,20 @@ import {
   withDemoStats,
   buildDemoRevenueChart,
   buildDemoOrdersDailyChart,
+  buildDemoStatusChart,
+  buildDemoUsersGrowthChart,
   mergeAdminBiCharts,
+  DEMO_ADMIN_ORDERS,
+  DEMO_ADMIN_USERS,
+  withDemoFallback,
 } from '../utils/adminDemoData';
 import { DEMO_LIVREUR_STATS } from '../utils/livreurDemoData';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import useAnalyticsHub from '../hooks/useAnalyticsHub';
 import PowerBiDashboardPanel from '../components/PowerBiDashboardPanel';
 import AdminPowerBiInsightsPanel from '../components/AdminPowerBiInsightsPanel';
+import AdminDashboardCharts from '../components/AdminDashboardCharts';
+import AdminDashboardSalesPanel from '../components/AdminDashboardSalesPanel';
 import { HERO_BACKGROUND } from '../utils/platformImages';
 
 const AdminDashboard = () => {
@@ -21,15 +28,20 @@ const AdminDashboard = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState(withDemoStats(null));
   const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState(DEMO_ADMIN_ORDERS);
   const { data: analyticsData } = useAnalyticsHub();
 
   const fetchStats = useCallback(async () => {
     try {
-      const ordersRes = await api.get('/orders/stats').catch(() => ({ data: {} }));
+      const [statsRes, ordersRes] = await Promise.all([
+        api.get('/orders/stats').catch(() => ({ data: {} })),
+        api.get('/orders').catch(() => ({ data: [] })),
+      ]);
+      setOrders(withDemoFallback(ordersRes.data, DEMO_ADMIN_ORDERS));
       setStats(withDemoStats({
-        totalOrders: ordersRes.data.total || 0,
-        totalRevenue: ordersRes.data.revenue || 0,
-        pendingOrders: ordersRes.data.pending || 0,
+        totalOrders: statsRes.data.total || 0,
+        totalRevenue: statsRes.data.revenue || 0,
+        pendingOrders: statsRes.data.pending || 0,
       }));
     } catch (error) {
       console.error('Dashboard error', error);
@@ -47,8 +59,10 @@ const AdminDashboard = () => {
 
   usePlatformRefresh(fetchStats);
 
-  const revenueData = buildDemoRevenueChart();
-  const dailyData = buildDemoOrdersDailyChart();
+  const revenueData = buildDemoRevenueChart(orders);
+  const dailyData = buildDemoOrdersDailyChart(orders);
+  const statusData = buildDemoStatusChart(orders);
+  const usersData = buildDemoUsersGrowthChart(DEMO_ADMIN_USERS);
   const biCharts = mergeAdminBiCharts(analyticsData?.biCharts);
 
   const statCards = [
@@ -160,6 +174,15 @@ const AdminDashboard = () => {
           </motion.div>
         ))}
       </div>
+
+      <AdminDashboardSalesPanel />
+
+      <AdminDashboardCharts
+        revenueData={revenueData}
+        dailyData={dailyData}
+        statusData={statusData}
+        usersData={usersData}
+      />
 
       <PowerBiDashboardPanel
         compact

@@ -14,7 +14,7 @@ const HUB_LINKS = {
   client: '/client-recommendations',
   vet: '/vet/recommendations',
   veterinarian: '/vet/recommendations',
-  admin: '/admin/recommendations',
+  admin: '/admin/dashboard',
   vendor: '/vendor/recommendations',
   livreur: '/livreur/recommendations',
   moderator: '/moderator/recommendations',

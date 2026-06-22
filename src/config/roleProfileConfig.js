@@ -16,7 +16,7 @@ export const ROLE_PROFILE_CONFIG = {
     quickLinks: [
       { to: '/admin/dashboard', label: 'Tableau de bord', icon: '📊' },
       { to: '/admin/security', label: 'Sécurité plateforme', icon: '🔒' },
-      { to: '/admin/recommendations', label: 'Recommandations IA', icon: '🤖' },
+      { to: '/admin/digital-marketing', label: 'Marketing digital', icon: '📣' },
     ],
   },
   client: {
