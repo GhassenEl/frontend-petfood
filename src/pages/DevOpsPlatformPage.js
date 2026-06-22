@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  GitBranch, Activity, Server, Shield, HardDrive, ExternalLink, Container, Workflow, Zap,
+  GitBranch, Activity, Server, Shield, HardDrive, Container, Workflow, Zap, Rocket, Key,
 } from 'lucide-react';
 import {
-  DEVOPS_PIPELINES,
   DEVOPS_MONITORING,
   DEVOPS_STACKS,
   DEVOPS_ADMIN_INTERFACES,
@@ -13,16 +12,23 @@ import {
 } from '../config/devopsPlatformCatalog';
 import { fetchDevOpsStatus, fetchStackHealth } from '../services/devopsStatusService';
 import DevOpsLiveStatusPanel, { DevOpsAlertsPanel } from '../components/DevOpsLiveStatusPanel';
+import DevOpsCicdPanel from '../components/DevOpsCicdPanel';
+import DevOpsDeploymentsPanel from '../components/DevOpsDeploymentsPanel';
+import DevOpsEnvSecretsPanel from '../components/DevOpsEnvSecretsPanel';
+import DevOpsRunbookPanel from '../components/DevOpsRunbookPanel';
+import DevOpsMetricsCharts from '../components/DevOpsMetricsCharts';
 import AdminPrometheusGrafanaPanel from '../components/AdminPrometheusGrafanaPanel';
+import DemoModePill from '../components/DemoModePill';
 import MobileBottomNav, { AUTH_PUBLIC_MOBILE_NAV } from '../components/MobileBottomNav';
 import './DevOpsPlatformPage.css';
 
 const TABS = [
   { id: 'overview', label: 'Vue d\'ensemble', icon: Activity },
   { id: 'cicd', label: 'CI / CD', icon: GitBranch },
+  { id: 'deploy', label: 'Déploiements', icon: Rocket },
   { id: 'monitoring', label: 'Monitoring', icon: Activity },
   { id: 'infra', label: 'Infrastructure', icon: Server },
-  { id: 'security', label: 'Sécurité', icon: Shield },
+  { id: 'security', label: 'DevSecOps', icon: Shield },
 ];
 
 const REFRESH_MS = 30000;
@@ -48,9 +54,7 @@ const DevOpsPlatformPage = ({ adminMode = false }) => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = adminMode
-        ? await fetchDevOpsStatus()
-        : await fetchStackHealth();
+      const data = adminMode ? await fetchDevOpsStatus() : await fetchStackHealth();
       setStatus(data);
     } catch {
       setStatus(null);
@@ -66,7 +70,7 @@ const DevOpsPlatformPage = ({ adminMode = false }) => {
   }, [load]);
 
   const hero = useMemo(() => {
-    if (adminMode && status?.hero) return status.hero;
+    if (status?.hero) return status.hero;
     const demo = DEVOPS_METRICS_DEMO;
     const up = status?.summary?.up ?? demo.pipelinesOk;
     const total = status?.summary?.total ?? demo.pipelinesTotal;
@@ -76,12 +80,17 @@ const DevOpsPlatformPage = ({ adminMode = false }) => {
       uptime: status?.performance?.uptime?.formatted ?? demo.uptime,
       pipelinesOk: up,
       pipelinesTotal: total,
-      containersRunning: status?.hero?.containersRunning ?? demo.containersRunning,
+      containersRunning: demo.containersRunning,
+      lastDeploy: status?.hero?.lastDeploy,
     };
-  }, [adminMode, status]);
+  }, [status]);
 
   const services = status?.services || [];
-  const alerts = adminMode ? (status?.alerts || []) : [];
+  const alerts = status?.alerts || [];
+  const pipelines = status?.pipelines || [];
+  const deployments = status?.deployments || [];
+  const envSecrets = status?.envSecrets || [];
+  const isDemo = status?.mode === 'demo';
 
   return (
     <div className={`devops-page${adminMode ? ' devops-page--admin' : ''}`}>
@@ -92,24 +101,32 @@ const DevOpsPlatformPage = ({ adminMode = false }) => {
       <header className="devops-hero">
         <div className="devops-hero__top">
           <p className="devops-hero__eyebrow">PetfoodTN DevOps Platform</p>
-          <span className={`devops-hero__health devops-hero__health--${hero.health}`}>
-            {healthLabel(hero.health)}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span className={`devops-hero__health devops-hero__health--${hero.health}`}>
+              {healthLabel(hero.health)}
+            </span>
+            {isDemo && <DemoModePill />}
+          </div>
         </div>
         <h1>
           <Workflow size={28} style={{ verticalAlign: 'middle', marginRight: 8 }} />
           DevOps &amp; observabilité
         </h1>
         <p>
-          CI/CD GitHub Actions, monitoring Prometheus/Grafana, Docker, sauvegardes,
-          sécurité et interfaces admin — tableau de bord live.
+          CI/CD GitHub Actions, DevSecOps, monitoring Prometheus/Grafana, Docker, déploiements
+          Render/VPS, secrets et runbooks — tableau de bord live.
         </p>
         <div className="devops-stats">
-          <div><strong>{hero.score}</strong><span>Score santé</span></div>
+          <div><strong>{hero.score ?? '—'}</strong><span>Score santé</span></div>
           <div><strong>{hero.pipelinesOk}/{hero.pipelinesTotal}</strong><span>Services UP</span></div>
           <div><strong>{hero.uptime}</strong><span>Uptime API</span></div>
           <div><strong>{hero.containersRunning}</strong><span>Conteneurs actifs</span></div>
         </div>
+        {hero.lastDeploy && (
+          <p className="devops-hero__deploy">
+            Dernier déploiement prod : {new Date(hero.lastDeploy).toLocaleString('fr-FR')}
+          </p>
+        )}
         {adminMode && (
           <div className="devops-hero__actions">
             <Link to="/admin/performance" className="devops-hero__link">
@@ -117,6 +134,9 @@ const DevOpsPlatformPage = ({ adminMode = false }) => {
             </Link>
             <Link to="/admin/backups" className="devops-hero__link">
               <HardDrive size={15} /> Sauvegardes →
+            </Link>
+            <Link to="/admin/security-framework" className="devops-hero__link">
+              <Shield size={15} /> Cadre sécurité →
             </Link>
           </div>
         )}
@@ -148,7 +168,8 @@ const DevOpsPlatformPage = ({ adminMode = false }) => {
             hero={status?.hero}
             showHeroMetrics={adminMode}
           />
-          {adminMode && alerts.length > 0 && <DevOpsAlertsPanel alerts={alerts} />}
+          {alerts.length > 0 && <DevOpsAlertsPanel alerts={alerts} />}
+          {status?.performance && <DevOpsMetricsCharts performance={status.performance} />}
           {adminMode && (
             <AdminPrometheusGrafanaPanel refreshMs={5000} />
           )}
@@ -158,21 +179,29 @@ const DevOpsPlatformPage = ({ adminMode = false }) => {
       {tab === 'overview' && (
         <>
           <section className="devops-section">
-            <h2>Interfaces admin intégrées</h2>
-            <p className="devops-section__hint">
-              Connexion <strong>admin@petfood.tn</strong> requise pour les panneaux sécurisés.
-            </p>
-            <div className="devops-grid">
-              {DEVOPS_ADMIN_INTERFACES.map((item) => (
-                <Link key={item.id} to={item.route} className="devops-card devops-card--link">
-                  <span className="devops-card__icon">{item.icon}</span>
-                  <h3>{item.label}</h3>
-                  <p>{item.desc}</p>
-                  <span className="devops-card__cta">Ouvrir →</span>
-                </Link>
-              ))}
-            </div>
+            <h2>Runbooks rapides</h2>
+            <p className="devops-section__hint">Commandes npm — copier-coller pour opérations courantes.</p>
+            <DevOpsRunbookPanel />
           </section>
+
+          {adminMode && (
+            <section className="devops-section">
+              <h2>Interfaces admin intégrées</h2>
+              <p className="devops-section__hint">
+                Connexion <strong>admin@petfood.tn</strong> requise pour les panneaux sécurisés.
+              </p>
+              <div className="devops-grid">
+                {DEVOPS_ADMIN_INTERFACES.map((item) => (
+                  <Link key={item.id} to={item.route} className="devops-card devops-card--link">
+                    <span className="devops-card__icon">{item.icon}</span>
+                    <h3>{item.label}</h3>
+                    <p>{item.desc}</p>
+                    <span className="devops-card__cta">Ouvrir →</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
 
           <section className="devops-section">
             <h2>Plateformes liées</h2>
@@ -190,39 +219,50 @@ const DevOpsPlatformPage = ({ adminMode = false }) => {
       )}
 
       {tab === 'cicd' && (
-        <section className="devops-section">
-          <h2>Pipelines CI/CD</h2>
-          <p className="devops-section__hint">
-            Workflows GitHub Actions — déclenchement sur push <code>main</code> et pull requests.
-          </p>
-          <div className="devops-pipeline-list">
-            {DEVOPS_PIPELINES.map((p) => (
-              <article key={p.id} className="devops-pipeline">
-                <div className="devops-pipeline__head">
-                  <strong>{p.name}</strong>
-                  <span className={`devops-badge ${statusClass(p.status)}`}>Actif</span>
-                </div>
-                <p>{p.detail}</p>
-                <code>{p.file}</code>
-              </article>
-            ))}
-          </div>
-          <div className="devops-grid devops-grid--2" style={{ marginTop: 16 }}>
-            <div className="devops-card devops-card--code">
-              <h3>CI locale</h3>
-              <pre>{`npm run devops:ci
+        <>
+          <section className="devops-section">
+            <h2>Pipelines CI/CD</h2>
+            <p className="devops-section__hint">
+              Workflows GitHub Actions — push <code>main</code>, pull requests et planification.
+            </p>
+            <DevOpsCicdPanel runs={pipelines} />
+          </section>
+          <section className="devops-section">
+            <h2>Commandes locales</h2>
+            <div className="devops-grid devops-grid--2">
+              <div className="devops-card devops-card--code">
+                <h3>CI locale</h3>
+                <pre>{`npm run devops:ci
 .\\scripts\\devops\\ci-local.ps1 -WithMl
 npm run devops:health`}</pre>
-            </div>
-            <div className="devops-card devops-card--code">
-              <h3>Déploiement</h3>
-              <pre>{`npm run docker:stack:full
+              </div>
+              <div className="devops-card devops-card--code">
+                <h3>Déploiement &amp; cloud</h3>
+                <pre>{`npm run docker:stack:full
 npm run devops:backup
+npm run devops:render:status
 node scripts/devops/render-provision.mjs`}</pre>
-              <p style={{ margin: '12px 0 0', fontSize: 13, color: '#64748b' }}>
-                Docs : <code>docs/DEVOPS-PLATFORM.md</code>
-              </p>
+                <p style={{ margin: '12px 0 0', fontSize: 13, color: '#64748b' }}>
+                  Docs : <code>docs/DEVOPS-PLATFORM.md</code>
+                </p>
+              </div>
             </div>
+          </section>
+        </>
+      )}
+
+      {tab === 'deploy' && (
+        <section className="devops-section">
+          <h2>Historique des déploiements</h2>
+          <p className="devops-section__hint">
+            Render Blueprint, GHCR et VPS — versions et statuts des releases.
+          </p>
+          <DevOpsDeploymentsPanel deployments={deployments} />
+          <div className="devops-card" style={{ marginTop: 16 }}>
+            <h3>Hooks Render</h3>
+            <p style={{ fontSize: 13, color: '#64748b' }}>
+              <code>npm run devops:render:hooks</code> — déclenchement deploy après publish GHCR.
+            </p>
           </div>
         </section>
       )}
@@ -240,7 +280,7 @@ node scripts/devops/render-provision.mjs`}</pre>
                   <p>{item.desc}</p>
                   {item.url ? (
                     <a href={item.url} target="_blank" rel="noopener noreferrer" className="devops-ext-link">
-                      {item.url} <ExternalLink size={14} />
+                      {item.url}
                     </a>
                   ) : (
                     <Link to={item.route} className="devops-card__cta">Ouvrir dans l&apos;app →</Link>
@@ -277,6 +317,16 @@ node scripts/devops/render-provision.mjs`}</pre>
             </div>
           </section>
           <section className="devops-section">
+            <h2>
+              <Key size={18} style={{ verticalAlign: 'middle', marginRight: 6 }} aria-hidden />
+              Variables &amp; secrets
+            </h2>
+            <p className="devops-section__hint">
+              Secrets jamais en git — Render env groups, GitHub Actions secrets, Docker secrets.
+            </p>
+            <DevOpsEnvSecretsPanel items={envSecrets} />
+          </section>
+          <section className="devops-section">
             <h2>Fichiers infrastructure</h2>
             <ul className="devops-file-list">
               <li><code>docker-compose.yml</code> — Base PostgreSQL + API + frontend</li>
@@ -299,7 +349,7 @@ node scripts/devops/render-provision.mjs`}</pre>
       {tab === 'security' && (
         <section className="devops-section">
           <h2>DevSecOps</h2>
-          {adminMode && status?.performance?.security && (
+          {status?.performance?.security && (
             <div className="devops-inline-metrics devops-inline-metrics--security">
               <div><strong>{status.performance.security.eventsLast24h}</strong><span>Événements IDS 24h</span></div>
               <div><strong>{status.performance.security.monitoredIps}</strong><span>IP surveillées</span></div>
@@ -307,28 +357,40 @@ node scripts/devops/render-provision.mjs`}</pre>
             </div>
           )}
           <div className="devops-grid devops-grid--2">
+            <Link to="/admin/security-framework" className="devops-card devops-card--link">
+              <Shield size={22} color="#7c3aed" />
+              <h3>Cadre sécurité (12 piliers)</h3>
+              <p>Auth, RBAC, chiffrement, audit, API, cloud.</p>
+            </Link>
+            <Link to="/admin/database-security" className="devops-card devops-card--link">
+              <h3>🗄️ Sécurité PostgreSQL</h3>
+              <p>TLS, Prisma, sauvegardes chiffrées, anti-SQLi.</p>
+            </Link>
             <Link to="/admin/security" className="devops-card devops-card--link">
               <Shield size={22} color="#dc2626" />
               <h3>Centre de sécurité</h3>
-              <p>Scans, menaces, politiques d&apos;accès admin.</p>
+              <p>IDS, anti-virus, scans et menaces.</p>
             </Link>
             <Link to="/admin/intelligent-security" className="devops-card devops-card--link">
               <h3>🧠 Sécurité intelligente</h3>
-              <p>IDS, détection anomalies réseau, IP surveillées.</p>
+              <p>Fraude IA, sessions, JWT, 2FA.</p>
             </Link>
             <Link to="/admin/activity-logs" className="devops-card devops-card--link">
               <h3>📋 Journaux d&apos;activité</h3>
-              <p>Audit connexions, actions sensibles, conformité.</p>
+              <p>Audit connexions, actions sensibles.</p>
             </Link>
             <Link to="/admin/backups" className="devops-card devops-card--link">
               <HardDrive size={22} color="#059669" />
               <h3>Sauvegardes</h3>
-              <p>pg_dump planifié, restauration, snapshots pré-déploiement.</p>
+              <p>pg_dump planifié, restauration, snapshots.</p>
             </Link>
           </div>
           <div className="devops-card devops-card--code" style={{ marginTop: 16 }}>
-            <h3>Outils CI sécurité</h3>
-            <p>Trivy (images Docker), OWASP dependency check, SonarQube — workflows <code>ci.yml</code>.</p>
+            <h3>Pipeline DevSecOps</h3>
+            <p>
+              <code>.github/workflows/security.yml</code> — Gitleaks (secrets), Trivy (images Docker),
+              OWASP dependency-check, npm audit. Planifié chaque lundi 03:00 UTC.
+            </p>
           </div>
         </section>
       )}

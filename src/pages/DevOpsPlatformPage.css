@@ -546,6 +546,153 @@
   color: #334155;
 }
 
+.devops-hero__deploy {
+  margin: 12px 0 0;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.devops-pipeline__run {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.devops-deploy-timeline {
+  display: grid;
+  gap: 12px;
+}
+
+.devops-deploy {
+  display: flex;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.devops-deploy--failed {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.devops-deploy__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.devops-deploy__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.devops-deploy__body p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.devops-deploy__services {
+  font-size: 12px !important;
+  color: #94a3b8 !important;
+}
+
+.devops-deploy__note {
+  color: #b45309 !important;
+  font-weight: 600;
+}
+
+.devops-secrets-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.devops-secret {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+}
+
+.devops-secret--missing {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.devops-secret__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.devops-secret code {
+  display: block;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.devops-secret p {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.devops-runbooks {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.devops-runbook {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.devops-runbook__label {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.devops-runbook code {
+  font-size: 12px;
+  color: #0f172a;
+}
+
+.devops-runbook__copy,
+.devops-copy-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #475569;
+}
+
 @media (max-width: 640px) {
   .devops-inline-metrics {
     grid-template-columns: repeat(2, 1fr);
