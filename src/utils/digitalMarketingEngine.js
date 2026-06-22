@@ -8,7 +8,6 @@ export const buildDigitalMarketingPack = ({
   orders = [],
   users = [],
   products = [],
-  crmOverview = null,
   newsletterSubs = [],
 } = {}) => {
   const clients = users.filter((u) => u.role === 'client' || !u.role);
@@ -25,7 +24,7 @@ export const buildDigitalMarketingPack = ({
   const { segments = [] } = segmentClientsByPurchases({ orders, users: clients });
   const aiMarketing = generateMarketingRecommendations({ orders, users: clients, products });
 
-  const campaignsSent = crmOverview?.kpis?.campaignsSent ?? 12;
+  const campaignsSent = 12;
   const newsletterTotal = newsletterSubs.length || Math.round(clientCount * 0.34);
 
   const kpis = {
@@ -39,7 +38,7 @@ export const buildDigitalMarketingPack = ({
     socialReach: Math.round(clientCount * 1.8),
     adRoas: 3.6,
     revenueAttributed: Math.round(revenue * 0.42),
-    campaignsActive: (crmOverview?.campaigns || []).filter((c) => c.status === 'draft').length + 3,
+    campaignsActive: 3,
     campaignsSent,
   };
 

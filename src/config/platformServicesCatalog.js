@@ -551,17 +551,6 @@ export const PLATFORM_SERVICES = [
     serviceKey: 'activityLogService',
   },
   {
-    id: 'admin-crm',
-    category: 'admin',
-    roles: ['admin'],
-    label: 'CRM & campagnes',
-    description: 'Segments clients, campagnes email et suggestions ML.',
-    route: '/admin/crm',
-    icon: '📣',
-    api: 'GET /api/admin/crm/overview',
-    serviceKey: 'adminOpsService',
-  },
-  {
     id: 'admin-digital-marketing',
     category: 'admin',
     roles: ['admin'],

@@ -485,7 +485,7 @@ export const DEMO_ADMIN_ADVANCED_AI = {
     complaintQueue: 2,
   },
   autoActions: [
-    { id: 'a1', priority: 'high', label: 'Relancer 3 clients à risque churn', link: '/admin/crm', type: 'crm' },
+    { id: 'a1', priority: 'high', label: 'Relancer 3 clients à risque churn', link: '/admin/digital-marketing', type: 'marketing' },
     { id: 'a2', priority: 'high', label: 'Traiter 2 réclamations NLP prioritaires', link: '/admin/incidents-ml', type: 'incidents' },
     { id: 'a3', priority: 'medium', label: 'Réapprovisionner croquettes Premium Chien', link: '/admin/stock', type: 'stock' },
     { id: 'a4', priority: 'medium', label: 'Valider candidature vendeur Sousse', link: '/admin/vendors', type: 'vendors' },
@@ -497,7 +497,7 @@ export const DEMO_ADMIN_ADVANCED_AI = {
     fraudSignals: 1,
     samplesAnalyzed: 142,
   },
-  insight: 'La demande croquettes chien senior augmente (+12 %). 3 clients à risque churn — action CRM recommandée cette semaine.',
+  insight: 'La demande croquettes chien senior augmente (+12 %). 3 clients à risque churn — campagne marketing recommandée cette semaine.',
 };
 
 export const DEMO_ADMIN_ANALYTICS = {

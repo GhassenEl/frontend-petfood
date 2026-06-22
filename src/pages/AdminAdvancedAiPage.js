@@ -189,7 +189,7 @@ const AdminAdvancedAiPage = () => {
           <div style={{ marginTop: 20, display: 'flex', flexWrap: 'wrap', gap: 10 }}>
             <Link to="/admin/incidents-ml" style={navLink}>Incidents ML</Link>
             <Link to="/admin/stock-bi" style={navLink}>Stock BI</Link>
-            <Link to="/admin/crm" style={navLink}>CRM ML</Link>
+            <Link to="/admin/digital-marketing" style={navLink}>Marketing digital</Link>
             <Link to="/admin/ml-agent" style={navLink}>Agent ML classique</Link>
           </div>
         </div>

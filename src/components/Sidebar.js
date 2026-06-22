@@ -55,7 +55,6 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'stock', label: 'Gestion stock', icon: '📦' },
         { id: 'promotions', label: 'Promotions & coupons', icon: '🎟️' },
         { id: 'digital-marketing', label: 'Marketing digital', icon: '📣' },
-        { id: 'crm', label: 'CRM clients', icon: '🤝' },
         { id: 'users', label: 'Utilisateurs', icon: '👥' },
         { id: 'leave-requests', label: 'Congés / maladie', icon: '🏖️' },
         { id: 'messages', label: 'Messages', icon: '💬' },

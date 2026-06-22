@@ -1,6 +1,5 @@
 import api from '../utils/api';
 import { getProducts } from './productService';
-import { fetchCrmOverview } from './adminOpsService';
 import { DEMO_ADMIN_ORDERS } from '../utils/adminDemoData';
 import { withDemoFallback } from '../utils/clientDemoData';
 import { buildDigitalMarketingPack } from '../utils/digitalMarketingEngine';
@@ -29,11 +28,10 @@ export async function fetchDigitalMarketingPack() {
     /* fallback local */
   }
 
-  const [ordersRes, usersRes, productsRes, crmOverview] = await Promise.all([
+  const [ordersRes, usersRes, productsRes] = await Promise.all([
     api.get('/orders').catch(() => ({ data: [] })),
     api.get('/users').catch(() => ({ data: [] })),
     getProducts().catch(() => []),
-    fetchCrmOverview().catch(() => null),
   ]);
 
   const orders = withDemoFallback(ordersRes.data, DEMO_ADMIN_ORDERS);
@@ -45,7 +43,6 @@ export async function fetchDigitalMarketingPack() {
     orders,
     users,
     products,
-    crmOverview,
     newsletterSubs,
   });
 }

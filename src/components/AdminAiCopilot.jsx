@@ -5,7 +5,7 @@ import { postAdminCopilot } from '../services/advancedAiService';
 
 const QUICK = [
   'Quelles actions prioritaires cette semaine ?',
-  'Analyse le risque churn et propose un plan CRM',
+  'Analyse le risque churn et propose une campagne marketing',
   'Quels produits réapprovisionner en urgence ?',
   'Synthèse des alertes fraude et commandes à risque',
   'Opportunités promo basées sur les top ventes',

@@ -163,7 +163,6 @@ import ClientDashboardPage from './pages/ClientDashboardPage';
 import ClientFamilyPage from './pages/ClientFamilyPage';
 import ClientSubscriptionsPage from './pages/ClientSubscriptionsPage';
 import ClientSmartCommercePage from './pages/ClientSmartCommercePage';
-import AdminCrmPage from './pages/AdminCrmPage';
 import AdminDigitalMarketingPage from './pages/AdminDigitalMarketingPage';
 import AdminMlAgentPage from './pages/AdminMlAgentPage';
 import AdminIncidentsMlPage from './pages/AdminIncidentsMlPage';
@@ -341,7 +340,6 @@ const App = () => {
       <Route path="/admin/regional-contacts" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRegionalContactsPage /></AdminLayout></RoleRoute>} />
       <Route path="/capabilities" element={<CapabilitiesRoute user={user} />} />
       <Route path="/admin/blog-articles" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminBlogArticles /></AdminLayout></RoleRoute>} />
-      <Route path="/admin/crm" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminCrmPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/digital-marketing" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDigitalMarketingPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/rehabilitation" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRehabilitationPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/ml-agent" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminMlAgentPage /></AdminLayout></RoleRoute>} />

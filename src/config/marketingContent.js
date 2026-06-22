@@ -330,8 +330,8 @@ export const MARKETING_PLATFORM_ACTORS = [
     title: 'Administrateur',
     tagline: 'Pilotage plateforme',
     description:
-      'KPIs, CRM, stock BI, fournisseurs et configuration globale de PetfoodTN.',
-    highlights: ['Dashboard', 'CRM', 'Power BI'],
+      'KPIs, marketing digital, stock BI, fournisseurs et configuration globale de PetfoodTN.',
+    highlights: ['Dashboard', 'Marketing', 'Power BI'],
     ctaLabel: 'Administration',
     ctaRoute: '/login',
     accent: '#dc2626',

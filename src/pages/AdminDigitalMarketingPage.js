@@ -174,8 +174,6 @@ const AdminDigitalMarketingPage = () => {
                 ))}
               </div>
               <p className="mkt-footer-link">
-                <Link to="/admin/crm">Créer &amp; envoyer une campagne CRM →</Link>
-                {' · '}
                 <Link to="/admin/promotions">Promotions produits →</Link>
               </p>
             </>
