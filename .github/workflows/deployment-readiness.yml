@@ -1,0 +1,66 @@
+name: Deployment Readiness
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  readiness:
+    name: Vérifier préparation déploiement
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Build production frontend
+        run: npm ci && npm run build
+        env:
+          VITE_API_BASE: https://petfoodtn-api.onrender.com/api
+          VITE_SOCKET_URL: https://petfoodtn-api.onrender.com
+
+      - name: Valider render.yaml
+        run: |
+          test -f render.yaml
+          grep -q 'petfoodtn-web' render.yaml
+          grep -q 'petfoodtn-api' render.yaml
+          grep -q 'staticPublishPath: dist' render.yaml
+          echo "render.yaml OK"
+
+      - name: Sonder URLs production
+        id: probe
+        run: |
+          probe() {
+            local key="$1" url="$2"
+            code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 25 "$url" || echo "000")
+            echo "${key}=${code}" >> "$GITHUB_OUTPUT"
+          }
+          probe web "https://petfoodtn-web.onrender.com"
+          probe api "https://petfoodtn-api.onrender.com/health"
+          probe ml "https://petfoodtn-ml.onrender.com/health"
+
+      - name: Résumé
+        run: |
+          {
+            echo "### État déploiement PetfoodTN"
+            echo ""
+            echo "| Service | URL | HTTP |"
+            echo "|---------|-----|------|"
+            echo "| Frontend | petfoodtn-web | ${{ steps.probe.outputs.web }} |"
+            echo "| API | petfoodtn-api | ${{ steps.probe.outputs.api }} |"
+            echo "| ML | petfoodtn-ml | ${{ steps.probe.outputs.ml }} |"
+            echo ""
+            if [ "${{ steps.probe.outputs.web }}" = "404" ]; then
+              echo "➡️ **Blueprint Render non appliqué** — [Créer la stack](https://dashboard.render.com/blueprints/new)"
+              echo ""
+              echo "Guide : \`docs/RENDER-SETUP.md\` · Audit : \`npm run devops:prod:audit\`"
+            elif [ "${{ steps.probe.outputs.web }}" = "200" ]; then
+              echo "✅ Application en ligne sur Render"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

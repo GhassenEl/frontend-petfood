@@ -184,6 +184,16 @@ jobs:
           export DEMO_MODE=true
           export PORT=5002
           node server.js &
-          sleep 8
           cd ..
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:5002/health >/dev/null 2>&1; then
+              echo "Backend prêt (tentative $i)"
+              break
+            fi
+            if [ "$i" -eq 30 ]; then
+              echo "Backend indisponible après 60s"
+              exit 1
+            fi
+            sleep 2
+          done
           npm run test:api

@@ -317,7 +317,7 @@ const App = () => {
       <Route path="/admin/reviews" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminReviews /></AdminLayout></RoleRoute>} />
       <Route path="/admin/complaints" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminComplaints /></AdminLayout></RoleRoute>} />
       <Route path="/admin/products" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminProducts /></AdminLayout></RoleRoute>} />
-      <Route path="/admin/stock" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminStockPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/stock" element={<RoleRoute user={user} roles={['admin', 'stock_manager']}><AdminLayout><AdminStockPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/food-quality" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><FoodQualitySurveillancePage role="admin" /></AdminLayout></RoleRoute>} />
       <Route path="/admin/delivery-cold-chain" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><DeliveryColdChainSurveillancePage role="admin" /></AdminLayout></RoleRoute>} />
       <Route path="/admin/sales" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminSalesPage /></AdminLayout></RoleRoute>} />

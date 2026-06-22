@@ -60,23 +60,49 @@ jobs:
           curl -fsS -X POST "$HOOK"
           echo "ML deploy déclenché"
 
+      - name: Attendre propagation Render
+        if: steps.fe.outputs.configured == 'true' || steps.api.outputs.configured == 'true' || steps.ml.outputs.configured == 'true'
+        run: sleep 45
+
+      - name: Vérifier santé production
+        id: health
+        run: |
+          check() {
+            local name="$1" url="$2"
+            code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 30 "$url" || echo "000")
+            echo "${name}=${code}" >> "$GITHUB_OUTPUT"
+            if [ "$code" = "404" ] || [ "$code" = "000" ]; then
+              echo "⚠️ $name — $code ($url)"
+            else
+              echo "✅ $name — $code ($url)"
+            fi
+          }
+          check web "${{ secrets.UPTIME_FRONTEND_URL || 'https://petfoodtn-web.onrender.com' }}"
+          check api "${{ secrets.UPTIME_BACKEND_URL || 'https://petfoodtn-api.onrender.com' }}/health"
+          check ml "${{ secrets.UPTIME_ML_URL || 'https://petfoodtn-ml.onrender.com' }}/health"
+
       - name: Résumé déploiement
         run: |
           echo "### Deploy Render" >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ steps.fe.outputs.configured }}" = "true" ]; then
-            echo "- ✅ Frontend — hook appelé" >> "$GITHUB_STEP_SUMMARY"
+            echo "- ✅ Frontend — hook appelé (${{ steps.health.outputs.web }})" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "- ⚠️ Frontend — secret manquant" >> "$GITHUB_STEP_SUMMARY"
+            echo "- ⚠️ Frontend — secret \`RENDER_DEPLOY_HOOK_FRONTEND\` manquant" >> "$GITHUB_STEP_SUMMARY"
           fi
           if [ "${{ steps.api.outputs.configured }}" = "true" ]; then
-            echo "- ✅ Backend — hook appelé" >> "$GITHUB_STEP_SUMMARY"
+            echo "- ✅ Backend — hook appelé (${{ steps.health.outputs.api }})" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "- ⚠️ Backend — secret manquant" >> "$GITHUB_STEP_SUMMARY"
+            echo "- ⚠️ Backend — secret \`RENDER_DEPLOY_HOOK_BACKEND\` manquant" >> "$GITHUB_STEP_SUMMARY"
           fi
           if [ "${{ steps.ml.outputs.configured }}" = "true" ]; then
-            echo "- ✅ ML — hook appelé" >> "$GITHUB_STEP_SUMMARY"
+            echo "- ✅ ML — hook appelé (${{ steps.health.outputs.ml }})" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "- ⚠️ ML — secret manquant" >> "$GITHUB_STEP_SUMMARY"
+            echo "- ⚠️ ML — secret \`RENDER_DEPLOY_HOOK_ML\` manquant" >> "$GITHUB_STEP_SUMMARY"
           fi
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Configurer : Blueprint Render + \`npm run devops:prod:sync -- --render\`" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.health.outputs.web }}" = "404" ] || [ "${{ steps.health.outputs.api }}" = "404" ]; then
+            echo "**Action requise** : appliquer le Blueprint Render une fois :" >> "$GITHUB_STEP_SUMMARY"
+            echo "1. [Nouveau Blueprint](https://dashboard.render.com/blueprints/new) → repo \`GhassenEl/frontend-petfood\` → \`render.yaml\` → Apply" >> "$GITHUB_STEP_SUMMARY"
+            echo "2. Packages GHCR publics : \`petfoodtn-backend\`, \`petfoodtn-ml\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "3. \`RENDER_API_KEY=xxx npm run devops:prod:sync -- --render\`" >> "$GITHUB_STEP_SUMMARY"
+          fi

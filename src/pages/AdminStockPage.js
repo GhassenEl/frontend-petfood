@@ -8,18 +8,16 @@ import {
   fetchAdminStockOverview,
   updateAdminStockThresholds,
 } from '../services/adminStockService';
-import {
-  DEMO_ADMIN_STOCK_MOVEMENTS,
-  buildStockAlerts,
-  mergeAdminStock,
-  withDemoFallback,
-} from '../utils/adminDemoData';
+import { buildStockAlerts } from '../utils/adminDemoData';
+
+const productId = (product) => String(product?.id || product?._id || '');
 
 const AdminStockPage = () => {
   const [items, setItems] = useState([]);
   const [movements, setMovements] = useState([]);
   const [stats, setStats] = useState({ total: 0, ruptures: 0, low: 0, value: 0 });
   const [loading, setLoading] = useState(true);
+  const [demoMode, setDemoMode] = useState(false);
   const [busy, setBusy] = useState(false);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
@@ -39,26 +37,15 @@ const AdminStockPage = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
-    try {
-      const overview = await fetchAdminStockOverview();
-      setItems(overview.items?.length ? overview.items : mergeAdminStock([]));
-      setStats(overview.stats || {
-        total: overview.items?.length || 0,
-        ruptures: 0,
-        low: 0,
-        value: 0,
-      });
-    } catch {
-      setItems(mergeAdminStock([]));
-      setStats({ total: 0, ruptures: 0, low: 0, value: 0 });
-    }
+    const overview = await fetchAdminStockOverview();
+    setItems(overview.items || []);
+    setStats(overview.stats || { total: 0, ruptures: 0, low: 0, value: 0 });
+    let demo = Boolean(overview.demo);
 
-    try {
-      const mv = await fetchAdminStockMovements(50);
-      setMovements(withDemoFallback(mv, DEMO_ADMIN_STOCK_MOVEMENTS));
-    } catch {
-      setMovements(DEMO_ADMIN_STOCK_MOVEMENTS);
-    }
+    const mv = await fetchAdminStockMovements(50);
+    setMovements(mv.data || []);
+    if (mv.demo) demo = true;
+    setDemoMode(demo);
     setLoading(false);
   }, []);
 
@@ -87,7 +74,7 @@ const AdminStockPage = () => {
     if (selectedIds.length === filtered.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filtered.map((p) => p.id));
+      setSelectedIds(filtered.map((p) => productId(p)));
     }
   };
 
@@ -116,15 +103,15 @@ const AdminStockPage = () => {
     }
     setBusy(true);
     try {
-      await adjustAdminStock(adjustTarget.id, {
+      const result = await adjustAdminStock(productId(adjustTarget), {
         adjustment,
         reason: adjustForm.reason || 'Ajustement manuel',
       });
       setAdjustTarget(null);
       await load();
-      window.alert('Stock mis à jour');
+      window.alert(result.demo ? 'Stock mis à jour (mode démo)' : 'Stock mis à jour');
     } catch (error) {
-      window.alert(error.response?.data?.error || 'Erreur ajustement stock');
+      window.alert(error.message || error.response?.data?.error || 'Erreur ajustement stock');
     } finally {
       setBusy(false);
     }
@@ -135,7 +122,7 @@ const AdminStockPage = () => {
     if (!thresholdTarget) return;
     setBusy(true);
     try {
-      await updateAdminStockThresholds(thresholdTarget.id, {
+      const result = await updateAdminStockThresholds(productId(thresholdTarget), {
         minStock: Number(thresholdForm.minStock),
         maxStock: Number(thresholdForm.maxStock),
         reorderQty: Number(thresholdForm.reorderQty),
@@ -144,9 +131,9 @@ const AdminStockPage = () => {
       });
       setThresholdTarget(null);
       await load();
-      window.alert('Seuils enregistrés');
+      window.alert(result.demo ? 'Seuils enregistrés (mode démo)' : 'Seuils enregistrés');
     } catch (error) {
-      window.alert(error.response?.data?.error || 'Erreur mise à jour seuils');
+      window.alert(error.message || error.response?.data?.error || 'Erreur mise à jour seuils');
     } finally {
       setBusy(false);
     }
@@ -165,9 +152,9 @@ const AdminStockPage = () => {
       const result = await bulkReorderAdminStock(targets);
       await load();
       setSelectedIds([]);
-      window.alert(result.summary || 'Réapprovisionnement terminé');
+      window.alert(result.data?.summary || 'Réapprovisionnement terminé');
     } catch (error) {
-      window.alert(error.response?.data?.error || 'Erreur réapprovisionnement');
+      window.alert(error.message || error.response?.data?.error || 'Erreur réapprovisionnement');
     } finally {
       setBusy(false);
     }
@@ -176,13 +163,13 @@ const AdminStockPage = () => {
   const quickAdjust = async (product, delta) => {
     setBusy(true);
     try {
-      await adjustAdminStock(product.id, {
+      await adjustAdminStock(productId(product), {
         adjustment: delta,
         reason: delta > 0 ? 'Entrée rapide' : 'Sortie rapide',
       });
       await load();
     } catch (error) {
-      window.alert(error.response?.data?.error || 'Erreur ajustement');
+      window.alert(error.message || error.response?.data?.error || 'Erreur ajustement');
     } finally {
       setBusy(false);
     }
@@ -210,8 +197,13 @@ const AdminStockPage = () => {
         }}
       >
         <div>
-          <h1 style={{ margin: '0 0 6px', fontSize: '1.6rem', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <h1 style={{ margin: '0 0 6px', fontSize: '1.6rem', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <Package size={28} /> Gestion stock
+            {demoMode && (
+              <span style={{ fontSize: 12, fontWeight: 700, background: 'rgba(255,255,255,0.2)', padding: '4px 10px', borderRadius: 999 }}>
+                Mode démo
+              </span>
+            )}
           </h1>
           <p style={{ margin: 0, opacity: 0.9, fontSize: 14 }}>
             Ajustements, seuils, réapprovisionnement et historique des mouvements
@@ -339,12 +331,12 @@ const AdminStockPage = () => {
               const status = p.stock <= 0 ? 'Rupture' : p.stock <= p.minStock ? 'Bas' : 'OK';
               const statusColor = p.stock <= 0 ? '#dc2626' : p.stock <= p.minStock ? '#d97706' : '#059669';
               return (
-                <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                <tr key={productId(p)} style={{ borderBottom: '1px solid #f1f5f9' }}>
                   <td style={{ padding: 12 }}>
                     <input
                       type="checkbox"
-                      checked={selectedIds.includes(p.id)}
-                      onChange={() => toggleSelect(p.id)}
+                      checked={selectedIds.includes(productId(p))}
+                      onChange={() => toggleSelect(productId(p))}
                       aria-label={`Sélectionner ${p.name}`}
                     />
                   </td>

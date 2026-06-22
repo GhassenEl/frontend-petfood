@@ -881,10 +881,45 @@ export const mergeAdminStock = (apiItems) => {
       velocityPerDay: p.velocityPerDay ?? 1,
       category: p.category || '—',
       location: p.location || 'Entrepôt',
+      price: p.price ?? 0,
     }));
   }
-  return DEMO_ADMIN_STOCK;
+  return DEMO_ADMIN_STOCK.map((p) => ({ ...p }));
 };
+
+export const computeStockStats = (items = []) => {
+  const list = items.length ? items : DEMO_ADMIN_STOCK;
+  const ruptures = list.filter((p) => (p.stock ?? 0) <= 0).length;
+  const low = list.filter((p) => {
+    const stock = p.stock ?? 0;
+    return stock > 0 && stock <= (p.minStock ?? 10);
+  }).length;
+  const value = list.reduce((sum, p) => {
+    const unit = Number(p.price) > 0 ? Number(p.price) : 25;
+    return sum + (p.stock ?? 0) * unit;
+  }, 0);
+  return { total: list.length, ruptures, low, value };
+};
+
+export const normalizeStockOverview = (data) => {
+  if (!data) return { items: [], stats: null };
+  if (Array.isArray(data)) return { items: data, stats: null };
+  if (Array.isArray(data.items)) return { items: data.items, stats: data.stats || null };
+  if (Array.isArray(data.products)) return { items: data.products, stats: data.stats || null };
+  return { items: [], stats: data.stats || null };
+};
+
+export const normalizeStockMovements = (data) => {
+  if (Array.isArray(data) && data.length > 0) return data;
+  if (Array.isArray(data?.items) && data.items.length > 0) return data.items;
+  if (Array.isArray(data?.movements) && data.movements.length > 0) return data.movements;
+  return null;
+};
+
+export const getDemoAdminStockStore = () => ({
+  items: DEMO_ADMIN_STOCK.map((p) => ({ ...p })),
+  movements: DEMO_ADMIN_STOCK_MOVEMENTS.map((m) => ({ ...m })),
+});
 
 export const buildStockAlerts = (items) => {
   const list = items?.length ? items : DEMO_ADMIN_STOCK;
