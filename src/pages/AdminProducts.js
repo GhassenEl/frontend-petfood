@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import api from '../utils/api';
 import { PRODUCT_CATEGORIES } from '../constants/productCategories';
@@ -6,6 +6,8 @@ import AdminImageUpload from '../components/AdminImageUpload';
 import { resolveUploadPreviewUrl } from '../services/uploadService';
 import SafeImage from '../components/SafeImage';
 import { PLATFORM_IMAGES, resolveNaturalProductImage } from '../utils/platformImages';
+
+const productId = (product) => product?._id || product?.id;
 
 const emptyForm = {
   name: '',
@@ -31,26 +33,31 @@ const AdminProducts = () => {
   const [showStockModal, setShowStockModal] = useState(false);
   const [stockAdjustForm, setStockAdjustForm] = useState({ adjustment: '', reason: '' });
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  usePlatformRefresh(fetchProducts);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const res = await api.get('/products');
       setProducts(res.data || []);
-      const lowRes = await api.get('/products/low-stock?threshold=10');
-      setLowStockProducts(lowRes.data || []);
     } catch (error) {
       console.error('Erreur chargement produits', error);
       setProducts([]);
+    }
+
+    try {
+      const lowRes = await api.get('/products/low-stock?threshold=10');
+      setLowStockProducts(lowRes.data || []);
+    } catch (error) {
+      console.error('Erreur chargement stocks bas', error);
       setLowStockProducts([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  usePlatformRefresh(fetchProducts, [fetchProducts]);
 
   const openCreate = () => {
     setEditingProduct(null);
@@ -89,7 +96,7 @@ const AdminProducts = () => {
         stock: Number(formData.stock || 0),
       };
       if (editingProduct) {
-        await api.put(`/products/${editingProduct._id}`, payload);
+        await api.put(`/products/${productId(editingProduct)}`, payload);
       } else {
         await api.post('/products', payload);
       }
@@ -137,7 +144,7 @@ const AdminProducts = () => {
 
     try {
       await Promise.all(stockTargets.map((product) =>
-        api.patch(`/products/${product._id}/stock/adjust`, {
+        api.patch(`/products/${productId(product)}/stock/adjust`, {
           adjustment,
           reason: stockAdjustForm.reason || 'Ajustement manuel',
         })
@@ -181,7 +188,7 @@ const AdminProducts = () => {
           <h3 style={styles.alertTitle}>⚠️ Stocks bas ({lowStockProducts.length})</h3>
           <div style={styles.alertList}>
             {lowStockProducts.slice(0, 5).map(product => (
-              <span key={product._id} style={styles.alertItem}>
+              <span key={productId(product)} style={styles.alertItem}>
                 {product.name} ({product.stock})
               </span>
             ))}
@@ -233,16 +240,16 @@ const AdminProducts = () => {
             {filteredProducts.map((product) => {
               const finalPrice = Number(product.price) * (1 - Number(product.discount || 0) / 100);
               return (
-                <tr key={product._id} style={styles.tr}>
+                <tr key={productId(product)} style={styles.tr}>
                   <td style={styles.td}>
                     <input
                       type="checkbox"
-                      checked={selectedProducts.some(p => p._id === product._id)}
+                      checked={selectedProducts.some((p) => productId(p) === productId(product))}
                       onChange={(e) => {
                         if (e.target.checked) {
                           setSelectedProducts([...selectedProducts, product]);
                         } else {
-                          setSelectedProducts(selectedProducts.filter(p => p._id !== product._id));
+                          setSelectedProducts(selectedProducts.filter((p) => productId(p) !== productId(product)));
                         }
                       }}
                       style={{ transform: 'scale(1.2)', marginRight: '8px' }}
@@ -295,7 +302,7 @@ const AdminProducts = () => {
                       <button style={styles.adjustBtn} onClick={() => openStockAdjust([product])} title="Ajuster stock">
                         ⚖️
                       </button>
-                      <button style={styles.deleteBtn} onClick={() => handleDelete(product._id)} title="Supprimer">
+                      <button style={styles.deleteBtn} onClick={() => handleDelete(productId(product))} title="Supprimer">
                         🗑️
                       </button>
                     </div>
@@ -342,7 +349,7 @@ const AdminProducts = () => {
                   {stockTargets.slice(0, 5).map((product) => {
                     const nextStock = Math.max(0, Number(product.stock || 0) + Number(stockAdjustForm.adjustment || 0));
                     return (
-                      <span key={product._id}>{product.name}: {product.stock} -&gt; {nextStock}</span>
+                      <span key={productId(product)}>{product.name}: {product.stock} -&gt; {nextStock}</span>
                     );
                   })}
                   {stockTargets.length > 5 && <span>... et {stockTargets.length - 5} autres</span>}
