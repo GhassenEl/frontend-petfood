@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Brain, TrendingUp, AlertTriangle, Package, Route, MapPin } from 'lucide-react';
+import { Brain, TrendingUp, AlertTriangle, Package, Route } from 'lucide-react';
 import useLivreurMlRisk from '../hooks/useLivreurMlRisk';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import { buildLivreurProductDemandAnalysis, LIVREUR_REGIONS } from '../utils/livreurProductDemandEngine';
@@ -131,7 +131,7 @@ const LivreurMlPage = () => {
           <TrendingUp size={20} color="#059669" /> Analyse produits demandés
         </h3>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, fontSize: 13, fontWeight: 700 }}>
-          <MapPin size={14} /> Région
+          Région
           <select value={region} onChange={(e) => setRegion(e.target.value)} style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
             {LIVREUR_REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
           </select>

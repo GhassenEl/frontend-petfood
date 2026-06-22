@@ -4,7 +4,7 @@ export const CLIENT_SIDEBAR_SECTIONS = [
   {
     title: '🏠 Accueil',
     items: [
-      { id: 'client-dashboard', label: 'Tableau de bord', icon: '🏠' },
+      { id: 'client-dashboard', label: 'Catalogue produits', icon: '🛍️' },
     ],
   },
   {

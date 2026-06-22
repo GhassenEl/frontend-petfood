@@ -3,14 +3,11 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 import {
   postVetClinicalAnalyze,
-  fetchVetClinicalPatientContext,
   postVetClinicalApplyDossier,
   postVetClinicalApplyPrescription,
 } from '../services/mlService';
-import {
-  DEMO_PATIENT_CONTEXT,
-  mergeVetClients,
-} from '../utils/vetDemoData';
+import { fetchVetPatientContext } from '../services/vetPatientContextService';
+import { mergeVetClients } from '../utils/vetDemoData';
 import { buildClinicalAnalysisResult } from '../utils/vetClinicalIntelligenceEngine';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
@@ -174,15 +171,30 @@ const VetPetDiagnosticsPage = () => {
     const pname = searchParams.get('petName');
     if (oid && clients.length) {
       setOwnerId(oid);
-      if (pname) {
-        setPetName(pname);
-        const client = clients.find((c) => (c.id || c._id) === oid);
-        const pet = client?.pets?.find((p) => p.name === pname);
+      const client = clients.find((c) => (c.id || c._id) === oid);
+      const resolvedPetName = pname || client?.pets?.[0]?.name;
+      if (resolvedPetName) {
+        setPetName(resolvedPetName);
+        const pet = client?.pets?.find((p) => p.name === resolvedPetName);
         if (pet) {
           setPetId(pet.id || '');
           setAnimalType(pet.type || 'dog');
         }
-        loadPatientContext(oid, pname, pet?.id);
+        loadPatientContext(oid, resolvedPetName, pet?.id);
+      }
+      return;
+    }
+
+    if (!oid && clients.length && !ownerId) {
+      const first = clients[0];
+      const firstPet = first?.pets?.[0];
+      if (first && firstPet) {
+        const cid = first.id || first._id;
+        setOwnerId(cid);
+        setPetId(firstPet.id || '');
+        setPetName(firstPet.name || '');
+        setAnimalType(firstPet.type || 'dog');
+        loadPatientContext(cid, firstPet.name, firstPet.id);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -202,15 +214,14 @@ const VetPetDiagnosticsPage = () => {
     }
     setCtxLoading(true);
     try {
-      const ctx = await fetchVetClinicalPatientContext({
+      const ctx = await fetchVetPatientContext({
         ownerId: oid,
         petName: pname,
         petId: pid || undefined,
       });
       setPatientCtx(ctx);
     } catch {
-      if (oid && pname) setPatientCtx(DEMO_PATIENT_CONTEXT);
-      else setPatientCtx(null);
+      setPatientCtx(null);
     } finally {
       setCtxLoading(false);
     }
@@ -325,7 +336,7 @@ const VetPetDiagnosticsPage = () => {
         },
       }));
       if (ownerId && petName && !patientCtx) {
-        setPatientCtx(DEMO_PATIENT_CONTEXT);
+        loadPatientContext(ownerId, petName, petId);
       }
     } finally {
       setAnalyzing(false);
@@ -553,7 +564,32 @@ const VetPetDiagnosticsPage = () => {
         <aside style={cardStyle}>
           <h3 style={{ marginTop: 0, fontSize: '1rem' }}>📁 Dossier & historique</h3>
           {ctxLoading && <p style={{ color: '#94a3b8', fontSize: 14 }}>Chargement…</p>}
-          {!ownerId && <p style={{ color: '#94a3b8', fontSize: 14 }}>Sélectionnez un patient.</p>}
+          {!ctxLoading && !ownerId && (
+            <p style={{ color: '#94a3b8', fontSize: 14 }}>Sélectionnez un client et un animal.</p>
+          )}
+          {!ctxLoading && ownerId && petName && patientCtx?.profile?.pet && (
+            <div style={{
+              marginBottom: 14,
+              padding: 12,
+              borderRadius: 10,
+              background: '#f0f9ff',
+              border: '1px solid #bae6fd',
+            }}>
+              <p style={{ margin: 0, fontWeight: 800, fontSize: 15 }}>
+                {animalEmoji[patientCtx.profile.pet.type] || '🐾'} {patientCtx.profile.pet.name}
+              </p>
+              <p style={{ margin: '4px 0 0', fontSize: 13, color: '#475569' }}>
+                {patientCtx.profile.pet.breed || patientCtx.profile.pet.type}
+                {patientCtx.profile.pet.ageYears != null ? ` · ${patientCtx.profile.pet.ageYears} an(s)` : ''}
+                {patientCtx.profile.pet.weightKg != null ? ` · ${patientCtx.profile.pet.weightKg} kg` : ''}
+              </p>
+              {patientCtx.profile.owner?.name && (
+                <p style={{ margin: '6px 0 0', fontSize: 12, color: '#64748b' }}>
+                  Propriétaire : {patientCtx.profile.owner.name}
+                </p>
+              )}
+            </div>
+          )}
           {patientCtx?.dossier && (
             <p style={{ fontSize: 14 }}>
               Dossier <strong>{patientCtx.dossier.dossierNumber}</strong>
@@ -562,6 +598,11 @@ const VetPetDiagnosticsPage = () => {
                   ⚠️ {patientCtx.dossier.allergies}
                 </span>
               )}
+            </p>
+          )}
+          {!ctxLoading && ownerId && petName && !patientCtx?.dossier && (
+            <p style={{ fontSize: 13, color: '#64748b', marginBottom: 12 }}>
+              Aucun dossier médical archivé — les données proviennent du profil animal et des RDV.
             </p>
           )}
           {pastAnalyses.length > 0 && (
@@ -603,10 +644,18 @@ const VetPetDiagnosticsPage = () => {
                   <li key={ev.id} style={{ padding: '6px 0', borderBottom: '1px solid #f8fafc' }}>
                     {timelineIcon[ev.type] || '•'}{' '}
                     {ev.date ? new Date(ev.date).toLocaleDateString('fr-FR') : '—'} — {ev.label}
+                    {ev.detail && (
+                      <span style={{ display: 'block', fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
+                        {ev.detail}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
             </>
+          )}
+          {!ctxLoading && ownerId && petName && timeline.length === 0 && pastAnalyses.length === 0 && (
+            <p style={{ fontSize: 13, color: '#94a3b8' }}>Pas encore d&apos;historique clinique pour cet animal.</p>
           )}
           {ownerId && petName && patientCtx?.dossier?.id && (
             <Link

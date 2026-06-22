@@ -86,7 +86,7 @@ const MobileBottomNav = ({ items = [] }) => {
 };
 
 export const CLIENT_MOBILE_NAV = [
-  { id: 'home', to: '/client-dashboard', icon: '🏠', label: 'Accueil' },
+  { id: 'home', to: '/client-dashboard', icon: '🛍️', label: 'Catalogue' },
   { id: 'products', to: '/client-products', icon: '🏷️', label: 'Boutique' },
   { id: 'orders', to: '/client-orders', icon: '📦', label: 'Commandes' },
   { id: 'vet', to: '/veterinary', icon: '🩺', label: 'Veto' },

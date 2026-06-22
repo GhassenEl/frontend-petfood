@@ -3,6 +3,7 @@ export {
   resolveNaturalProductImage,
   buildProductFallbackDataUri,
   resolveCategoryProductImage,
+  sanitizeProductImageUrl,
   PLATFORM_IMAGES,
 } from './platformImages';
 

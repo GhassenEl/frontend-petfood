@@ -59,6 +59,50 @@ export const isValidImageUrl = (url) => {
   return true;
 };
 
+/** URLs Unsplash retirées / 404 — remplacées par photos locales */
+const BROKEN_REMOTE_IMAGE_FRAGMENTS = [
+  'photo-1585110396000-f9e815c5c35f',
+  'photo-1552728080-b656399553ba',
+  'photo-1524704656165-b5c4abb5f90b',
+];
+
+const PLACEHOLDER_SVG_FRAGMENTS = [
+  '/images/pets/rabbit.svg',
+  '/images/pets/bird.svg',
+  '/images/pets/fish.svg',
+];
+
+const PRODUCT_REAL_IMAGES = {
+  ani_rabbit_1: '/images/products/rabbit-adoption.jpg',
+  ani_bird_1: '/images/products/bird-couple.jpg',
+  ani_fish_1: '/images/products/guppy-lot.jpg',
+  prd_rabbit_food: '/images/products/rabbit-food.jpg',
+};
+
+const ANIMAL_REAL_IMAGES = {
+  rabbit: '/images/products/rabbit-adoption.jpg',
+  bird: '/images/products/bird-couple.jpg',
+  fish: '/images/products/guppy-lot.jpg',
+};
+
+export const isBrokenRemoteImageUrl = (url) => {
+  if (!isValidImageUrl(url)) return false;
+  const hay = String(url);
+  return BROKEN_REMOTE_IMAGE_FRAGMENTS.some((frag) => hay.includes(frag))
+    || PLACEHOLDER_SVG_FRAGMENTS.some((frag) => hay.includes(frag));
+};
+
+export const sanitizeProductImageUrl = (url, product = {}) => {
+  const id = product?.id || product?._id;
+  if (id && PRODUCT_REAL_IMAGES[id]) return PRODUCT_REAL_IMAGES[id];
+
+  if (!isValidImageUrl(url)) return '';
+  if (isBrokenRemoteImageUrl(url)) {
+    return PRODUCT_REAL_IMAGES[id] || ANIMAL_REAL_IMAGES[product.animalType] || '';
+  }
+  return resolveUploadPreviewUrl(url) || url;
+};
+
 /** Fallback SVG inline selon type d'animal (jamais cassé) */
 export const buildProductFallbackDataUri = (product = {}) => {
   const meta = PRODUCT_IMAGE_META[product.animalType] || PRODUCT_IMAGE_META.other;
@@ -74,16 +118,17 @@ export const resolveCategoryProductImage = (product = {}) => {
 };
 
 export const resolveNaturalProductImage = (product = {}) => {
-  const raw = product?.imageUrl || product?.image;
+  const raw = product?.imageUrl || product?.image || product?.icon;
   if (isValidImageUrl(raw) && !String(raw).startsWith('data:image/svg')) {
-    return resolveUploadPreviewUrl(raw) || raw;
+    const sanitized = sanitizeProductImageUrl(raw, product);
+    if (sanitized) return sanitized;
   }
   return resolveCategoryProductImage(product);
 };
 
-export const resolveImageSrc = (src, fallback = PLATFORM_IMAGES.productDefault) => {
+export const resolveImageSrc = (src, fallback = PLATFORM_IMAGES.productDefault, product = null) => {
   if (!isValidImageUrl(src)) return fallback;
-  const resolved = resolveUploadPreviewUrl(src) || src;
+  const resolved = product ? sanitizeProductImageUrl(src, product) : (resolveUploadPreviewUrl(src) || src);
   return resolved || fallback;
 };
 

@@ -1,5 +1,4 @@
 import React from 'react';
-import { MapPin } from 'lucide-react';
 import usePlatformCity from '../hooks/usePlatformCity';
 
 const CitySelector = ({ compact = false }) => {
@@ -23,8 +22,7 @@ const CitySelector = ({ compact = false }) => {
         boxShadow: '0 1px 4px rgba(15,23,42,0.06)',
       }}
     >
-      <MapPin size={compact ? 14 : 16} color="#0d9488" aria-hidden />
-      <span style={{ color: '#64748b', fontWeight: 500 }}>{compact ? '' : 'Ville :'}</span>
+      {!compact && <span style={{ color: '#64748b', fontWeight: 500 }}>Ville :</span>}
       <select
         value={selectedCity}
         onChange={(e) => setSelectedCity(e.target.value)}

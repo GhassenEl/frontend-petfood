@@ -345,7 +345,6 @@ const ActorProfilePage = ({ role: roleProp }) => {
                     value={profile.region}
                     onChange={(region) => setProfile({ ...profile, region })}
                     hint={config.regionHint}
-                    showIcon
                   />
                 </div>
 

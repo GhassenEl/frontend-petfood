@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   CalendarDays,
   Target,
@@ -16,6 +16,7 @@ import {
   ArrowRightLeft,
   Pill,
   Sparkles,
+  FileText,
 } from 'lucide-react';
 import AdaptiveNutritionPanel from '../components/AdaptiveNutritionPanel';
 import IntelligentNutritionProgramPanel from '../components/IntelligentNutritionProgramPanel';
@@ -32,6 +33,13 @@ import FoodTransitionPanel from '../components/FoodTransitionPanel';
 import TherapeuticNutritionPanel from '../components/TherapeuticNutritionPanel';
 import FutureNutritionPanel from '../components/FutureNutritionPanel';
 import { loadAdaptiveNutritionPack } from '../services/adaptiveNutritionService';
+import {
+  generateNutritionPlan,
+  formatPlanAsText,
+  normalizePet,
+  persistNutritionPlan,
+} from '../services/nutritionPlanService';
+import { PET_TYPE_LABELS } from '../utils/petCalorieCalculator';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import './ClientAdaptiveNutrition.css';
 
@@ -71,11 +79,17 @@ const SECTIONS = [
 ];
 
 const ClientAdaptiveNutritionPage = () => {
+  const navigate = useNavigate();
   const [sectionId, setSectionId] = useState('profile');
   const [tab, setTab] = useState('profile');
   const [loading, setLoading] = useState(true);
   const [pack, setPack] = useState(null);
   const [petIndex, setPetIndex] = useState(0);
+  const [generatingPetKey, setGeneratingPetKey] = useState(null);
+  const [generatedPlans, setGeneratedPlans] = useState({});
+  const [activePlanPetKey, setActivePlanPetKey] = useState(null);
+  const [planToast, setPlanToast] = useState('');
+  const [planError, setPlanError] = useState('');
   const [options, setOptions] = useState({
     activityLevel: 'moyen',
     goal: 'maintien',
@@ -108,6 +122,82 @@ const ClientAdaptiveNutritionPage = () => {
 
   const current = pack?.pets?.[petIndex] || null;
   const riskCount = current?.intelligentProgram?.riskAnalysis?.risks?.length ?? 0;
+  const activeGeneratedPlan = activePlanPetKey ? generatedPlans[activePlanPetKey] : null;
+
+  const petKeyForEntry = (entry, index) =>
+    String(entry?.pet?.id || entry?.pet?._id || `idx-${index}`);
+
+  const handleGeneratePlan = async (entry, index) => {
+    const rawPet = entry?.pet || {};
+    const petKey = petKeyForEntry(entry, index);
+    const weight = rawPet.weightKg ?? rawPet.weight ?? entry?.recommendation?.weightKg;
+
+    if (!rawPet.name) {
+      setPlanError('Animal sans nom — impossible de générer le plan.');
+      return;
+    }
+    if (!weight || Number(weight) <= 0) {
+      setPlanError(`Renseignez le poids de ${rawPet.name} (profil animal ou calculateur calories).`);
+      return;
+    }
+
+    setGeneratingPetKey(petKey);
+    setPlanError('');
+    setPlanToast('');
+
+    try {
+      const pet = normalizePet({ ...rawPet, weight });
+      const plan = await generateNutritionPlan({
+        pet,
+        options,
+        useAi: true,
+        aiContext: {
+          pets: [{
+            type: pet.type,
+            name: pet.name,
+            weightKg: pet.weightKg,
+            breed: pet.breed,
+            age: pet.ageYears,
+          }],
+          nutritionPreferences: {
+            goal: options.goal,
+            activityLevel: options.activityLevel,
+            mealCount: options.mealCount,
+          },
+        },
+        aiMessage:
+          `Génère un plan alimentaire professionnel pour ${pet.name} `
+          + `(${PET_TYPE_LABELS[pet.type] || pet.type}). `
+          + 'Sections : profil, portions, routine repas, aliments recommandés, suivi hebdomadaire.',
+      });
+
+      const planText = plan.aiPlan || formatPlanAsText(plan);
+      await persistNutritionPlan({
+        planText,
+        pet,
+        goal: options.goal,
+        metadata: {
+          activityLevel: options.activityLevel,
+          mealCount: options.mealCount,
+        },
+      });
+
+      setGeneratedPlans((prev) => ({
+        ...prev,
+        [petKey]: { ...plan, planText, pet },
+      }));
+      setActivePlanPetKey(petKey);
+      setPetIndex(index);
+      setSectionId('plans');
+      setTab('weekly');
+      setPlanToast(`Plan nutritionnel généré et sauvegardé pour ${pet.name}.`);
+    } catch (e) {
+      console.error(e);
+      setPlanError('Génération du plan impossible. Réessayez dans un instant.');
+    } finally {
+      setGeneratingPetKey(null);
+    }
+  };
 
   const handleSectionChange = (id) => {
     setSectionId(id);
@@ -186,6 +276,86 @@ const ClientAdaptiveNutritionPage = () => {
           Calculateur calories détaillé →
         </Link>
       </div>
+
+      {(pack?.pets || []).length > 0 && (
+        <div className="an-pet-plans-row">
+          <p className="an-pet-plans-title">Générer un plan NutriPro par animal</p>
+          <div className="an-pet-plans-grid">
+            {(pack.pets || []).map((entry, index) => {
+              const pet = entry.pet || {};
+              const petKey = petKeyForEntry(entry, index);
+              const isGenerating = generatingPetKey === petKey;
+              const hasPlan = !!generatedPlans[petKey];
+              const weight = pet.weightKg ?? pet.weight ?? entry?.recommendation?.weightKg;
+
+              return (
+                <div
+                  key={petKey}
+                  className={`an-pet-plan-card ${petIndex === index ? 'is-selected' : ''}`}
+                >
+                  <div>
+                    <strong>{pet.name || `Animal ${index + 1}`}</strong>
+                    <span className="an-pet-plan-meta">
+                      {PET_TYPE_LABELS[pet.type] || pet.type || '—'}
+                      {weight ? ` · ${weight} kg` : ' · poids manquant'}
+                    </span>
+                  </div>
+                  <div className="an-pet-plan-actions">
+                    {hasPlan && (
+                      <button
+                        type="button"
+                        className="an-pet-plan-view"
+                        onClick={() => {
+                          setActivePlanPetKey(petKey);
+                          setPetIndex(index);
+                        }}
+                      >
+                        Voir plan
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="an-pet-plan-generate"
+                      disabled={isGenerating || loading}
+                      onClick={() => handleGeneratePlan(entry, index)}
+                    >
+                      <Sparkles size={14} aria-hidden />
+                      {isGenerating ? 'Génération…' : 'Générer plan'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {planError && <p className="an-plan-error">{planError}</p>}
+          {planToast && <p className="an-plan-success">{planToast}</p>}
+        </div>
+      )}
+
+      {activeGeneratedPlan && (
+        <div className="an-generated-plan">
+          <div className="an-generated-plan-header">
+            <h2>
+              <FileText size={20} aria-hidden />
+              Plan — {activeGeneratedPlan.pet?.name}
+            </h2>
+            <div className="an-generated-plan-links">
+              <button type="button" onClick={() => navigate('/nutripro-history')}>
+                Historique NutriPro
+              </button>
+              <Link to="/smart-food-agent">Ouvrir NutriPro →</Link>
+            </div>
+          </div>
+          {activeGeneratedPlan.calories?.supported && (
+            <p className="an-generated-plan-stats">
+              {activeGeneratedPlan.calories.dailyKcal} kcal/j ·{' '}
+              {activeGeneratedPlan.calories.dryFoodGramsPerDay} g/jour ·{' '}
+              {activeGeneratedPlan.calories.gramsPerMeal} g × {activeGeneratedPlan.calories.mealCount} repas
+            </p>
+          )}
+          <pre className="an-generated-plan-text">{activeGeneratedPlan.planText}</pre>
+        </div>
+      )}
 
       <div className="an-sections" role="tablist" aria-label="Sections nutrition">
         {SECTIONS.map(({ id, label }) => (

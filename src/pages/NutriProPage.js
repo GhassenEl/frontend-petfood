@@ -1,10 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import Toast from '../components/Toast';
-import { calculatePetCalories } from '../utils/petCalorieCalculator';
+import { calculatePetCalories, PET_TYPE_LABELS, petAgeYears } from '../utils/petCalorieCalculator';
+import { getPets } from '../services/userService';
+import { generateNutritionPlan, formatPlanAsText, normalizePet, buildLocalNutritionPlan } from '../services/nutritionPlanService';
+import { DEMO_NUTRITION_PETS } from '../utils/clientDemoData';
 
 const NutriProPage = () => {
   const { user } = useAuth();
@@ -34,14 +37,50 @@ const NutriProPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [structuredPlan, setStructuredPlan] = useState(null);
   const [error, setError] = useState('');
   const [toast, setToast] = useState({ message: '', type: 'info' });
+  const [savedPets, setSavedPets] = useState([]);
+  const [selectedPetKey, setSelectedPetKey] = useState('manual');
 
   // Onboarding
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [onboardingAnswers, setOnboardingAnswers] = useState({});
 
   const assistantTitle = useMemo(() => 'NutriPro', []);
+
+  useEffect(() => {
+    getPets()
+      .then((list) => setSavedPets(list?.length ? list : DEMO_NUTRITION_PETS))
+      .catch(() => setSavedPets(DEMO_NUTRITION_PETS));
+  }, []);
+
+  const applyPetToForm = useCallback((pet) => {
+    if (!pet) return;
+    setPetName(pet.name || '');
+    setPetType(String(pet.type || pet.animalType || 'dog').toLowerCase());
+    setPetBreed(pet.breed || '');
+    const w = pet.weightKg ?? pet.weight;
+    if (w != null && w !== '') setPetWeight(String(w));
+    const age = pet.ageYears ?? petAgeYears(pet.birthDate);
+    if (age != null && !Number.isNaN(age)) setPetAge(String(Math.round(age * 10) / 10));
+    if (pet.allergies) {
+      setAllergies(Array.isArray(pet.allergies) ? pet.allergies.join(', ') : String(pet.allergies));
+    }
+    if (pet.notes) setPetNotes(pet.notes);
+  }, []);
+
+  const handlePetSelect = (key) => {
+    setSelectedPetKey(key);
+    if (key === 'manual') return;
+    const pet = savedPets.find((p) => String(p.id || p._id) === key);
+    if (pet) applyPetToForm(pet);
+  };
+
+  const selectedSavedPet = useMemo(
+    () => (selectedPetKey !== 'manual' ? savedPets.find((p) => String(p.id || p._id) === selectedPetKey) : null),
+    [savedPets, selectedPetKey],
+  );
 
   const ageBand = useMemo(() => {
     const age = Number(petAge || 0);
@@ -175,10 +214,32 @@ const NutriProPage = () => {
   const handleGenerate = async () => {
     setError('');
     setResult(null);
+    setStructuredPlan(null);
+
+    if (!petName.trim()) {
+      setError('Indiquez le nom de l\'animal.');
+      return;
+    }
+    if (!petWeight || Number(petWeight) <= 0) {
+      setError('Renseignez le poids (kg) pour calculer calories et portions.');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const context = buildContextPayload();
+      const pet = normalizePet({
+        ...(selectedSavedPet || {}),
+        id: selectedSavedPet?.id || selectedSavedPet?._id,
+        name: petName.trim(),
+        type: petType,
+        weight: petWeight,
+        breed: petBreed,
+        ageYears: petAge ? Number(petAge) : undefined,
+        notes: petNotes,
+        allergies,
+      });
 
       const msg =
         "Génère un plan alimentaire professionnel, concret et personnalisé pour mon animal. " +
@@ -186,21 +247,31 @@ const NutriProPage = () => {
         "Utilise le contexte fourni et complète avec prudence. Ne donne pas de diagnostic médical. " +
         "Si vaccins, médicaments, allergies, poids inhabituel ou symptômes sont mentionnés, recommande une consultation vétérinaire et liste les points à valider.";
 
-      const res = await api.post('/chat/pet', {
-        message: msg,
-        context,
+      const structured = await generateNutritionPlan({
+        pet,
+        options: {
+          activityLevel,
+          goal,
+          mealCount: Number(mealCount) || 2,
+          bodyCondition,
+          isNeutered: true,
+        },
+        useAi: true,
+        aiContext: context,
+        aiMessage: msg,
       });
 
-      const backendMessage = res.data?.message || res.data?.content || '';
+      setStructuredPlan(structured);
+      const backendMessage = structured.aiPlan || formatPlanAsText(structured) || localNutritionPlan;
 
       setResult({
-        ...res.data,
         message: backendMessage,
         localPlan: localNutritionPlan,
-        shouldShowVetCTA: !!res.data?.shouldShowVetCTA,
+        shouldShowVetCTA: !!structured.shouldShowVetCTA,
+        products: structured.aiProducts || structured.productRecommendations?.food || [],
+        quickReplies: [],
       });
-      const savedText = backendMessage || localNutritionPlan;
-      const saved = await persistPlanToBackend(savedText);
+      const saved = await persistPlanToBackend(backendMessage);
       if (saved) setToast({ message: 'Plan généré et sauvegardé dans votre historique', type: 'success' });
       try {
         const ctx = buildContextPayload();
@@ -214,8 +285,25 @@ const NutriProPage = () => {
         }
       } catch (e) {}
     } catch (e) {
-      setResult({ message: localNutritionPlan, localPlan: localNutritionPlan, quickReplies: [], products: [] });
-      setError("Le backend IA est indisponible. J'ai généré un plan local à partir du profil renseigné.");
+      const structured = buildLocalNutritionPlan(
+        normalizePet({
+          name: petName,
+          type: petType,
+          weight: petWeight,
+          breed: petBreed,
+          ageYears: petAge ? Number(petAge) : undefined,
+          allergies,
+        }),
+        { activityLevel, goal, mealCount: Number(mealCount) || 2, bodyCondition }
+      );
+      setStructuredPlan(structured);
+      setResult({
+        message: formatPlanAsText(structured) || localNutritionPlan,
+        localPlan: localNutritionPlan,
+        quickReplies: [],
+        products: structured.productRecommendations?.food || [],
+      });
+      setError("Le backend IA est indisponible. Plan local généré à partir du profil renseigné.");
       await persistPlanToBackend(localNutritionPlan);
     } finally {
       setLoading(false);
@@ -366,6 +454,22 @@ const NutriProPage = () => {
         <div style={{ background: 'white', borderRadius: 20, padding: 18, boxShadow: '0 10px 30px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.04)' }}>
           <h2 style={{ fontWeight: 900, margin: '0 0 12px' }}>Profil animal</h2>
 
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
+            <span style={{ fontSize: 13, fontWeight: 800, color: '#111827' }}>Choisir un animal enregistré</span>
+            <select
+              value={selectedPetKey}
+              onChange={(e) => handlePetSelect(e.target.value)}
+              className="border rounded-xl px-3 py-2"
+            >
+              <option value="manual">✏️ Saisie libre (nouvel animal)</option>
+              {savedPets.map((p) => (
+                <option key={p.id || p._id} value={String(p.id || p._id)}>
+                  {PET_TYPE_LABELS[p.type] || p.type} — {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
           {/* form fields (same as before) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
             <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -376,11 +480,9 @@ const NutriProPage = () => {
             <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <span style={{ fontSize: 13, fontWeight: 800, color: '#111827' }}>Type d’animal</span>
               <select value={petType} onChange={(e) => setPetType(e.target.value)} className="border rounded-xl px-3 py-2">
-                <option value="dog">Chien</option>
-                <option value="cat">Chat</option>
-                <option value="bird">Oiseau</option>
-                <option value="fish">Poisson</option>
-                <option value="other">Autre</option>
+                {Object.entries(PET_TYPE_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
               </select>
             </label>
 
@@ -505,6 +607,22 @@ const NutriProPage = () => {
               </div>
 
               {result.localPlan && content !== result.localPlan ? (<div style={{ marginBottom: 14, padding: 14, borderRadius: 14, background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#065f46', whiteSpace: 'pre-wrap', lineHeight: 1.55, fontSize: 14 }}>{result.localPlan}</div>) : null}
+
+              {structuredPlan?.calories?.supported && (
+                <div style={{ marginBottom: 16, padding: 14, borderRadius: 14, background: '#fff7ed', border: '1px solid #fed7aa' }}>
+                  <div style={{ fontWeight: 800, marginBottom: 8, color: '#9a3412' }}>📊 Plan structuré (backend)</div>
+                  <p style={{ margin: '0 0 8px', fontSize: 14, color: '#7c2d12' }}>
+                    {structuredPlan.calories.dailyKcal} kcal/j · {structuredPlan.calories.dryFoodGramsPerDay} g/jour · {structuredPlan.calories.gramsPerMeal} g × {structuredPlan.calories.mealCount} repas
+                  </p>
+                  {(structuredPlan.mealPlan || []).length > 0 && (
+                    <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: '#78350f' }}>
+                      {structuredPlan.mealPlan.map((m) => (
+                        <li key={`${m.time}-${m.label}`}>{m.time} — {m.label} : {m.portion}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
 
               <pre style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.55, fontFamily: 'inherit', fontSize: 14, color: '#374151' }}>{content}</pre>
 

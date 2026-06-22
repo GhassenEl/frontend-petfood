@@ -26,13 +26,6 @@ export const VET_SIDEBAR_SECTIONS = [
     ],
   },
   {
-    title: '📊 BI & contenu',
-    items: [
-      { id: 'bi', label: 'Dashboard BI Santé', icon: '📈' },
-      { id: 'content', label: 'Gestion du contenu', icon: '📝' },
-    ],
-  },
-  {
     title: '🤖 Intelligence clinique',
     items: [
       { id: 'recommendations', label: 'Recommandations IA', icon: '🎯' },

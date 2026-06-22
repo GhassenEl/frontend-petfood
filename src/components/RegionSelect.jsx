@@ -1,5 +1,4 @@
 import React from 'react';
-import { MapPin } from 'lucide-react';
 import usePlatformRegions from '../hooks/usePlatformRegions';
 
 const baseSelectStyle = {
@@ -26,20 +25,12 @@ const RegionSelect = ({
   emptyLabel = '— Choisir une région —',
   name,
   style = {},
-  showIcon = false,
 }) => {
   const { regions, loading } = usePlatformRegions();
 
   return (
     <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', ...style }}>
-      {showIcon ? (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <MapPin size={14} color="#0d9488" aria-hidden />
-          {label}
-        </span>
-      ) : (
-        label
-      )}
+      {label}
       <select
         name={name}
         value={value}

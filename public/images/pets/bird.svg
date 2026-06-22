@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="120" fill="#2563eb"/><text x="120" y="145" text-anchor="middle" font-size="96">=&</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <circle cx="120" cy="120" r="120" fill="#2563eb"/>
+  <ellipse cx="115" cy="130" rx="52" ry="34" fill="#ffffff" opacity="0.95"/>
+  <circle cx="145" cy="112" r="9" fill="#1e3a8a"/>
+  <polygon points="70,118 95,108 95,128" fill="#fbbf24"/>
+</svg>

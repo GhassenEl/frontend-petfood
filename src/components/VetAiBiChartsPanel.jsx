@@ -9,7 +9,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
-import { DEMO_VET_BI } from '../utils/vetDemoData';
+import { DEMO_VET_BI, DEMO_VET_DASHBOARD } from '../utils/vetDemoData';
 import './VetAiBiChartsPanel.css';
 
 const COLORS = ['#0ea5e9', '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
@@ -44,10 +44,11 @@ const VetAiBiChartsPanel = ({
   showBiSection = true,
   showAiSection = true,
   compact = false,
+  embeddedInDashboard = false,
 }) => {
   const bi = biData || DEMO_VET_BI;
   const ai = bi.aiMetrics || DEMO_VET_BI.aiMetrics;
-  const chartH = compact ? 200 : 240;
+  const chartH = compact || embeddedInDashboard ? 220 : 240;
 
   const monthData = (bi.casesByMonth || []).map((row) => ({
     name: row.label,
@@ -59,9 +60,19 @@ const VetAiBiChartsPanel = ({
     value: row.count,
   }));
 
+  const diseasePie = (bi.diseaseByAnimal || []).slice(0, 8).map((row) => ({
+    name: row.disease?.length > 20 ? `${row.disease.slice(0, 18)}…` : row.disease,
+    value: row.count,
+    fullName: row.disease,
+    animal: row.animal,
+  }));
+
+  const resolvedWeekChart = weekChart.length ? weekChart : DEMO_VET_DASHBOARD.weekChart;
+  const resolvedStatusChart = statusChart.length ? statusChart : DEMO_VET_DASHBOARD.statusChart;
+
   return (
     <motion.section
-      className={`vet-aibi-panel${compact ? ' vet-aibi-panel--compact' : ''}`}
+      className={`vet-aibi-panel${compact || embeddedInDashboard ? ' vet-aibi-panel--compact' : ''}${embeddedInDashboard ? ' vet-aibi-panel--dashboard' : ''}`}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
@@ -71,12 +82,16 @@ const VetAiBiChartsPanel = ({
           <span className="vet-aibi-panel__badge">
             <Brain size={12} /> IA + BI
           </span>
-          <h2>Courbes intelligence artificielle &amp; business intelligence</h2>
-          <p>Analyses ML, précision diagnostic, activité clinique et pharmacie</p>
+          <h2>{embeddedInDashboard ? 'Courbes BI & intelligence clinique' : 'Courbes intelligence artificielle & business intelligence'}</h2>
+          <p>
+            {embeddedInDashboard
+              ? 'Activité, cas cliniques, espèces, maladies et performance IA — données synchronisées avec le dashboard BI.'
+              : 'Analyses ML, précision diagnostic, activité clinique et pharmacie'}
+          </p>
         </div>
         <div className="vet-aibi-panel__links">
           <Link to="/vet/ml-agent" className="vet-aibi-link">Hub Agents IA</Link>
-          <Link to="/vet/bi" className="vet-aibi-link vet-aibi-link--primary">Dashboard BI →</Link>
+          <Link to="/vet/bi" className="vet-aibi-link vet-aibi-link--primary">Dashboard BI complet →</Link>
         </div>
       </header>
 
@@ -217,10 +232,10 @@ const VetAiBiChartsPanel = ({
             <BarChart3 size={18} /> Business intelligence clinique
           </h3>
           <div className="vet-aibi-grid">
-            {weekChart.length > 0 && (
+            {resolvedWeekChart.length > 0 && (
               <ChartBox title="RDV & consultations (7 jours)" icon={Activity} iconColor="#0ea5e9">
                 <ResponsiveContainer width="100%" height={chartH}>
-                  <LineChart data={weekChart}>
+                  <LineChart data={resolvedWeekChart}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                     <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
@@ -253,10 +268,10 @@ const VetAiBiChartsPanel = ({
               </ChartBox>
             )}
 
-            {statusChart.length > 0 && (
+            {resolvedStatusChart.length > 0 && (
               <ChartBox title="Statut des RDV">
                 <ResponsiveContainer width="100%" height={chartH - 20}>
-                  <BarChart data={statusChart}>
+                  <BarChart data={resolvedStatusChart}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                     <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                     <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
@@ -278,6 +293,35 @@ const VetAiBiChartsPanel = ({
                     </Pie>
                     <Tooltip contentStyle={tooltipStyle} />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </ChartBox>
+            )}
+
+            {diseasePie.length > 0 && (
+              <ChartBox title="Maladies par animal" subtitle="Répartition des diagnostics" icon={Stethoscope} iconColor="#f59e0b">
+                <ResponsiveContainer width="100%" height={chartH}>
+                  <PieChart>
+                    <Pie
+                      data={diseasePie}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={compact || embeddedInDashboard ? 42 : 50}
+                      outerRadius={compact || embeddedInDashboard ? 68 : 80}
+                      paddingAngle={2}
+                      label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                    >
+                      {diseasePie.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={tooltipStyle}
+                      formatter={(v, _n, p) => [`${v} cas`, p.payload.fullName || p.payload.name]}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 10 }} />
                   </PieChart>
                 </ResponsiveContainer>
               </ChartBox>

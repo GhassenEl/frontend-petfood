@@ -131,7 +131,6 @@ const VetClinicPage = () => {
             label="Région"
             value={clinicRegion}
             onChange={setClinicRegion}
-            showIcon
           />
         </div>
         <label style={{ ...labelStyle, marginTop: 14 }}>

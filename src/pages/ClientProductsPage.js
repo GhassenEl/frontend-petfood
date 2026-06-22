@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MapPin, Flame, Sparkles, ShoppingCart, Search, Eye } from 'lucide-react';
+import { MapPin, Flame, Sparkles, ShoppingCart, Search, Eye, Store } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import RecommendationPipelinePanel from '../components/RecommendationPipelinePanel';
 import {
@@ -27,8 +27,26 @@ import {
 } from '../utils/productCatalog';
 import { getEffectiveDiscount, getPromoPrice, isOnPromotion } from '../utils/productDetails';
 import { productId, dedupeProducts, withProductIds } from '../utils/productId';
-import { resolveNaturalProductImage } from '../utils/productImages';
+import { resolveNaturalProductImage, sanitizeProductImageUrl } from '../utils/productImages';
 import { DEMO_NEAREST_STORE } from '../utils/clientDemoData';
+
+const VENDOR_BY_CATEGORY = {
+  accessoires: { vendorId: 'v-1', vendorName: 'Animalerie Tunis — Démo' },
+  jouets: { vendorId: 'v-2', vendorName: 'Pets & Co Sfax' },
+  vetements: { vendorId: 'v-1', vendorName: 'Animalerie Tunis — Démo' },
+  friandises: { vendorId: 'v-2', vendorName: 'Pets & Co Sfax' },
+  animaux: { vendorId: 'v-1', vendorName: 'Animalerie Tunis — Démo' },
+};
+
+const DEFAULT_VENDOR = { vendorId: 'v-1', vendorName: 'Animalerie Tunis — Démo' };
+
+const resolveVendor = (product) => {
+  if (product?.vendorName) {
+    return { vendorId: product.vendorId || 'v-1', vendorName: product.vendorName };
+  }
+  const cat = String(product?.category || '').toLowerCase();
+  return VENDOR_BY_CATEGORY[cat] || DEFAULT_VENDOR;
+};
 
 const PET_LABELS = {
   dog: 'chien',
@@ -41,7 +59,9 @@ const PET_LABELS = {
   other: 'animal',
 };
 
-const ClientProductsPage = () => {
+const ClientProductsPage = ({ variant = 'catalog' }) => {
+  const isHomeCatalog = variant === 'home';
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [recommendations, setRecommendations] = useState([]);
@@ -135,11 +155,14 @@ const ClientProductsPage = () => {
 
     const stockRaw = p.stock ?? p.quantity ?? p.availableStock ?? p.available ?? 0;
     const priceRaw = p.price ?? p.unitPrice ?? p.unit_price ?? 0;
+    const vendor = resolveVendor(p);
+    const imageRaw = p.imageUrl ?? p.image ?? p.icon;
     const base = {
       ...p,
+      ...vendor,
       stock: Number(stockRaw || 0),
       price: Number(priceRaw || 0),
-      imageUrl: resolveNaturalProductImage({ ...p, imageUrl: p.imageUrl ?? p.image ?? undefined }),
+      imageUrl: sanitizeProductImageUrl(imageRaw, p) || resolveNaturalProductImage({ ...p, imageUrl: imageRaw }),
     };
     return withProductIds({ ...base, discount: getEffectiveDiscount(base) });
   };
@@ -183,12 +206,29 @@ const ClientProductsPage = () => {
 
   const addToCart = (product) => {
     window.dispatchEvent(new CustomEvent('addToCart', { detail: getCartProduct(product) }));
-    
+
     const viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
-    if (!viewed.includes(product._id)) {
-      viewed.push(product._id);
+    const id = productId(product);
+    if (!viewed.includes(id)) {
+      viewed.push(id);
       localStorage.setItem('viewedProducts', JSON.stringify(viewed.slice(-20)));
     }
+  };
+
+  const orderProduct = (product) => {
+    addToCart(product);
+    navigate('/checkout');
+  };
+
+  const openVendor = (product) => {
+    const vendor = resolveVendor(product);
+    navigate('/vendor', {
+      state: {
+        fromProduct: productId(product),
+        vendorId: vendor.vendorId,
+        shopName: vendor.vendorName,
+      },
+    });
   };
 
   const likeProduct = async (product) => {
@@ -253,10 +293,12 @@ const ClientProductsPage = () => {
       >
         <div style={{ position: 'relative', zIndex: 1 }}>
           <h1 style={{ fontSize: '36px', fontWeight: 800, color: '#065f46', margin: '0 0 8px' }}>
-            🛒 Nos Produits
+            {isHomeCatalog ? '🛍️ Catalogue produits' : '🛒 Nos Produits'}
           </h1>
           <p style={{ fontSize: '16px', color: '#6b7280', margin: '0 0 10px' }}>
-            Découvrez notre sélection premium pour vos animaux
+            {isHomeCatalog
+              ? 'Croquettes, accessoires, jouets — photos réelles, promos et vendeurs marketplace'
+              : 'Découvrez notre sélection premium pour vos animaux'}
           </p>
           <Link
             to="/client-rse"
@@ -278,6 +320,52 @@ const ClientProductsPage = () => {
           </Link>
         </div>
       </motion.div>
+
+      {isHomeCatalog && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+          {[
+            { id: 'all', label: '🏠 Tout le catalogue' },
+            { id: 'croquettes', label: '🥣 Croquettes' },
+            { id: 'accessoires', label: '🎒 Accessoires' },
+            { id: 'jouets', label: '🎾 Jouets' },
+            { id: 'friandises', label: '🦴 Friandises' },
+          ].map((chip) => (
+            <button
+              key={chip.id}
+              type="button"
+              onClick={() => { setCategoryFilter(chip.id); setPromoOnly(false); }}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 999,
+                border: categoryFilter === chip.id ? '2px solid #059669' : '1px solid #e5e7eb',
+                background: categoryFilter === chip.id ? '#ecfdf5' : 'white',
+                color: categoryFilter === chip.id ? '#047857' : '#374151',
+                fontWeight: 700,
+                fontSize: 13,
+                cursor: 'pointer',
+              }}
+            >
+              {chip.label}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setPromoOnly((v) => !v)}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 999,
+              border: promoOnly ? '2px solid #dc2626' : '1px solid #fecaca',
+              background: promoOnly ? '#fef2f2' : '#fff7ed',
+              color: '#b91c1c',
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: 'pointer',
+            }}
+          >
+            🔥 Promotions
+          </button>
+        </div>
+      )}
 
       {profile?.petType && (
         <motion.div
@@ -319,6 +407,8 @@ const ClientProductsPage = () => {
                 key={`freq-${productId(product)}`}
                 product={product}
                 onAdd={addToCart}
+                onOrder={orderProduct}
+                onVendor={openVendor}
                 onLike={likeProduct}
                 isLiked={favoriteIds.has(productId(product))}
                 getPrice={getPrice}
@@ -339,6 +429,8 @@ const ClientProductsPage = () => {
                 key={`promo-${productId(product)}`}
                 product={product}
                 onAdd={addToCart}
+                onOrder={orderProduct}
+                onVendor={openVendor}
                 onLike={likeProduct}
                 isLiked={favoriteIds.has(productId(product))}
                 getPrice={getPrice}
@@ -456,7 +548,7 @@ const ClientProductsPage = () => {
         <Section title="✨ Recommandés pour vous (contenu + similaires)" titleColor="#059669" icon={<Sparkles size={20} />}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
             {inStockRecommendations.map(product => (
-              <ProductCard key={`rec-${productId(product)}`} product={product} onAdd={addToCart} onLike={likeProduct} isLiked={favoriteIds.has(productId(product))} getPrice={getPrice} isRec onView={setSelectedProduct} />
+              <ProductCard key={`rec-${productId(product)}`} product={product} onAdd={addToCart} onOrder={orderProduct} onVendor={openVendor} onLike={likeProduct} isLiked={favoriteIds.has(productId(product))} getPrice={getPrice} isRec onView={setSelectedProduct} />
             ))}
           </div>
         </Section>
@@ -479,7 +571,7 @@ const ClientProductsPage = () => {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
             {inStockNearby.map(product => (
-              <ProductCard key={`near-${productId(product)}`} product={product} onAdd={addToCart} onLike={likeProduct} isLiked={favoriteIds.has(productId(product))} getPrice={getPrice} isNearby onView={setSelectedProduct} />
+              <ProductCard key={`near-${productId(product)}`} product={product} onAdd={addToCart} onOrder={orderProduct} onVendor={openVendor} onLike={likeProduct} isLiked={favoriteIds.has(productId(product))} getPrice={getPrice} isNearby onView={setSelectedProduct} />
             ))}
           </div>
         </Section>
@@ -498,6 +590,8 @@ const ClientProductsPage = () => {
                 key={`all-${productId(product)}`}
                 product={product}
                 onAdd={addToCart}
+                onOrder={orderProduct}
+                onVendor={openVendor}
                 onLike={likeProduct}
                 isLiked={favoriteIds.has(productId(product))}
                 getPrice={getPrice}
@@ -514,6 +608,8 @@ const ClientProductsPage = () => {
         product={selectedProduct}
         onClose={() => setSelectedProduct(null)}
         onAddToCart={(p) => { addToCart(p); setSelectedProduct(null); }}
+        onOrder={(p) => { orderProduct(p); setSelectedProduct(null); }}
+        onVendor={openVendor}
         getPrice={getPrice}
         getImage={getProductImage}
         profilePetType={profilePetType}
@@ -566,9 +662,12 @@ const productFallbackImage = (product) => {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 };
 
-const getProductImage = (product) => resolveNaturalProductImage(product) || productFallbackImage(product);
+const getProductImage = (product) => {
+  const raw = product?.imageUrl || product?.image || product?.icon;
+  return sanitizeProductImageUrl(raw, product) || resolveNaturalProductImage(product) || productFallbackImage(product);
+};
 
-const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearby, onView, profilePetType, isLiked }) => {
+const ProductCard = ({ product, onAdd, onOrder, onVendor, onLike, getPrice, isPromo, isRec, isNearby, onView, profilePetType, isLiked }) => {
   const discount = getEffectiveDiscount(product);
   const finalPrice = getPrice(product);
   const profileMatch = profilePetType && product.animalType === profilePetType;
@@ -676,8 +775,12 @@ const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearb
         <div style={{ marginBottom: 8 }}>
           <RseEcoBadge product={product} size="xs" showScore />
         </div>
-        <p style={{ fontSize: '13px', color: '#6b7280', margin: '0 0 12px', lineHeight: '1.4', minHeight: '36px' }}>
+        <p style={{ fontSize: '13px', color: '#6b7280', margin: '0 0 8px', lineHeight: '1.4', minHeight: '36px' }}>
           {product.description || 'Nourriture premium pour animaux'}
+        </p>
+        <p style={{ fontSize: '12px', color: '#64748b', margin: '0 0 12px', fontWeight: 600 }}>
+          <Store size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+          {product.vendorName || resolveVendor(product).vendorName}
         </p>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
@@ -723,49 +826,74 @@ const ProductCard = ({ product, onAdd, onLike, getPrice, isPromo, isRec, isNearb
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onView?.(product); }}
+              style={{
+                flex: 1,
+                padding: '10px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '12px',
+                background: 'white',
+                color: '#374151',
+                fontWeight: 700,
+                fontSize: '13px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+              }}
+            >
+              <Eye size={14} /> Détails
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onVendor?.(product); }}
+              style={{
+                flex: 1,
+                padding: '10px',
+                border: '2px solid #c7d2fe',
+                borderRadius: '12px',
+                background: '#eef2ff',
+                color: '#4338ca',
+                fontWeight: 700,
+                fontSize: '13px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+              }}
+            >
+              <Store size={14} /> Vendeur
+            </button>
+          </div>
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); onView?.(product); }}
-            style={{
-              flex: 1,
-              padding: '10px',
-              border: '2px solid #e5e7eb',
-              borderRadius: '12px',
-              background: 'white',
-              color: '#374151',
-              fontWeight: 700,
-              fontSize: '13px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '4px',
-            }}
-          >
-            <Eye size={14} /> Détails
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onAdd(product); }}
+            onClick={(e) => { e.stopPropagation(); onOrder?.(product); }}
             disabled={!product.stock}
             style={{
-              flex: 1.2,
-              padding: '10px',
+              width: '100%',
+              padding: '12px',
               border: 'none',
               borderRadius: '12px',
               color: 'white',
-              fontWeight: 700,
-              fontSize: '13px',
+              fontWeight: 800,
+              fontSize: '14px',
               cursor: product.stock ? 'pointer' : 'not-allowed',
-              background: product.stock ? (isPromo ? '#dc2626' : '#10b981') : '#9ca3af',
+              background: product.stock ? (isPromo ? 'linear-gradient(135deg,#dc2626,#b91c1c)' : 'linear-gradient(135deg,#10b981,#059669)') : '#9ca3af',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '4px',
+              gap: '6px',
+              boxShadow: product.stock ? '0 4px 14px rgba(16,185,129,0.35)' : 'none',
             }}
           >
-            <ShoppingCart size={14} />
-            {product.stock ? 'Panier' : 'Rupture'}
+            <ShoppingCart size={16} />
+            {product.stock ? 'Passer commande' : 'Rupture de stock'}
           </button>
         </div>
       </div>

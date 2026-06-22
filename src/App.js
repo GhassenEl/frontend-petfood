@@ -121,7 +121,6 @@ import ClientDigitalTwinPage from './pages/ClientDigitalTwinPage';
 import ClientVetIntelligencePage from './pages/ClientVetIntelligencePage';
 import ClientPetHealthRecommendationPage from './pages/ClientPetHealthRecommendationPage';
 import ClientWalletPage from './pages/ClientWalletPage';
-import VetContentPage from './pages/VetContentPage';
 import VendorTraceabilityPage from './pages/VendorTraceabilityPage';
 import VendorFeederIoTPage from './pages/VendorFeederIoTPage';
 import ClientPetsPage from './pages/ClientPetsPage';
@@ -473,7 +472,6 @@ const App = () => {
       <Route path="/vet/nutrition" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetNutritionAdvicePage /></VetLayout></RoleRoute>} />
       <Route path="/vet/ml-agent" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetMlAgentPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/intelligence" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetIntelligenceHubPage /></VetLayout></RoleRoute>} />
-      <Route path="/vet/content" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetContentPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/rehabilitation" element={<RoleRoute user={user} roles={['vet']}><VetLayout><AdminRehabilitationPage /></VetLayout></RoleRoute>} />
 
       <Route path="/visitor/*" element={<Navigate to="/" replace />} />

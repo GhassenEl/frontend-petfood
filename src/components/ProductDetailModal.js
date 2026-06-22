@@ -1,13 +1,13 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShoppingCart, Star, Package, Tag, Beaker, BookOpen, Sparkles } from 'lucide-react';
+import { X, ShoppingCart, Star, Package, Tag, Beaker, BookOpen, Sparkles, Store } from 'lucide-react';
 import { getProductDetailFields, getEffectiveDiscount, getPromoPrice } from '../utils/productDetails';
 import VerifiedPriceBadge from './VerifiedPriceBadge';
 import ProductReviewAiPanel from './ProductReviewAiPanel';
 
 const ANIMAL_LABELS = { dog: 'Chien', cat: 'Chat', bird: 'Oiseau', fish: 'Poisson', other: 'Autre' };
 
-const ProductDetailModal = ({ product, onClose, onAddToCart, getPrice, getImage, profilePetType }) => {
+const ProductDetailModal = ({ product, onClose, onAddToCart, onOrder, onVendor, getPrice, getImage, profilePetType }) => {
   if (!product) return null;
 
   const id = product._id || product.id;
@@ -167,19 +167,71 @@ const ProductDetailModal = ({ product, onClose, onAddToCart, getPrice, getImage,
 
             <ProductReviewAiPanel productId={id} productName={product.name} />
 
+            {product.vendorName && (
+              <div style={{
+                marginBottom: 16,
+                padding: 14,
+                borderRadius: 12,
+                background: '#eef2ff',
+                border: '1px solid #c7d2fe',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+                flexWrap: 'wrap',
+              }}>
+                <div>
+                  <p style={{ margin: 0, fontSize: 12, color: '#6366f1', fontWeight: 700 }}>Vendeur marketplace</p>
+                  <p style={{ margin: '4px 0 0', fontSize: 15, fontWeight: 800, color: '#312e81' }}>{product.vendorName}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onVendor?.(product)}
+                  style={{
+                    padding: '10px 14px',
+                    border: 'none',
+                    borderRadius: 10,
+                    background: '#4f46e5',
+                    color: 'white',
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <Store size={16} /> Détails vendeur
+                </button>
+              </div>
+            )}
+
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 20 }}>
+              <button
+                type="button"
+                onClick={() => onOrder?.(product)}
+                disabled={!product.stock}
+                style={{
+                  flex: 1, minWidth: 200, padding: '14px 20px', border: 'none', borderRadius: 14,
+                  background: product.stock ? 'linear-gradient(135deg,#10b981,#059669)' : '#9ca3af', color: 'white', fontWeight: 800,
+                  cursor: product.stock ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', gap: 8, fontSize: 15,
+                }}
+              >
+                <ShoppingCart size={18} /> Passer commande
+              </button>
               <button
                 type="button"
                 onClick={() => onAddToCart?.(product)}
                 disabled={!product.stock}
                 style={{
-                  flex: 1, minWidth: 200, padding: '14px 20px', border: 'none', borderRadius: 14,
-                  background: product.stock ? '#10b981' : '#9ca3af', color: 'white', fontWeight: 800,
+                  flex: 1, minWidth: 160, padding: '14px 20px', border: '2px solid #10b981', borderRadius: 14,
+                  background: 'white', color: '#059669', fontWeight: 700,
                   cursor: product.stock ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', gap: 8, fontSize: 15,
+                  justifyContent: 'center', gap: 8, fontSize: 14,
                 }}
               >
-                <ShoppingCart size={18} /> Ajouter au panier
+                Ajouter au panier
               </button>
             </div>
 

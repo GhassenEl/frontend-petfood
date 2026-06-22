@@ -15,14 +15,13 @@ import {
   PackageX,
   UtensilsCrossed,
   Brain,
-  Activity,
   Target,
 } from 'lucide-react';
 import api from '../utils/api';
 import { fetchPharmacyCatalog } from '../services/vetMedicationService';
 import { summarizePharmacyStock } from '../utils/vetPharmacyAlerts';
 import { notifyNewPharmacyAlerts } from '../services/vetPharmacyNotificationService';
-import { withDemoDashboard, DEMO_VET_BI } from '../utils/vetDemoData';
+import { withDemoDashboard, mergeVetBiData, DEMO_VET_BI } from '../utils/vetDemoData';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import VetAiBiChartsPanel from '../components/VetAiBiChartsPanel';
 import RecommendationPipelinePanel from '../components/RecommendationPipelinePanel';
@@ -30,6 +29,7 @@ import './VetPages.css';
 
 const VetDashboard = () => {
   const [data, setData] = useState(null);
+  const [biData, setBiData] = useState(DEMO_VET_BI);
   const [pharmacySummary, setPharmacySummary] = useState({ ruptures: 0, lowStock: 0, expiry: 0, vaccinesOverdue: 0 });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -38,12 +38,14 @@ const VetDashboard = () => {
     if (!silent) setLoading(true);
     else setRefreshing(true);
     try {
-      const [{ data: dash }, catalog, vaccinesRes] = await Promise.all([
+      const [{ data: dash }, catalog, vaccinesRes, biRes] = await Promise.all([
         api.get('/vet/dashboard'),
         fetchPharmacyCatalog(),
         api.get('/vet/vaccinations').catch(() => ({ data: null })),
+        api.get('/vet/bi/dashboard?days=90').catch(() => ({ data: null })),
       ]);
       setData(withDemoDashboard(dash));
+      setBiData(mergeVetBiData(biRes?.data));
       const summary = summarizePharmacyStock(catalog);
       const vaccines = vaccinesRes.data || [];
       const now = new Date();
@@ -53,6 +55,7 @@ const VetDashboard = () => {
     } catch (error) {
       console.error('Vet dashboard error:', error);
       setData(withDemoDashboard(null));
+      setBiData(mergeVetBiData(null));
       setPharmacySummary({ ruptures: 1, lowStock: 2, expiry: 1, vaccinesOverdue: 1, alerts: [] });
     } finally {
       setLoading(false);
@@ -160,7 +163,6 @@ const VetDashboard = () => {
     { to: '/vet/nutrition', icon: UtensilsCrossed, label: 'Conseils nutrition', desc: 'Plans alimentaires' },
     { to: '/vet/recommendations', icon: Target, label: 'Recommandations IA', desc: 'Contenu + similaires' },
     { to: '/vet/ml-agent', icon: Brain, label: 'Agents IA', desc: 'ML & diagnostic' },
-    { to: '/vet/bi', icon: Activity, label: 'Dashboard BI', desc: 'Courbes & analytics' },
   ];
 
   return (
@@ -267,6 +269,34 @@ const VetDashboard = () => {
         ))}
       </div>
 
+      {(biData?.insights?.length ?? 0) > 0 && (
+        <div
+          style={{
+            marginBottom: 20,
+            padding: '16px 20px',
+            borderRadius: 16,
+            background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+            border: '1px solid #bbf7d0',
+          }}
+        >
+          <h2 style={{ margin: '0 0 10px', fontSize: '0.95rem', fontWeight: 800, color: '#065f46' }}>
+            Synthèse BI clinique
+          </h2>
+          <ul style={{ margin: 0, paddingLeft: 18, color: '#334155', lineHeight: 1.6, fontSize: 13 }}>
+            {biData.insights.slice(0, 3).map((line, i) => (
+              <li key={i}>{line}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <VetAiBiChartsPanel
+        weekChart={data?.weekChart?.length ? data.weekChart : []}
+        statusChart={data?.statusChart?.length ? data.statusChart : []}
+        biData={biData}
+        embeddedInDashboard
+      />
+
       <RecommendationPipelinePanel role="vet" limit={4} compact hubLink="/vet/recommendations" />
 
       <div style={{ marginBottom: 24 }}>
@@ -301,12 +331,6 @@ const VetDashboard = () => {
           })}
         </div>
       </div>
-
-      <VetAiBiChartsPanel
-        weekChart={data?.weekChart || []}
-        statusChart={data?.statusChart || []}
-        biData={DEMO_VET_BI}
-      />
 
       <div
         style={{

@@ -3,9 +3,7 @@ import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import api from '../utils/api';
 import { PRODUCT_CATEGORIES } from '../constants/productCategories';
 import AdminImageUpload from '../components/AdminImageUpload';
-import { resolveUploadPreviewUrl } from '../services/uploadService';
 import SafeImage from '../components/SafeImage';
-import { PLATFORM_IMAGES, resolveNaturalProductImage } from '../utils/platformImages';
 
 const productId = (product) => product?._id || product?.id;
 
@@ -257,8 +255,7 @@ const AdminProducts = () => {
                   </td>
                   <td style={styles.td}>
                     <SafeImage
-                      src={resolveUploadPreviewUrl(product.imageUrl || product.image)}
-                      fallback={resolveNaturalProductImage(product)}
+                      src={product.imageUrl || product.image || product.icon}
                       product={product}
                       alt={product.name}
                       style={styles.productImg}

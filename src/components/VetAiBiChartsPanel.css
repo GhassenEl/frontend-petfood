@@ -11,6 +11,14 @@
   padding: 16px;
 }
 
+.vet-aibi-panel--dashboard {
+  margin-bottom: 24px;
+}
+
+.vet-aibi-panel--dashboard .vet-aibi-panel__head h2 {
+  font-size: 1.05rem;
+}
+
 .vet-aibi-panel__head {
   display: flex;
   flex-wrap: wrap;
