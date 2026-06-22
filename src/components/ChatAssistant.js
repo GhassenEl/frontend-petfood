@@ -117,7 +117,7 @@ const VARIANT_CONFIG = {
     makeGreeting: () => ({
       role: 'assistant',
       content:
-        'Bonjour ! Assistant vendeur — commandes, stock, commissions, ML et recommandations basées sur les avis clients (notes 1–5).',
+        'Bonjour ! Assistant vendeur — commandes, stock, commissions, ML, traçabilité et recommandations basées sur les avis clients (notes 1–5).',
       quickReplies: ['Dashboard', 'Assistant ML', 'Mes commandes', 'Recommandations produits'],
       products: [],
     }),
@@ -182,7 +182,7 @@ const mapHistoryRow = (m) => ({
 const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = false }) => {
   const cfg = VARIANT_CONFIG[variant] || VARIANT_CONFIG.client;
   const { user } = useAuth();
-  const skipHistory = !user && ['visitor', 'vendor', 'moderator'].includes(variant);
+  const skipHistory = variant === 'vendor' || variant === 'moderator' || (!user && variant === 'visitor');
 
   const [language, setLanguage] = useState(() => loadStoredChatLang());
 
@@ -352,8 +352,23 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
         nlp: local.nlp || null,
         isLocal: true,
       };
-      setMessages((prev) => [...prev, assistantMsg]);
+      setMessages((prev) => {
+        const updated = [...prev];
+        const lastIdx = updated.length - 1;
+        if (lastIdx >= 0 && updated[lastIdx]?.role === 'user' && assistantMsg.nlp) {
+          updated[lastIdx] = { ...updated[lastIdx], nlp: assistantMsg.nlp };
+        }
+        return [...updated, assistantMsg];
+      });
       setIsBackendOnline(false);
+    };
+
+    const portalRole = variant;
+    const payload = {
+      message: text.trim(),
+      role: portalRole,
+      language: activeLang,
+      context: { role: portalRole, portal: portalRole, language: activeLang, ...(context || {}) },
     };
 
     try {
@@ -364,17 +379,19 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
         : usePublic
           ? '/chat/public'
           : '/chat/message';
-      const res = await api.post(chatEndpoint, {
-        message: text.trim(),
-        role: variant,
-        language: activeLang,
-        context: { role: variant, language: activeLang, ...(context || {}) },
-      });
+      const res = await api.post(chatEndpoint, payload);
 
       const data = res.data || {};
-      const assistantText = data.message ?? data.content ?? '';
+      let assistantText = data.message ?? data.content ?? '';
+
+      if (!assistantText.trim() && publicRoles.includes(variant)) {
+        const pub = await api.post('/chat/public', payload);
+        assistantText = pub.data?.message ?? pub.data?.content ?? '';
+        Object.assign(data, pub.data || {});
+      }
+
       if (!assistantText.trim()) {
-        applyLocalReply(getPlatformChatReply({ message: text.trim(), role: variant, language: activeLang }));
+        applyLocalReply(getPlatformChatReply({ message: text.trim(), role: portalRole, language: activeLang }));
         return;
       }
       // Mark the last HTTP assistant reply to ignore the matching socket broadcast.
@@ -515,10 +532,14 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
       'Mes commandes': '/vendor/orders',
       'Mes produits': '/vendor/products',
       'Alertes stock': '/vendor/ml',
+      'Recommandations produits': '/vendor/recommendations',
+      Recommandations: '/vendor/recommendations',
       Commissions: '/vendor/dashboard',
       Retours: '/vendor/returns',
       Messagerie: '/vendor/communication',
       'Mes ventes': '/vendor/sales',
+      'Traçabilité blockchain': '/vendor/traceability',
+      'IoT distributeur': '/vendor/feeder-iot',
     };
     if (variant === 'vendor' && vendorNav[cleanReply]) {
       setIsOpen(false);
@@ -671,6 +692,24 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
     window.dispatchEvent(new CustomEvent('addToCart', { detail: getCartProduct(product) }));
   };
 
+  const isImageUrl = (value) => typeof value === 'string' && /^https?:\/\//i.test(value.trim());
+
+  const getProductImageSrc = (product) => {
+    const candidates = [product.imageUrl, product.image, product.icon];
+    return candidates.find((c) => isImageUrl(c)) || null;
+  };
+
+  const getProductEmoji = (product) => {
+    const icon = product.icon;
+    if (icon && !isImageUrl(icon)) return icon;
+    return '📦';
+  };
+
+  const formatChatText = (text) =>
+    String(text || '')
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/`([^`]+)`/g, '$1');
+
   const formatPrice = (price, discount) => {
     if (!discount || discount <= 0) return price + ' DT';
     const discounted = Number(price || 0) * (1 - Number(discount || 0) / 100);
@@ -790,17 +829,25 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
               borderBottomLeftRadius: msg.role === 'assistant' ? '4px' : '18px',
             }}
           >
-            <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5, fontSize: '14px' }}>{msg.content}</div>
+            <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5, fontSize: '14px' }}>{formatChatText(msg.content)}</div>
 
             {msg.nlp && <ChatNlpInsight nlp={msg.nlp} compact={msg.role === 'user'} />}
 
             {msg.products && msg.products.length > 0 && (
               <div style={styles.productsGrid}>
                 {msg.products
-                  .filter((product) => (product.stock ?? 0) > 0)
-                  .map((product, pidx) => (
-                    <motion.div key={pidx} whileHover={{ scale: 1.03 }} style={styles.productCard}>
-                      <div style={styles.productIcon}>{product.icon || '📦'}</div>
+                  .filter((product) => variant === 'vendor' || (product.stock ?? 0) > 0)
+                  .map((product, pidx) => {
+                    const imageSrc = getProductImageSrc(product);
+                    return (
+                    <motion.div key={product.id || product._id || pidx} whileHover={{ scale: 1.03 }} style={styles.productCard}>
+                      <div style={styles.productIcon}>
+                        {imageSrc ? (
+                          <img src={imageSrc} alt="" style={styles.productThumb} loading="lazy" />
+                        ) : (
+                          getProductEmoji(product)
+                        )}
+                      </div>
                       <div style={styles.productInfo}>
                         <div style={styles.productName}>{product.name}</div>
                         <div style={styles.productReason}>{product.reason}</div>
@@ -817,7 +864,8 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
                         </button>
                       )}
                     </motion.div>
-                  ))}
+                    );
+                  })}
               </div>
             )}
 
@@ -1102,6 +1150,13 @@ const styles = {
     background: 'rgba(230,126,34,0.08)',
     borderRadius: '10px',
     flexShrink: 0,
+    overflow: 'hidden',
+  },
+  productThumb: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    display: 'block',
   },
   productInfo: {
     flex: 1,

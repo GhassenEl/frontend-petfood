@@ -3,6 +3,7 @@
  * Utilisé en secours local quand l'API est indisponible et pour les réponses instantanées.
  */
 import { getLocalVetAssistantReply } from './vetAssistantEngine';
+import { buildLocalChatNlp } from './chatNlpPayload';
 
 export const SUPPORTED_LANGS = ['fr', 'en', 'ar'];
 export const LANG_LABELS = { fr: 'FR', en: 'EN', ar: 'AR' };
@@ -157,9 +158,9 @@ const ROLE_GREETINGS = {
       ar: 'مساعد البائع — الطلبات، المخزون، العمولات، ML، المرتجعات والتوصيات من تقييمات العملاء.',
     },
     quickReplies: {
-      fr: ['Dashboard', 'Assistant ML', 'Mes commandes', 'Alertes stock'],
-      en: ['Dashboard', 'ML assistant', 'My orders', 'Stock alerts'],
-      ar: ['لوحة التحكم', 'مساعد ML', 'طلباتي', 'تنبيهات المخزون'],
+      fr: ['Dashboard', 'Assistant ML', 'Mes commandes', 'Recommandations produits'],
+      en: ['Dashboard', 'ML assistant', 'My orders', 'Product recommendations'],
+      ar: ['لوحة التحكم', 'مساعد ML', 'طلباتي', 'توصيات المنتجات'],
     },
   },
   visitor: {
@@ -423,6 +424,30 @@ const ROLE_QUESTIONS = {
         ar: 'رسائل البائع /vendor/communication.',
       },
     },
+    {
+      keys: ['tracabil', 'blockchain', 'lot', 'sha', 'producteur', 'تتبع'],
+      reply: {
+        fr: 'Traçabilité alimentaire /vendor/traceability — producteur, numéro de lot, date fabrication, vérification SHA-256.',
+        en: 'Food traceability /vendor/traceability — producer, batch, manufacturing date, SHA-256 verification.',
+        ar: 'تتبع الغذاء /vendor/traceability.',
+      },
+    },
+    {
+      keys: ['esp32', 'distributeur', 'feeder', 'iot', 'reservoir', 'réservoir'],
+      reply: {
+        fr: 'IoT distributeur /vendor/feeder-iot — surveillance ESP32, réservoir, température, distribution manuelle et alertes.',
+        en: 'Feeder IoT /vendor/feeder-iot — ESP32 monitoring, tank level, temperature, manual dispense and alerts.',
+        ar: 'موزع IoT /vendor/feeder-iot.',
+      },
+    },
+    {
+      keys: ['recommand', 'top', 'mieux note', 'best', 'profil animal'],
+      reply: {
+        fr: 'Recommandations IA /vendor/recommendations — top produits et suggestions selon profil animal (race, âge).',
+        en: 'AI recommendations /vendor/recommendations — top products and pet profile suggestions.',
+        ar: 'توصيات /vendor/recommendations.',
+      },
+    },
   ],
   moderator: [
     {
@@ -533,48 +558,47 @@ function matchQuestions(questionList, hay) {
 export const getPlatformChatReply = ({ message, role = 'visitor', language = 'fr', pet = null }) => {
   const lang = SUPPORTED_LANGS.includes(language) ? language : 'fr';
   const hay = normalize(message);
+  const nlp = buildLocalChatNlp(message, role);
+
+  const withNlp = (payload) => ({ ...payload, nlp, language: lang });
 
   if (role === 'vet') {
     const vet = getLocalVetAssistantReply(message, pet);
     if (vet.source === 'local-questions') {
-      return {
+      return withNlp({
         message: vet.message,
         quickReplies: vet.quickReplies || pick(ROLE_GREETINGS.vet.quickReplies, lang),
         shouldShowVetCTA: vet.shouldShowVetCTA,
         source: 'local-vet',
-        language: lang,
-      };
+      });
     }
   }
 
   const shared = matchQuestions(SHARED_QUESTIONS, hay);
   if (shared) {
-    return {
+    return withNlp({
       message: pick(shared.reply, lang),
       quickReplies: pick(ROLE_GREETINGS[role]?.quickReplies || ROLE_GREETINGS.visitor.quickReplies, lang).slice(0, 3),
       source: 'local-shared',
-      language: lang,
-    };
+    });
   }
 
   const roleQuestions = ROLE_QUESTIONS[role] || ROLE_QUESTIONS.visitor;
   const hit = matchQuestions(roleQuestions, hay);
   if (hit) {
-    return {
+    return withNlp({
       message: pick(hit.reply, lang),
       quickReplies: [pick(OTHER_QUESTION, lang), ...pick(ROLE_GREETINGS[role]?.quickReplies || ROLE_GREETINGS.visitor.quickReplies, lang).slice(0, 2)],
       source: 'local-role',
-      language: lang,
-    };
+    });
   }
 
   const greeting = ROLE_GREETINGS[role] || ROLE_GREETINGS.visitor;
-  return {
+  return withNlp({
     message: pick(FALLBACK, lang),
     quickReplies: pick(greeting.quickReplies, lang).slice(0, 4),
     source: 'local-fallback',
-    language: lang,
-  };
+  });
 };
 
 export default getPlatformChatReply;
