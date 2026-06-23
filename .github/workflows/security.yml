@@ -122,10 +122,17 @@ jobs:
 
       - name: Build images (local)
         run: |
-          docker compose --env-file .env.docker.example build
-          docker compose -f docker-compose.yml -f docker-compose.ml.yml --env-file .env.docker.example build ml
-          docker tag "$(docker compose --env-file .env.docker.example images -q frontend)" petfoodtn-frontend:ci
-          docker tag "$(docker compose --env-file .env.docker.example images -q backend)" petfoodtn-backend:ci
+          set -euo pipefail
+          docker compose --env-file .env.docker.example build frontend backend
+          FE_ID="$(docker compose --env-file .env.docker.example images -q frontend | head -n1)"
+          BE_ID="$(docker compose --env-file .env.docker.example images -q backend | head -n1)"
+          if [ -z "$FE_ID" ] || [ -z "$BE_ID" ]; then
+            echo "::error::Images Docker introuvables après build"
+            docker compose --env-file .env.docker.example images
+            exit 1
+          fi
+          docker tag "$FE_ID" petfoodtn-frontend:ci
+          docker tag "$BE_ID" petfoodtn-backend:ci
 
       - name: Trivy — frontend image
         uses: aquasecurity/trivy-action@v0.36.0

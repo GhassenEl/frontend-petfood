@@ -15,7 +15,6 @@ export const CLIENT_SIDEBAR_SECTIONS = [
       { id: 'client-orders', label: 'Mes commandes', icon: '📦' },
       { id: 'client-history', label: 'Historique achats', icon: '📜' },
       { id: 'client-invoices', label: 'Mes factures', icon: '🧾' },
-      { id: 'client-wallet', label: 'Portefeuille', icon: '💳' },
       { id: 'client-loyalty', label: 'Fidélité', icon: '🎁' },
       { id: 'client-community', label: 'Communauté', icon: '👥' },
     ],

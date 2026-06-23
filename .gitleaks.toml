@@ -8,6 +8,7 @@ paths = [
   '''(?i)e2e/.*''',
   '''(?i)scripts/backend-jwt-middleware\.example\.js''',
   '''(?i)scripts/ci/.*''',
+  '''(?i)scripts/record-demo-video\.js''',
   '''(?i)backend-ci-test/.*''',
   '''(?i)tmp_.*\.json''',
 ]

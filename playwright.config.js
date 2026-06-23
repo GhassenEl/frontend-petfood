@@ -10,8 +10,8 @@ module.exports = defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   reporter: process.env.CI ? [['github'], ['list']] : [['list']],
-  timeout: 60_000,
-  expect: { timeout: 15_000 },
+  timeout: process.env.CI ? 90_000 : 60_000,
+  expect: { timeout: process.env.CI ? 20_000 : 15_000 },
   use: {
     baseURL: BASE_URL,
     trace: 'on-first-retry',

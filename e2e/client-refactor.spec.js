@@ -102,6 +102,7 @@ test.describe('Réservation services avec portefeuille', () => {
 
     await expect(modal).toBeHidden({ timeout: 20_000 });
     await page.getByRole('tab', { name: /mes réservations/i }).click();
+    await expect(page.getByRole('heading', { name: /mes réservations/i })).toBeVisible({ timeout: 15_000 });
     await expect(
       page.locator('.cc-list').getByRole('heading', { name: new RegExp(petName) }),
     ).toBeVisible({ timeout: 20_000 });
