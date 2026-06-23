@@ -219,6 +219,35 @@ async function getPostgresConnectionUrl(postgresId) {
   return conn?.connectionString || conn?.externalConnectionString || conn?.internalConnectionString;
 }
 
+async function createGitWebService(ownerId, config) {
+  const { name, repo, branch = 'main', rootDir, runtime, buildCommand, startCommand, envVars, healthCheck = '/health' } = config;
+  const existing = (await listServices()).find((s) => s.name === name);
+  if (existing) {
+    console.log(`  Service existant : ${name}`);
+    return existing;
+  }
+  const body = {
+    type: 'web_service',
+    name,
+    ownerId,
+    plan: 'free',
+    region: 'frankfurt',
+    repo,
+    branch,
+    envVars,
+    serviceDetails: {
+      runtime,
+      healthCheckPath: healthCheck,
+      envSpecificDetails: { buildCommand, startCommand },
+    },
+  };
+  if (rootDir) body.rootDir = rootDir;
+  const created = await renderFetch('/services', { method: 'POST', body: JSON.stringify(body) });
+  const svc = created?.service || created;
+  console.log(`  ✅ ${name} créé (${svc.id})`);
+  return svc;
+}
+
 async function createImageWebService(ownerId, name, imagePath, envVars, healthCheck = '/health') {
   const existing = (await listServices()).find((s) => s.name === name);
   if (existing) {
@@ -301,9 +330,15 @@ async function provisionStack() {
     await new Promise((r) => setTimeout(r, 5000));
   }
 
-  await createImageWebService(ownerId, 'petfoodtn-ml', `ghcr.io/${GHCR_OWNER}/petfoodtn-ml:latest`, [
-    { key: 'TZ', value: 'Africa/Tunis' },
-  ]);
+  await createGitWebService(ownerId, {
+    name: 'petfoodtn-ml',
+    repo: GITHUB_REPO,
+    rootDir: 'fastapi_service',
+    runtime: 'python',
+    buildCommand: 'pip install -r requirements.txt',
+    startCommand: 'uvicorn app.main:app --host 0.0.0.0 --port $PORT',
+    envVars: [{ key: 'TZ', value: 'Africa/Tunis' }],
+  });
 
   const apiEnv = [
     { key: 'NODE_ENV', value: 'production' },
@@ -322,12 +357,14 @@ async function provisionStack() {
     console.log('  ⚠️  DATABASE_URL non récupéré — configurez-le sur petfoodtn-api');
   }
 
-  await createImageWebService(
-    ownerId,
-    'petfoodtn-api',
-    `ghcr.io/${GHCR_OWNER}/petfoodtn-backend:latest`,
-    apiEnv,
-  );
+  await createGitWebService(ownerId, {
+    name: 'petfoodtn-api',
+    repo: 'https://github.com/GhassenEl/backend-petfood',
+    runtime: 'node',
+    buildCommand: 'npm ci && npx prisma generate && npx prisma db push',
+    startCommand: 'npm start',
+    envVars: apiEnv,
+  });
 
   await createStaticSite(ownerId);
   console.log('\n✅ Provisionnement terminé — déploiements en cours (5–15 min)');

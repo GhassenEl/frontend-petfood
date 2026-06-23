@@ -1,0 +1,39 @@
+name: Auto Provision Render
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  provision:
+    name: Provisionner Render si clé API configurée
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Provision stack Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "$RENDER_API_KEY" ]; then
+            echo "::notice::RENDER_API_KEY absent — ajoutez le secret GitHub ou créez .env.render puis npm run devops:host:render"
+            exit 0
+          fi
+          node scripts/devops/render-provision.mjs provision
+          node scripts/devops/render-provision.mjs sync-github
+
+      - name: Santé production
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          if [ -z "$RENDER_API_KEY" ]; then exit 0; fi
+          node scripts/devops/render-provision.mjs health

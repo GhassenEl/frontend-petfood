@@ -1,11 +1,5 @@
-# PetfoodTN — Blueprint Render (stack complet depuis frontend-petfood)
-# Déploie : PostgreSQL + API (GHCR) + ML (GHCR) + frontend static
-#
-# Prérequis : images GHCR publiques (workflow Publish Docker Images)
-#   ghcr.io/ghassenel/petfoodtn-backend:latest
-#   ghcr.io/ghassenel/petfoodtn-ml:latest
-#
-# Dashboard : New → Blueprint → GhassenEl/frontend-petfood
+# PetfoodTN — Blueprint Render (stack complet, builds Git — pas de GHCR requis)
+# Dashboard : New → Blueprint → GhassenEl/frontend-petfood → render.yaml → Apply
 
 databases:
   - name: petfoodtn-db
@@ -14,17 +8,15 @@ databases:
     user: petfood
 
 services:
-  # ── API Express (image GHCR — pas besoin du repo backend sur Render) ──
+  # ── API Express (repo backend public) ──
   - type: web
     name: petfoodtn-api
-    runtime: image
+    runtime: node
     plan: free
-    image:
-      url: ghcr.io/ghassenel/petfoodtn-backend:latest
-      # Packages GHCR prives : decommenter apres creation credential "petfoodtn-ghcr"
-      # creds:
-      #   fromRegistryCreds:
-      #     name: petfoodtn-ghcr
+    repo: https://github.com/GhassenEl/backend-petfood
+    branch: main
+    buildCommand: npm ci && npx prisma generate && npx prisma db push
+    startCommand: npm start
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
@@ -50,16 +42,14 @@ services:
       - key: MCP_ENABLE
         value: 'false'
 
-  # ── ML FastAPI (image GHCR) ──
+  # ── ML FastAPI (sous-dossier de ce repo) ──
   - type: web
     name: petfoodtn-ml
-    runtime: image
+    runtime: python
     plan: free
-    image:
-      url: ghcr.io/ghassenel/petfoodtn-ml:latest
-      # creds:
-      #   fromRegistryCreds:
-      #     name: petfoodtn-ghcr
+    rootDir: fastapi_service
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: TZ
