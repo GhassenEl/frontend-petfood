@@ -1,0 +1,13 @@
+title = "PetfoodTN gitleaks"
+
+[allowlist]
+description = "Mots de passe démo documentés (comptes test) et helpers E2E"
+paths = [
+  '''(?i)readme\.md''',
+  '''(?i)docs/.*''',
+  '''(?i)e2e/.*''',
+  '''(?i)scripts/backend-jwt-middleware\.example\.js''',
+  '''(?i)scripts/ci/.*''',
+  '''(?i)backend-ci-test/.*''',
+  '''(?i)tmp_.*\.json''',
+]
