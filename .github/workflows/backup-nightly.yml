@@ -26,7 +26,7 @@ jobs:
 
       - name: Sauvegarde sur VPS
         if: steps.vps.outputs.configured == 'true'
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}

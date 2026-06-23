@@ -55,7 +55,7 @@ jobs:
 
       - name: Deploy stack on VPS
         if: steps.check.outputs.skip != 'true'
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.5
         env:
           GHCR_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
           GHCR_OWNER: ${{ github.repository_owner }}
