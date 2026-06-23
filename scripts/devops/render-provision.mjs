@@ -21,6 +21,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../..');
 const RENDER_API = 'https://api.render.com/v1';
 const SERVICES = ['petfoodtn-web', 'petfoodtn-api', 'petfoodtn-ml'];
+const GHCR_OWNER = 'ghassenel';
+const GITHUB_REPO = 'https://github.com/GhassenEl/frontend-petfood';
 const HEALTH_URLS = {
   web: 'https://petfoodtn-web.onrender.com',
   api: 'https://petfoodtn-api.onrender.com/health',
@@ -180,6 +182,160 @@ async function syncGithubSecrets() {
   console.log('\nDeploy hooks synchronises. Lancez : gh workflow run "Deploy Render" -R GhassenEl/frontend-petfood');
 }
 
+async function listPostgres() {
+  const ownerId = await listOwnerId();
+  const data = await renderFetch(`/postgres?ownerId=${ownerId}&limit=50`);
+  const list = Array.isArray(data) ? data : data?.items || [];
+  return list.map((row) => row.postgres || row);
+}
+
+async function ensurePostgres(ownerId) {
+  const existing = (await listPostgres()).find((p) => p.name === 'petfoodtn-db');
+  if (existing) {
+    console.log(`  DB existante : petfoodtn-db (${existing.id})`);
+    return existing;
+  }
+  console.log('  Création PostgreSQL petfoodtn-db…');
+  const created = await renderFetch('/postgres', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: 'petfoodtn-db',
+      plan: 'free',
+      ownerId,
+      version: '16',
+      databaseName: 'petfood',
+      databaseUser: 'petfood',
+      region: 'frankfurt',
+    }),
+  });
+  const pg = created?.postgres || created;
+  console.log(`  ✅ PostgreSQL créé : ${pg.id}`);
+  return pg;
+}
+
+async function getPostgresConnectionUrl(postgresId) {
+  const info = await renderFetch(`/postgres/${postgresId}/connection`);
+  const conn = info?.connection || info;
+  return conn?.connectionString || conn?.externalConnectionString || conn?.internalConnectionString;
+}
+
+async function createImageWebService(ownerId, name, imagePath, envVars, healthCheck = '/health') {
+  const existing = (await listServices()).find((s) => s.name === name);
+  if (existing) {
+    console.log(`  Service existant : ${name}`);
+    return existing;
+  }
+  const created = await renderFetch('/services', {
+    method: 'POST',
+    body: JSON.stringify({
+      type: 'web_service',
+      name,
+      ownerId,
+      plan: 'free',
+      region: 'frankfurt',
+      image: { ownerId, imagePath },
+      envVars,
+      serviceDetails: {
+        runtime: 'image',
+        healthCheckPath: healthCheck,
+        envSpecificDetails: {
+          dockerCommand: '',
+          dockerContext: '',
+          dockerfilePath: '',
+        },
+      },
+    }),
+  });
+  const svc = created?.service || created;
+  console.log(`  ✅ ${name} créé (${svc.id})`);
+  return svc;
+}
+
+async function createStaticSite(ownerId) {
+  const existing = (await listServices()).find((s) => s.name === 'petfoodtn-web');
+  if (existing) {
+    console.log('  Static site existant : petfoodtn-web');
+    return existing;
+  }
+  const created = await renderFetch('/services', {
+    method: 'POST',
+    body: JSON.stringify({
+      type: 'static_site',
+      name: 'petfoodtn-web',
+      ownerId,
+      repo: GITHUB_REPO,
+      branch: 'main',
+      autoDeploy: 'yes',
+      envVars: [
+        { key: 'NODE_VERSION', value: '20' },
+        { key: 'VITE_API_BASE', value: 'https://petfoodtn-api.onrender.com/api' },
+        { key: 'VITE_SOCKET_URL', value: 'https://petfoodtn-api.onrender.com' },
+        { key: 'VITE_APP_RELEASE', value: 'petfoodtn@render' },
+      ],
+      serviceDetails: {
+        buildCommand: 'npm ci && npm run build',
+        publishPath: 'dist',
+        routes: [{ type: 'rewrite', source: '/*', destination: '/index.html' }],
+      },
+    }),
+  });
+  const svc = created?.service || created;
+  console.log(`  ✅ petfoodtn-web créé (${svc.id})`);
+  return svc;
+}
+
+async function provisionStack() {
+  console.log('\n☁️  Provisionnement stack Render PetfoodTN\n');
+  const ownerId = await listOwnerId();
+  const pg = await ensurePostgres(ownerId);
+
+  let databaseUrl = null;
+  for (let i = 0; i < 12; i += 1) {
+    try {
+      databaseUrl = await getPostgresConnectionUrl(pg.id);
+      if (databaseUrl) break;
+    } catch {
+      /* retry */
+    }
+    console.log(`  ⏳ Attente connexion PostgreSQL (${i + 1}/12)…`);
+    await new Promise((r) => setTimeout(r, 5000));
+  }
+
+  await createImageWebService(ownerId, 'petfoodtn-ml', `ghcr.io/${GHCR_OWNER}/petfoodtn-ml:latest`, [
+    { key: 'TZ', value: 'Africa/Tunis' },
+  ]);
+
+  const apiEnv = [
+    { key: 'NODE_ENV', value: 'production' },
+    { key: 'PORT', value: '5002' },
+    { key: 'DEMO_MODE', value: 'true' },
+    { key: 'RUN_SEED', value: 'true' },
+    { key: 'CORS_ORIGINS', value: 'https://petfoodtn-web.onrender.com,https://ghassenel.github.io' },
+    { key: 'FASTAPI_URL', value: 'https://petfoodtn-ml.onrender.com' },
+    { key: 'STRIPE_MOCK', value: '1' },
+    { key: 'MCP_ENABLE', value: 'false' },
+    { key: 'JWT_SECRET', generateValue: true },
+  ];
+  if (databaseUrl) {
+    apiEnv.push({ key: 'DATABASE_URL', value: databaseUrl });
+  } else {
+    console.log('  ⚠️  DATABASE_URL non récupéré — configurez-le sur petfoodtn-api');
+  }
+
+  await createImageWebService(
+    ownerId,
+    'petfoodtn-api',
+    `ghcr.io/${GHCR_OWNER}/petfoodtn-backend:latest`,
+    apiEnv,
+  );
+
+  await createStaticSite(ownerId);
+  console.log('\n✅ Provisionnement terminé — déploiements en cours (5–15 min)');
+  console.log('   Frontend : https://petfoodtn-web.onrender.com');
+  console.log('   API      : https://petfoodtn-api.onrender.com/health');
+  console.log('   ML       : https://petfoodtn-ml.onrender.com/health\n');
+}
+
 async function checkHealth() {
   console.log('Verification endpoints publics...\n');
   for (const [name, url] of Object.entries(HEALTH_URLS)) {
@@ -201,6 +357,7 @@ Commandes :
   status     Liste les services petfoodtn-* sur Render
   hooks        Affiche les Deploy Hooks pour secrets GitHub
   sync-github  Cree les hooks Render et les pousse en secrets GitHub
+  provision    Cree la stack (DB + API + ML + web) via API Render
   health       Teste les URLs publiques (sans cle API)
   github       Liste les secrets GitHub a configurer
 
@@ -216,6 +373,7 @@ Etapes manuelles (sans cle API) :
 
 async function showGithubSecretsTemplate() {
   console.log('\nSecrets GitHub (Settings -> Secrets -> Actions) :\n');
+  console.log('RENDER_API_KEY            = (Render Account -> API Keys)');
   console.log('RENDER_DEPLOY_HOOK_FRONTEND = (Render petfoodtn-web -> Deploy Hook)');
   console.log('RENDER_DEPLOY_HOOK_BACKEND  = (Render petfoodtn-api -> Deploy Hook)');
   console.log('RENDER_DEPLOY_HOOK_ML       = (Render petfoodtn-ml -> Deploy Hook)');
@@ -241,6 +399,9 @@ async function main() {
         break;
       case 'sync-github':
         await syncGithubSecrets();
+        break;
+      case 'provision':
+        await provisionStack();
         break;
       case 'health':
         await checkHealth();

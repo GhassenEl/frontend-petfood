@@ -4,15 +4,38 @@
  *
  * Usage :
  *   node scripts/devops/host-application.mjs
- *   RENDER_API_KEY=xxx node scripts/devops/host-application.mjs --render
+ *   node scripts/devops/host-application.mjs --render
+ *
+ * Clé Render (une des options) :
+ *   - fichier .env.render : RENDER_API_KEY=rnd_...
+ *   - variable d'environnement RENDER_API_KEY
  */
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { resolveGithubToken } from './github-token.mjs';
+import { resolveGithubToken, setRepoSecret } from './github-token.mjs';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, '../..');
 const REPO = 'GhassenEl/frontend-petfood';
 const [owner, repo] = REPO.split('/');
 const GHCR_PACKAGES = ['petfoodtn-backend', 'petfoodtn-ml', 'petfoodtn-frontend'];
 const withRender = process.argv.includes('--render');
+
+function loadEnvRender() {
+  const file = path.join(ROOT, '.env.render');
+  if (!fs.existsSync(file)) return;
+  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq === -1) continue;
+    const key = trimmed.slice(0, eq).trim();
+    const value = trimmed.slice(eq + 1).trim().replace(/^["']|["']$/g, '');
+    if (key && value && !process.env[key]) process.env[key] = value;
+  }
+}
 
 async function githubApi(path, { method = 'GET', body } = {}) {
   const token = resolveGithubToken();
@@ -112,41 +135,69 @@ async function triggerPagesWorkflow() {
   console.log('  ✅ Déploiement Pages déclenché');
 }
 
-function provisionRender() {
+async function provisionRender() {
+  loadEnvRender();
   const apiKey = process.env.RENDER_API_KEY?.trim();
   if (!apiKey) {
     console.log('\n⏭️  Render — RENDER_API_KEY absent');
-    console.log('   Blueprint manuel : https://dashboard.render.com/blueprints/new');
-    console.log('   Puis : RENDER_API_KEY=xxx npm run devops:prod:sync -- --render');
+    console.log('   1. Créez .env.render avec : RENDER_API_KEY=rnd_votre_cle');
+    console.log('      (Render → Account Settings → API Keys)');
+    console.log('   2. Relancez : npm run devops:host:render');
+    console.log('   Ou ajoutez le secret RENDER_API_KEY sur GitHub puis :');
+    console.log('   gh workflow run "Provision Render Stack" -R GhassenEl/frontend-petfood');
     return;
   }
 
   console.log('\n☁️  Provisionnement Render (API)\n');
-  const root = new URL('../..', import.meta.url);
-  const cwd = decodeURIComponent(root.pathname).replace(/^\/([A-Z]:)/, '$1');
-  const result = spawnSync(process.execPath, ['scripts/devops/render-provision.mjs', 'status'], {
-    cwd,
-    encoding: 'utf8',
-    env: { ...process.env, RENDER_API_KEY: apiKey },
-  });
-  if (result.stdout) console.log(result.stdout);
-  if (result.stderr) console.error(result.stderr);
+  const run = (args) => {
+    const result = spawnSync(process.execPath, args, {
+      cwd: ROOT,
+      encoding: 'utf8',
+      windowsHide: true,
+      env: { ...process.env, RENDER_API_KEY: apiKey },
+    });
+    if (result.stdout) console.log(result.stdout);
+    if (result.stderr) console.error(result.stderr);
+    return result.status ?? 1;
+  };
 
-  const sync = spawnSync(process.execPath, ['scripts/devops/render-provision.mjs', 'sync-github'], {
-    cwd,
-    encoding: 'utf8',
-    env: { ...process.env, RENDER_API_KEY: apiKey },
-  });
-  if (sync.stdout) console.log(sync.stdout);
-  if (sync.status !== 0 && sync.stderr) console.log(sync.stderr);
+  try {
+    await setRepoSecret('RENDER_API_KEY', apiKey, REPO);
+    console.log('  ✅ Secret GitHub RENDER_API_KEY synchronisé');
+  } catch (err) {
+    console.log(`  ⚠️  Secret GitHub : ${err.message}`);
+  }
+
+  const code = run(['scripts/devops/render-provision.mjs', 'provision']);
+  if (code === 0) {
+    run(['scripts/devops/render-provision.mjs', 'sync-github']);
+    await triggerWorkflow('Provision Render Stack');
+  }
+}
+
+async function triggerWorkflow(name) {
+  try {
+    const workflows = await githubApi(`/repos/${owner}/${repo}/actions/workflows`);
+    const wf = workflows.workflows?.find((w) => w.name === name);
+    if (!wf) return;
+    await githubApi(`/repos/${owner}/${repo}/actions/workflows/${wf.id}/dispatches`, {
+      method: 'POST',
+      body: { ref: 'main' },
+    });
+    console.log(`  ✅ Workflow « ${name} » déclenché`);
+  } catch (err) {
+    console.log(`  ⚠️  Workflow ${name} : ${err.message}`);
+  }
 }
 
 async function main() {
   console.log('🐾 PetfoodTN — hébergement\n');
+  loadEnvRender();
   await makeGhcrPackagesPublic();
   const pagesUrl = await enableGithubPages();
   await triggerPagesWorkflow();
-  if (withRender) provisionRender();
+  await triggerWorkflow('Publish GHCR packages (public)');
+  if (withRender || process.env.RENDER_API_KEY) await provisionRender();
 
   console.log('\n✅ Hébergement initié');
   console.log(`\nFrontend (GitHub Pages) : ${pagesUrl}`);

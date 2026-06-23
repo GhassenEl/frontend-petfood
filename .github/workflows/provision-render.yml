@@ -1,0 +1,36 @@
+name: Provision Render Stack
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  provision:
+    name: Créer stack Render + sync hooks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Provision services Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
+        run: node scripts/devops/render-provision.mjs provision
+
+      - name: Sync deploy hooks GitHub
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
+        run: node scripts/devops/render-provision.mjs sync-github
+
+      - name: Health check
+        run: node scripts/devops/render-provision.mjs health

@@ -63,6 +63,7 @@
     "devops:ci": "powershell -ExecutionPolicy Bypass -File scripts/devops/ci-local.ps1",
     "devops:render:setup": "powershell -ExecutionPolicy Bypass -File scripts/devops/setup-render.ps1",
     "devops:render:health": "node scripts/devops/render-provision.mjs health",
+    "devops:render:provision": "node scripts/devops/render-provision.mjs provision",
     "devops:render:status": "node scripts/devops/render-provision.mjs status",
     "devops:render:hooks": "node scripts/devops/render-provision.mjs hooks",
     "devops:render:github": "node scripts/devops/render-provision.mjs github",

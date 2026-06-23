@@ -42,7 +42,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGINS
-        value: https://petfoodtn-web.onrender.com
+        value: https://petfoodtn-web.onrender.com,https://ghassenel.github.io
       - key: FASTAPI_URL
         value: https://petfoodtn-ml.onrender.com
       - key: STRIPE_MOCK
