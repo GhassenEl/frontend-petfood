@@ -1,0 +1,58 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build & publish frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install & build
+        run: npm ci && npm run build
+        env:
+          VITE_BASE_PATH: /frontend-petfood/
+          VITE_API_BASE: https://petfoodtn-api.onrender.com/api
+          VITE_SOCKET_URL: https://petfoodtn-api.onrender.com
+          VITE_APP_RELEASE: petfoodtn@github-pages
+
+      - name: SPA fallback (404 → index.html)
+        run: cp dist/index.html dist/404.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Résumé
+        run: |
+          echo "### GitHub Pages" >> "$GITHUB_STEP_SUMMARY"
+          echo "- URL : ${{ steps.deployment.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Build avec base \`/frontend-petfood/\`" >> "$GITHUB_STEP_SUMMARY"

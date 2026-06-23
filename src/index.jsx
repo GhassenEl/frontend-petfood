@@ -17,9 +17,11 @@ import { initSentry } from './utils/sentry.js';
 initSentry();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+const routerBase = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={routerBase || undefined}>
       <ScrollToTop />
       <ThemeProvider>
         <AuthProvider>

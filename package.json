@@ -70,6 +70,8 @@
     "devops:prod:audit": "node scripts/devops/setup-prod.mjs audit",
     "devops:prod:sync": "node scripts/devops/setup-prod.mjs sync",
     "devops:deploy:check": "node scripts/devops/setup-prod.mjs audit",
+    "devops:host": "node scripts/devops/host-application.mjs",
+    "devops:host:render": "node scripts/devops/host-application.mjs --render",
     "demo:video": "node scripts/record-demo-video.js",
     "demo:video:5min": "cross-env DEMO_PACE=2.3 DEMO_HEADLESS=0 node scripts/record-demo-video.js",
     "test:e2e": "playwright test",

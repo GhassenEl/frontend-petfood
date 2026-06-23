@@ -8,8 +8,10 @@ export default defineConfig(({ mode }) => {
   const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:5002'
   const grafanaProxyTarget = env.VITE_GRAFANA_PROXY_TARGET || 'http://127.0.0.1:3000'
   const n8nProxyTarget = env.VITE_N8N_PROXY_TARGET || 'http://127.0.0.1:5678'
+  const base = env.VITE_BASE_PATH || '/'
 
   return {
+  base,
   plugins: [
     {
       name: 'load-js-files-as-jsx',
