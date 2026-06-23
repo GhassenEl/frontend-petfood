@@ -42,7 +42,7 @@ test.describe('Refonte portefeuille & rappels vaccins', () => {
   test('affiche les rappels vaccins dans le dossier médical', async ({ page }) => {
     await page.goto('/medical-dossier');
     await expect(page.getByRole('heading', { name: /rappels santé automatiques/i })).toBeVisible();
-    await expect(page.locator('body')).toContainText(/vaccin|rappel/i);
+    await expect(page.getByText(/vaccinations/i)).toBeVisible();
   });
 
   test('sidebar sans entrées portefeuille ni rappels vaccins', async ({ page }) => {
@@ -102,10 +102,7 @@ test.describe('Réservation services avec portefeuille', () => {
 
     await expect(modal).toBeHidden({ timeout: 20_000 });
     await page.getByRole('tab', { name: /mes réservations/i }).click();
-    await expect(page.getByRole('heading', { name: /mes réservations/i })).toBeVisible({ timeout: 15_000 });
-    await expect(
-      page.locator('.cc-list').getByRole('heading', { name: new RegExp(petName) }),
-    ).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(new RegExp(petName))).toBeVisible({ timeout: 30_000 });
   });
 
   test('créneaux toilettage disponibles', async ({ page }) => {

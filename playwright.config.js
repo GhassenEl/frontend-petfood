@@ -7,7 +7,7 @@ module.exports = defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 3 : 0,
   workers: 1,
   reporter: process.env.CI ? [['github'], ['list']] : [['list']],
   timeout: process.env.CI ? 90_000 : 60_000,

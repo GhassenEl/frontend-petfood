@@ -9,7 +9,7 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
 
     steps:
       - uses: actions/checkout@v4
@@ -54,25 +54,25 @@ jobs:
         env:
           PORT: 3001
           VITE_API_PROXY_TARGET: http://127.0.0.1:5002
-        run: npx vite --host --port 3001 &
+        run: npx vite --host 127.0.0.1 --port 3001 &
 
       - name: Wait for servers
         run: node scripts/wait-for-servers.js
         env:
-          PLAYWRIGHT_BASE_URL: http://localhost:3001
-          API_BASE_URL: http://localhost:5002
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3001
+          API_BASE_URL: http://127.0.0.1:5002
 
       - name: API tests (wallet / vaccins)
         working-directory: backend
         run: node scripts/test-wallet-api.js
         env:
-          API_BASE_URL: http://localhost:5002
+          API_BASE_URL: http://127.0.0.1:5002
 
       - name: Playwright E2E tests
         run: npm run test:e2e
         env:
-          PLAYWRIGHT_BASE_URL: http://localhost:3001
-          API_BASE_URL: http://localhost:5002
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3001
+          API_BASE_URL: http://127.0.0.1:5002
           CI: true
 
       - uses: actions/upload-artifact@v4

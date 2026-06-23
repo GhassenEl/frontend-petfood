@@ -14,6 +14,12 @@ async function acceptCookieConsent(page) {
         },
       }),
     );
+    localStorage.setItem(
+      'petfood_cart',
+      JSON.stringify([
+        { id: 'e2e-cart-item', name: 'Croquettes E2E', price: 45, quantity: 1 },
+      ]),
+    );
   });
 }
 
