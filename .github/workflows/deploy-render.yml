@@ -104,5 +104,17 @@ jobs:
             echo "**Action requise** : appliquer le Blueprint Render une fois :" >> "$GITHUB_STEP_SUMMARY"
             echo "1. [Nouveau Blueprint](https://dashboard.render.com/blueprints/new) → repo \`GhassenEl/frontend-petfood\` → \`render.yaml\` → Apply" >> "$GITHUB_STEP_SUMMARY"
             echo "2. Packages GHCR publics : \`petfoodtn-backend\`, \`petfoodtn-ml\`" >> "$GITHUB_STEP_SUMMARY"
-            echo "3. \`RENDER_API_KEY=xxx npm run devops:prod:sync -- --render\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "3. \`RENDER_API_KEY=xxx npm run devops:host:render\`" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Échec si aucun hook (lancement manuel)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          FE: ${{ steps.fe.outputs.configured }}
+          API: ${{ steps.api.outputs.configured }}
+          ML: ${{ steps.ml.outputs.configured }}
+        run: |
+          if [ "$FE" != "true" ] && [ "$API" != "true" ] && [ "$ML" != "true" ]; then
+            echo "::error::Aucun secret RENDER_DEPLOY_HOOK_* configuré — rien n'a été déployé"
+            exit 1
           fi

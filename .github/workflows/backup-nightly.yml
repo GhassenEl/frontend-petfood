@@ -10,10 +10,22 @@ jobs:
     name: Backup PostgreSQL + médias + ML
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: ${{ secrets.VPS_HOST != '' }}
 
     steps:
+      - id: vps
+        name: Vérifier secrets VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          if [ -z "$VPS_HOST" ]; then
+            echo "::notice::VPS_HOST absent — sauvegarde ignorée"
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Sauvegarde sur VPS
+        if: steps.vps.outputs.configured == 'true'
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -27,7 +39,7 @@ jobs:
             bash "${DEPLOY_PATH}/scripts/devops/backup-nightly.sh"
 
       - name: Alerte échec
-        if: failure()
+        if: failure() && steps.vps.outputs.configured == 'true'
         uses: actions/github-script@v7
         with:
           script: |

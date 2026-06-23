@@ -1,0 +1,23 @@
+name: Patch backend for CI
+description: Fichiers manquants dans backend-petfood (jwtTokens, sessionRegistry)
+
+runs:
+  using: composite
+  steps:
+    - name: Appliquer correctifs backend CI
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ ! -d backend ]; then
+          echo "backend/ introuvable — exécutez checkout-backend avant ce patch"
+          exit 1
+        fi
+        mkdir -p backend/utils backend/services
+        if [ ! -f backend/utils/jwtTokens.js ]; then
+          cp scripts/ci/backend-jwtTokens.js backend/utils/jwtTokens.js
+          echo "✓ backend/utils/jwtTokens.js"
+        fi
+        if [ ! -f backend/services/sessionRegistry.service.js ]; then
+          cp scripts/ci/backend-sessionRegistry.service.js backend/services/sessionRegistry.service.js
+          echo "✓ backend/services/sessionRegistry.service.js"
+        fi

@@ -25,7 +25,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ -z "$RENDER_API_KEY" ]; then
-            echo "::notice::RENDER_API_KEY absent — ajoutez le secret GitHub ou créez .env.render puis npm run devops:host:render"
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              echo "::error::RENDER_API_KEY absent — ajoutez le secret GitHub ou .env.render + npm run devops:host:render"
+              exit 1
+            fi
+            echo "::notice::RENDER_API_KEY absent — skip auto-provision"
             exit 0
           fi
           node scripts/devops/render-provision.mjs provision

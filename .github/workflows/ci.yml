@@ -50,6 +50,9 @@ jobs:
       - name: Checkout backend repo
         uses: ./.github/actions/checkout-backend
 
+      - name: Patch backend CI
+        uses: ./.github/actions/patch-backend-ci
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -110,6 +113,9 @@ jobs:
       - name: Checkout backend repo
         uses: ./.github/actions/checkout-backend
 
+      - name: Patch backend CI
+        uses: ./.github/actions/patch-backend-ci
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -160,6 +166,9 @@ jobs:
       - name: Checkout backend repo
         uses: ./.github/actions/checkout-backend
 
+      - name: Patch backend CI
+        uses: ./.github/actions/patch-backend-ci
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -170,9 +179,9 @@ jobs:
         working-directory: backend
         run: npm ci
 
-      - name: Prisma generate
+      - name: Prisma generate & sync schema
         working-directory: backend
-        run: npx prisma generate
+        run: npx prisma generate && npx prisma db push --accept-data-loss
         env:
           DATABASE_URL: file:./dev.db
 
