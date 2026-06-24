@@ -23,6 +23,94 @@ const buildDailyChart = () => {
   });
 };
 
+/** Normalise les séries API (clés variables) pour Recharts. */
+export const normalizeLivreurDailyChart = (series) => {
+  if (!Array.isArray(series) || series.length === 0) return buildDailyChart();
+
+  const normalized = series.map((d, i) => {
+    const count = Number(
+      d?.count ?? d?.deliveries ?? d?.total ?? d?.value ?? d?.primary ?? 0,
+    );
+    const commission = Number(
+      d?.commission ?? d?.earnings ?? d?.gains ?? d?.secondary
+        ?? count * COMMISSION_PER_DELIVERY,
+    );
+    let label = d?.label ?? d?.name ?? d?.day ?? d?.date;
+    if (!label && d?.at) {
+      label = new Date(d.at).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' });
+    }
+    if (!label) {
+      const d0 = new Date();
+      d0.setDate(d0.getDate() - (series.length - 1 - i));
+      label = d0.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' });
+    }
+    return { label: String(label), count, commission };
+  });
+
+  const hasActivity = normalized.some((d) => d.count > 0 || d.commission > 0);
+  return hasActivity ? normalized : buildDailyChart();
+};
+
+export const LIVREUR_STATUS_LABELS = {
+  pending: 'En attente',
+  shipped: 'En cours',
+  delivered: 'Livrées',
+  cancelled: 'Annulées',
+  paid: 'Payées',
+};
+
+const STATUS_COLOR_MAP = {
+  pending: '#f39c12',
+  shipped: '#3498db',
+  delivered: '#27ae60',
+  cancelled: '#e74c3c',
+  paid: '#059669',
+};
+
+const DEFAULT_STATUS_BREAKDOWN = {
+  pending: 2,
+  shipped: 3,
+  delivered: 47,
+  cancelled: 3,
+  paid: 12,
+};
+
+/** Données camembert — objet API, tableau ou fallback démo. */
+export const normalizeLivreurStatusBreakdown = (breakdown) => {
+  const base = DEFAULT_STATUS_BREAKDOWN;
+  let raw = { ...base };
+
+  if (Array.isArray(breakdown) && breakdown.length > 0) {
+    raw = {};
+    breakdown.forEach((row) => {
+      const key = String(row.status || row.key || row.name || '').toLowerCase();
+      const val = Number(row.count ?? row.value ?? row.total ?? 0);
+      if (key) raw[key] = (raw[key] || 0) + val;
+    });
+  } else if (breakdown && typeof breakdown === 'object' && Object.keys(breakdown).length > 0) {
+    raw = breakdown;
+  }
+
+  const hasValues = Object.values(raw).some((v) => Number(v) > 0);
+  if (!hasValues) raw = base;
+
+  const pie = Object.entries(raw)
+    .map(([key, value]) => ({
+      key,
+      name: LIVREUR_STATUS_LABELS[key] || key,
+      value: Number(value) || 0,
+      color: STATUS_COLOR_MAP[key] || '#94a3b8',
+    }))
+    .filter((d) => d.value > 0);
+
+  if (pie.length > 0) return pie;
+
+  return [
+    { key: 'delivered', name: LIVREUR_STATUS_LABELS.delivered, value: base.delivered || 1, color: STATUS_COLOR_MAP.delivered },
+    { key: 'shipped', name: LIVREUR_STATUS_LABELS.shipped, value: base.shipped || 1, color: STATUS_COLOR_MAP.shipped },
+  ];
+};
+
 const item = (name, qty, price) => ({
   quantity: qty,
   price,
@@ -160,12 +248,7 @@ export const DEMO_LIVREUR_STATS = {
   weekCommission: 12 * COMMISSION_PER_DELIVERY,
   avgDeliveryMinutes: 28,
   onTimeRate: 94,
-  statusBreakdown: {
-    pending: 2,
-    shipped: 1,
-    delivered: 47,
-    cancelled: 3,
-  },
+  statusBreakdown: { ...DEFAULT_STATUS_BREAKDOWN },
   dailyChart: buildDailyChart(),
 };
 
@@ -338,23 +421,22 @@ export const withDemoFallback = (data, demo) => {
 
 export const withDemoStats = (data) => {
   const base = DEMO_LIVREUR_STATS;
-  if (!data) return { ...base };
+  if (!data) {
+    return {
+      ...base,
+      statusPie: normalizeLivreurStatusBreakdown(base.statusBreakdown),
+    };
+  }
 
-  const dailyChart = Array.isArray(data.dailyChart) && data.dailyChart.length > 0
-    ? data.dailyChart.map((d) => ({
-      ...d,
-      commission: d.commission ?? (d.count ?? 0) * COMMISSION_PER_DELIVERY,
-    }))
-    : base.dailyChart;
-
-  const hasBreakdown = data.statusBreakdown
-    && Object.values(data.statusBreakdown).some((v) => Number(v) > 0);
-  const statusBreakdown = hasBreakdown ? data.statusBreakdown : base.statusBreakdown;
+  const dailyChart = normalizeLivreurDailyChart(data.dailyChart);
+  const statusPie = normalizeLivreurStatusBreakdown(data.statusBreakdown);
+  const statusBreakdown = Object.fromEntries(statusPie.map((d) => [d.key, d.value]));
 
   return {
     ...base,
     ...data,
     dailyChart,
+    statusPie,
     statusBreakdown,
     totalDelivered: data.totalDelivered ?? base.totalDelivered,
     totalCommission: data.totalCommission ?? base.totalCommission,

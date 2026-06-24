@@ -2,6 +2,8 @@
  * Moteur IA livreur — tournées, ETA, retards, colis, navigation, perf, éco.
  */
 
+import { normalizeLivreurDailyChart } from './livreurDemoData';
+
 const haversineKm = (a, b) => {
   if (!a?.lat || !b?.lat) return 5;
   const R = 6371;
@@ -269,7 +271,7 @@ export const computePerformanceMetrics = (stats = {}) => ({
   cancelRate: stats.statusBreakdown?.cancelled
     ? Math.round((stats.statusBreakdown.cancelled / (stats.totalDelivered + stats.statusBreakdown.cancelled)) * 100)
     : 6,
-  dailyChart: stats.dailyChart || [],
+  dailyChart: normalizeLivreurDailyChart(stats.dailyChart),
   insights: [
     { label: 'Ponctualité', value: `${stats.onTimeRate ?? 94}%`, trend: 'up', message: 'Au-dessus de l\'objectif 90 %.' },
     { label: 'Temps moyen', value: `${stats.avgDeliveryMinutes ?? 28} min`, trend: 'stable', message: 'Stable sur 7 jours.' },

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
 import { withDemoStats, DEMO_LIVREUR_STATS } from '../utils/livreurDemoData';
-import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import LivreurDashboardCharts from '../components/LivreurDashboardCharts';
 
 const LivreurStatsPage = () => {
   const [stats, setStats] = useState(null);
@@ -48,10 +48,7 @@ const LivreurStatsPage = () => {
           Zone {stats.region} · commission {stats.commissionPerDelivery} DT / livraison
         </p>
       )}
-      <p style={{ color: '#94a3b8', fontSize: 14, marginBottom: 24 }}>
-        Les graphiques de performance (livraisons, gains, répartition) sont sur le{' '}
-        <Link to="/livreur/dashboard" style={{ color: '#059669', fontWeight: 700 }}>tableau de bord</Link>.
-      </p>
+      <LivreurDashboardCharts stats={stats} loading={false} />
 
       <div style={{
         display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',

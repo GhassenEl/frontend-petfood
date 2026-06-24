@@ -1,23 +1,23 @@
-import React from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  BarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
-  LineChart,
   Line,
   PieChart,
   Pie,
   Cell,
   Legend,
+  ComposedChart,
+  LineChart,
+  Label,
 } from 'recharts';
 
-import { DEMO_LIVREUR_STATS } from '../utils/livreurDemoData';
+import { normalizeLivreurDailyChart, normalizeLivreurStatusBreakdown } from '../utils/livreurDemoData';
 
 const COLORS = ['#27ae60', '#059669', '#3498db', '#f39c12', '#e74c3c'];
 
@@ -29,7 +29,59 @@ const tooltipStyle = {
   fontWeight: 600,
 };
 
+const useMeasuredWidth = () => {
+  const ref = useRef(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+
+    const measure = () => {
+      const next = Math.floor(el.getBoundingClientRect().width);
+      if (next > 0) setWidth(next);
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
+
+  return [ref, width];
+};
+
+const ChartFrame = ({ height = 240, children }) => {
+  const [ref, width] = useMeasuredWidth();
+  return (
+    <div ref={ref} style={{ width: '100%', minWidth: 0, height }}>
+      {width > 0 ? children(width) : null}
+    </div>
+  );
+};
+
 const LivreurDashboardCharts = ({ stats, loading }) => {
+  const dailyChart = useMemo(
+    () => normalizeLivreurDailyChart(stats?.dailyChart),
+    [stats?.dailyChart],
+  );
+
+  const statusData = useMemo(
+    () => (stats?.statusPie?.length
+      ? stats.statusPie
+      : normalizeLivreurStatusBreakdown(stats?.statusBreakdown)),
+    [stats?.statusPie, stats?.statusBreakdown],
+  );
+
+  const totalOrders = useMemo(
+    () => statusData.reduce((sum, d) => sum + d.value, 0),
+    [statusData],
+  );
+
   if (loading) {
     return (
       <div className="card-animal" style={{ padding: 24, marginBottom: 24, textAlign: 'center', color: '#64748b' }}>
@@ -39,13 +91,6 @@ const LivreurDashboardCharts = ({ stats, loading }) => {
   }
 
   if (!stats) return null;
-
-  const dailyChart = stats.dailyChart?.length ? stats.dailyChart : DEMO_LIVREUR_STATS.dailyChart;
-  const statusEntries = Object.entries(stats.statusBreakdown || {}).filter(([, v]) => Number(v) > 0);
-  const statusData = (statusEntries.length ? statusEntries : Object.entries(DEMO_LIVREUR_STATS.statusBreakdown)).map(([name, value]) => ({
-    name: { pending: 'En attente', shipped: 'En cours', delivered: 'Livrées', cancelled: 'Annulées', paid: 'Payées' }[name] || name,
-    value,
-  }));
 
   return (
     <motion.div
@@ -72,69 +117,152 @@ const LivreurDashboardCharts = ({ stats, loading }) => {
         </Link>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
-        <div className="card-animal" style={{ padding: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18, minWidth: 0 }}>
+        <div className="card-animal" style={{ padding: 20, minWidth: 0 }}>
           <h3 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 700 }}>Livraisons & gains (7 jours)</h3>
           <p style={{ margin: '0 0 16px', fontSize: '0.8rem', color: '#64748b' }}>
             {stats.weekDelivered ?? 0} livraison(s) · {stats.weekCommission ?? 0} DT cette semaine
           </p>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={dailyChart} margin={{ top: 4, right: 8, left: -8, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} allowDecimals={false} />
-              <Tooltip contentStyle={tooltipStyle} />
-              <Bar dataKey="count" name="Livraisons" fill="#27ae60" radius={[6, 6, 0, 0]} maxBarSize={36} />
-              <Bar dataKey="commission" name="Gains (DT)" fill="#059669" radius={[6, 6, 0, 0]} maxBarSize={36} />
-            </BarChart>
-          </ResponsiveContainer>
+          <ChartFrame height={240}>
+            {(width) => (
+              <ComposedChart width={width} height={240} data={dailyChart} margin={{ top: 8, right: 12, left: -4, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                <YAxis
+                  yAxisId="left"
+                  tick={{ fontSize: 11, fill: '#64748b' }}
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={false}
+                  width={32}
+                />
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  tick={{ fontSize: 11, fill: '#64748b' }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={36}
+                  unit=" DT"
+                />
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  formatter={(value, name) => [
+                    name === 'Gains (DT)' ? `${value} DT` : value,
+                    name,
+                  ]}
+                />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Bar
+                  yAxisId="left"
+                  dataKey="count"
+                  name="Livraisons"
+                  fill="#27ae60"
+                  radius={[6, 6, 0, 0]}
+                  maxBarSize={32}
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="commission"
+                  name="Gains (DT)"
+                  stroke="#059669"
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: '#059669' }}
+                />
+              </ComposedChart>
+            )}
+          </ChartFrame>
         </div>
 
-        <div className="card-animal" style={{ padding: 20 }}>
+        <div className="card-animal" style={{ padding: 20, minWidth: 0 }}>
           <h3 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 700 }}>Courbe des gains</h3>
           <p style={{ margin: '0 0 16px', fontSize: '0.8rem', color: '#64748b' }}>
             Commission {stats.commissionPerDelivery ?? 5} DT / livraison
           </p>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={dailyChart} margin={{ top: 4, right: 8, left: -8, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={tooltipStyle} />
-              <Line type="monotone" dataKey="commission" name="Gains (DT)" stroke="#059669" strokeWidth={3} dot={{ r: 4, fill: '#059669' }} activeDot={{ r: 6 }} />
-            </LineChart>
-          </ResponsiveContainer>
+          <ChartFrame height={240}>
+            {(width) => (
+              <LineChart width={width} height={240} data={dailyChart} margin={{ top: 8, right: 12, left: -4, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                <YAxis
+                  tick={{ fontSize: 11, fill: '#64748b' }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={36}
+                  unit=" DT"
+                />
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  formatter={(v) => [`${v} DT`, 'Gains']}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="commission"
+                  name="Gains (DT)"
+                  stroke="#059669"
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: '#059669' }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            )}
+          </ChartFrame>
         </div>
 
-        <div className="card-animal" style={{ padding: 20 }}>
+        <div className="card-animal" style={{ padding: 20, minWidth: 0 }}>
           <h3 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 700 }}>Répartition des commandes</h3>
           <p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: '#64748b' }}>
             Ponctualité {stats.onTimeRate ?? 95}% · moy. {stats.avgDeliveryMinutes ?? '—'} min
           </p>
-          {statusData.length === 0 ? (
-            <p style={{ textAlign: 'center', color: '#94a3b8', padding: 40 }}>Pas encore de données</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
+          <ChartFrame height={200}>
+            {(width) => (
+              <PieChart width={width} height={200}>
                 <Pie
                   data={statusData}
-                  cx="50%"
-                  cy="45%"
-                  innerRadius={48}
-                  outerRadius={72}
+                  cx={width / 2}
+                  cy={100}
+                  innerRadius={52}
+                  outerRadius={78}
                   paddingAngle={3}
                   dataKey="value"
                   nameKey="name"
+                  isAnimationActive={false}
                 >
-                  {statusData.map((entry, index) => (
-                    <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
+                  {statusData.map((entry) => (
+                    <Cell key={entry.key || entry.name} fill={entry.color || COLORS[0]} stroke="#fff" strokeWidth={2} />
                   ))}
+                  <Label
+                    value={totalOrders}
+                    position="center"
+                    style={{ fontSize: 22, fontWeight: 800, fill: '#334155' }}
+                  />
                 </Pie>
-                <Tooltip contentStyle={tooltipStyle} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  formatter={(value, name) => [`${value} commande(s)`, name]}
+                />
               </PieChart>
-            </ResponsiveContainer>
-          )}
+            )}
+          </ChartFrame>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(72px, 1fr))',
+            gap: 8,
+            marginTop: 4,
+          }}
+          >
+            {statusData.map((entry) => (
+              <div key={entry.key || entry.name} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: entry.color || '#334155' }}>
+                  {entry.value}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, lineHeight: 1.2 }}>
+                  {entry.name}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </motion.div>

@@ -3,6 +3,7 @@ import {
   DEMO_LIVREUR_ORDERS,
   DEMO_LIVREUR_ROUTE,
   DEMO_LIVREUR_STATS,
+  withDemoStats,
 } from '../utils/livreurDemoData';
 import { enrichLivreurIntelligencePack } from '../utils/livreurIntelligenceEngine';
 
@@ -23,7 +24,7 @@ export async function loadLivreurIntelligenceHubPack() {
       mode = 'live';
     }
     if (routeRes?.data?.stops?.length) route = routeRes.data;
-    if (statsRes?.data) stats = { ...stats, ...statsRes.data };
+    if (statsRes?.data) stats = withDemoStats(statsRes.data);
   } catch {
     /* démo */
   }

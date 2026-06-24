@@ -1,4 +1,5 @@
 import React from 'react';
+import { normalizeLivreurDailyChart } from '../utils/livreurDemoData';
 import { Link } from 'react-router-dom';
 import { BarChart3, TrendingUp } from 'lucide-react';
 import {
@@ -8,6 +9,8 @@ import {
 const LivreurPerformancePanel = ({ performance, loading }) => {
   if (loading) return <p className="livih-muted">Chargement performances…</p>;
   const p = performance || {};
+
+  const dailyChart = normalizeLivreurDailyChart(p.dailyChart);
 
   return (
     <div className="livih-panel">
@@ -22,10 +25,10 @@ const LivreurPerformancePanel = ({ performance, loading }) => {
         <div className="livih-stat"><strong>{p.satisfactionScore}/5</strong><span>Satisfaction</span></div>
       </div>
       <p className="livih-ai-text">{p.aiSummary}</p>
-      {(p.dailyChart || []).length > 0 && (
-        <div className="livih-chart-wrap">
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={p.dailyChart}>
+      {dailyChart.length > 0 && (
+        <div className="livih-chart-wrap" style={{ width: '100%', minHeight: 200, height: 200 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={dailyChart} margin={{ top: 4, right: 8, left: -8, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
               <XAxis dataKey="label" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 10 }} />
