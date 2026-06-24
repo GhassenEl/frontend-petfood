@@ -16,7 +16,7 @@
 | Acteur | Nom | Email | Mot de passe | Accueil après login |
 |--------|-----|-------|--------------|---------------------|
 | ⚙️ **Administrateur** | Ghassen Admin | `admin@petfood.tn` | `PetfoodTN2024!` | `/admin/dashboard` |
-| 🐾 **Client** | Sami Ben Ali | `client@petfood.tn` | `MonChat123!` | `/client-dashboard` |
+| 🐾 **Client** | Sami Ben Ali | `client@petfood.tn` | `MonChat123!` | `/client-products` |
 | 🩺 **Vétérinaire** | Dr. Amira Khelifi | `vet@petfood.tn` | `Vet2024!` | `/vet/dashboard` |
 | 🛵 **Livreur** | Karim Mansouri | `livreur@petfood.tn` | `Livreur123!` | `/livreur/dashboard` |
 | 🏬 **Vendeur** | Leila Mansouri | `vendor@petfood.tn` | `Vendor2024!` | `/vendor/dashboard` |

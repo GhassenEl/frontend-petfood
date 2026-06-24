@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MapPin, Flame, Sparkles, ShoppingCart, Search, Eye, Store } from 'lucide-react';
+import { MapPin, Flame, Sparkles, ShoppingCart, Search, Eye, Store, Package } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import RecommendationPipelinePanel from '../components/RecommendationPipelinePanel';
 import {
@@ -28,6 +28,7 @@ import {
 import { getEffectiveDiscount, getPromoPrice, isOnPromotion } from '../utils/productDetails';
 import { productId, dedupeProducts, withProductIds } from '../utils/productId';
 import { resolveNaturalProductImage, sanitizeProductImageUrl } from '../utils/productImages';
+import ProductPacksPanel from '../components/ProductPacksPanel';
 import { DEMO_NEAREST_STORE } from '../utils/clientDemoData';
 
 const VENDOR_BY_CATEGORY = {
@@ -510,6 +511,10 @@ const ClientProductsPage = () => {
             ))}
           </div>
         )}
+      </Section>
+
+      <Section title="📦 Packs produits" titleColor="#0d9488" icon={<Package size={20} />}>
+        <ProductPacksPanel embedded />
       </Section>
 
       {inStockSoldes.length > 0 && !promoOnly && (

@@ -7,6 +7,8 @@ import {
   RBAC_ROLE_MATRIX,
   AUDIT_TABLE_DEMO,
 } from '../config/platformSecurityFramework';
+import ProdSecurityAuditPanel from '../components/ProdSecurityAuditPanel';
+import { useAuth } from '../contexts/AuthContext';
 import '../pages/AdminIntelligentSecurity.css';
 import '../pages/AdminPages.css';
 
@@ -28,6 +30,7 @@ const StatusBadge = ({ status }) => {
 };
 
 const PlatformSecurityFrameworkPage = () => {
+  const { user } = useAuth();
   const stats = countSecurityPillarStats();
 
   return (
@@ -47,6 +50,8 @@ const PlatformSecurityFrameworkPage = () => {
           <div className="adm-hub-kpi"><strong>{stats.total}</strong><span>Exigences suivies</span></div>
         </div>
       </header>
+
+      <ProdSecurityAuditPanel user={user} id="prod-audit" recordRun={false} />
 
       <div style={{ display: 'grid', gap: 20 }}>
         {PLATFORM_SECURITY_PILLARS.map((pillar) => (

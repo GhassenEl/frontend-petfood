@@ -1,10 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { FileText, Download } from 'lucide-react';
+import { FileText, Download, Shield } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import {
   fetchAdminActivityLogs,
   exportLogsJson,
   exportLogsCsv,
+  logActivity,
 } from '../services/adminService';
 import { ROLE_LABELS } from '../services/activityLogService';
 import './AdminPages.css';
@@ -43,6 +45,8 @@ const ACTION_LABELS = {
   route_start: 'Tournée démarrée',
   flag_abusive: 'Comportement signalé',
   delete_content: 'Contenu supprimé',
+  security_audit_run: 'Audit sécurité exécuté',
+  security_audit_view: 'Consultation journal audit',
 };
 
 const ROLE_OPTIONS = [
@@ -64,17 +68,20 @@ const MODULE_OPTIONS = [
   { id: 'boutique', label: 'Boutique' },
   { id: 'livraison', label: 'Livraison' },
   { id: 'sante', label: 'Santé' },
+  { id: 'audit', label: 'Audit sécurité' },
 ];
 
 const AdminActivityLogsPage = () => {
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
+  const viewLogged = useRef(false);
   const [logs, setLogs] = useState([]);
   const [total, setTotal] = useState(0);
   const [source, setSource] = useState('server');
   const [demo, setDemo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState(searchParams.get('role') || 'all');
-  const [moduleFilter, setModuleFilter] = useState('all');
+  const [moduleFilter, setModuleFilter] = useState(searchParams.get('module') || 'all');
   const [search, setSearch] = useState('');
 
   const load = useCallback(async () => {
@@ -93,6 +100,20 @@ const AdminActivityLogsPage = () => {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    if (!user || viewLogged.current) return;
+    viewLogged.current = true;
+    logActivity({
+      actorRole: user.role,
+      actorId: user.id,
+      actorName: user.name || user.email || 'Admin',
+      action: 'security_audit_view',
+      target: '/admin/activity-logs',
+      details: 'Consultation du journal d\'activité',
+      module: 'audit',
+    });
+  }, [user]);
+
   const exportFilters = { role: roleFilter, module: moduleFilter, search };
 
   return (
@@ -100,10 +121,31 @@ const AdminActivityLogsPage = () => {
       <header className="adm-hero">
         <h1><FileText size={24} /> Journal d&apos;activité {demo && <span className="adm-demo-pill">Cache local</span>}</h1>
         <p>
-          Audit persistant serveur — admin, vendeurs, modérateurs, clients, livreurs et vétérinaires.
+          Audit persistant serveur — accès admin + 2FA. Connexions, produits, suppressions et audits sécurité.
           {source === 'server' && !demo && ' · Source : base de données'}
+          {demo && ' · Mode local — connecter l\'API pour un journal immuable'}
         </p>
       </header>
+
+      {demo && (
+        <div
+          style={{
+            marginBottom: 14,
+            padding: 12,
+            borderRadius: 10,
+            background: '#fffbeb',
+            border: '1px solid #fde68a',
+            fontSize: 13,
+            color: '#92400e',
+            display: 'flex',
+            gap: 8,
+            alignItems: 'center',
+          }}
+        >
+          <Shield size={16} aria-hidden />
+          Journaux en cache local — en production, vérifiez que GET /admin/activity-logs répond depuis le serveur.
+        </div>
+      )}
 
       <div className="adm-export-row">
         <button type="button" className="adm-btn adm-btn--primary adm-btn--sm" onClick={() => exportLogsJson(exportFilters)}>

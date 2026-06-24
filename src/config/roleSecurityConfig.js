@@ -1,6 +1,7 @@
 /** Routes sécurité & profil par rôle PetfoodTN. */
 export const ROLE_PROFILE_ROUTES = {
   admin: '/admin/profile',
+  stock_manager: '/admin/stock/security',
   client: '/client-profile',
   vet: '/vet/profile',
   livreur: '/livreur/profile',
@@ -9,7 +10,8 @@ export const ROLE_PROFILE_ROUTES = {
 };
 
 export const ROLE_SECURITY_HUB_ROUTES = {
-  admin: '/admin/security',
+  admin: '/admin/account-security',
+  stock_manager: '/admin/stock/security',
   client: '/client-security',
   vet: '/vet/security',
   livreur: '/livreur/security',
@@ -26,11 +28,17 @@ export const getPasswordChangeRoute = (role) => {
 export const SECURITY_QUICK_LINKS = {
   admin: [
     { to: '/admin/security', label: 'Centre de sécurité', icon: '🛡️' },
+    { to: '/admin/security-audit', label: 'Audit production', icon: '✅' },
+    { to: '/admin/security-framework#prod-audit', label: 'Cadre + checklist', icon: '📋' },
     { to: '/admin/security-framework', label: 'Cadre sécurité (12 piliers)', icon: '📜' },
     { to: '/admin/database-security', label: 'Sécurité base de données', icon: '🗄️' },
     { to: '/admin/intelligent-security', label: 'Sécurité intelligente', icon: '🧠' },
     { to: '/admin/backups', label: 'Sauvegardes', icon: '💾' },
     { to: '/admin/activity-logs', label: 'Journaux d\'activité', icon: '📋' },
+  ],
+  stock_manager: [
+    { to: '/admin/stock/security', label: 'Sécurité du compte', icon: '🛡️' },
+    { to: '/privacy-policy', label: 'Confidentialité', icon: '🔒' },
   ],
   moderator: [
     { to: '/moderator/fraud', label: 'Centre anti-fraude', icon: '🚨' },

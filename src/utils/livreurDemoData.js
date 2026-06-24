@@ -57,6 +57,119 @@ export const normalizeLivreurDailyChart = (series) => {
   return hasActivity ? normalized : buildDailyChart();
 };
 
+const COMPLETED_DELIVERY_STATUSES = new Set(['delivered', 'paid']);
+const IN_PROGRESS_STATUSES = new Set(['shipped', 'out_for_delivery', 'in_transit', 'processing', 'ready']);
+
+/** Agrège les commandes livreur sur 7 jours pour alimenter les graphiques. */
+export const buildDailyChartFromOrders = (orders = []) => {
+  const now = new Date();
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() - (6 - i));
+    d.setHours(12, 0, 0, 0);
+    return {
+      dateKey: d.toDateString(),
+      label: d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' }),
+      count: 0,
+      commission: 0,
+    };
+  });
+  const byDay = Object.fromEntries(days.map((d) => [d.dateKey, d]));
+  const todayKey = now.toDateString();
+  const bucketFor = (dateKey) => byDay[dateKey] || byDay[todayKey];
+
+  orders.forEach((order) => {
+    const status = String(order?.status || '').toLowerCase();
+    const commission = getLivreurCommission(order);
+
+    if (COMPLETED_DELIVERY_STATUSES.has(status)) {
+      const at = new Date(order.deliveredAt || order.updatedAt || order.createdAt);
+      if (Number.isNaN(at.getTime())) return;
+      const bucket = bucketFor(at.toDateString());
+      if (!bucket) return;
+      bucket.count += 1;
+      bucket.commission += commission;
+      return;
+    }
+
+    if (IN_PROGRESS_STATUSES.has(status)) {
+      const at = new Date(order.updatedAt || order.createdAt || now);
+      const bucket = bucketFor(Number.isNaN(at.getTime()) ? todayKey : at.toDateString());
+      if (!bucket) return;
+      bucket.count += 1;
+      bucket.commission += commission;
+    }
+  });
+
+  return days.map(({ label, count, commission }) => ({ label, count, commission }));
+};
+
+const sumChart = (chart, key) => chart.reduce((s, d) => s + (Number(d[key]) || 0), 0);
+
+/** Enrichit les stats API avec les commandes du dashboard si les séries sont vides. */
+export const enrichLivreurChartStats = (stats, dashboard = null) => {
+  let enriched = withDemoStats(stats);
+  const orders = [
+    ...(dashboard?.active || []),
+    ...(dashboard?.pool || []),
+    ...(dashboard?.recent || []),
+    ...(dashboard?.completed || []),
+  ];
+
+  const chartHasData = enriched.dailyChart?.some((d) => d.count > 0 || d.commission > 0);
+  if (!chartHasData && orders.length > 0) {
+    const derived = buildDailyChartFromOrders(orders);
+    if (derived.some((d) => d.count > 0)) {
+      enriched = {
+        ...enriched,
+        dailyChart: derived,
+        weekDelivered: sumChart(derived, 'count'),
+        weekCommission: sumChart(derived, 'commission'),
+        chartSource: 'orders',
+      };
+    }
+  }
+
+  const stillEmpty = !enriched.dailyChart?.some((d) => d.count > 0 || d.commission > 0);
+  const activeCount = Number(dashboard?.stats?.activeDeliveries || 0);
+  if (stillEmpty && activeCount > 0) {
+    const base = normalizeLivreurDailyChart(enriched.dailyChart);
+    const next = base.length ? [...base] : buildDailyChartFromOrders([]);
+    const todayIdx = Math.max(0, next.length - 1);
+    const rate = enriched.commissionPerDelivery || COMMISSION_PER_DELIVERY;
+    next[todayIdx] = {
+      ...next[todayIdx],
+      count: activeCount,
+      commission: activeCount * rate,
+    };
+    enriched = {
+      ...enriched,
+      dailyChart: next,
+      weekDelivered: activeCount,
+      weekCommission: activeCount * rate,
+      chartSource: 'active',
+    };
+  }
+
+  if (!enriched.statusPie?.length && orders.length > 0) {
+    const breakdown = {};
+    orders.forEach((o) => {
+      const key = String(o.status || 'pending').toLowerCase();
+      breakdown[key] = (breakdown[key] || 0) + 1;
+    });
+    const statusPie = normalizeLivreurStatusBreakdown(breakdown);
+    if (statusPie.length > 0) {
+      enriched = {
+        ...enriched,
+        statusPie,
+        statusBreakdown: Object.fromEntries(statusPie.map((d) => [d.key, d.value])),
+      };
+    }
+  }
+
+  return enriched;
+};
+
 export const LIVREUR_STATUS_LABELS = {
   pending: 'En attente',
   shipped: 'En cours',

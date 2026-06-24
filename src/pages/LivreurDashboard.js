@@ -3,13 +3,10 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
 import { livreurCancelOrder } from '../services/orderService';
-import { withDemoDashboard, withDemoStats } from '../utils/livreurDemoData';
-import LivreurMissionPanel from '../components/LivreurMissionPanel';
-import LivreurDashboardCharts from '../components/LivreurDashboardCharts';
-import DeliveryProofModal from '../components/DeliveryProofModal';
-import { DEMO_LIVREUR_STATS } from '../utils/livreurDemoData';
+import { withDemoDashboard, enrichLivreurChartStats } from '../utils/livreurDemoData';
 import useLivreurGps from '../hooks/useLivreurGps';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import LivreurDashboardCharts from '../components/LivreurDashboardCharts';
 
 const oid = (o) => o?.id || o?._id;
 
@@ -26,16 +23,28 @@ const LivreurDashboard = () => {
   useLivreurGps(isAvailable && (data?.stats?.activeDeliveries > 0 || data?.pool?.length > 0));
 
   useEffect(() => {
-    fetchData();
-    const loadCharts = () => api.get('/livreur/stats')
-      .then(({ data: s }) => setChartStats(withDemoStats(s)))
-      .catch(() => setChartStats(DEMO_LIVREUR_STATS))
-      .finally(() => setChartsLoading(false));
-    loadCharts();
-    const poll = window.setInterval(() => {
-      fetchData();
-      loadCharts();
-    }, 12000);
+    const loadAll = async () => {
+      setChartsLoading(true);
+      try {
+        const [dashRes, statsRes] = await Promise.all([
+          api.get('/livreur/dashboard'),
+          api.get('/livreur/stats'),
+        ]);
+        const dash = withDemoDashboard(dashRes.data);
+        setData(dash);
+        setChartStats(enrichLivreurChartStats(statsRes.data, dash));
+      } catch (error) {
+        console.error('Livreur dashboard error:', error);
+        const dash = withDemoDashboard(null);
+        setData(dash);
+        setChartStats(enrichLivreurChartStats(null, dash));
+      } finally {
+        setLoading(false);
+        setChartsLoading(false);
+      }
+    };
+    loadAll();
+    const poll = window.setInterval(loadAll, 12000);
     return () => window.clearInterval(poll);
   }, []);
 
@@ -45,11 +54,18 @@ const LivreurDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const { data: dash } = await api.get('/livreur/dashboard');
-      setData(withDemoDashboard(dash));
+      const [{ data: dash }, { data: stats }] = await Promise.all([
+        api.get('/livreur/dashboard'),
+        api.get('/livreur/stats'),
+      ]);
+      const normalizedDash = withDemoDashboard(dash);
+      setData(normalizedDash);
+      setChartStats(enrichLivreurChartStats(stats, normalizedDash));
     } catch (error) {
       console.error('Livreur dashboard error:', error);
-      setData(withDemoDashboard(null));
+      const dash = withDemoDashboard(null);
+      setData(dash);
+      setChartStats(enrichLivreurChartStats(null, dash));
     } finally {
       setLoading(false);
     }

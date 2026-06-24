@@ -128,7 +128,7 @@ const VARIANT_CONFIG = {
       role: 'assistant',
       content:
         'Bonjour ! 👋 Je réponds à toutes vos questions — catalogue, nutrition, comparateur, points de vente et produits recommandés selon les **avis clients**.',
-      quickReplies: ['Recommandations', 'Simulateur nutrition', 'Catalogue produits', 'Devenir vendeur'],
+      quickReplies: ['Recommandations', 'Simulateur nutrition', 'Boutique produits', 'Devenir vendeur'],
       products: [],
     }),
   },
@@ -550,7 +550,8 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
     const publicNav = {
       Recommandations: '/register',
       'Simulateur nutrition': '/register',
-      'Catalogue produits': '/register',
+      'Boutique produits': '/client-products',
+      'Catalogue produits': '/client-products',
       'Devenir vendeur': '/vendor#devenir-partenaire',
       'Hub vendeur': '/vendor',
       Connexion: '/login',

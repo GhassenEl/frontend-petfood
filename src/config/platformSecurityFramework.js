@@ -23,7 +23,7 @@ export const PLATFORM_SECURITY_PILLARS = [
       { id: 'bcrypt', label: 'Hachage BCrypt des mots de passe', status: 'partial', route: '/admin/intelligent-security', note: 'Cost 12 côté API — vérification UI' },
       { id: 'password-policy', label: 'Politique de mots de passe forts', status: 'implemented', route: '/register', note: '8+ car., majuscule, minuscule, chiffre, symbole' },
       { id: 'email-verify', label: 'Vérification adresse email', status: 'partial', route: '/verify-email', note: 'Lien de confirmation après inscription' },
-      { id: '2fa', label: '2FA (TOTP, email ou SMS)', status: 'partial', route: '/admin/intelligent-security#2fa', note: 'TOTP actif — canaux email/SMS en déploiement' },
+      { id: '2fa', label: '2FA (TOTP, email ou SMS)', status: 'partial', route: '/admin/account-security#2fa', note: 'Obligatoire admin, stock, vet, livreur, modérateur — gate RoleRoute' },
     ],
   },
   {
@@ -116,6 +116,7 @@ export const PLATFORM_SECURITY_PILLARS = [
       { id: 'products', label: 'Modifications produits', status: 'implemented', route: '/admin/activity-logs' },
       { id: 'deletes', label: 'Suppressions', status: 'implemented', route: '/admin/activity-logs' },
       { id: 'payments', label: 'Paiements', status: 'implemented', route: '/admin/sales' },
+      { id: 'prod-audit', label: 'Audit production (admin + 2FA)', status: 'implemented', route: '/admin/security-audit', note: 'Checklist, export JSON, chaîne d\'intégrité' },
     ],
   },
   {

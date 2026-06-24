@@ -333,7 +333,7 @@ const AdminPriceGovernancePage = () => {
             <BadgeCheck size={15} /> Vérifier tous les prix
           </button>
           <Link to="/admin/products" className="adm-btn adm-btn--ghost" style={{ textDecoration: 'none' }}>
-            Catalogue produits →
+            Gestion produits →
           </Link>
         </div>
         <AdminImportExportBar

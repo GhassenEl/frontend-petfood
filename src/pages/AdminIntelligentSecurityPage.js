@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, CreditCard, Key, MessageSquareOff, LayoutDashboard, Users, ShieldCheck } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import FraudDetectionPanel from '../components/FraudDetectionPanel';
 import JwtAuthSecurityPanel from '../components/JwtAuthSecurityPanel';
 import TwoFactorAuthPanel from '../components/TwoFactorAuthPanel';
@@ -21,6 +22,7 @@ const TABS = [
 ];
 
 const AdminIntelligentSecurityPage = () => {
+  const { user } = useAuth();
   const [tab, setTab] = useState('overview');
   const [pack, setPack] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -111,7 +113,7 @@ const AdminIntelligentSecurityPage = () => {
         {tab === '2fa' && (
           <>
             <h2 style={{ marginTop: 0, fontSize: 18 }}>Authentification à deux facteurs</h2>
-            <TwoFactorAuthPanel enabled={intel?.twoFactorEnabled} />
+            <TwoFactorAuthPanel user={user} mandatory />
           </>
         )}
 

@@ -37,7 +37,7 @@ export const PLATFORM_SERVICES = [
     id: 'products',
     category: 'boutique',
     roles: ['client'],
-    label: 'Catalogue produits',
+    label: 'Boutique produits',
     description: 'Croquettes, accessoires, aliments NAC — filtres par espèce et recommandations IA.',
     route: '/client-products',
     icon: '🏷️',

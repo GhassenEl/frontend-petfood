@@ -171,8 +171,8 @@ const ROLE_GREETINGS = {
       ar: 'مرحباً! أجيب على جميع أسئلتك — الكatalog، التغذية، المقارنة، نقاط البيع، IoT والانضمام كبائع.',
     },
     quickReplies: {
-      fr: ['Recommandations', 'Simulateur nutrition', 'Catalogue produits', 'Devenir vendeur'],
-      en: ['Recommendations', 'Nutrition simulator', 'Product catalog', 'Become a vendor'],
+      fr: ['Recommandations', 'Simulateur nutrition', 'Boutique produits', 'Devenir vendeur'],
+      en: ['Recommendations', 'Nutrition simulator', 'Product shop', 'Become a vendor'],
       ar: ['توصيات', 'محاكي التغذية', 'كتalog المنتجات', 'كن بائعاً'],
     },
   },

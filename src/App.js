@@ -40,6 +40,7 @@ import AdminIntelligentSecurityPage from './pages/AdminIntelligentSecurityPage';
 import AdminDatabaseSecurityPage from './pages/AdminDatabaseSecurityPage';
 import AccountSecurityPage from './pages/AccountSecurityPage';
 import PlatformSecurityFrameworkPage from './pages/PlatformSecurityFrameworkPage';
+import AdminSecurityAuditPage from './pages/AdminSecurityAuditPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import AdminModeratorsPage from './pages/AdminModeratorsPage';
 import AdminLiveAudiencePage from './pages/AdminLiveAudiencePage';
@@ -194,7 +195,6 @@ import SmartFoodAgentPage from './pages/SmartFoodAgentPage';
 import NutriProHistory from './pages/NutriProHistory';
 import ClientRehabilitationPage from './pages/ClientRehabilitationPage';
 import ClientRelayPointsPage from './pages/ClientRelayPointsPage';
-import ClientProductPacksPage from './pages/ClientProductPacksPage';
 import ClientOwnerEmotionsPage from './pages/ClientOwnerEmotionsPage';
 import LivreurMlPage from './pages/LivreurMlPage';
 import LivreurIntelligenceHubPage from './pages/LivreurIntelligenceHubPage';
@@ -319,6 +319,7 @@ const App = () => {
       <Route path="/admin/complaints" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminComplaints /></AdminLayout></RoleRoute>} />
       <Route path="/admin/products" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminProducts /></AdminLayout></RoleRoute>} />
       <Route path="/admin/stock" element={<RoleRoute user={user} roles={['admin', 'stock_manager']}><AdminLayout><AdminStockPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/stock/security" element={<RoleRoute user={user} roles={['admin', 'stock_manager']}><AdminLayout><AccountSecurityPage role="stock_manager" /></AdminLayout></RoleRoute>} />
       <Route path="/admin/food-quality" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><FoodQualitySurveillancePage role="admin" /></AdminLayout></RoleRoute>} />
       <Route path="/admin/delivery-cold-chain" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><DeliveryColdChainSurveillancePage role="admin" /></AdminLayout></RoleRoute>} />
       <Route path="/admin/sales" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminSalesPage /></AdminLayout></RoleRoute>} />
@@ -333,6 +334,7 @@ const App = () => {
       <Route path="/admin/intelligent-security" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminIntelligentSecurityPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/database-security" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDatabaseSecurityPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/security-framework" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><PlatformSecurityFrameworkPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/security-audit" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminSecurityAuditPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/account-security" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AccountSecurityPage role="admin" /></AdminLayout></RoleRoute>} />
       <Route path="/admin/moderators" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminModeratorsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/activity-logs" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminActivityLogsPage /></AdminLayout></RoleRoute>} />
@@ -415,7 +417,7 @@ const App = () => {
       <Route path="/nutripro-history" element={<RoleRoute user={user} roles={['client']}><ClientLayout><NutriProHistory /></ClientLayout></RoleRoute>} />
       <Route path="/client-rehabilitation" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientRehabilitationPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-relay-points" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientRelayPointsPage /></ClientLayout></RoleRoute>} />
-      <Route path="/client-product-packs" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientProductPacksPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-product-packs" element={<Navigate to="/client-products#packs-produits" replace />} />
       <Route path="/client-traceability" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientTraceabilityPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-iot" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientIoTHubPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-esp32cam-food-quality" element={<Navigate to="/client-iot?tab=food-quality" replace />} />

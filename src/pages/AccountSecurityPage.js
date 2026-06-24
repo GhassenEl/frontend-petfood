@@ -1,11 +1,15 @@
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { Shield, Lock, Wifi, FileText } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Shield, Lock, Wifi, FileText, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import JwtAuthSecurityPanel from '../components/JwtAuthSecurityPanel';
+import TwoFactorAuthPanel from '../components/TwoFactorAuthPanel';
+import ProdSecurityAuditPanel from '../components/ProdSecurityAuditPanel';
 import { getStoredToken } from '../utils/authStorage';
 import { validateTokenClaims, VALID_ROLES, ROLE_LABELS } from '../utils/jwtSecurity';
 import { isSecureConnection } from '../utils/platformSecurityLayer';
+import { is2FARequiredForRole } from '../utils/twoFactorPolicy';
+import { canAccessAuditFeatures } from '../utils/auditSecurityPolicy';
 import {
   getPasswordChangeRoute,
   SECURITY_QUICK_LINKS,
@@ -21,8 +25,12 @@ const CHECKS = [
 
 const AccountSecurityPage = ({ role: roleProp }) => {
   const { user } = useAuth();
+  const location = useLocation();
   const role = roleProp || user?.role || 'client';
   const secure = isSecureConnection();
+  const mandatory2fa = is2FARequiredForRole(role);
+  const require2faBanner = Boolean(location.state?.require2fa) && mandatory2fa;
+  const auditBlocked = Boolean(location.state?.auditBlocked);
 
   const jwt = useMemo(() => {
     const token = getStoredToken();
@@ -63,6 +71,33 @@ const AccountSecurityPage = ({ role: roleProp }) => {
         </p>
       </header>
 
+      {(require2faBanner || auditBlocked) && (
+        <div
+          style={{
+            marginBottom: 20,
+            padding: 14,
+            borderRadius: 12,
+            background: '#fff7ed',
+            border: '1px solid #fed7aa',
+            color: '#9a3412',
+            fontSize: 14,
+            display: 'flex',
+            gap: 10,
+            alignItems: 'flex-start',
+          }}
+        >
+          <AlertTriangle size={20} style={{ flexShrink: 0 }} aria-hidden />
+          <div>
+            <strong>{auditBlocked ? 'Accès audit refusé' : 'Configuration 2FA requise'}</strong>
+            <p style={{ margin: '6px 0 0', fontSize: 13 }}>
+              {auditBlocked
+                ? 'Les journaux et l\'audit production exigent un compte administrateur avec 2FA active.'
+                : 'Votre rôle exige l\'authentification à deux facteurs. Activez-la ci-dessous pour continuer.'}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 20 }}>
         <div className="ais-panel-wrap" style={{ padding: 16, textAlign: 'center' }}>
           <Wifi size={22} color={secure ? '#059669' : '#dc2626'} aria-hidden />
@@ -91,6 +126,20 @@ const AccountSecurityPage = ({ role: roleProp }) => {
         <h2 style={{ margin: '0 0 14px', fontSize: '1.05rem' }}>Session &amp; authentification</h2>
         <JwtAuthSecurityPanel jwt={jwt} loading={false} />
       </div>
+
+      {mandatory2fa && (
+        <TwoFactorAuthPanel user={user} mandatory />
+      )}
+
+      {canAccessAuditFeatures(user) && (
+        <ProdSecurityAuditPanel user={user} recordRun={false} />
+      )}
+
+      {role === 'admin' && !canAccessAuditFeatures(user) && (
+        <div className="ais-panel-wrap" style={{ marginBottom: 20, fontSize: 13, color: '#64748b' }}>
+          <strong>Audit production</strong> — activez la 2FA pour débloquer la checklist et les journaux sensibles.
+        </div>
+      )}
 
       <div className="ais-panel-wrap" style={{ marginBottom: 20 }}>
         <h2 style={{ margin: '0 0 14px', fontSize: '1.05rem' }}>Protections actives</h2>

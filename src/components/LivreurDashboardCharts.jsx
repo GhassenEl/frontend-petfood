@@ -82,6 +82,33 @@ const LivreurDashboardCharts = ({ stats, loading }) => {
     [statusData],
   );
 
+  const chartEmpty = dailyChart.length === 0
+    || dailyChart.every((d) => !(Number(d.count) || Number(d.commission)));
+
+  const maxDeliveries = Math.max(1, ...dailyChart.map((d) => d.count || 0));
+  const maxCommission = Math.max(5, ...dailyChart.map((d) => d.commission || 0));
+
+  const EmptyChart = ({ message }) => (
+    <div style={{
+      height: 240,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#94a3b8',
+      fontSize: 14,
+      textAlign: 'center',
+      padding: 16,
+    }}
+    >
+      <span style={{ fontSize: 32, marginBottom: 8 }}>📊</span>
+      <p style={{ margin: '0 0 10px' }}>{message}</p>
+      <Link to="/livreur/orders" style={{ color: '#059669', fontWeight: 700, fontSize: 13 }}>
+        Voir les commandes →
+      </Link>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="card-animal" style={{ padding: 24, marginBottom: 24, textAlign: 'center', color: '#64748b' }}>
@@ -123,8 +150,20 @@ const LivreurDashboardCharts = ({ stats, loading }) => {
           <p style={{ margin: '0 0 16px', fontSize: '0.8rem', color: '#64748b' }}>
             {stats.weekDelivered ?? 0} livraison(s) · {stats.weekCommission ?? 0} DT cette semaine
           </p>
+          {stats.chartSource === 'orders' && (
+            <p style={{ margin: '0 0 8px', fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>
+              Données calculées depuis vos commandes en cours
+            </p>
+          )}
+          {stats.chartSource === 'active' && (
+            <p style={{ margin: '0 0 8px', fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>
+              Livraisons actives comptabilisées sur aujourd&apos;hui
+            </p>
+          )}
           <ChartFrame height={240}>
-            {(width) => (
+            {(width) => (chartEmpty ? (
+              <EmptyChart message="Aucune livraison enregistrée sur les 7 derniers jours." />
+            ) : (
               <ComposedChart width={width} height={240} data={dailyChart} margin={{ top: 8, right: 12, left: -4, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
@@ -135,6 +174,7 @@ const LivreurDashboardCharts = ({ stats, loading }) => {
                   tickLine={false}
                   allowDecimals={false}
                   width={32}
+                  domain={[0, maxDeliveries + 1]}
                 />
                 <YAxis
                   yAxisId="right"
@@ -144,6 +184,7 @@ const LivreurDashboardCharts = ({ stats, loading }) => {
                   tickLine={false}
                   width={36}
                   unit=" DT"
+                  domain={[0, Math.ceil(maxCommission / 5) * 5 + 5]}
                 />
                 <Tooltip
                   contentStyle={tooltipStyle}
@@ -171,7 +212,7 @@ const LivreurDashboardCharts = ({ stats, loading }) => {
                   dot={{ r: 3, fill: '#059669' }}
                 />
               </ComposedChart>
-            )}
+            ))}
           </ChartFrame>
         </div>
 
@@ -181,7 +222,9 @@ const LivreurDashboardCharts = ({ stats, loading }) => {
             Commission {stats.commissionPerDelivery ?? 5} DT / livraison
           </p>
           <ChartFrame height={240}>
-            {(width) => (
+            {(width) => (chartEmpty ? (
+              <EmptyChart message="Pas encore de gains cette semaine." />
+            ) : (
               <LineChart width={width} height={240} data={dailyChart} margin={{ top: 8, right: 12, left: -4, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
@@ -191,6 +234,7 @@ const LivreurDashboardCharts = ({ stats, loading }) => {
                   tickLine={false}
                   width={36}
                   unit=" DT"
+                  domain={[0, Math.ceil(maxCommission / 5) * 5 + 5]}
                 />
                 <Tooltip
                   contentStyle={tooltipStyle}
@@ -206,7 +250,7 @@ const LivreurDashboardCharts = ({ stats, loading }) => {
                   activeDot={{ r: 6 }}
                 />
               </LineChart>
-            )}
+            ))}
           </ChartFrame>
         </div>
 

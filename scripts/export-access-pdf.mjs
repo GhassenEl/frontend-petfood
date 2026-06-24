@@ -19,7 +19,7 @@ const accounts = [
     email: 'client@petfood.tn',
     password: 'MonChat123!',
     name: 'Sami Ben Ali',
-    home: '/client-dashboard',
+    home: '/client-products',
   },
   {
     role: 'Vétérinaire',

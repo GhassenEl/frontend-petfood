@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
-import { withDemoStats, DEMO_LIVREUR_STATS } from '../utils/livreurDemoData';
+import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import { enrichLivreurChartStats, withDemoDashboard } from '../utils/livreurDemoData';
 import LivreurDashboardCharts from '../components/LivreurDashboardCharts';
 
 const LivreurStatsPage = () => {
@@ -11,11 +12,14 @@ const LivreurStatsPage = () => {
 
   const fetchStats = async () => {
     try {
-      const { data } = await api.get('/livreur/stats');
-      setStats(withDemoStats(data));
+      const [statsRes, dashRes] = await Promise.all([
+        api.get('/livreur/stats'),
+        api.get('/livreur/dashboard').catch(() => ({ data: null })),
+      ]);
+      setStats(enrichLivreurChartStats(statsRes.data, withDemoDashboard(dashRes.data)));
     } catch (error) {
       console.error('Stats error:', error);
-      setStats(DEMO_LIVREUR_STATS);
+      setStats(enrichLivreurChartStats(null, withDemoDashboard(null)));
     } finally {
       setLoading(false);
     }
