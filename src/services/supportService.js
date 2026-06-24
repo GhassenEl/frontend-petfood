@@ -4,6 +4,7 @@ import api from '../utils/api';
 import { DEMO_SUPPORT_TICKETS, DEMO_SUPPORT_ASSIST_QUEUE } from '../utils/supportDemoData';
 import { DEMO_COMPLAINTS } from '../utils/clientDemoData';
 import { fetchAdminRefunds } from './refundService';
+import { resolveApiCall } from '../utils/liveDataResolver';
 
 const TICKET_KEY = 'petfood_support_tickets';
 let memoryTickets = null;
@@ -26,13 +27,7 @@ const getTickets = () => {
   return memoryTickets;
 };
 
-const withDemo = async (apiCall, fallback) => {
-  try {
-    return { data: await apiCall(), demo: false };
-  } catch {
-    return { data: fallback(), demo: true };
-  }
-};
+const withDemo = async (apiCall, fallback) => resolveApiCall(apiCall, fallback);
 
 export const fetchSupportTickets = () =>
   withDemo(

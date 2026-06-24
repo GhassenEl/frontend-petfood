@@ -1,5 +1,7 @@
 /** Données démo modération — utilisateurs, vendeurs, contenu, signalements. */
 
+import { allowDemoFallback } from '../config/liveDataPolicy';
+import { withDemoFallback } from './liveDataResolver';
 import { DEMO_ADMIN_USERS, DEMO_ADMIN_VENDORS } from './adminDemoData';
 
 const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString();
@@ -221,10 +223,10 @@ export const getModeratorDemoStore = () => {
   return modStore;
 };
 
-export const withDemoModeratorStats = (data) => ({
-  ...DEMO_MODERATOR_STATS,
-  ...(data || {}),
-});
+export const withDemoModeratorStats = (data) => (
+  allowDemoFallback()
+    ? { ...DEMO_MODERATOR_STATS, ...(data || {}) }
+    : (data || {})
+);
 
-export const withDemoModeratorQueue = (items) =>
-  Array.isArray(items) && items.length > 0 ? items : DEMO_MODERATOR_QUEUE;
+export const withDemoModeratorQueue = (items) => withDemoFallback(items, DEMO_MODERATOR_QUEUE);

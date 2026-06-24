@@ -2,6 +2,7 @@
 
 import api from '../utils/api';
 import { PRODUCT_CATEGORIES } from '../constants/productCategories';
+import { resolveApiCall } from '../utils/liveDataResolver';
 
 const STORAGE_KEY = 'petfood_categories';
 
@@ -27,13 +28,7 @@ const getStore = () => {
   return memory;
 };
 
-const withDemo = async (apiCall, fallback) => {
-  try {
-    return { data: await apiCall(), demo: false };
-  } catch {
-    return { data: fallback(), demo: true };
-  }
-};
+const withDemo = async (apiCall, fallback) => resolveApiCall(apiCall, fallback);
 
 export const fetchCategories = () =>
   withDemo(

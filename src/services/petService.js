@@ -2,6 +2,7 @@
 
 import api from '../utils/api';
 import { DEMO_NUTRITION_PETS } from '../utils/clientDemoData';
+import { resolveApiCall } from '../utils/liveDataResolver';
 
 const STORAGE_KEY = 'petfood_client_pets';
 
@@ -48,14 +49,7 @@ const normalizePet = (pet) => {
   };
 };
 
-const withDemo = async (apiCall, fallbackFn) => {
-  try {
-    const data = await apiCall();
-    return { data, demo: false };
-  } catch {
-    return { data: fallbackFn(), demo: true };
-  }
-};
+const withDemo = async (apiCall, fallbackFn) => resolveApiCall(apiCall, fallbackFn);
 
 export const fetchClientPets = () =>
   withDemo(

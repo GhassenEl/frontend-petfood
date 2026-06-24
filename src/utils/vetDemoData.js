@@ -1,9 +1,6 @@
 /** Données de démonstration lorsque l'API renvoie des listes vides (espace vétérinaire). */
 
-export const withDemoFallback = (data, demo) => {
-  if (Array.isArray(data) && data.length > 0) return data;
-  return demo;
-};
+export { withDemoFallback } from './liveDataResolver';
 
 const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString();
 const hoursFromNow = (h) => new Date(Date.now() + h * 3600000).toISOString();

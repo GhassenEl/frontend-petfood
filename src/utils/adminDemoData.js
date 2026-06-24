@@ -1,11 +1,12 @@
 /** Données de démonstration lorsque l'API renvoie des listes vides (espace admin). */
 
+import { allowDemoFallback } from '../config/liveDataPolicy';
+import { mergeBiCharts, withDemoFallback } from './liveDataResolver';
 import {
   DEMO_ORDERS,
   DEMO_INVOICES,
   DEMO_REVIEWS,
   DEMO_COMPLAINTS,
-  withDemoFallback,
 } from './clientDemoData';
 import { DEMO_LIVREUR_LEAVE_REQUESTS } from './livreurDemoData';
 
@@ -759,24 +760,18 @@ export const buildDemoAdminMessages = (adminId = 'demo-admin-1') => [
 
 export const withDemoStats = (data) => {
   if (data?.totalOrders > 0 || data?.totalRevenue > 0) return data;
-  return DEMO_ADMIN_STATS;
+  return allowDemoFallback() ? DEMO_ADMIN_STATS : (data ?? {});
 };
 
 /** Fusionne les graphiques Power BI admin (API ou démo). */
 export const mergeAdminBiCharts = (apiCharts) => {
   const base = DEMO_ADMIN_ANALYTICS.biCharts;
-  if (!apiCharts) return base;
-  return {
-    topMedications: apiCharts.topMedications?.length ? apiCharts.topMedications : base.topMedications,
-    topDiseases: apiCharts.topDiseases?.length ? apiCharts.topDiseases : base.topDiseases,
-    animalDistribution: apiCharts.animalDistribution?.length ? apiCharts.animalDistribution : base.animalDistribution,
-    regionDistribution: apiCharts.regionDistribution?.length ? apiCharts.regionDistribution : base.regionDistribution,
-  };
+  return mergeBiCharts(apiCharts, base);
 };
 
 export const withDemoUserStats = (data) => {
   if (data?.count > 0) return data;
-  return DEMO_ADMIN_USER_STATS;
+  return allowDemoFallback() ? DEMO_ADMIN_USER_STATS : (data ?? { count: 0 });
 };
 
 export const buildDemoHistoryEntries = () => {

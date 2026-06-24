@@ -1,6 +1,7 @@
 import api from '../utils/api';
 import { getDemoVendorStore } from '../utils/vendorDemoData';
 import { logActivity } from './activityLogService';
+import { resolveApiCall } from '../utils/liveDataResolver';
 
 let demoStore = null;
 
@@ -12,15 +13,9 @@ const ensureDemoStore = () => {
 const uid = (prefix) => `${prefix}-${Date.now().toString(36)}`;
 
 const withDemo = async (apiCall, fallbackFn, logFn) => {
-  try {
-    const data = await apiCall();
-    if (logFn) logFn(data);
-    return { data, demo: false };
-  } catch {
-    const data = fallbackFn();
-    if (logFn) logFn(data);
-    return { data, demo: true };
-  }
+  const result = await resolveApiCall(apiCall, fallbackFn);
+  if (logFn) logFn(result.data);
+  return result;
 };
 
 const vendorLog = (action, target, details = '') => {

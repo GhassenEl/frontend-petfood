@@ -1,5 +1,8 @@
 /** Données de démonstration lorsque l'API renvoie des listes vides (espace livreur). */
 
+import { allowDemoFallback } from '../config/liveDataPolicy';
+import { withDemoFallback } from './liveDataResolver';
+
 export const COMMISSION_PER_DELIVERY = 5;
 
 const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString();
@@ -25,7 +28,9 @@ const buildDailyChart = () => {
 
 /** Normalise les séries API (clés variables) pour Recharts. */
 export const normalizeLivreurDailyChart = (series) => {
-  if (!Array.isArray(series) || series.length === 0) return buildDailyChart();
+  if (!Array.isArray(series) || series.length === 0) {
+    return allowDemoFallback() ? buildDailyChart() : [];
+  }
 
   const normalized = series.map((d, i) => {
     const count = Number(
@@ -48,6 +53,7 @@ export const normalizeLivreurDailyChart = (series) => {
   });
 
   const hasActivity = normalized.some((d) => d.count > 0 || d.commission > 0);
+  if (!hasActivity && !allowDemoFallback()) return normalized;
   return hasActivity ? normalized : buildDailyChart();
 };
 
@@ -104,6 +110,8 @@ export const normalizeLivreurStatusBreakdown = (breakdown) => {
     .filter((d) => d.value > 0);
 
   if (pie.length > 0) return pie;
+
+  if (!allowDemoFallback()) return [];
 
   return [
     { key: 'delivered', name: LIVREUR_STATUS_LABELS.delivered, value: base.delivered || 1, color: STATUS_COLOR_MAP.delivered },
@@ -414,12 +422,23 @@ export const buildDemoLivreurMessages = (livreurId = 'livreur-demo') => [
   },
 ];
 
-export const withDemoFallback = (data, demo) => {
-  if (Array.isArray(data) && data.length > 0) return data;
-  return demo;
-};
+export { withDemoFallback };
 
 export const withDemoStats = (data) => {
+  if (!allowDemoFallback()) {
+    if (!data) {
+      return { dailyChart: [], statusPie: [], statusBreakdown: {} };
+    }
+    const dailyChart = normalizeLivreurDailyChart(data.dailyChart);
+    const statusPie = normalizeLivreurStatusBreakdown(data.statusBreakdown);
+    return {
+      ...data,
+      dailyChart,
+      statusPie,
+      statusBreakdown: Object.fromEntries(statusPie.map((d) => [d.key, d.value])),
+    };
+  }
+
   const base = DEMO_LIVREUR_STATS;
   if (!data) {
     return {
@@ -452,10 +471,10 @@ export const withDemoDashboard = (data) => {
   if (data?.stats && (data.pool?.length || data.active?.length || data.stats.todayDeliveries > 0)) {
     return data;
   }
-  return DEMO_LIVREUR_DASHBOARD;
+  return allowDemoFallback() ? DEMO_LIVREUR_DASHBOARD : (data || { stats: {}, pool: [], active: [] });
 };
 
 export const withDemoRoute = (data) => {
   if (data?.stops?.length) return data;
-  return DEMO_LIVREUR_ROUTE;
+  return allowDemoFallback() ? DEMO_LIVREUR_ROUTE : (data || { stops: [] });
 };

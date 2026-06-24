@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import CookieConsentBanner from './components/CookieConsentBanner';
 import SessionExpiryBanner from './components/SessionExpiryBanner';
+import LiveDataBanner from './components/LiveDataBanner';
 import GlobalPlatformChat from './components/GlobalPlatformChat';
 import LoginPage from './pages/LoginPage.js';
 import RegisterPage from './pages/RegisterPage.jsx';
@@ -231,6 +232,7 @@ const App = () => {
       <>
       <CookieConsentBanner />
       <SessionExpiryBanner />
+      <LiveDataBanner />
       <GlobalPlatformChat />
       <Suspense fallback={<PageLoader />}>
       <Routes>
@@ -274,6 +276,7 @@ const App = () => {
     <>
     <CookieConsentBanner />
     <SessionExpiryBanner />
+    <LiveDataBanner />
     <GlobalPlatformChat />
     <Suspense fallback={<PageLoader />}>
     <Routes>

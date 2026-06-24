@@ -1742,10 +1742,7 @@ export const DEMO_SUBSCRIPTIONS = [
   },
 ];
 
-export const withDemoFallback = (data, demo) => {
-  if (Array.isArray(data) && data.length > 0) return data;
-  return demo;
-};
+export { withDemoFallback } from './liveDataResolver';
 
 export const buildDemoHistory = () => [
   {

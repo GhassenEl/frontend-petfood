@@ -6,6 +6,7 @@ import {
 } from '../utils/moderatorDemoData';
 
 import { logActivity } from './activityLogService';
+import { resolveApiCall } from '../utils/liveDataResolver';
 
 let demoStore = null;
 
@@ -16,14 +17,7 @@ const ensureStore = () => {
 
 const uid = (prefix) => `${prefix}-${Date.now().toString(36)}`;
 
-const withDemo = async (apiCall, fallbackFn) => {
-  try {
-    const data = await apiCall();
-    return { data, demo: false };
-  } catch {
-    return { data: fallbackFn(), demo: true };
-  }
-};
+const withDemo = async (apiCall, fallbackFn) => resolveApiCall(apiCall, fallbackFn);
 
 const logAction = (action, target, moderator = 'Modérateur') => {
   const s = ensureStore();

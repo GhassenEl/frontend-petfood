@@ -22,7 +22,7 @@ import {
   processPayPalPayment,
   processTunisianPayment,
 } from '../utils/onlinePayment';
-import { DEMO_ADMIN_COUPONS } from '../utils/adminDemoData';
+import { validateCouponCode } from '../services/couponService';
 import { getWallet } from '../services/walletService';
 
 const CART_STORAGE_KEY = 'petfood_cart';
@@ -54,6 +54,7 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
   const [promoCode, setPromoCode] = useState('');
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoMessage, setPromoMessage] = useState('');
+  const [promoLoading, setPromoLoading] = useState(false);
   const cart = Array.isArray(cartProp) && cartProp.length > 0 ? cartProp : storedCart;
   const computedSubtotal = cart.reduce(
     (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
@@ -146,29 +147,26 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
     return false;
   };
 
-  const applyPromoCode = () => {
+  const applyPromoCode = async () => {
     const code = promoCode.trim().toUpperCase();
     if (!code) {
       setPromoDiscount(0);
       setPromoMessage('');
       return;
     }
-    const coupon = DEMO_ADMIN_COUPONS.find((c) => c.code === code && c.active);
-    if (!coupon) {
-      setPromoDiscount(0);
-      setPromoMessage('Code invalide ou expiré.');
-      return;
+    setPromoLoading(true);
+    try {
+      const result = await validateCouponCode(code, subtotal);
+      if (!result.valid) {
+        setPromoDiscount(0);
+        setPromoMessage(result.message || 'Code invalide ou expiré.');
+        return;
+      }
+      setPromoDiscount(result.discount);
+      setPromoMessage(result.message);
+    } finally {
+      setPromoLoading(false);
     }
-    if (subtotal < coupon.minOrder) {
-      setPromoMessage(`Commande minimum ${coupon.minOrder} DT pour ce code.`);
-      setPromoDiscount(0);
-      return;
-    }
-    const discount = coupon.type === 'percent'
-      ? Number((subtotal * coupon.value / 100).toFixed(2))
-      : Math.min(coupon.value, subtotal);
-    setPromoDiscount(discount);
-    setPromoMessage(`Code ${code} appliqué — −${discount.toFixed(2)} DT`);
   };
 
   const handleCheckout = async () => {
@@ -434,8 +432,8 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
             onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
             style={{ flex: '1 1 180px', padding: '12px 14px', borderRadius: 12, border: '2px solid #e5e7eb' }}
           />
-          <button type="button" onClick={applyPromoCode} style={{ padding: '12px 18px', borderRadius: 12, border: 'none', background: '#e67e22', color: 'white', fontWeight: 700, cursor: 'pointer' }}>
-            Appliquer
+          <button type="button" onClick={applyPromoCode} disabled={promoLoading} style={{ padding: '12px 18px', borderRadius: 12, border: 'none', background: '#e67e22', color: 'white', fontWeight: 700, cursor: promoLoading ? 'wait' : 'pointer', opacity: promoLoading ? 0.7 : 1 }}>
+            {promoLoading ? '…' : 'Appliquer'}
           </button>
         </div>
         {promoMessage && (
