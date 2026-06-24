@@ -11,15 +11,21 @@ import {
 } from 'recharts';
 import api from '../utils/api';
 import {
-  fetchFeederFirebaseLatest,
   fetchFeederFirebaseStatus,
-  mergeFeederWithFirebaseGrandeurs,
 } from '../services/feederFirebaseService';
 import {
-  getDemoFeederList,
+  fetchFeederList,
+  fetchFeederBundle,
+  dispenseFeeder,
+  applyFeederSchedules,
+} from '../services/feederService';
+import {
   getDemoFeederBundle,
   DEMO_FEEDER_PETS,
 } from '../utils/clientDemoData';
+import { allowDemoFallback } from '../config/liveDataPolicy';
+import { computeSuggestedPortion, buildDefaultAutoSchedules } from '../utils/autoFeederEngine';
+import AutoDistributionPanel from '../components/AutoDistributionPanel';
 import FeederRealtimeAlerts from '../components/FeederRealtimeAlerts';
 import {
   FeederLiveBowl,
@@ -72,61 +78,42 @@ const PetFeederPage = () => {
   }, []);
 
   const loadFeeders = useCallback(async () => {
-    try {
-      const { data } = await api.get('/feeder');
-      const list = data || [];
-      if (list.length === 0) {
-        const demoList = getDemoFeederList();
-        setDemoMode(true);
-        setFeeders(demoList);
-        if (!selectedId) setSelectedId(demoList[0].id);
-        return;
-      }
-      setDemoMode(false);
-      setFeeders(list);
-      if (!selectedId) setSelectedId(list[0].id);
-    } catch (e) {
-      console.error(e);
-      const demoList = getDemoFeederList();
-      setDemoMode(true);
-      setFeeders(demoList);
-      if (!selectedId) setSelectedId(demoList[0].id);
-    }
+    const { list, demo } = await fetchFeederList();
+    setDemoMode(demo);
+    setFeeders(list);
+    if (list.length > 0 && !selectedId) setSelectedId(list[0].id);
   }, [selectedId]);
 
   const loadFeederDetail = useCallback(async (id, silent = false) => {
     if (!id) return;
     if (!silent) setLoading(true);
     if (demoMode || isDemoFeederId(id)) {
-      applyDemoBundle(getDemoFeederBundle());
+      if (allowDemoFallback()) {
+        applyDemoBundle(getDemoFeederBundle(id));
+      }
       if (!silent) setLoading(false);
       return;
     }
     try {
-      const [detailRes, planRes, statsRes, alertsRes, historyRes, petsRes, fbLatestRes] = await Promise.all([
-        api.get(`/feeder/${id}`),
-        api.get(`/feeder/${id}/nutrition-plan`),
-        api.get(`/feeder/${id}/stats?days=7`),
-        api.get(`/feeder/${id}/alerts`),
-        api.get(`/feeder/${id}/history?limit=40`),
-        api.get('/pets').catch(() => ({ data: [] })),
-        fetchFeederFirebaseLatest(id).catch(() => ({ firebaseEnabled: false, grandeurs: null })),
-      ]);
-      const mergedFeeder = mergeFeederWithFirebaseGrandeurs(detailRes.data, fbLatestRes);
-      setFeeder(mergedFeeder);
-      setFirebaseEnabled(Boolean(fbLatestRes?.firebaseEnabled));
-      setFirebaseRecordedAt(fbLatestRes?.recordedAt || mergedFeeder?.firebaseRecordedAt || null);
-      setFeederName(detailRes.data.name || '');
-      setPlan(planRes.data);
-      setStats(statsRes.data);
-      setAlerts(alertsRes.data || []);
-      setHistory(historyRes.data || []);
+      const bundle = await fetchFeederBundle(id);
+      if (!bundle) {
+        if (!silent) setLoading(false);
+        return;
+      }
+      const petsRes = await api.get('/pets').catch(() => ({ data: [] }));
+      setFeeder(bundle.feeder);
+      setFeederName(bundle.feeder?.name || '');
+      setPlan(bundle.plan);
+      setStats(bundle.stats);
+      setAlerts(bundle.alerts || []);
+      setHistory(bundle.history || []);
       setPets(petsRes.data || []);
-      if (planRes.data?.portionGrams) setGrams(planRes.data.portionGrams);
+      if (bundle.plan?.portionGrams) setGrams(bundle.plan.portionGrams);
+      setDemoMode(Boolean(bundle.demo));
     } catch (e) {
       console.error(e);
-      if (isDemoFeederId(id)) {
-        applyDemoBundle(getDemoFeederBundle());
+      if (allowDemoFallback()) {
+        applyDemoBundle(getDemoFeederBundle(id));
       }
     } finally {
       if (!silent) setLoading(false);
@@ -216,11 +203,11 @@ const PetFeederPage = () => {
     }
   };
 
-  const dispense = async () => {
+  const dispense = async (gramsOverride) => {
     if (!selectedId) return;
+    const portion = gramsOverride ?? grams;
     if (demoMode) {
       setActionLoading(true);
-      const portion = grams;
       setFeeder((prev) => {
         if (!prev) return prev;
         const nextPct = Math.max(5, (prev.reservoirPercent ?? 42) - Math.round(portion / 8));
@@ -253,7 +240,7 @@ const PetFeederPage = () => {
     }
     setActionLoading(true);
     try {
-      await api.post(`/feeder/${selectedId}/dispense`, { grams });
+      await dispenseFeeder(selectedId, portion);
       await loadFeederDetail(selectedId, true);
     } catch (e) {
       window.alert(e?.response?.data?.error || 'Commande échouée');
@@ -297,12 +284,14 @@ const PetFeederPage = () => {
   const applySchedules = async () => {
     if (!selectedId) return;
     if (demoMode) {
-      window.alert('Planning automatique appliqué (simulation démo).');
+      const autoSchedules = buildDefaultAutoSchedules(plan);
+      setFeeder((prev) => (prev ? { ...prev, schedules: autoSchedules } : prev));
+      window.alert(`Planning automatique activé : ${autoSchedules.map((s) => s.time).join(', ')}`);
       return;
     }
     setActionLoading(true);
     try {
-      await api.post(`/feeder/${selectedId}/apply-schedules`);
+      await applyFeederSchedules(selectedId);
       await loadFeederDetail(selectedId, true);
     } catch (e) {
       window.alert('Impossible d\'appliquer le planning');
@@ -380,6 +369,16 @@ const PetFeederPage = () => {
 
   const scheduleSlots = getScheduleSlots(feeder?.schedules || [], history);
   const nextMeal = getNextMeal(scheduleSlots);
+  const suggestedPortion = computeSuggestedPortion({
+    plan,
+    stats,
+    slots: scheduleSlots,
+    reservoirLow: feeder?.isLowFood,
+  });
+
+  useEffect(() => {
+    if (suggestedPortion?.grams) setGrams(suggestedPortion.grams);
+  }, [suggestedPortion.grams, selectedId]);
   const habitAnalysis = feeder ? analyzeFeederHabits({
     feeder,
     stats,
@@ -484,6 +483,18 @@ const PetFeederPage = () => {
           ) : feeder && (
             <>
               <FeederRealtimeAlerts alerts={realtimeAlerts} realtime />
+
+              <AutoDistributionPanel
+                plan={plan}
+                stats={stats}
+                slots={scheduleSlots}
+                nextMeal={nextMeal}
+                reservoirLow={feeder.isLowFood}
+                autoEnabled={(feeder.schedules || []).some((s) => s.enabled !== false)}
+                loading={actionLoading}
+                onDispense={(g) => dispense(g)}
+                onApplySchedules={applySchedules}
+              />
 
               <FeederPipelineStrip />
 
@@ -631,6 +642,7 @@ const PetFeederPage = () => {
                     Quantité (grammes)
                     <input type="number" min={5} max={200} value={grams} onChange={(e) => setGrams(Number(e.target.value))} style={inputStyle} />
                   </label>
+                  <p style={{ fontSize: 12, color: '#64748b', margin: '8px 0 0' }}>{suggestedPortion.reason}</p>
                   <button type="button" onClick={dispense} disabled={actionLoading || (!demoMode && feeder.isLowFood)} style={{ ...btnPrimary, width: '100%', marginTop: 12, opacity: (!demoMode && feeder.isLowFood) ? 0.5 : 1 }}>
                     Distribuer maintenant
                   </button>

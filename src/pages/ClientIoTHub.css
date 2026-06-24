@@ -3261,3 +3261,44 @@
 .nh-tips {
   margin-bottom: 16px;
 }
+
+/* Distribution automatique intelligente */
+.fd-auto-panel__track {
+  height: 10px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.fd-auto-panel__fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.fd-auto-panel__fill--on_track { background: linear-gradient(90deg, #059669, #34d399); }
+.fd-auto-panel__fill--behind { background: linear-gradient(90deg, #d97706, #fbbf24); }
+.fd-auto-panel__fill--low { background: linear-gradient(90deg, #dc2626, #f87171); }
+.fd-auto-panel__fill--high { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+
+.fd-auto-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 12px;
+  border: 1px solid #d1fae5;
+}
+
+.fd-auto-stat strong {
+  font-size: 1.1rem;
+  color: #0f172a;
+}
+
+.fd-auto-stat span {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.3;
+}

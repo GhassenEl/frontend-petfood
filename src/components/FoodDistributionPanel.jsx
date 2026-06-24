@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Play, Calendar, Package, ChevronRight, AlertTriangle, CheckCircle2, Clock,
@@ -26,6 +26,12 @@ import {
   generateNutritionTips,
 } from '../utils/nutritionHydrationEngine';
 import { PLATFORM_IMAGES } from '../utils/platformImages';
+import AutoDistributionPanel from './AutoDistributionPanel';
+import {
+  fetchFeederBundle,
+  dispenseFeeder,
+  applyFeederSchedules,
+} from '../services/feederService';
 
 const COMPLEMENTS = [
   { icon: '🦴', label: 'Friandises dentaires', stock: 85, color: '#f59e0b' },
@@ -334,9 +340,37 @@ export const NutritionWaterSynergyCard = ({ synergy, petName }) => (
 const FoodDistributionPanel = ({ pack = {}, demoMode = false }) => {
   const feederDevice = (pack.devices || []).find((d) => d.type === 'feeder');
   const camDevice = (pack.devices || []).find((d) => d.type === 'feeder-cam');
+  const feederId = feederDevice?.id;
+  const [liveData, setLiveData] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const refreshLive = useCallback(async () => {
+    if (!feederId || demoMode || String(feederId).startsWith('demo-')) return;
+    const bundle = await fetchFeederBundle(feederId);
+    if (bundle) setLiveData(bundle);
+  }, [feederId, demoMode]);
+
+  useEffect(() => {
+    if (!feederId || demoMode || String(feederId).startsWith('demo-')) {
+      setLiveData(null);
+      return undefined;
+    }
+    let cancelled = false;
+    const load = async () => {
+      const bundle = await fetchFeederBundle(feederId);
+      if (!cancelled && bundle) setLiveData(bundle);
+    };
+    load();
+    const iv = setInterval(load, 15000);
+    return () => {
+      cancelled = true;
+      clearInterval(iv);
+    };
+  }, [feederId, demoMode]);
+
   const demoBundle = demoMode ? getDemoFeederBundle() : null;
 
-  const feeder = demoBundle?.feeder || {
+  const feeder = liveData?.feeder || demoBundle?.feeder || {
     name: feederDevice?.name,
     status: feederDevice?.status,
     reservoirPercent: feederDevice?.metrics?.reservoirPercent,
@@ -344,13 +378,45 @@ const FoodDistributionPanel = ({ pack = {}, demoMode = false }) => {
     animalPresent: false,
     temperature: feederDevice?.metrics?.temperature,
   };
-  const stats = demoBundle?.stats || {
+  const stats = liveData?.stats || demoBundle?.stats || {
     todayGrams: feederDevice?.metrics?.todayGrams ?? 0,
     dailyAverage: feederDevice?.metrics?.avgDailyGrams ?? 65,
   };
-  const plan = demoBundle?.plan || DEMO_FEEDER_PLAN;
+  const plan = liveData?.plan || demoBundle?.plan || DEMO_FEEDER_PLAN;
   const schedules = feeder?.schedules || DEMO_FEEDER_SCHEDULE;
-  const history = demoBundle?.history || DEMO_FEEDER_HISTORY_LOGS;
+  const history = liveData?.history || demoBundle?.history || DEMO_FEEDER_HISTORY_LOGS;
+
+  const handleDispense = async (grams) => {
+    if (demoMode || !feederId) {
+      window.location.href = '/pet-feeder';
+      return;
+    }
+    setActionLoading(true);
+    try {
+      await dispenseFeeder(feederId, grams);
+      await refreshLive();
+    } catch {
+      window.alert('Distribution échouée — vérifiez la connexion ESP32.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleApplySchedules = async () => {
+    if (demoMode || !feederId) {
+      window.location.href = '/pet-feeder';
+      return;
+    }
+    setActionLoading(true);
+    try {
+      await applyFeederSchedules(feederId);
+      await refreshLive();
+    } catch {
+      window.alert('Impossible d\'appliquer le planning automatique.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const slots = useMemo(() => getScheduleSlots(schedules, history), [schedules, history]);
   const nextMeal = useMemo(() => getNextMeal(slots), [slots]);
@@ -463,6 +529,18 @@ const FoodDistributionPanel = ({ pack = {}, demoMode = false }) => {
       </div>
 
       <FeederPipelineStrip />
+
+      <AutoDistributionPanel
+        plan={plan}
+        stats={stats}
+        slots={slots}
+        nextMeal={nextMeal}
+        reservoirLow={feeder?.isLowFood}
+        autoEnabled={(feeder?.schedules || schedules).some((s) => s.enabled !== false)}
+        loading={actionLoading}
+        onDispense={handleDispense}
+        onApplySchedules={handleApplySchedules}
+      />
 
       <div className="fd-panel__grid">
         <FeederLiveBowl
