@@ -3,7 +3,7 @@
 export const ROLE_HOMES = {
   admin: '/admin/dashboard',
   stock_manager: '/admin/stock',
-  client: '/client-dashboard',
+  client: '/client-products',
   livreur: '/livreur/dashboard',
   vet: '/vet/dashboard',
   vendor: '/vendor/dashboard',

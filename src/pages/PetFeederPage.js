@@ -421,7 +421,7 @@ const PetFeederPage = () => {
           <Link to="/client-iot" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: 'white', borderRadius: 10, border: '1px solid #bfdbfe' }}>
             📡 Centre IoT
           </Link>
-          <Link to="/client-iot?tab=detection" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: 'white', borderRadius: 10, border: '1px solid #bfdbfe' }}>
+          <Link to="/client-iot?tab=food-quality" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: 'white', borderRadius: 10, border: '1px solid #bfdbfe' }}>
             📷 ESP32-CAM & afficheur
           </Link>
           <Link to="/client-smart-water" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: 'white', borderRadius: 10, border: '1px solid #bfdbfe' }}>

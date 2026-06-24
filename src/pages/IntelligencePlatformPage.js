@@ -93,7 +93,7 @@ const IntelligencePlatformPage = () => {
 
   return (
     <div className="ip-page">
-      <Link to={user ? (role === 'admin' ? '/admin/dashboard' : '/client-dashboard') : '/'} className="ip-back">
+      <Link to={user ? (role === 'admin' ? '/admin/dashboard' : '/client-products') : '/'} className="ip-back">
         ← Retour
       </Link>
 

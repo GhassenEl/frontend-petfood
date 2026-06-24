@@ -37,7 +37,7 @@ export const PLATFORM_SECURITY_PILLARS = [
     items: [
       { id: 'admin', label: 'Administrateur', status: 'implemented', route: '/admin/dashboard' },
       { id: 'stock_manager', label: 'Gestionnaire de stock', status: 'implemented', route: '/admin/stock' },
-      { id: 'client', label: 'Client', status: 'implemented', route: '/client-dashboard' },
+      { id: 'client', label: 'Client', status: 'implemented', route: '/client-products' },
       { id: 'livreur', label: 'Livreur', status: 'implemented', route: '/livreur/dashboard' },
       { id: 'vendor', label: 'Vendeur marketplace', status: 'implemented', route: '/vendor/dashboard' },
       { id: 'vet', label: 'Vétérinaire', status: 'implemented', route: '/vet/dashboard' },

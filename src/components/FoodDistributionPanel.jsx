@@ -649,7 +649,7 @@ const FoodDistributionPanel = ({ pack = {}, demoMode = false }) => {
       <div className="fd-actions">
         <QuickAction to="/pet-feeder" icon={<Play size={18} />} label="Distribuer maintenant" sub={`Portion suggérée ${plan?.portionGrams || 30} g`} primary />
         <QuickAction to="/pet-feeder" icon={<Package size={18} />} label="Recharger le réservoir" sub="Enregistrer une recharge" />
-        <QuickAction to="/client-iot?tab=detection" icon="📷" label="Contrôle qualité ESP32-CAM" sub={qualityScore != null ? `Score ${qualityScore}/100` : 'Surveillance bac'} />
+        <QuickAction to="/client-iot?tab=food-quality" icon="📷" label="Contrôle qualité ESP32-CAM" sub={qualityScore != null ? `Score ${qualityScore}/100` : 'Surveillance bac'} />
         <QuickAction to="/client-smart-water" icon={<Droplets size={18} />} label="Hydratation liée" sub={waterTracking ? `${waterTracking.todayMl} ml · ${waterTracking.percentOfTarget ?? synergy.waterPct} % objectif` : 'Fontaine connectée'} />
         <QuickAction to="/pet-adaptive-nutrition" icon="🥗" label="Plan nutritionnel IA" sub={`${dailyTarget} g/jour · ${plan?.mealsPerDay || 3} repas`} />
       </div>

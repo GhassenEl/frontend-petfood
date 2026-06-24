@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const HOME = {
   admin: '/admin/dashboard',
-  client: '/client-dashboard',
+  client: '/client-products',
   livreur: '/livreur/dashboard',
   vet: '/vet/dashboard',
   vendor: '/vendor/dashboard',

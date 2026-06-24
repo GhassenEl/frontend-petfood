@@ -2,12 +2,6 @@
 
 export const CLIENT_SIDEBAR_SECTIONS = [
   {
-    title: '🏠 Accueil',
-    items: [
-      { id: 'client-dashboard', label: 'Catalogue produits', icon: '🛍️' },
-    ],
-  },
-  {
     title: '🛒 Boutique',
     items: [
       { id: 'client-products', label: 'Produits', icon: '🏷️' },
@@ -24,7 +18,7 @@ export const CLIENT_SIDEBAR_SECTIONS = [
     items: [
       { id: 'client-iot', label: 'Centre IoT', icon: '📡' },
       { id: 'pet-feeder', label: 'Distributeur ESP32', icon: '🍽️' },
-      { id: 'client-esp32cam-food-quality', label: 'ESP32-CAM & afficheur', icon: '📷', route: '/client-iot?tab=detection' },
+      { id: 'client-esp32cam-food-quality', label: 'Qualité alimentaire', icon: '📷', route: '/client-iot?tab=food-quality' },
       { id: 'client-smart-water', label: 'Consommation eau', icon: '💧' },
       { id: 'client-wearable', label: 'Colliers santé', icon: '📿', route: '/client-iot?tab=wearable' },
       { id: 'client-traceability', label: 'Traçabilité', icon: '🔗' },

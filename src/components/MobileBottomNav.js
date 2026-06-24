@@ -86,7 +86,7 @@ const MobileBottomNav = ({ items = [] }) => {
 };
 
 export const CLIENT_MOBILE_NAV = [
-  { id: 'home', to: '/client-dashboard', icon: '🛍️', label: 'Catalogue' },
+  { id: 'home', to: '/client-products', icon: '🏷️', label: 'Boutique' },
   { id: 'products', to: '/client-products', icon: '🏷️', label: 'Boutique' },
   { id: 'orders', to: '/client-orders', icon: '📦', label: 'Commandes' },
   { id: 'vet', to: '/veterinary', icon: '🩺', label: 'Veto' },
@@ -97,7 +97,7 @@ export const CLIENT_MOBILE_NAV = [
 export const CLIENT_IOT_MOBILE_NAV = [
   { id: 'iot', to: '/client-iot', icon: '📡', label: 'IoT', match: '/client-iot', matchQuery: 'tab=distribution' },
   { id: 'feeder', to: '/pet-feeder', icon: '🍽️', label: 'Distrib.', match: '/pet-feeder' },
-  { id: 'cam', to: '/client-iot?tab=detection', icon: '📷', label: 'Caméra', matchQuery: 'tab=detection' },
+  { id: 'cam', to: '/client-iot?tab=food-quality', icon: '📷', label: 'Qualité', matchQuery: 'tab=food-quality' },
   { id: 'water', to: '/client-smart-water', icon: '💧', label: 'Eau', match: '/client-smart-water' },
   { id: 'mobile', to: '/mobile#iot', icon: '📱', label: 'App', match: '/mobile' },
 ];

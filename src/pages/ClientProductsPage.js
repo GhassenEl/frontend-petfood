@@ -59,8 +59,7 @@ const PET_LABELS = {
   other: 'animal',
 };
 
-const ClientProductsPage = ({ variant = 'catalog' }) => {
-  const isHomeCatalog = variant === 'home';
+const ClientProductsPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
@@ -293,12 +292,10 @@ const ClientProductsPage = ({ variant = 'catalog' }) => {
       >
         <div style={{ position: 'relative', zIndex: 1 }}>
           <h1 style={{ fontSize: '36px', fontWeight: 800, color: '#065f46', margin: '0 0 8px' }}>
-            {isHomeCatalog ? '🛍️ Catalogue produits' : '🛒 Nos Produits'}
+            🛒 Nos Produits
           </h1>
           <p style={{ fontSize: '16px', color: '#6b7280', margin: '0 0 10px' }}>
-            {isHomeCatalog
-              ? 'Croquettes, accessoires, jouets — photos réelles, promos et vendeurs marketplace'
-              : 'Découvrez notre sélection premium pour vos animaux'}
+            Croquettes, accessoires, jouets — photos réelles, promos et vendeurs marketplace
           </p>
           <Link
             to="/client-rse"
@@ -321,8 +318,7 @@ const ClientProductsPage = ({ variant = 'catalog' }) => {
         </div>
       </motion.div>
 
-      {isHomeCatalog && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
           {[
             { id: 'all', label: '🏠 Tout le catalogue' },
             { id: 'croquettes', label: '🥣 Croquettes' },
@@ -365,7 +361,6 @@ const ClientProductsPage = ({ variant = 'catalog' }) => {
             🔥 Promotions
           </button>
         </div>
-      )}
 
       {profile?.petType && (
         <motion.div
@@ -387,60 +382,6 @@ const ClientProductsPage = ({ variant = 'catalog' }) => {
             {inStockSoldes.length} promotion{inStockSoldes.length > 1 ? 's' : ''} en cours · produits triés selon votre profil
           </p>
         </motion.div>
-      )}
-
-      <RecommendationPipelinePanel
-        role="client"
-        limit={6}
-        catalog={products}
-        onSelectItem={(item) => {
-          const match = products.find((p) => productId(p) === String(item.id || item._id));
-          if (match) setSelectedProduct(match);
-        }}
-      />
-
-      {frequent.length > 0 && !promoOnly && (
-        <Section title="🔄 Vos achats fréquents" titleColor="#0369a1" icon={<Sparkles size={20} />}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
-            {frequent.map((product) => (
-              <ProductCard
-                key={`freq-${productId(product)}`}
-                product={product}
-                onAdd={addToCart}
-                onOrder={orderProduct}
-                onVendor={openVendor}
-                onLike={likeProduct}
-                isLiked={favoriteIds.has(productId(product))}
-                getPrice={getPrice}
-                profilePetType={profilePetType}
-                onView={setSelectedProduct}
-              />
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* Promotions en premier */}
-      {inStockSoldes.length > 0 && !promoOnly && (
-        <Section title={`🔥 Promotions (${inStockSoldes.length})`} titleColor="#dc2626" icon={<Flame size={20} />}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
-            {inStockSoldes.map((product) => (
-              <ProductCard
-                key={`promo-${productId(product)}`}
-                product={product}
-                onAdd={addToCart}
-                onOrder={orderProduct}
-                onVendor={openVendor}
-                onLike={likeProduct}
-                isLiked={favoriteIds.has(productId(product))}
-                getPrice={getPrice}
-                isPromo
-                profilePetType={profilePetType}
-                onView={setSelectedProduct}
-              />
-            ))}
-          </div>
-        </Section>
       )}
 
       {/* Search */}
@@ -535,7 +476,6 @@ const ClientProductsPage = ({ variant = 'catalog' }) => {
             fontWeight: 700,
             cursor: 'pointer',
             fontSize: 13,
-            marginLeft: 'auto',
           }}
         >
           <Flame size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
@@ -543,42 +483,10 @@ const ClientProductsPage = ({ variant = 'catalog' }) => {
         </button>
       </div>
 
-      {/* Recommendations */}
-      {inStockRecommendations.length > 0 && (
-        <Section title="✨ Recommandés pour vous (contenu + similaires)" titleColor="#059669" icon={<Sparkles size={20} />}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
-            {inStockRecommendations.map(product => (
-              <ProductCard key={`rec-${productId(product)}`} product={product} onAdd={addToCart} onOrder={orderProduct} onVendor={openVendor} onLike={likeProduct} isLiked={favoriteIds.has(productId(product))} getPrice={getPrice} isRec onView={setSelectedProduct} />
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* Nearby */}
-      {inStockNearby.length > 0 && (
-        <Section title="📍 Près de chez vous — magasin assigné automatiquement" titleColor="#8b5cf6" icon={<MapPin size={20} />}>
-          <div style={{
-            marginBottom: 16,
-            padding: '14px 18px',
-            borderRadius: 14,
-            background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)',
-            border: '1px solid #c4b5fd',
-            fontSize: 14,
-            color: '#5b21b6',
-          }}>
-            🏪 Votre magasin le plus proche : <strong>{DEMO_NEAREST_STORE.name}</strong> ({DEMO_NEAREST_STORE.distanceKm} km)
-            — {DEMO_NEAREST_STORE.address} · ouvert jusqu&apos;à {DEMO_NEAREST_STORE.openUntil}
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
-            {inStockNearby.map(product => (
-              <ProductCard key={`near-${productId(product)}`} product={product} onAdd={addToCart} onOrder={orderProduct} onVendor={openVendor} onLike={likeProduct} isLiked={favoriteIds.has(productId(product))} getPrice={getPrice} isNearby onView={setSelectedProduct} />
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* All Products */}
-      <Section title={`Tous les produits (${sortedAllProducts.length})`} titleColor="#374151">
+      <Section
+        title={`Tous les produits (${sortedAllProducts.length})`}
+        titleColor="#374151"
+      >
         {sortedAllProducts.length === 0 ? (
           <p style={{ textAlign: 'center', color: '#9ca3af', padding: '40px', fontSize: '15px' }}>
             {promoOnly ? 'Aucune promotion ne correspond à vos filtres.' : 'Aucun produit disponible pour l’instant (stock insuffisant).'}
@@ -603,6 +511,108 @@ const ClientProductsPage = ({ variant = 'catalog' }) => {
           </div>
         )}
       </Section>
+
+      {inStockSoldes.length > 0 && !promoOnly && (
+        <Section title={`🔥 Promotions (${inStockSoldes.length})`} titleColor="#dc2626" icon={<Flame size={20} />}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+            {inStockSoldes.map((product) => (
+              <ProductCard
+                key={`promo-${productId(product)}`}
+                product={product}
+                onAdd={addToCart}
+                onOrder={orderProduct}
+                onVendor={openVendor}
+                onLike={likeProduct}
+                isLiked={favoriteIds.has(productId(product))}
+                getPrice={getPrice}
+                isPromo
+                profilePetType={profilePetType}
+                onView={setSelectedProduct}
+              />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {frequent.length > 0 && !promoOnly && (
+        <Section title="🔄 Vos achats fréquents" titleColor="#0369a1" icon={<Sparkles size={20} />}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+            {frequent.map((product) => (
+              <ProductCard
+                key={`freq-${productId(product)}`}
+                product={product}
+                onAdd={addToCart}
+                onOrder={orderProduct}
+                onVendor={openVendor}
+                onLike={likeProduct}
+                isLiked={favoriteIds.has(productId(product))}
+                getPrice={getPrice}
+                profilePetType={profilePetType}
+                onView={setSelectedProduct}
+              />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* Recommandations — après le catalogue */}
+      {inStockRecommendations.length > 0 && (
+        <Section title="✨ Produits recommandés pour vous" titleColor="#059669" icon={<Sparkles size={20} />}>
+          <p style={{ margin: '0 0 16px', fontSize: 14, color: '#64748b' }}>
+            Sélection IA selon votre profil, vos achats et les avis clients.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+            {inStockRecommendations.map((product) => (
+              <ProductCard
+                key={`rec-${productId(product)}`}
+                product={product}
+                onAdd={addToCart}
+                onOrder={orderProduct}
+                onVendor={openVendor}
+                onLike={likeProduct}
+                isLiked={favoriteIds.has(productId(product))}
+                getPrice={getPrice}
+                isRec
+                profilePetType={profilePetType}
+                onView={setSelectedProduct}
+              />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      <RecommendationPipelinePanel
+        role="client"
+        limit={6}
+        catalog={products}
+        onSelectItem={(item) => {
+          const match = products.find((p) => productId(p) === String(item.id || item._id));
+          if (match) setSelectedProduct(match);
+        }}
+      />
+
+      {/* Nearby */}
+      {inStockNearby.length > 0 && (
+        <Section title="📍 Près de chez vous — magasin assigné automatiquement" titleColor="#8b5cf6" icon={<MapPin size={20} />}>
+          <div style={{
+            marginBottom: 16,
+            padding: '14px 18px',
+            borderRadius: 14,
+            background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)',
+            border: '1px solid #c4b5fd',
+            fontSize: 14,
+            color: '#5b21b6',
+          }}>
+            🏪 Votre magasin le plus proche : <strong>{DEMO_NEAREST_STORE.name}</strong> ({DEMO_NEAREST_STORE.distanceKm} km)
+            — {DEMO_NEAREST_STORE.address} · ouvert jusqu&apos;à {DEMO_NEAREST_STORE.openUntil}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+            {inStockNearby.map(product => (
+              <ProductCard key={`near-${productId(product)}`} product={product} onAdd={addToCart} onOrder={orderProduct} onVendor={openVendor} onLike={likeProduct} isLiked={favoriteIds.has(productId(product))} getPrice={getPrice} isNearby onView={setSelectedProduct} />
+            ))}
+          </div>
+        </Section>
+      )}
 
       <ProductDetailModal
         product={selectedProduct}
@@ -833,7 +843,7 @@ const ProductCard = ({ product, onAdd, onOrder, onVendor, onLike, getPrice, isPr
               onClick={(e) => { e.stopPropagation(); onView?.(product); }}
               style={{
                 flex: 1,
-                padding: '10px',
+                padding: '11px',
                 border: '2px solid #e5e7eb',
                 borderRadius: '12px',
                 background: 'white',
@@ -851,49 +861,51 @@ const ProductCard = ({ product, onAdd, onOrder, onVendor, onLike, getPrice, isPr
             </button>
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); onVendor?.(product); }}
+              onClick={(e) => { e.stopPropagation(); onOrder?.(product); }}
+              disabled={!product.stock}
               style={{
-                flex: 1,
-                padding: '10px',
-                border: '2px solid #c7d2fe',
+                flex: 1.2,
+                padding: '11px',
+                border: 'none',
                 borderRadius: '12px',
-                background: '#eef2ff',
-                color: '#4338ca',
-                fontWeight: 700,
+                color: 'white',
+                fontWeight: 800,
                 fontSize: '13px',
-                cursor: 'pointer',
+                cursor: product.stock ? 'pointer' : 'not-allowed',
+                background: product.stock
+                  ? (isPromo ? 'linear-gradient(135deg,#dc2626,#b91c1c)' : 'linear-gradient(135deg,#10b981,#059669)')
+                  : '#9ca3af',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '4px',
+                boxShadow: product.stock ? '0 4px 14px rgba(16,185,129,0.3)' : 'none',
               }}
             >
-              <Store size={14} /> Vendeur
+              <ShoppingCart size={14} />
+              {product.stock ? 'Passer commande' : 'Rupture'}
             </button>
           </div>
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); onOrder?.(product); }}
-            disabled={!product.stock}
+            onClick={(e) => { e.stopPropagation(); onVendor?.(product); }}
             style={{
               width: '100%',
-              padding: '12px',
+              padding: '8px',
               border: 'none',
-              borderRadius: '12px',
-              color: 'white',
-              fontWeight: 800,
-              fontSize: '14px',
-              cursor: product.stock ? 'pointer' : 'not-allowed',
-              background: product.stock ? (isPromo ? 'linear-gradient(135deg,#dc2626,#b91c1c)' : 'linear-gradient(135deg,#10b981,#059669)') : '#9ca3af',
+              borderRadius: '10px',
+              background: 'transparent',
+              color: '#4338ca',
+              fontWeight: 700,
+              fontSize: '12px',
+              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '6px',
-              boxShadow: product.stock ? '0 4px 14px rgba(16,185,129,0.35)' : 'none',
+              gap: '4px',
             }}
           >
-            <ShoppingCart size={16} />
-            {product.stock ? 'Passer commande' : 'Rupture de stock'}
+            <Store size={13} /> Voir le vendeur
           </button>
         </div>
       </div>

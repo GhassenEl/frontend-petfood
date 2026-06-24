@@ -163,7 +163,6 @@ import AdminCategoriesPage from './pages/AdminCategoriesPage';
 import AdminVetsPage from './pages/AdminVetsPage';
 import AdminRegionalContactsPage from './pages/AdminRegionalContactsPage';
 import ClientReturnsPage from './pages/ClientReturnsPage';
-import ClientDashboardPage from './pages/ClientDashboardPage';
 import ClientFamilyPage from './pages/ClientFamilyPage';
 import ClientSubscriptionsPage from './pages/ClientSubscriptionsPage';
 import ClientSmartCommercePage from './pages/ClientSmartCommercePage';
@@ -369,7 +368,7 @@ const App = () => {
       <Route path="/admin/profile" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminProfilePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/platform-services" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><PlatformServicesPage /></AdminLayout></RoleRoute>} />
 
-      <Route path="/client-dashboard" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientDashboardPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-dashboard" element={<Navigate to="/client-products" replace />} />
       <Route path="/client-family" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientFamilyPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-subscriptions" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSubscriptionsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-products" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientProductsPage /></ClientLayout></RoleRoute>} />
@@ -419,7 +418,7 @@ const App = () => {
       <Route path="/client-product-packs" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientProductPacksPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-traceability" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientTraceabilityPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-iot" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientIoTHubPage /></ClientLayout></RoleRoute>} />
-      <Route path="/client-esp32cam-food-quality" element={<Navigate to="/client-iot?tab=detection" replace />} />
+      <Route path="/client-esp32cam-food-quality" element={<Navigate to="/client-iot?tab=food-quality" replace />} />
       <Route path="/client-smart-water" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSmartWaterPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-smart-delivery" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSmartDeliveryPage /></ClientLayout></RoleRoute>} />
       <Route path="/contact" element={

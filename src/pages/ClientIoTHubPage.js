@@ -12,6 +12,7 @@ import IoTInsightsPanel from '../components/IoTInsightsPanel';
 import IoTSensorTimelinePanel from '../components/IoTSensorTimelinePanel';
 import IoTAutomationRulesPanel from '../components/IoTAutomationRulesPanel';
 import IoTFoodQualityCamPanel from '../components/IoTFoodQualityCamPanel';
+import IoTFoodQualityHubStrip from '../components/IoTFoodQualityHubStrip';
 import AdvancedIoTDevicesPanel from '../components/AdvancedIoTDevicesPanel';
 import IoTLiveStatusBar from '../components/IoTLiveStatusBar';
 import IoTAnomalyPanel from '../components/IoTAnomalyPanel';
@@ -41,8 +42,8 @@ const card = {
 
 const TABS = [
   { id: 'distribution', label: 'Distribution nourriture', shortLabel: 'Distrib.' },
+  { id: 'food-quality', label: 'Qualité alimentaire', shortLabel: 'Qualité' },
   { id: 'devices', label: 'Appareils', shortLabel: 'Appareils' },
-  { id: 'detection', label: 'ESP32-CAM & afficheur', shortLabel: 'Caméra' },
   { id: 'wearable', label: 'Colliers santé', shortLabel: 'Colliers' },
   { id: 'environment', label: 'Environnement', shortLabel: 'Env.' },
   { id: 'security', label: 'Sécurité', shortLabel: 'Sécu.' },
@@ -100,7 +101,7 @@ const ClientIoTHubPage = () => {
 
   useEffect(() => {
     const t = searchParams.get('tab');
-    if (t === 'food-quality') setTab('detection');
+    if (t === 'food-quality' || t === 'detection') setTab('food-quality');
     else if (t === 'security') setTab('security');
     else if (t === 'wearable') setTab('wearable');
     else if (t && TABS.some((x) => x.id === t)) setTab(t);
@@ -132,7 +133,7 @@ const ClientIoTHubPage = () => {
           <div className="iot-hub-hero__copy">
             <h1>📡 Centre IoT PetfoodTN</h1>
             <p>
-              Distributeur ESP32 · ESP32-CAM · colliers santé (SpO₂, rythme cardiaque) · fontaines connectées,
+              Distributeur ESP32 · qualité alimentaire ESP32-CAM · colliers santé · fontaines connectées,
               environnement, registre appareils et commandes à distance.
             </p>
             {!loading && d.healthScore != null && (
@@ -183,6 +184,9 @@ const ClientIoTHubPage = () => {
             className={`iot-tab${tab === t.id ? ' is-active' : ''}`}
           >
             {isMobile ? t.shortLabel : t.label}
+            {t.id === 'food-quality' && (
+              <span className="iot-tab-badge" style={{ background: '#ecfdf5', color: '#059669' }}>LIVE</span>
+            )}
             {t.id === 'wearable' && (c.wearablesOnline || 0) > 0 && (
               <span className="iot-tab-badge" style={{ background: '#ecfdf5', color: '#059669' }}>{c.wearablesOnline}</span>
             )}
@@ -298,10 +302,10 @@ const ClientIoTHubPage = () => {
                   badge={d.mode === 'demo' ? 'Démo' : null}
                 />
                 <IoTModuleCard
-                  to="/client-iot?tab=detection"
+                  to="/client-iot?tab=food-quality"
                   icon="📷"
-                  title="ESP32-CAM & afficheur"
-                  subtitle="Détection nourriture réelle → affichage OLED local."
+                  title="Qualité alimentaire ESP32-CAM"
+                  subtitle="Score qualité, température, humidité et afficheur OLED."
                   status="Surveillance active"
                   statusColor="#7c3aed"
                 />
@@ -371,10 +375,13 @@ const ClientIoTHubPage = () => {
             <IoTDevicesRegistryPanel devices={d.devices || []} demoMode={d.mode === 'demo'} />
           )}
 
-          {tab === 'detection' && (
-            <div className="iot-card">
-              <IoTFoodQualityCamPanel loading={loading} />
-            </div>
+          {tab === 'food-quality' && (
+            <>
+              <IoTFoodQualityHubStrip />
+              <div className="iot-card">
+                <IoTFoodQualityCamPanel loading={loading} />
+              </div>
+            </>
           )}
 
           {tab === 'wearable' && (

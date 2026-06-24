@@ -35,7 +35,7 @@ export const ROLE_PROFILE_CONFIG = {
       { key: 'bio', label: 'À propos de moi', placeholder: 'Quelques mots sur vous et vos compagnons…', type: 'textarea' },
     ],
     quickLinks: [
-      { to: '/client-dashboard', label: 'Mon espace', icon: '🏠' },
+      { to: '/client-products', label: 'Mon espace', icon: '🏠' },
       { to: '/client-security', label: 'Sécurité', icon: '🛡️' },
       { to: '/client-pets', label: 'Mes animaux', icon: '🐕' },
       { to: '/client-recommendations', label: 'Recommandations', icon: '✨' },
