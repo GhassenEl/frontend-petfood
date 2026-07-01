@@ -1,13 +1,10 @@
 name: DevSecOps
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_call:
+  workflow_dispatch:
   schedule:
     - cron: '0 3 * * 1'
-  workflow_dispatch:
 
 permissions:
   contents: read

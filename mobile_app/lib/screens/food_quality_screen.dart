@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import '../utils/date_format_utils.dart';
 import '../models/food_quality.dart';
 import '../services/auth_service.dart';
-import '../services/food_quality_engine.dart';
 import '../widgets/food_quality_ai_panel.dart';
 import '../widgets/petfood_lcd_card.dart';
 import '../services/food_quality_repository.dart';
@@ -69,23 +68,9 @@ class _FoodQualityScreenState extends State<FoodQualityScreen> with SingleTicker
 
   Future<void> _refreshLive() async {
     try {
-      FoodQualityReading reading;
-      if (_state?.mode == 'live') {
-        final state = await _repo.fetchState();
-        if (!mounted) return;
-        setState(() => _state = state);
-        return;
-      }
-      reading = FoodQualityEngine.simulate();
+      final state = await _repo.fetchState();
       if (!mounted) return;
-      setState(() {
-        _state = FoodQualityState(
-          mode: _state?.mode ?? 'demo',
-          current: reading,
-          history: [reading, ...(_state?.history ?? []).take(19)],
-          device: _state?.device,
-        );
-      });
+      setState(() => _state = state);
     } catch (_) {}
   }
 
@@ -256,7 +241,6 @@ class _ScoreTab extends StatelessWidget {
           children: [
             _MetricChip(Icons.thermostat, '${cur.temperatureC?.toStringAsFixed(1) ?? '—'} °C'),
             _MetricChip(Icons.water_drop, '${cur.humidityPct?.round() ?? '—'} % HR'),
-            _MetricChip(Icons.inventory_2, 'Stock ${cur.stockLevelPct ?? '—'} %'),
             _MetricChip(Icons.bug_report, 'Insectes ${((cur.insectPixelRatio ?? 0) * 100).toStringAsFixed(2)} %'),
           ],
         ),
@@ -505,7 +489,7 @@ class _JournalTab extends StatelessWidget {
             leading: CircleAvatar(backgroundColor: c.withValues(alpha: 0.15), child: Text('${r.qualityScore}', style: TextStyle(color: c, fontWeight: FontWeight.bold, fontSize: 12))),
             title: Text(r.aiClassLabel),
             subtitle: Text(
-              'Stock ${r.stockLevelPct ?? '—'} % · Péremption ${r.expirationDaysRemaining ?? '—'} j'
+              'Péremption ${r.expirationDaysRemaining ?? '—'} j'
               '${r.moldDetected == true ? ' · Moisissure IA' : ''}',
             ),
             trailing: Text(_fmt(r.analyzedAt), style: const TextStyle(fontSize: 11)),
@@ -567,5 +551,5 @@ Color _scoreColor(int score) {
 
 String _fmt(DateTime? d) {
   if (d == null) return '—';
-  return DateFormat('dd/MM HH:mm').format(d);
+  return DateFormatUtils.formatDateTimeShort(d);
 }

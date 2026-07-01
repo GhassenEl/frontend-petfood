@@ -66,7 +66,7 @@ const ClientProductsPage = () => {
   const [searchParams] = useSearchParams();
   const [recommendations, setRecommendations] = useState([]);
   const [nearby, setNearby] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(() => searchParams.get('q') || '');
   const [animalFilter, setAnimalFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [promoOnly, setPromoOnly] = useState(false);
@@ -85,6 +85,8 @@ const ClientProductsPage = () => {
 
   useEffect(() => {
     const cat = searchParams.get('category');
+    const q = searchParams.get('q');
+    if (q) setSearchTerm(q);
     if (cat && CATEGORY_FILTERS.some((f) => f.id === cat)) {
       setCategoryFilter(cat);
     }

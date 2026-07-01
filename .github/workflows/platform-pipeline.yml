@@ -1,0 +1,89 @@
+name: Platform Pipeline
+
+# Pipeline DevOps unifié PetfoodTN — CI → DevSecOps → E2E → Readiness → ECR → AWS ECS
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      skip_deploy:
+        description: 'Ignorer publish ECR + deploy AWS'
+        type: boolean
+        default: false
+
+concurrency:
+  group: platform-pipeline-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+  security-events: write
+
+jobs:
+  ci:
+    name: '① CI · Build & tests'
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  security:
+    name: '② DevSecOps · Scans'
+    uses: ./.github/workflows/security.yml
+    secrets: inherit
+
+  e2e:
+    name: '③ E2E · Playwright'
+    uses: ./.github/workflows/e2e.yml
+    needs: [ci]
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    secrets: inherit
+
+  readiness:
+    name: '④ Readiness · Gate production'
+    uses: ./.github/workflows/deployment-readiness.yml
+    needs: [ci, security]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    secrets: inherit
+
+  publish-ecr:
+    name: '⑤ CD · Publish Amazon ECR'
+    uses: ./.github/workflows/publish-ecr.yml
+    needs: [ci, security, readiness]
+    if: >
+      github.ref == 'refs/heads/main' &&
+      github.event_name != 'pull_request' &&
+      inputs.skip_deploy != true
+    secrets: inherit
+
+  deploy-aws:
+    name: '⑥ CD · Deploy AWS ECS'
+    uses: ./.github/workflows/deploy-aws.yml
+    needs: [publish-ecr]
+    if: >
+      github.ref == 'refs/heads/main' &&
+      github.event_name != 'pull_request' &&
+      inputs.skip_deploy != true
+    secrets: inherit
+
+  pipeline-summary:
+    name: '⑦ Résumé pipeline'
+    runs-on: ubuntu-latest
+    needs: [ci, security, publish-ecr, deploy-aws]
+    if: always() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    steps:
+      - name: Résumé déploiement
+        run: |
+          {
+            echo "### Platform Pipeline — PetfoodTN"
+            echo ""
+            echo "| Étape | Statut |"
+            echo "|-------|--------|"
+            echo "| CI | ${{ needs.ci.result }} |"
+            echo "| DevSecOps | ${{ needs.security.result }} |"
+            echo "| Publish ECR | ${{ needs.publish-ecr.result }} |"
+            echo "| Deploy AWS | ${{ needs.deploy-aws.result }} |"
+            echo ""
+            echo "Cible : **AWS ECS Fargate** · Doc : \`docs/DEVOPS-PIPELINE.md\`"
+          } >> "$GITHUB_STEP_SUMMARY"

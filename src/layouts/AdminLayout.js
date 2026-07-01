@@ -4,6 +4,7 @@ import ChatAssistant from '../components/ChatAssistant';
 import { useAuth } from '../contexts/AuthContext';
 import ResponsiveShell from './ResponsiveShell';
 import MobileBottomNav, { ADMIN_MOBILE_NAV } from '../components/MobileBottomNav';
+import RecommendedForYouButton from '../components/RecommendedForYouButton';
 
 const AdminLayout = ({ children }) => {
   const { user, logout } = useAuth();
@@ -17,6 +18,7 @@ const AdminLayout = ({ children }) => {
     >
       {children}
       <ChatAssistant key={chatKey} variant="admin" />
+      <RecommendedForYouButton />
     </ResponsiveShell>
   );
 };

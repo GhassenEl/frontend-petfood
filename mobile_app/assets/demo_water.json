@@ -1,0 +1,221 @@
+{
+  "pets": [
+    { "petId": "demo-pet-1", "name": "Max", "type": "dog", "todayMl": 420, "targetMl": 550, "percentOfTarget": 76, "alert": false },
+    { "petId": "demo-pet-2", "name": "Luna", "type": "cat", "todayMl": 165, "targetMl": 250, "percentOfTarget": 66, "alert": true },
+    { "petId": "demo-pet-3", "name": "Kiwi", "type": "bird", "todayMl": 28, "targetMl": 40, "percentOfTarget": 70, "alert": false },
+    { "petId": "demo-pet-4", "name": "Coco", "type": "rabbit", "todayMl": 280, "targetMl": 350, "percentOfTarget": 80, "alert": false },
+    { "petId": "demo-pet-5", "name": "Nemo", "type": "fish", "todayMl": 0, "targetMl": 0, "percentOfTarget": 0, "alert": false },
+    { "petId": "demo-pet-6", "name": "Pistache", "type": "hamster", "todayMl": 10, "targetMl": 15, "percentOfTarget": 67, "alert": true }
+  ],
+  "tracking": {
+    "demo-pet-1": {
+      "petId": "demo-pet-1",
+      "petName": "Max",
+      "petType": "dog",
+      "todayMl": 420,
+      "targetMl": 550,
+      "percentOfTarget": 76,
+      "monitor": {
+        "id": "demo-water-1",
+        "name": "Fontaine Max — Salon",
+        "online": true,
+        "reservoirMl": 890,
+        "reservoirCapacityMl": 1500,
+        "waterTempC": 18.5,
+        "flowRateMlMin": 12,
+        "filterDaysLeft": 18,
+        "pumpActive": false
+      },
+      "stats": { "avg7dMl": 485, "maxDayMl": 610 },
+      "alerts": [
+        { "severity": "medium", "message": "Hydratation a 76 % — encouragez Max apres la promenade." }
+      ],
+      "hourlyToday": [
+        { "label": "07h", "hour": 7, "volumeMl": 45 },
+        { "label": "08h", "hour": 8, "volumeMl": 52 },
+        { "label": "12h", "hour": 12, "volumeMl": 38 },
+        { "label": "18h", "hour": 18, "volumeMl": 61 },
+        { "label": "19h", "hour": 19, "volumeMl": 55 },
+        { "label": "21h", "hour": 21, "volumeMl": 48 }
+      ],
+      "series": [
+        { "label": "Lun", "totalMl": 480 },
+        { "label": "Mar", "totalMl": 515 },
+        { "label": "Mer", "totalMl": 490 },
+        { "label": "Jeu", "totalMl": 520 },
+        { "label": "Ven", "totalMl": 505 },
+        { "label": "Sam", "totalMl": 540 },
+        { "label": "Dim", "totalMl": 420 }
+      ],
+      "hydrationTip": "Un chien actif de 25 kg a besoin d'environ 550 ml/jour."
+    },
+    "demo-pet-2": {
+      "petId": "demo-pet-2",
+      "petName": "Luna",
+      "petType": "cat",
+      "todayMl": 165,
+      "targetMl": 250,
+      "percentOfTarget": 66,
+      "monitor": {
+        "id": "demo-water-2",
+        "name": "Fontaine Luna — Cuisine",
+        "online": true,
+        "reservoirMl": 420,
+        "reservoirCapacityMl": 2000,
+        "waterTempC": 19.2,
+        "filterDaysLeft": 6,
+        "pumpActive": false
+      },
+      "stats": { "avg7dMl": 210, "maxDayMl": 280 },
+      "alerts": [
+        { "severity": "high", "message": "Hydratation basse (66 %) — verifiez la fontaine." },
+        { "severity": "low", "message": "Filtre a remplacer dans 6 jours." }
+      ],
+      "hourlyToday": [
+        { "label": "06h", "hour": 6, "volumeMl": 40 },
+        { "label": "10h", "hour": 10, "volumeMl": 35 },
+        { "label": "14h", "hour": 14, "volumeMl": 30 },
+        { "label": "20h", "hour": 20, "volumeMl": 60 }
+      ],
+      "series": [
+        { "label": "Lun", "totalMl": 220 },
+        { "label": "Mar", "totalMl": 235 },
+        { "label": "Mer", "totalMl": 200 },
+        { "label": "Jeu", "totalMl": 245 },
+        { "label": "Ven", "totalMl": 210 },
+        { "label": "Sam", "totalMl": 255 },
+        { "label": "Dim", "totalMl": 165 }
+      ],
+      "hydrationTip": "Les chats boivent peu : une fontaine augmente la consommation."
+    },
+    "demo-pet-3": {
+      "petId": "demo-pet-3",
+      "petName": "Kiwi",
+      "petType": "bird",
+      "todayMl": 28,
+      "targetMl": 40,
+      "percentOfTarget": 70,
+      "monitor": {
+        "id": "demo-water-3",
+        "name": "Abreuvoir Kiwi — Voliere",
+        "online": true,
+        "reservoirMl": 120,
+        "reservoirCapacityMl": 200,
+        "waterTempC": 20.0,
+        "filterDaysLeft": 30,
+        "pumpActive": false
+      },
+      "stats": { "avg7dMl": 35, "maxDayMl": 45 },
+      "alerts": [],
+      "hourlyToday": [
+        { "label": "08h", "hour": 8, "volumeMl": 12 },
+        { "label": "12h", "hour": 12, "volumeMl": 8 },
+        { "label": "17h", "hour": 17, "volumeMl": 8 }
+      ],
+      "series": [
+        { "label": "Lun", "totalMl": 38 },
+        { "label": "Mar", "totalMl": 42 },
+        { "label": "Mer", "totalMl": 36 },
+        { "label": "Jeu", "totalMl": 40 },
+        { "label": "Ven", "totalMl": 35 },
+        { "label": "Sam", "totalMl": 41 },
+        { "label": "Dim", "totalMl": 28 }
+      ],
+      "hydrationTip": "Changez l'eau des oiseaux 2 fois par jour."
+    },
+    "demo-pet-4": {
+      "petId": "demo-pet-4",
+      "petName": "Coco",
+      "petType": "rabbit",
+      "todayMl": 280,
+      "targetMl": 350,
+      "percentOfTarget": 80,
+      "monitor": {
+        "id": "demo-water-4",
+        "name": "Bol Coco — Enclos",
+        "online": true,
+        "reservoirMl": 500,
+        "reservoirCapacityMl": 600,
+        "filterDaysLeft": 14,
+        "pumpActive": false
+      },
+      "stats": { "avg7dMl": 320, "maxDayMl": 380 },
+      "alerts": [],
+      "hourlyToday": [
+        { "label": "07h", "hour": 7, "volumeMl": 50 },
+        { "label": "13h", "hour": 13, "volumeMl": 80 },
+        { "label": "19h", "hour": 19, "volumeMl": 90 }
+      ],
+      "series": [
+        { "label": "Lun", "totalMl": 310 },
+        { "label": "Mar", "totalMl": 330 },
+        { "label": "Mer", "totalMl": 300 },
+        { "label": "Jeu", "totalMl": 340 },
+        { "label": "Ven", "totalMl": 315 },
+        { "label": "Sam", "totalMl": 325 },
+        { "label": "Dim", "totalMl": 280 }
+      ],
+      "hydrationTip": "Les lapins boivent beaucoup — bol lourd et eau fraiche quotidienne."
+    },
+    "demo-pet-5": {
+      "petId": "demo-pet-5",
+      "petName": "Nemo",
+      "petType": "fish",
+      "todayMl": 0,
+      "targetMl": 0,
+      "percentOfTarget": 0,
+      "monitor": {
+        "id": "demo-water-5",
+        "name": "Aquarium Nemo — 60L",
+        "online": true,
+        "reservoirMl": 60000,
+        "reservoirCapacityMl": 60000,
+        "waterTempC": 24.5,
+        "filterDaysLeft": 21,
+        "pumpActive": true
+      },
+      "stats": { "avg7dMl": 0, "maxDayMl": 0 },
+      "alerts": [
+        { "severity": "low", "message": "Controle pH recommande cette semaine." }
+      ],
+      "hourlyToday": [],
+      "series": [],
+      "hydrationTip": "Poissons : surveillez pH, temperature et nitrites de l'aquarium."
+    },
+    "demo-pet-6": {
+      "petId": "demo-pet-6",
+      "petName": "Pistache",
+      "petType": "hamster",
+      "todayMl": 10,
+      "targetMl": 15,
+      "percentOfTarget": 67,
+      "monitor": {
+        "id": "demo-water-6",
+        "name": "Biberon Pistache — Cage",
+        "online": true,
+        "reservoirMl": 80,
+        "reservoirCapacityMl": 120,
+        "filterDaysLeft": 30,
+        "pumpActive": false
+      },
+      "stats": { "avg7dMl": 13, "maxDayMl": 18 },
+      "alerts": [
+        { "severity": "medium", "message": "Biberon a verifier — consommation en baisse." }
+      ],
+      "hourlyToday": [
+        { "label": "09h", "hour": 9, "volumeMl": 4 },
+        { "label": "21h", "hour": 21, "volumeMl": 6 }
+      ],
+      "series": [
+        { "label": "Lun", "totalMl": 14 },
+        { "label": "Mar", "totalMl": 15 },
+        { "label": "Mer", "totalMl": 12 },
+        { "label": "Jeu", "totalMl": 16 },
+        { "label": "Ven", "totalMl": 13 },
+        { "label": "Sam", "totalMl": 14 },
+        { "label": "Dim", "totalMl": 10 }
+      ],
+      "hydrationTip": "Hamster : biberon propre chaque jour, cage pas trop chaude."
+    }
+  }
+}

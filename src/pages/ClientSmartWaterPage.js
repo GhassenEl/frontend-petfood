@@ -35,7 +35,8 @@ import './ClientSmartWaterPage.css';
 
 const alertColor = { high: '#dc2626', medium: '#d97706', low: '#64748b' };
 
-const petEmoji = { dog: '🐕', cat: '🐈', bird: '🐦', fish: '🐠', other: '🐾' };
+import MultiSpeciesBwPanel from '../components/MultiSpeciesBwPanel';
+import { PET_EMOJI, resolveSpecies } from '../utils/speciesCatalog';
 
 const SensorGauge = ({ label, value, unit, min, max, optimal, color }) => {
   if (value == null) return null;
@@ -312,6 +313,22 @@ const ClientSmartWaterPage = () => {
         </div>
       </motion.div>
 
+      {petsOverview.length > 0 && (
+        <MultiSpeciesBwPanel
+          pets={petsOverview.map((p) => ({
+            petId: p.petId,
+            name: p.petName,
+            type: p.petType,
+            todayMl: p.todayMl,
+            targetMl: p.targetMl,
+            percentOfTarget: p.percentOfTarget,
+            alert: p.alert,
+          }))}
+          selectedPetId={petId}
+          onSelectPet={setPetId}
+        />
+      )}
+
       {petsOverview.length > 1 && (
         <div className="water-overview-row">
           {petsOverview.map((p) => (
@@ -321,7 +338,7 @@ const ClientSmartWaterPage = () => {
               className={`water-overview-card${petId === p.petId ? ' is-active' : ''}${p.alert ? ' has-alert' : ''}`}
               onClick={() => setPetId(p.petId)}
             >
-              <strong>{petEmoji[p.petType] || '🐾'} {p.petName}</strong>
+              <strong>{PET_EMOJI[p.petType] || resolveSpecies(p.petType).emoji} {p.petName}</strong>
               <span>{p.todayMl} ml · {p.percentOfTarget} % · Score {p.score}/100</span>
             </button>
           ))}
@@ -337,7 +354,7 @@ const ClientSmartWaterPage = () => {
               onClick={() => setPetId(p.petId)}
               className={`water-pet-tab${petId === p.petId ? ' is-active' : ''}`}
             >
-              {petEmoji[p.type] || '🐾'} {p.name}
+              {PET_EMOJI[p.type] || resolveSpecies(p.type).emoji} {p.name}
               {p.alert ? ' ⚠️' : ''}
             </button>
           ))}

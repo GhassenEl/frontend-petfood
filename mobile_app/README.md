@@ -8,6 +8,10 @@ Application mobile pour contrôler le **distributeur IoT**, surveiller la **qual
 - **Tableau de bord BI** : KPIs client, tendance qualité alimentaire, alertes IoT, fidélité
 - **Qualité alimentaire IoT** (ESP32-CAM) : score temps réel, **IA** (classification, moisissures, stock, péremption), alertes, notifications, journal
 - **Distributeur IoT** : statut capteurs, distribution manuelle, plan nutritionnel, planning, journal
+- **Hub IoT Nutrition** (onglet IoT) :
+  - **Distribution** : distributeur ESP32, score nutrition, portions auto intelligentes, planning repas (manqués / à venir)
+  - **Eau** : fontaine connectée, consommation ml/jour, score hydratation, graphiques 7 jours, remplissage, alertes
+  - **Synergie** : équilibre alimentation ↔ hydratation, ratio ml/g, conseils personnalisés
 - **Sécurité** : score posture, contrôles JWT/IDS/IoT, sessions actives, journal des menaces
 - **Produits** : catalogue + recommandations par animal
 - **Profil & services** : animaux (CRUD), suivi livraison temps réel, scan QR lot blockchain, notifications push, accès IoT
@@ -76,6 +80,9 @@ lib/
   models/mobile_bi.dart, mobile_security.dart
   services/mobile_bi_service.dart, mobile_security_service.dart
   screens/login_screen.dart, home_shell.dart, bi_dashboard_screen.dart, security_screen.dart
-  screens/food_quality_screen.dart, feeder_screen.dart, products_screen.dart, profile_screen.dart
+  screens/food_quality_screen.dart, feeder_screen.dart, iot_hub_screen.dart
+  screens/water_screen.dart, synergy_screen.dart, products_screen.dart, profile_screen.dart
+  services/feeder_auto_engine.dart, nutrition_hydration_engine.dart, water_repository.dart
+  models/water_tracking.dart, widgets/water_bowl_view.dart
   main.dart
 ```

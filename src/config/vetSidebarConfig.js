@@ -8,6 +8,12 @@ export const VET_SIDEBAR_SECTIONS = [
       { id: 'calendar', label: 'Calendrier', icon: '📅' },
       { id: 'availability', label: 'Disponibilité', icon: '🟢' },
       { id: 'prescriptions', label: 'Ordonnances', icon: '💊' },
+      {
+        id: 'medication-recommendations',
+        label: 'Recommandation médicaments',
+        icon: '🧬',
+        route: '/vet/medication-recommendations',
+      },
       { id: 'diagnostics', label: 'Détection maladie', icon: '🔬' },
       { id: 'pharmacy', label: 'Pharmacie', icon: '🏪' },
       { id: 'clinic', label: 'Ma clinique', icon: '🏥' },
@@ -29,6 +35,7 @@ export const VET_SIDEBAR_SECTIONS = [
     title: '🤖 Intelligence clinique',
     items: [
       { id: 'recommendations', label: 'Recommandations IA', icon: '🎯' },
+      { id: 'chat-history', label: 'Historique chatbot', icon: '💬', route: '/vet/chat-history' },
     ],
   },
   {

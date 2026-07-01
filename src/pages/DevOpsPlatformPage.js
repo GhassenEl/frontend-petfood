@@ -13,6 +13,7 @@ import {
 import { fetchDevOpsStatus, fetchStackHealth } from '../services/devopsStatusService';
 import DevOpsLiveStatusPanel, { DevOpsAlertsPanel } from '../components/DevOpsLiveStatusPanel';
 import DevOpsCicdPanel from '../components/DevOpsCicdPanel';
+import DevOpsPipelineFlow from '../components/DevOpsPipelineFlow';
 import DevOpsDeploymentsPanel from '../components/DevOpsDeploymentsPanel';
 import DevOpsEnvSecretsPanel from '../components/DevOpsEnvSecretsPanel';
 import DevOpsRunbookPanel from '../components/DevOpsRunbookPanel';
@@ -113,8 +114,8 @@ const DevOpsPlatformPage = ({ adminMode = false }) => {
           DevOps &amp; observabilité
         </h1>
         <p>
-          CI/CD GitHub Actions, DevSecOps, monitoring Prometheus/Grafana, Docker, déploiements
-          Render/VPS, secrets et runbooks — tableau de bord live.
+          CI/CD GitHub Actions, pipeline AWS ECS, DevSecOps, monitoring Prometheus/Grafana,
+          Docker, secrets et runbooks — tableau de bord live.
         </p>
         <div className="devops-stats">
           <div><strong>{hero.score ?? '—'}</strong><span>Score santé</span></div>
@@ -220,10 +221,11 @@ const DevOpsPlatformPage = ({ adminMode = false }) => {
 
       {tab === 'cicd' && (
         <>
+          <DevOpsPipelineFlow runs={pipelines} />
           <section className="devops-section">
             <h2>Pipelines CI/CD</h2>
             <p className="devops-section__hint">
-              Workflows GitHub Actions — push <code>main</code>, pull requests et planification.
+              Orchestrateur <code>platform-pipeline.yml</code> — push <code>main</code>, PR et déclenchement manuel.
             </p>
             <DevOpsCicdPanel runs={pipelines} />
           </section>
@@ -231,19 +233,18 @@ const DevOpsPlatformPage = ({ adminMode = false }) => {
             <h2>Commandes locales</h2>
             <div className="devops-grid devops-grid--2">
               <div className="devops-card devops-card--code">
-                <h3>CI locale</h3>
+                <h3>CI &amp; pipeline</h3>
                 <pre>{`npm run devops:ci
-.\\scripts\\devops\\ci-local.ps1 -WithMl
+npm run devops:pipeline
 npm run devops:health`}</pre>
               </div>
               <div className="devops-card devops-card--code">
-                <h3>Déploiement &amp; cloud</h3>
-                <pre>{`npm run docker:stack:full
-npm run devops:backup
-npm run devops:render:status
-node scripts/devops/render-provision.mjs`}</pre>
+                <h3>Déploiement AWS</h3>
+                <pre>{`npm run devops:aws:auto
+npm run devops:aws:status
+npm run docker:stack:full`}</pre>
                 <p style={{ margin: '12px 0 0', fontSize: 13, color: '#64748b' }}>
-                  Docs : <code>docs/DEVOPS-PLATFORM.md</code>
+                  Docs : <code>docs/DEVOPS-PIPELINE.md</code>
                 </p>
               </div>
             </div>
@@ -255,13 +256,14 @@ node scripts/devops/render-provision.mjs`}</pre>
         <section className="devops-section">
           <h2>Historique des déploiements</h2>
           <p className="devops-section__hint">
-            Render Blueprint, GHCR et VPS — versions et statuts des releases.
+            AWS ECS, ECR et VPS — versions et statuts des releases.
           </p>
           <DevOpsDeploymentsPanel deployments={deployments} />
           <div className="devops-card" style={{ marginTop: 16 }}>
-            <h3>Hooks Render</h3>
+            <h3>Pipeline production</h3>
             <p style={{ fontSize: 13, color: '#64748b' }}>
-              <code>npm run devops:render:hooks</code> — déclenchement deploy après publish GHCR.
+              <code>platform-pipeline.yml</code> — CI → DevSecOps → Readiness → ECR → ECS.
+              Manuel : Actions → <strong>Platform Pipeline</strong> → Run workflow.
             </p>
           </div>
         </section>
@@ -322,17 +324,17 @@ node scripts/devops/render-provision.mjs`}</pre>
               Variables &amp; secrets
             </h2>
             <p className="devops-section__hint">
-              Secrets jamais en git — Render env groups, GitHub Actions secrets, Docker secrets.
+              Secrets jamais en git — AWS Secrets Manager, GitHub Actions secrets, Docker env.
             </p>
             <DevOpsEnvSecretsPanel items={envSecrets} />
           </section>
           <section className="devops-section">
             <h2>Fichiers infrastructure</h2>
             <ul className="devops-file-list">
-              <li><code>docker-compose.yml</code> — Base PostgreSQL + API + frontend</li>
+              <li><code>.github/workflows/platform-pipeline.yml</code> — Orchestrateur CI/CD</li>
+              <li><code>infra/terraform/aws/</code> — ECS Fargate + RDS + ALB</li>
               <li><code>docker-compose.monitoring.yml</code> — Prometheus + Grafana</li>
               <li><code>docker-compose.iot.yml</code> — MQTT Mosquitto</li>
-              <li><code>render.yaml</code> — Blueprint cloud Render</li>
               <li><code>jenkins/Jenkinsfile</code> — Pipeline Jenkins (labo)</li>
             </ul>
             <Link to="/cloud" className="devops-card__cta" style={{ display: 'inline-block', marginTop: 12 }}>

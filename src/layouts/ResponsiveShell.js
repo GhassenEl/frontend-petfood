@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import PlatformLiveBadge from '../components/PlatformLiveBadge';
 import CitySelector from '../components/CitySelector';
+import GlobalSearchBar from '../components/GlobalSearchBar';
 
 /**
  * En-tête mobile + panneau latéral coulissant pour les trois plateformes (client / admin / livreur).
@@ -48,6 +49,7 @@ const ResponsiveShell = ({ children, sidebar, roleBadge, className = '', bottomN
             {roleBadge}
           </span>
         ) : null}
+        <GlobalSearchBar compact />
         <PlatformLiveBadge />
       </header>
 
@@ -65,9 +67,12 @@ const ResponsiveShell = ({ children, sidebar, roleBadge, className = '', bottomN
       </div>
 
       <main id="contenu-principal" className="main-area main-area--platform" tabIndex={-1}>
-        <div className="platform-live-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
-          <PlatformLiveBadge />
-          {showCitySelector ? <CitySelector compact /> : null}
+        <div className="platform-live-bar">
+          <GlobalSearchBar />
+          <div className="platform-live-bar__right">
+            <PlatformLiveBadge />
+            {showCitySelector ? <CitySelector compact /> : null}
+          </div>
         </div>
         <div className="page-content-shell">{children}</div>
       </main>

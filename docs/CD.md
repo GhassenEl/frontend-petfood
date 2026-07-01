@@ -1,15 +1,16 @@
 # PetfoodTN — CD (Continuous Deployment)
 
-Guide pour publier les images Docker, déployer sur **VPS** ou **Render**, activer **HTTPS**, **Sentry** et les **alertes uptime**.
+Guide pour publier les images Docker, déployer sur **AWS** (ECS), **VPS**, activer **HTTPS**, **Sentry** et les **alertes uptime**.
 
 ## Pipeline complet
 
 ```mermaid
 flowchart LR
   push[Push main] --> ci[CI tests]
-  push --> publish[Publish GHCR]
-  publish --> vps[Deploy VPS SSH]
-  publish --> render[Deploy Render hooks]
+  push --> ecr[Publish ECR]
+  ecr --> aws[Deploy AWS ECS]
+  push --> ghcr[Publish GHCR]
+  ghcr --> vps[Deploy VPS SSH]
   cron[*/15 min] --> uptime[Uptime probe]
   uptime --> alert[Webhook / Issue GitHub]
 ```
@@ -17,9 +18,10 @@ flowchart LR
 | Workflow | Fichier | Déclencheur |
 |----------|---------|-------------|
 | CI | `ci.yml` | push/PR `main` |
-| Publish images | `publish-ghcr.yml` | push `main`, tags `v*` |
-| Deploy VPS | `deploy-vps.yml` | après publish OK |
-| Deploy Render | `deploy-render.yml` | après publish OK |
+| Publish ECR | `publish-ecr.yml` | push `main`, tags `v*` |
+| Deploy AWS | `deploy-aws.yml` | après publish ECR OK |
+| Publish GHCR | `publish-ghcr.yml` | push `main`, tags `v*` |
+| Deploy VPS | `deploy-vps.yml` | après publish GHCR OK |
 | Uptime | `uptime.yml` | toutes les 15 min |
 
 ---
@@ -100,42 +102,37 @@ Caddy obtient automatiquement un certificat Let's Encrypt pour `DOMAIN`.
 
 ---
 
-## 3. Déploiement Render
+## 3. Déploiement AWS (production recommandé)
 
-Guide détaillé : **[RENDER-SETUP.md](./RENDER-SETUP.md)** (pas à pas).
+Guide détaillé : **[AWS-SETUP.md](./AWS-SETUP.md)**.
 
 ```powershell
-npm run devops:render:setup
+cd infra/terraform/aws
+copy terraform.tfvars.example terraform.tfvars
+terraform init && terraform apply
 ```
 
-### Blueprint frontend (ce repo)
+### Secrets GitHub
 
-1. Render → **New** → **Blueprint** → `GhassenEl/frontend-petfood`
-2. Crée : `petfoodtn-db`, `petfoodtn-web`, `petfoodtn-ml`
+| Secret / Variable | Description |
+|-------------------|-------------|
+| `AWS_ACCESS_KEY_ID` | IAM CI (ECR + ECS) |
+| `AWS_SECRET_ACCESS_KEY` | Secret IAM |
+| `AWS_REGION` (variable) | ex. `eu-west-3` |
+| `AWS_ECS_CLUSTER` (variable) | ex. `petfoodtn-production-cluster` |
+| `UPTIME_FRONTEND_URL` | URL publique ALB / domaine |
 
-### Blueprint backend (repo séparé)
+### Déploiement manuel
 
-Copier `docs/render-backend.yaml` → `render.yaml` dans **backend-petfood**, puis Blueprint sur ce repo.
-
-### Variables clés
-
-| Service | Variable | Exemple |
-|---------|----------|---------|
-| `petfoodtn-web` | `VITE_API_BASE` | `https://petfoodtn-api.onrender.com/api` |
-| `petfoodtn-api` | `CORS_ORIGINS` | `https://petfoodtn-web.onrender.com` |
-| `petfoodtn-api` | `FASTAPI_URL` | `https://petfoodtn-ml.onrender.com` |
-
-### Deploy Hooks (CD auto)
-
-| Secret GitHub | Service |
-|---------------|---------|
-| `RENDER_DEPLOY_HOOK_FRONTEND` | petfoodtn-web |
-| `RENDER_DEPLOY_HOOK_BACKEND` | petfoodtn-api |
-| `RENDER_DEPLOY_HOOK_ML` | petfoodtn-ml |
+Actions → **Publish ECR Images** → puis **Deploy AWS**.
 
 ---
 
-## 4. Sentry (monitoring erreurs frontend)
+## 4. Déploiement Render (legacy)
+
+Guide : **[RENDER-SETUP.md](./RENDER-SETUP.md)** — remplacé par AWS pour la production.
+
+## 5. Sentry (monitoring erreurs frontend)
 
 1. Créer un projet sur [sentry.io](https://sentry.io) (React).
 2. Copier le **DSN**.
@@ -152,7 +149,7 @@ Backend Sentry (optionnel) : ajouter `@sentry/node` dans `backend-petfood`.
 
 ---
 
-## 5. Uptime & alertes
+## 6. Uptime & alertes
 
 ### GitHub Actions (inclus)
 
@@ -176,11 +173,11 @@ Créer 3 monitors HTTP(S) :
 
 ---
 
-## 6. Commandes npm
+## 7. Commandes npm
 
 ```bash
-npm run docker:ghcr:pull    # pull images GHCR
-npm run docker:https:up     # prod + Caddy HTTPS
+npm run devops:aws:health    # health check ALB AWS
+npm run devops:aws:setup     # wizard Terraform AWS
 ```
 
 ---
@@ -191,7 +188,7 @@ npm run docker:https:up     # prod + Caddy HTTPS
 - [ ] `DEMO_MODE=false`, `RUN_SEED=false`
 - [ ] `CORS_ORIGINS` = domaine HTTPS réel
 - [ ] DNS + ports 80/443
-- [ ] Secrets GitHub VPS ou Render configurés
+- [ ] Secrets GitHub AWS (`AWS_*`) ou VPS configurés
 - [ ] `VITE_SENTRY_DSN` dans secrets publish
 - [ ] `UPTIME_*_URL` + `ALERT_WEBHOOK_URL`
 - [ ] Sauvegardes PostgreSQL (`pg_dump` planifié)

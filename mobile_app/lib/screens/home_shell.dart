@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import 'bi_dashboard_screen.dart';
-import 'feeder_screen.dart';
+import 'iot_hub_screen.dart';
 import 'food_quality_screen.dart';
 import 'products_screen.dart';
 import 'profile_screen.dart';
@@ -24,7 +24,7 @@ class _HomeShellState extends State<HomeShell> {
     final pages = [
       BiDashboardScreen(auth: widget.auth),
       FoodQualityScreen(auth: widget.auth),
-      FeederScreen(auth: widget.auth),
+      IotHubScreen(auth: widget.auth),
       SecurityScreen(auth: widget.auth),
       ProductsScreen(auth: widget.auth),
       ProfileScreen(auth: widget.auth),

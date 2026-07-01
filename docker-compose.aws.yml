@@ -1,0 +1,26 @@
+# Overlay AWS EC2 — RDS externe (Terraform) + S3 uploads
+# Usage :
+#   cp .env.aws.example .env.aws
+#   docker compose -f docker-compose.yml -f docker-compose.aws.yml -f docker-compose.ml.yml -f docker-compose.prod.yml --env-file .env.aws up -d
+
+services:
+  db:
+    profiles: ['local-db']
+    # Désactivé par défaut — utiliser RDS via DATABASE_URL dans backend
+
+  backend:
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-}
+      AWS_REGION: ${AWS_REGION:-eu-west-3}
+      FASTAPI_URL: ${FASTAPI_URL:-http://ml:8000}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      DEMO_MODE: 'false'
+      RUN_SEED: 'false'
+
+  frontend:
+    build:
+      args:
+        VITE_API_BASE: /api
+        VITE_SOCKET_URL: ''
+        VITE_APP_RELEASE: petfoodtn@aws

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Plus, Trash2, Edit3, Send, Sparkles, Package } from 'lucide-react';
+import { Star, Plus, Trash2, Edit3, Send, Sparkles, Package, Search } from 'lucide-react';
 import { getProducts } from '../services/productService';
 import { getMyReviews, createReview, updateReview, deleteReview } from '../services/reviewService';
 import { postAnalyzeComment } from '../services/mlService';
@@ -14,6 +14,8 @@ import ClientNutritionBlogPanel from '../components/ClientNutritionBlogPanel';
 import CommentSentimentPanel from '../components/CommentSentimentPanel';
 import StarRatingPicker from '../components/StarRatingPicker';
 import StarRatingDisplay from '../components/StarRatingDisplay';
+import { filterAndSortReviews, DEFAULT_REVIEW_ADVANCED, countActiveReviewFilters } from '../utils/reviewAdvancedSearch';
+import ReviewAdvancedSearchPanel from '../components/ReviewAdvancedSearchPanel';
 import './ClientComplaintsPage.css';
 
 const EMOTIONS = [
@@ -57,6 +59,11 @@ const ClientReviewsPage = () => {
   const [aiSuggestion, setAiSuggestion] = useState(null);
   const [anomalyWarning, setAnomalyWarning] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [emotionFilter, setEmotionFilter] = useState('all');
+  const [search, setSearch] = useState('');
+  const [advanced, setAdvanced] = useState(() => ({ ...DEFAULT_REVIEW_ADVANCED }));
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [toast, setToast] = useState(null);
 
   const showToast = (text, type = 'success') => {
@@ -100,14 +107,18 @@ const ClientReviewsPage = () => {
     };
   }, [reviews]);
 
-  const filtered = useMemo(() => {
-    if (filter === 'all') return reviews;
-    if (filter.startsWith('star-')) {
-      const n = Number(filter.replace('star-', ''));
-      return reviews.filter((r) => r.rating === n);
-    }
-    return reviews.filter((r) => (r.emotion || 'neutral') === filter);
-  }, [reviews, filter]);
+  const filtered = useMemo(
+    () => filterAndSortReviews(reviews, {
+      search,
+      filter,
+      emotionFilter,
+      advanced,
+      emotions: EMOTIONS,
+    }),
+    [reviews, filter, emotionFilter, search, advanced],
+  );
+
+  const activeFilterCount = countActiveReviewFilters(advanced, { search, filter, emotionFilter });
 
   const analyzeComment = async () => {
     if (!formData.comment.trim()) {
@@ -416,6 +427,29 @@ const ClientReviewsPage = () => {
             </section>
           )}
 
+          <div className="cc-search">
+            <Search size={18} color="#94a3b8" />
+            <input
+              type="text"
+              placeholder="Rechercher par produit, commentaire, émotion…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <span className="cc-search-count">{filtered.length} résultat(s)</span>
+          </div>
+
+          <ReviewAdvancedSearchPanel
+            open={showAdvanced}
+            onToggle={() => setShowAdvanced((v) => !v)}
+            advanced={advanced}
+            onChange={setAdvanced}
+            products={products}
+            search={search}
+            filter={filter}
+            emotionFilter={emotionFilter}
+            productIdFn={productId}
+          />
+
           <div className="cc-toolbar">
             <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Historique</h2>
             <div className="cc-filters">
@@ -432,7 +466,26 @@ const ClientReviewsPage = () => {
                   {n} ★
                 </button>
               ))}
+              <button type="button" className={`cc-filter-btn reviews ${filter === 'ai' ? 'active' : ''}`} onClick={() => setFilter('ai')}>
+                ✨ IA
+              </button>
             </div>
+          </div>
+
+          <div className="cc-filters cc-filters--emotions" style={{ marginBottom: 16 }}>
+            <button type="button" className={`cc-filter-btn reviews ${emotionFilter === 'all' ? 'active' : ''}`} onClick={() => setEmotionFilter('all')}>
+              Toutes émotions
+            </button>
+            {EMOTIONS.map((e) => (
+              <button
+                key={e.id}
+                type="button"
+                className={`cc-filter-btn reviews ${emotionFilter === e.id ? 'active' : ''}`}
+                onClick={() => setEmotionFilter(e.id)}
+              >
+                {e.emoji} {e.label}
+              </button>
+            ))}
           </div>
 
           {listLoading ? (
@@ -440,8 +493,8 @@ const ClientReviewsPage = () => {
           ) : filtered.length === 0 ? (
             <div className="cc-empty">
               <Star size={48} style={{ opacity: 0.3, marginBottom: 12 }} />
-              <p>Aucun avis{filter !== 'all' ? ' pour ce filtre' : ''}.</p>
-              {filter === 'all' && (
+              <p>Aucun avis{activeFilterCount > 0 ? ' pour ces critères' : ''}.</p>
+              {activeFilterCount === 0 && (
                 <p style={{ fontSize: '0.9rem' }}>
                   <Link to="/client-products" style={{ color: '#2563eb', fontWeight: 700 }}>
                     Parcourir le catalogue

@@ -1,18 +1,31 @@
 /** Moteur nutrition + hydratation — scores, macros et synergie alimentation/eau. */
 
+import { resolveSpecies, idealWaterRatioFor } from './speciesCatalog';
+
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
-const SPECIES_KCAL_PER_GRAM = { dog: 3.5, cat: 3.8, default: 3.5 };
+const SPECIES_KCAL_PER_GRAM = {
+  dog: 3.5, cat: 3.8, bird: 3.2, rabbit: 2.5, hamster: 3.4, reptile: 2.8, fish: 2.5, ferret: 3.6, guinea_pig: 2.6, nac: 3.0, default: 3.5,
+};
 
 const MACRO_SPLIT = {
   dog: { protein: 26, fat: 14, carbs: 45, fiber: 4 },
   cat: { protein: 32, fat: 18, carbs: 35, fiber: 3 },
+  bird: { protein: 18, fat: 8, carbs: 55, fiber: 6 },
+  rabbit: { protein: 16, fat: 4, carbs: 60, fiber: 20 },
+  hamster: { protein: 16, fat: 6, carbs: 55, fiber: 8 },
+  reptile: { protein: 20, fat: 5, carbs: 50, fiber: 5 },
+  fish: { protein: 40, fat: 8, carbs: 30, fiber: 2 },
+  ferret: { protein: 35, fat: 20, carbs: 25, fiber: 3 },
+  guinea_pig: { protein: 16, fat: 4, carbs: 55, fiber: 18 },
+  nac: { protein: 20, fat: 8, carbs: 50, fiber: 8 },
 };
 
 /** Estimation macros journaliers à partir des grammes consommés. */
 export const estimateDailyMacros = (grams = 0, petType = 'dog') => {
-  const split = MACRO_SPLIT[petType] || MACRO_SPLIT.dog;
-  const kcalPerG = SPECIES_KCAL_PER_GRAM[petType] || SPECIES_KCAL_PER_GRAM.default;
+  const species = resolveSpecies(petType);
+  const split = MACRO_SPLIT[species.id] || MACRO_SPLIT.dog;
+  const kcalPerG = SPECIES_KCAL_PER_GRAM[species.id] || SPECIES_KCAL_PER_GRAM.default;
   const totalKcal = Math.round(grams * kcalPerG);
   return {
     totalKcal,
@@ -158,13 +171,18 @@ export const buildNutritionWaterSynergy = ({
   const foodPct = dailyTarget > 0 ? Math.round((todayGrams / dailyTarget) * 100) : 0;
   const waterPct = targetMl > 0 ? Math.round((todayMl / targetMl) * 100) : 0;
   const ratio = todayGrams > 0 ? Math.round(todayMl / todayGrams) : 0;
-  const idealRatio = petType === 'cat' ? 4 : 5;
+  const species = resolveSpecies(petType);
+  const idealRatio = idealWaterRatioFor(petType);
 
   const tips = [];
   let status = 'balanced';
   let message = `${petName} : alimentation ${foodPct} % et hydratation ${waterPct} % des objectifs.`;
 
-  if (foodPct >= 85 && waterPct < 65) {
+  if (species.usesAquarium) {
+    status = 'aquarium';
+    message = `${petName} (aquarium) : surveillez qualité eau et température.`;
+    tips.push({ icon: '🐠', text: 'Poissons : pH et nitrites plus critiques que le volume bu.' });
+  } else if (foodPct >= 85 && waterPct < 65) {
     status = 'dehydration_risk';
     message = `Apport alimentaire correct (${foodPct} %) mais hydratation insuffisante (${waterPct} %). Proposez de l'eau fraîche après chaque repas.`;
     tips.push({ icon: '💧', text: 'Placez la fontaine à moins de 2 m du distributeur de croquettes.' });
@@ -178,7 +196,7 @@ export const buildNutritionWaterSynergy = ({
     message = `Équilibre nutrition/hydratation optimal pour ${petName}.`;
     tips.push({ icon: '✅', text: 'Maintenez les horaires de repas et renouvelez l\'eau 2× par jour.' });
   } else {
-    tips.push({ icon: '📊', text: `Ratio eau/nourriture : ${ratio} ml/g (idéal ~${idealRatio} ml/g pour un ${petType === 'cat' ? 'chat' : 'chien'}).` });
+    tips.push({ icon: '📊', text: `Ratio eau/nourriture : ${ratio} ml/g (idéal ~${idealRatio} ml/g pour un ${species.labelFr}).` });
   }
 
   return {

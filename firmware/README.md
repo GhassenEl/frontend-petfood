@@ -18,6 +18,8 @@ Système embarqué de distribution nutritionnelle pour animaux, connecté à l'a
 | LCD 16x2 I2C | Affichage local | SDA=21, SCL=22 |
 | Alimentation 5V | Alim carte + actionneurs | — |
 
+**Cartes PCB (Proteus + Gerber)** : voir `hardware/proteus/` et `hardware/gerber/` — page web `/client-hardware-pcb`.
+
 ## Fonctionnement
 
 1. Le capteur **IR** détecte l'animal devant la gamelle.

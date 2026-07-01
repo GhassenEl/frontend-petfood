@@ -6,15 +6,15 @@ import MobileBottomNav, { AUTH_PUBLIC_MOBILE_NAV } from '../components/MobileBot
 import './EnterpriseFeaturesPage.css';
 
 const CLOUD_PROVIDERS = [
-  { name: 'Render', status: 'Actif', detail: 'render.yaml — PostgreSQL + API + ML + frontend static', color: '#059669' },
+  { name: 'AWS', status: 'Actif', detail: 'ECS Fargate + RDS PostgreSQL + ALB + ECR + S3 — docs/AWS-SETUP.md', color: '#059669' },
   { name: 'Docker / VPS', status: 'Actif', detail: 'docker-compose.yml, GHCR, deploy-vps.yml', color: '#059669' },
-  { name: 'AWS', status: 'Compatible', detail: 'ECS/Fargate + RDS PostgreSQL + S3 (images CAM)', color: '#d97706' },
+  { name: 'Render', status: 'Legacy', detail: 'render.yaml — remplacé par AWS (docs/AWS-SETUP.md)', color: '#94a3b8' },
   { name: 'Azure', status: 'Compatible', detail: 'AKS + Azure Database + Blob Storage', color: '#d97706' },
   { name: 'Google Cloud', status: 'Compatible', detail: 'GKE + Cloud SQL + Cloud Storage', color: '#d97706' },
 ];
 
 const STACK = [
-  { id: 'postgres', icon: Database, label: 'PostgreSQL 16', value: 'Render DB · Docker pgdata volume', desc: 'Schéma Prisma, migrations, healthcheck pg_isready' },
+  { id: 'postgres', icon: Database, label: 'PostgreSQL 16', value: 'RDS AWS · Docker pgdata volume', desc: 'Schéma Prisma, migrations, healthcheck pg_isready' },
   { id: 'storage', icon: Camera, label: 'ESP32-CAM cloud', value: 'API télémétrie + bucket prêt', desc: 'JSON qualité temps réel — images option S3/GCS/Azure Blob' },
   { id: 'scale', icon: TrendingUp, label: 'Scalabilité', value: 'Stateless + health checks', desc: 'Réplication API/ML, load balancer, HPA Kubernetes' },
 ];
@@ -103,10 +103,11 @@ const CloudInfrastructurePage = () => {
         <section>
           <h2 style={{ fontSize: 18, marginBottom: 12 }}>Fichiers infrastructure</h2>
           <ul style={{ margin: 0, paddingLeft: 20, fontSize: 14, color: '#475569', lineHeight: 1.9 }}>
-            <li><code>render.yaml</code> — Blueprint Render (DB + API + ML + web)</li>
+            <li><code>infra/terraform/aws/</code> — Terraform ECS Fargate + RDS + ALB + ECR + S3</li>
+            <li><code>.github/workflows/publish-ecr.yml</code> — CI images ECR</li>
+            <li><code>.github/workflows/deploy-aws.yml</code> — CD ECS rolling deploy</li>
             <li><code>docker-compose.yml</code> — Stack locale PostgreSQL + backend + frontend</li>
-            <li><code>.github/workflows/deploy-vps.yml</code> — CD VPS</li>
-            <li><code>docs/DEVOPS.md</code>, <code>docs/RENDER-SETUP.md</code></li>
+            <li><code>docs/AWS-SETUP.md</code>, <code>docs/DEVOPS.md</code></li>
           </ul>
         </section>
       )}

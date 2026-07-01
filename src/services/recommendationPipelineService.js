@@ -8,6 +8,7 @@ import { DEMO_ADMIN_TOP_PRODUCTS, DEMO_PRICE_GOVERNANCE_PACK } from '../utils/ad
 import { DEMO_VET_BI, DEMO_VET_PHARMACY_MEDS } from '../utils/vetDemoData';
 import { DEMO_MODERATOR_PENDING_PRODUCTS, DEMO_MODERATOR_INAPPROPRIATE } from '../utils/moderatorDemoData';
 import { DEMO_LIVREUR_ORDERS } from '../utils/livreurDemoData';
+import { fetchHybridRecommendations } from './hybridRecommendationService';
 
 const mapProduct = (p) => ({
   id: String(p.id || p._id),
@@ -180,6 +181,25 @@ function demoProfileForRole(role, userId) {
 export async function loadRecommendationPipeline(role = 'client', userId) {
   const normalizedRole = role === 'veterinarian' ? 'vet' : role;
   const uid = userId || ROLE_USER_MAP[normalizedRole] || 'client-demo';
+
+  if (['client', 'vet', 'admin', 'livreur', 'moderator', 'vendor'].includes(normalizedRole)) {
+    try {
+      const apiPack = await fetchHybridRecommendations({ role: normalizedRole, limit: 10 });
+      if (apiPack?.recommendations?.length) {
+        return {
+          ...apiPack,
+          mode: apiPack.pythonPowered ? 'hybrid-live' : apiPack.mode,
+          pipeline: apiPack.pipeline || {
+            weights: apiPack.pipeline?.weights || { content: 0.55, collaborative: 0.45 },
+            steps: ['content_based', 'collaborative_filtering', 'review_nlp_filter', 'hybrid_blend'],
+          },
+        };
+      }
+    } catch {
+      /* fallback local */
+    }
+  }
+
   const catalogFn = ROLE_CATALOG[normalizedRole] || CLIENT_CATALOG;
   const items = catalogFn();
 

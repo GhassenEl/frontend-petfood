@@ -1,0 +1,340 @@
+.hardware-pcb-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px 4px 48px;
+}
+
+.hardware-pcb-hero {
+  border-radius: 20px;
+  padding: 28px 24px;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 45%, #059669 100%);
+  color: #f8fafc;
+}
+
+.hardware-pcb-hero h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+}
+
+.hardware-pcb-hero p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  max-width: 720px;
+}
+
+.hardware-pcb-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.hardware-pcb-stat {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 10px 14px;
+  min-width: 100px;
+}
+
+.hardware-pcb-stat strong {
+  display: block;
+  font-size: 1.1rem;
+}
+
+.hardware-pcb-stat span {
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
+.hardware-pcb-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.hardware-pcb-tab {
+  flex: 1;
+  min-width: 200px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.hardware-pcb-tab:hover {
+  border-color: #94a3b8;
+}
+
+.hardware-pcb-tab--active {
+  border-color: var(--tab-color, #059669);
+  box-shadow: 0 4px 16px rgba(5, 150, 105, 0.15);
+}
+
+.hardware-pcb-tab strong {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.hardware-pcb-tab span {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.hardware-pcb-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .hardware-pcb-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hardware-pcb-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+}
+
+.hardware-pcb-card h2 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hardware-pcb-card h3 {
+  margin: 18px 0 10px;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.hardware-pcb-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.hardware-pcb-meta dt {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.hardware-pcb-meta dd {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.hardware-pcb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.hardware-pcb-table th,
+.hardware-pcb-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+.hardware-pcb-table th {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.hardware-pcb-table tr:hover td {
+  background: #f8fafc;
+}
+
+.pcb-diagram-wrap {
+  text-align: center;
+  padding: 12px;
+  background: #0f172a;
+  border-radius: 14px;
+  margin-bottom: 12px;
+}
+
+.pcb-diagram {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+}
+
+.pcb-diagram__edge {
+  fill: none;
+  stroke: #475569;
+  stroke-width: 1.5;
+}
+
+.pcb-diagram__copper {
+  fill: #166534;
+  opacity: 0.35;
+}
+
+.pcb-diagram__zone {
+  fill: var(--zone-color, #059669);
+  opacity: 0.55;
+  stroke: #fff;
+  stroke-width: 0.4;
+}
+
+.pcb-diagram__zone--active {
+  opacity: 0.9;
+  stroke-width: 1;
+}
+
+.pcb-diagram__zone-label {
+  fill: #fff;
+  font-size: 4px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+.pcb-diagram__pad {
+  fill: #fbbf24;
+  stroke: #78350f;
+  stroke-width: 0.4;
+}
+
+.pcb-diagram__ref {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.hardware-pcb-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.hardware-pcb-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #1e40af;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.hardware-pcb-link:hover {
+  background: #e2e8f0;
+}
+
+.hardware-pcb-workflow {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: pcb-step;
+}
+
+.hardware-pcb-workflow li {
+  counter-increment: pcb-step;
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.85rem;
+}
+
+.hardware-pcb-workflow li::before {
+  content: counter(pcb-step);
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #059669;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hardware-pcb-workflow strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.hardware-pcb-interconnect {
+  margin-top: 24px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #fff7ed, #ecfdf5);
+  border: 1px solid #fed7aa;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.hardware-pcb-interconnect code {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.82rem;
+}
+
+.hardware-pcb-downloads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hardware-pcb-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #1e40af;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.hardware-pcb-download:hover {
+  background: #e2e8f0;
+}
+
+.hardware-pcb-download--primary {
+  background: #059669;
+  border-color: #059669;
+  color: #fff;
+}
+
+.hardware-pcb-download--primary:hover {
+  background: #047857;
+}

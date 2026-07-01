@@ -74,14 +74,14 @@ export const MOBILE_CLOUD_DOMAINS = [
       {
         id: 'cloud-deploy',
         label: 'Déploiement AWS, Azure ou Google Cloud',
-        description: 'Docker portable — compatible ECS, AKS, GKE et Render.',
+        description: 'ECS Fargate + RDS + ALB + ECR — Terraform infra/terraform/aws.',
         route: '/cloud',
-        status: 'partial',
+        status: 'implemented',
       },
       {
         id: 'postgres',
         label: 'Base de données cloud PostgreSQL',
-        description: 'PostgreSQL 16 — Render managed DB, Docker Compose, VPS.',
+        description: 'PostgreSQL 16 — RDS AWS, Docker Compose, VPS.',
         route: '/cloud',
         status: 'implemented',
         anchor: 'postgres',
@@ -104,7 +104,7 @@ export const MOBILE_CLOUD_DOMAINS = [
       {
         id: 'autoscale',
         label: 'Scalabilité automatique',
-        description: 'Conteneurs stateless, health checks, scaling horizontal K8s/Render.',
+        description: 'Conteneurs stateless, health checks, scaling ECS Fargate / K8s.',
         route: '/cloud',
         status: 'partial',
         anchor: 'scale',

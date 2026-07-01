@@ -319,6 +319,15 @@ const ClientIoTHubPage = () => {
                   badge="Temps réel"
                 />
                 <IoTModuleCard
+                  to="/client-hardware-pcb"
+                  icon="🟢"
+                  title="Cartes PCB imprimées"
+                  subtitle="PCB contrôle ESP32 + carte d'alimentation 5 V — ARES, BOM, Gerber."
+                  status="Documentation hardware"
+                  statusColor="#059669"
+                  badge="ARES"
+                />
+                <IoTModuleCard
                   to="/client-smart-water"
                   icon="💧"
                   title="Consommation eau"

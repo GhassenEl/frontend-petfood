@@ -1,0 +1,11 @@
+Reference,Quantity,Value,Package,Description
+U1,1,LM2596-5.0,TO-263-5,Buck 5 V
+D1,1,SS34,SMA,Schottky
+L1,1,33µH 3A,Shielded,Inductance buck
+C1-C2,2,470µF 16V,Radial,Filtrage entrée/sortie
+C3-C4,2,100nF,0805,Découplage HF
+F1,1,2A,5x20,Fusible rapide
+SW1,1,SPST,Panel,Interrupteur ON/OFF
+J1,1,DC-5.5x2.1,Jack,Entrée 12 V
+J2,1,CONN-2X2,2.54mm,Sortie 5 V vers PCB ctrl
+J3,1,TERMINAL,Chassis,Terre boîtier

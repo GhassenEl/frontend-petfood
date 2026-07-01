@@ -189,11 +189,9 @@ class FoodQualityAiEngine {
   static String _buildSummary(FoodAiClass cls, FoodAiInsights insights) {
     final mold = insights.moldVision;
     final exp = insights.expiration;
-    final stock = insights.stockEstimation;
     final moldTxt = mold.detected ? 'Moisissure IA : ${mold.severity} (${mold.pixelRatioPct}%). ' : '';
     return 'IA : ${cls.label} (${(insights.classificationConfidence * 100).round()}%). '
         '$moldTxt'
-        'Stock estimé ${stock.levelPct}%. '
         'Péremption ~${exp.daysRemaining} j (${(exp.confidence * 100).round()}% confiance).';
   }
 }

@@ -23,7 +23,11 @@ class PetProfile {
       name: json['name']?.toString() ?? 'Animal',
       species: json['species']?.toString() ?? json['type']?.toString() ?? 'chien',
       breed: json['breed']?.toString(),
-      weightKg: json['weight'] != null ? double.tryParse(json['weight'].toString()) : null,
+      weightKg: json['weight'] != null
+          ? double.tryParse(json['weight'].toString())
+          : json['weightKg'] != null
+              ? double.tryParse(json['weightKg'].toString())
+              : null,
       birthDate: json['birthDate']?.toString(),
       notes: json['notes']?.toString(),
     );

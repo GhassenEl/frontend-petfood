@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import legacy, platform, sales
+from app.routers import legacy, platform, recommendations, sales
 
 app = FastAPI(
     title="PetfoodTN ML Service",
@@ -19,6 +19,7 @@ app.add_middleware(
 
 app.include_router(sales.router)
 app.include_router(platform.router)
+app.include_router(recommendations.router)
 app.include_router(legacy.router)
 
 
@@ -32,6 +33,9 @@ def root():
     return {
         "service": "PetfoodTN FastAPI ML",
         "endpoints": [
+            "POST /recommendations/hybrid",
+            "POST /recommendations/admin/client-profile",
+            "POST /recommendations/explain-sales",
             "POST /ml/platform/insights",
             "POST /sales/forecast",
             "POST /ml/rank/senior-dog",

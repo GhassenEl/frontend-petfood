@@ -7,10 +7,12 @@ import ChatAssistant from '../components/ChatAssistant';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
 import MobileBottomNav, { CLIENT_MOBILE_NAV, CLIENT_IOT_MOBILE_NAV } from '../components/MobileBottomNav';
+import RecommendedForYouButton from '../components/RecommendedForYouButton';
 
 const CLIENT_IOT_PATHS = [
   '/client-iot',
   '/pet-feeder',
+  '/client-hardware-pcb',
   '/client-smart-water',
   '/client-smart-delivery',
   '/food-quality-surveillance',
@@ -126,6 +128,7 @@ const ClientLayout = ({ children }) => {
         />
       )}
       <ChatAssistant key={chatKey} variant="client" />
+      <RecommendedForYouButton align="left" bottomOffset={92} />
     </ResponsiveShell>
   );
 };

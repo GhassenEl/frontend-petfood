@@ -1,6 +1,7 @@
 import React from 'react';
 import VendorSidebar from '../components/VendorSidebar';
 import ChatAssistant from '../components/ChatAssistant';
+import RecommendedForYouButton from '../components/RecommendedForYouButton';
 import { useAuth } from '../contexts/AuthContext';
 import ResponsiveShell from './ResponsiveShell';
 import MobileBottomNav, { VENDOR_MOBILE_NAV } from '../components/MobileBottomNav';
@@ -17,6 +18,7 @@ const VendorLayout = ({ children }) => {
       sidebar={(onClose) => <VendorSidebar user={user} onLogout={logout} onNavigate={onClose} />}
     >
       {children}
+      <RecommendedForYouButton bottomOffset={88} />
       <ChatAssistant key={chatKey} variant="vendor" />
     </ResponsiveShell>
   );

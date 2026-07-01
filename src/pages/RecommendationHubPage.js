@@ -55,6 +55,8 @@ const RecommendationHubPage = () => {
         <p style={{ marginTop: 8, fontSize: 12, opacity: 0.8 }}>
           Poids hybride — contenu {(data.pipeline.weights.content * 100).toFixed(0)}% · collaboratif {(data.pipeline.weights.collaborative * 100).toFixed(0)}%
           {data.mode === 'demo' && ' · Mode démo'}
+          {data.pythonPowered && ' · FastAPI live'}
+          {data.mode === 'hybrid-live' && ' · Moteur hybride NLP'}
         </p>
         <button type="button" className="rechub-refresh" onClick={load}>
           Actualiser le pipeline

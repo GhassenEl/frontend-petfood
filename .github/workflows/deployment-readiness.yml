@@ -1,8 +1,7 @@
 name: Deployment Readiness
 
 on:
-  push:
-    branches: [main]
+  workflow_call:
   workflow_dispatch:
 
 jobs:
@@ -22,45 +21,62 @@ jobs:
       - name: Build production frontend
         run: npm ci && npm run build
         env:
-          VITE_API_BASE: https://petfoodtn-api.onrender.com/api
-          VITE_SOCKET_URL: https://petfoodtn-api.onrender.com
+          VITE_API_BASE: /api
+          VITE_SOCKET_URL: ''
 
-      - name: Valider render.yaml
+      - name: Valider Terraform AWS
         run: |
-          test -f render.yaml
-          grep -q 'petfoodtn-web' render.yaml
-          grep -q 'petfoodtn-api' render.yaml
-          grep -q 'staticPublishPath: dist' render.yaml
-          echo "render.yaml OK"
+          test -f infra/terraform/aws/main.tf
+          test -f infra/terraform/aws/ecs.tf
+          grep -q 'aws_ecs_cluster' infra/terraform/aws/ecs.tf
+          grep -q 'aws_db_instance' infra/terraform/aws/rds.tf
+          echo "infra/terraform/aws OK"
 
-      - name: Sonder URLs production
+      - name: Valider platform-pipeline
+        run: |
+          test -f .github/workflows/platform-pipeline.yml
+          grep -q 'publish-ecr.yml' .github/workflows/platform-pipeline.yml
+          grep -q 'deploy-aws.yml' .github/workflows/platform-pipeline.yml
+          echo "platform-pipeline.yml OK"
+
+      - name: Sonder URL production (AWS / ALB)
         id: probe
+        env:
+          APP_URL: ${{ vars.UPTIME_FRONTEND_URL }}
         run: |
           probe() {
             local key="$1" url="$2"
-            code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 25 "$url" || echo "000")
+            code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 25 "$url" 2>/dev/null || echo "000")
             echo "${key}=${code}" >> "$GITHUB_OUTPUT"
           }
-          probe web "https://petfoodtn-web.onrender.com"
-          probe api "https://petfoodtn-api.onrender.com/health"
-          probe ml "https://petfoodtn-ml.onrender.com/health"
+          if [ -n "$APP_URL" ]; then
+            probe web "$APP_URL"
+            probe api "${APP_URL}/health"
+            probe nginx "${APP_URL}/nginx-health"
+          else
+            echo "web=skip" >> "$GITHUB_OUTPUT"
+            echo "api=skip" >> "$GITHUB_OUTPUT"
+            echo "nginx=skip" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Résumé
         run: |
           {
-            echo "### État déploiement PetfoodTN"
+            echo "### Readiness — PetfoodTN (AWS)"
             echo ""
-            echo "| Service | URL | HTTP |"
-            echo "|---------|-----|------|"
-            echo "| Frontend | petfoodtn-web | ${{ steps.probe.outputs.web }} |"
-            echo "| API | petfoodtn-api | ${{ steps.probe.outputs.api }} |"
-            echo "| ML | petfoodtn-ml | ${{ steps.probe.outputs.ml }} |"
+            echo "| Check | Statut |"
+            echo "|-------|--------|"
+            echo "| Build Vite prod | ✅ |"
+            echo "| Terraform AWS | ✅ |"
+            echo "| Platform pipeline | ✅ |"
+            echo "| Frontend ALB | ${{ steps.probe.outputs.web || 'non configuré' }} |"
+            echo "| API /health | ${{ steps.probe.outputs.api || 'non configuré' }} |"
             echo ""
-            if [ "${{ steps.probe.outputs.web }}" = "404" ]; then
-              echo "➡️ **Blueprint Render non appliqué** — [Créer la stack](https://dashboard.render.com/blueprints/new)"
+            if [ "${{ steps.probe.outputs.web }}" = "skip" ]; then
+              echo "➡️ Configurez \`UPTIME_FRONTEND_URL\` après \`terraform apply\`"
               echo ""
-              echo "Guide : \`docs/RENDER-SETUP.md\` · Audit : \`npm run devops:prod:audit\`"
+              echo "Guide : \`docs/AWS-SETUP.md\` · Pipeline : \`docs/DEVOPS-PIPELINE.md\`"
             elif [ "${{ steps.probe.outputs.web }}" = "200" ]; then
-              echo "✅ Application en ligne sur Render"
+              echo "✅ Application en ligne sur AWS"
             fi
           } >> "$GITHUB_STEP_SUMMARY"

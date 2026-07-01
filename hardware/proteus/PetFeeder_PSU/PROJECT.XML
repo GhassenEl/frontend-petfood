@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+<PROJECT>
+ <TIMESTAMP RELEASE="813" FILEVER="830" MODIFIED="1740000001" CUSTID="175675344" CREATED="1740000001"/>
+ <VARIANTS/>
+ <SCRIPTS>
+  <STRING>PWRRAILS.DAT</STRING>
+ </SCRIPTS>
+ <TITLE>PetFeeder_PSU — Alimentation 5V</TITLE>
+ <NOTES>Carte alimentation LM2596. Importer PetFeeder_PSU.net. Voir hardware/proteus/README.md</NOTES>
+</PROJECT>

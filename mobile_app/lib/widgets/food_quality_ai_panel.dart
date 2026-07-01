@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/food_quality.dart';
 import '../models/food_quality_ai.dart';
 
-/// Panneau fonctionnalités IA — classification, moisissures, stock, péremption.
+/// Panneau fonctionnalités IA — classification, moisissures, péremption.
 class FoodQualityAiPanel extends StatelessWidget {
   const FoodQualityAiPanel({super.key, required this.reading});
 
@@ -23,15 +22,13 @@ class FoodQualityAiPanel extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         const Text(
-          'Classification automatique · Vision moisissures · Stock · Péremption',
+          'Classification automatique · Vision moisissures · Péremption',
           style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
         ),
         const SizedBox(height: 12),
         _ClassificationCard(reading: reading, cls: cls, color: clsColor),
         const SizedBox(height: 10),
         _MoldVisionCard(reading: reading),
-        const SizedBox(height: 10),
-        _StockCard(reading: reading),
         const SizedBox(height: 10),
         _ExpirationCard(reading: reading),
         const SizedBox(height: 10),
@@ -169,56 +166,6 @@ class _MoldVisionCard extends StatelessWidget {
   }
 }
 
-class _StockCard extends StatelessWidget {
-  const _StockCard({required this.reading});
-  final FoodQualityReading reading;
-
-  @override
-  Widget build(BuildContext context) {
-    final level = reading.stockLevelPct ?? 65;
-    final conf = ((reading.stockEstimateConfidence ?? 0.85) * 100).round();
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.inventory_2, size: 18, color: Color(0xFF2563EB)),
-                SizedBox(width: 8),
-                Text('Estimation quantité restante', style: TextStyle(fontWeight: FontWeight.bold)),
-              ],
-            ),
-            const SizedBox(height: 12),
-            LinearProgressIndicator(
-              value: level / 100,
-              minHeight: 10,
-              borderRadius: BorderRadius.circular(6),
-              backgroundColor: const Color(0xFFE2E8F0),
-              color: level < 25 ? const Color(0xFFDC2626) : const Color(0xFF059669),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('$level % restant', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                Text('Confiance $conf %', style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              level < 25 ? 'Réapprovisionner le récipient' : 'Estimation par couverture surface vision',
-              style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _ExpirationCard extends StatelessWidget {
   const _ExpirationCard({required this.reading});
   final FoodQualityReading reading;
@@ -269,7 +216,7 @@ class _ExpirationCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(DateFormat('dd MMM yyyy', 'fr_FR').format(date), style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(_formatExpirationDate(date), style: const TextStyle(fontWeight: FontWeight.bold)),
                       Text('Confiance prédiction : $conf %', style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
                       const SizedBox(height: 4),
                       Text(_riskLabel(risk), style: TextStyle(fontSize: 12, color: riskColor, fontWeight: FontWeight.w600)),
@@ -293,6 +240,12 @@ class _ExpirationCard extends StatelessWidget {
       default:
         return 'Conservation optimale prévue';
     }
+  }
+
+  static String _formatExpirationDate(DateTime d) {
+    final day = d.day.toString().padLeft(2, '0');
+    final month = d.month.toString().padLeft(2, '0');
+    return '$day/$month/${d.year}';
   }
 }
 

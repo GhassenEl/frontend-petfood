@@ -889,12 +889,20 @@ body.dark .livreur-sidebar .sidebar-footer {
 
 .platform-live-bar {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
+  gap: 12px;
   padding: 6px 16px;
   border-bottom: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(6px);
+}
+
+.platform-live-bar__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .platform-live-badge {

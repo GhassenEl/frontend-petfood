@@ -1,0 +1,138 @@
+name: Deploy AWS
+
+on:
+  workflow_call:
+    inputs:
+      image_tag:
+        description: 'Tag ECR override'
+        required: false
+        type: string
+        default: ''
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Tag ECR (latest ou sha-abc1234)'
+        required: false
+        default: latest
+
+concurrency:
+  group: deploy-aws-production
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'eu-west-3' }}
+
+jobs:
+  deploy:
+    name: ECS rolling deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: production
+
+    steps:
+      - name: Resolve image tag
+        id: tag
+        run: |
+          INPUT_TAG="${{ inputs.image_tag || '' }}"
+          if [ -n "$INPUT_TAG" ]; then
+            echo "value=${INPUT_TAG}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ github.event.inputs.image_tag || 'latest' }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=sha-${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip if AWS secrets missing
+        id: check
+        run: |
+          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ] || [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Secrets AWS non configurés — déploiement AWS ignoré."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Configure AWS credentials
+        if: steps.check.outputs.skip != 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Resolve ECS names
+        if: steps.check.outputs.skip != 'true'
+        id: ecs
+        run: |
+          CLUSTER="${{ vars.AWS_ECS_CLUSTER || 'petfoodtn-production-cluster' }}"
+          PREFIX="${{ vars.AWS_ECR_PREFIX || 'petfoodtn-production' }}"
+          echo "cluster=${CLUSTER}" >> "$GITHUB_OUTPUT"
+          echo "frontend=${PREFIX}-frontend" >> "$GITHUB_OUTPUT"
+          echo "backend=${PREFIX}-backend" >> "$GITHUB_OUTPUT"
+          echo "ml=${PREFIX}-ml" >> "$GITHUB_OUTPUT"
+
+      - name: Update task definitions with new image tag
+        if: steps.check.outputs.skip != 'true'
+        env:
+          IMAGE_TAG: ${{ steps.tag.outputs.value }}
+          ECR_PREFIX: ${{ vars.AWS_ECR_PREFIX || 'petfoodtn-production' }}
+        run: |
+          set -euo pipefail
+          ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+          REGISTRY="${ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+          for SVC in frontend backend ml; do
+            FAMILY="${ECR_PREFIX}-${SVC}"
+            TASK_ARN=$(aws ecs describe-services \
+              --cluster "${{ steps.ecs.outputs.cluster }}" \
+              --services "${ECR_PREFIX}-${SVC}" \
+              --query 'services[0].taskDefinition' --output text 2>/dev/null || true)
+
+            if [ -z "$TASK_ARN" ] || [ "$TASK_ARN" = "None" ]; then
+              echo "::warning::Service ${ECR_PREFIX}-${SVC} introuvable — lancez terraform apply d'abord."
+              continue
+            fi
+
+            aws ecs describe-task-definition --task-definition "$TASK_ARN" --query taskDefinition > task.json
+            jq --arg img "${REGISTRY}/${ECR_PREFIX}-${SVC}:${IMAGE_TAG}" \
+              '.containerDefinitions[0].image = $img | del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.compatibilities,.registeredAt,.registeredBy)' \
+              task.json > task-new.json
+
+            NEW_ARN=$(aws ecs register-task-definition --cli-input-json file://task-new.json --query 'taskDefinition.taskDefinitionArn' --output text)
+            aws ecs update-service \
+              --cluster "${{ steps.ecs.outputs.cluster }}" \
+              --service "${ECR_PREFIX}-${SVC}" \
+              --task-definition "$NEW_ARN" \
+              --force-new-deployment
+            echo "✅ ${ECR_PREFIX}-${SVC} → ${IMAGE_TAG}"
+          done
+
+      - name: Wait for services stable
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          CLUSTER="${{ steps.ecs.outputs.cluster }}"
+          for SVC in "${{ steps.ecs.outputs.frontend }}" "${{ steps.ecs.outputs.backend }}" "${{ steps.ecs.outputs.ml }}"; do
+            if aws ecs describe-services --cluster "$CLUSTER" --services "$SVC" --query 'services[0].status' --output text 2>/dev/null | grep -q ACTIVE; then
+              aws ecs wait services-stable --cluster "$CLUSTER" --services "$SVC" || true
+            fi
+          done
+
+      - name: Health check
+        if: steps.check.outputs.skip != 'true'
+        env:
+          APP_URL: ${{ vars.UPTIME_FRONTEND_URL }}
+        run: |
+          URL="${APP_URL:-}"
+          if [ -z "$URL" ]; then
+            echo "UPTIME_FRONTEND_URL non défini — skip health check"
+            exit 0
+          fi
+          for i in 1 2 3 4 5; do
+            if curl -fsS "${URL}/nginx-health" && curl -fsS "${URL}/health"; then
+              echo "✅ Stack AWS healthy"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::warning::Health check timeout — vérifiez ECS / ALB"
+          exit 1

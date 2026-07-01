@@ -1,11 +1,14 @@
 /** Catalogue interfaces DevOps PetfoodTN — CI/CD, monitoring, infra, sécurité. */
 
 export const DEVOPS_PIPELINES = [
-  { id: 'ci', name: 'CI — GitHub Actions', status: 'ok', detail: 'Build Vite, tests backend, ML, Docker, SonarQube, Playwright', file: '.github/workflows/ci.yml' },
-  { id: 'security', name: 'DevSecOps', status: 'ok', detail: 'Gitleaks, Trivy images, OWASP dependency-check, npm audit', file: '.github/workflows/security.yml' },
-  { id: 'publish', name: 'Publish GHCR', status: 'ok', detail: 'Images frontend, backend, ML → ghcr.io', file: '.github/workflows/publish-ghcr.yml' },
-  { id: 'deploy-vps', name: 'CD VPS', status: 'ok', detail: 'Déploiement SSH docker-compose.ghcr.yml', file: '.github/workflows/deploy-vps.yml' },
-  { id: 'deploy-render', name: 'CD Render', status: 'ok', detail: 'Hooks Blueprint render.yaml', file: '.github/workflows/deploy-render.yml' },
+  { id: 'platform', name: 'Platform Pipeline', status: 'ok', detail: 'Orchestrateur CI → Sec → E2E → ECR → AWS ECS', file: '.github/workflows/platform-pipeline.yml' },
+  { id: 'ci', name: 'CI — Build & tests', status: 'ok', detail: 'Vite, Prisma, ML smoke, Docker, API wallet', file: '.github/workflows/ci.yml' },
+  { id: 'security', name: 'DevSecOps', status: 'ok', detail: 'Gitleaks, Trivy, OWASP, npm audit', file: '.github/workflows/security.yml' },
+  { id: 'publish-ecr', name: 'Publish ECR', status: 'ok', detail: 'Images → Amazon ECR (production AWS)', file: '.github/workflows/publish-ecr.yml' },
+  { id: 'deploy-aws', name: 'CD AWS ECS', status: 'ok', detail: 'Rolling deploy Fargate + health ALB', file: '.github/workflows/deploy-aws.yml' },
+  { id: 'readiness', name: 'Deployment readiness', status: 'ok', detail: 'Gate prod — Terraform AWS + build Vite', file: '.github/workflows/deployment-readiness.yml' },
+  { id: 'publish', name: 'Publish GHCR', status: 'ok', detail: 'Images → ghcr.io (VPS secondaire)', file: '.github/workflows/publish-ghcr.yml' },
+  { id: 'deploy-vps', name: 'CD VPS', status: 'ok', detail: 'SSH docker-compose.ghcr.yml', file: '.github/workflows/deploy-vps.yml' },
   { id: 'backup', name: 'Sauvegarde nocturne', status: 'ok', detail: 'pg_dump chiffré 02:00 UTC', file: '.github/workflows/backup-nightly.yml' },
   { id: 'uptime', name: 'Uptime & alertes', status: 'ok', detail: 'Sonde /health toutes les 15 min', file: '.github/workflows/uptime.yml' },
   { id: 'e2e', name: 'E2E Playwright', status: 'ok', detail: 'Tests navigateur sur PR', file: '.github/workflows/e2e.yml' },
@@ -26,7 +29,8 @@ export const DEVOPS_STACKS = [
   { id: 'full', label: 'Stack complète', cmd: 'npm run docker:stack:full', desc: 'IA FastAPI + MQTT + Prometheus + Grafana' },
   { id: 'iot', label: 'IoT MQTT', cmd: 'npm run docker:iot:up', desc: 'Mosquitto pour distributeurs & ESP32-CAM' },
   { id: 'monitoring', label: 'Monitoring', cmd: 'npm run docker:monitoring:up', desc: 'Prometheus + Grafana + exporters' },
-  { id: 'prod', label: 'Audit production', cmd: 'npm run devops:prod:audit', desc: 'Vérification secrets, health, Render hooks' },
+  { id: 'aws', label: 'Deploy AWS auto', cmd: 'npm run devops:aws:auto', desc: 'Terraform + ECR + ECS (compte AWS requis)' },
+  { id: 'prod', label: 'Audit production', cmd: 'npm run devops:prod:audit', desc: 'Secrets, health, pipeline readiness' },
 ];
 
 export const DEVOPS_ADMIN_INTERFACES = [
@@ -42,7 +46,7 @@ export const DEVOPS_ADMIN_INTERFACES = [
 ];
 
 export const DEVOPS_PLATFORM_LINKS = [
-  { id: 'cloud', icon: '☁️', label: 'Cloud Computing', route: '/cloud', desc: 'Render, Docker, AWS/Azure/GCP' },
+  { id: 'cloud', icon: '☁️', label: 'Cloud Computing', route: '/cloud', desc: 'AWS ECS, Docker, Terraform' },
   { id: 'big-data', icon: '📊', label: 'Big Data', route: '/big-data', desc: 'Kafka, Spark, Hadoop' },
   { id: 'enterprise', icon: '🏢', label: 'Fonctionnalités entreprise', route: '/enterprise', desc: 'Vue globale PFE' },
 ];
@@ -52,8 +56,8 @@ export const DEVOPS_METRICS_DEMO = {
   score: 94,
   uptime: '99.7%',
   lastDeploy: '2026-06-16T08:30:00Z',
-  pipelinesOk: 7,
-  pipelinesTotal: 8,
+  pipelinesOk: 9,
+  pipelinesTotal: 10,
   containersRunning: 12,
   grafanaDashboards: 3,
 };

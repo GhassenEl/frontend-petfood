@@ -1,13 +1,22 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/models.dart';
 import '../services/auth_service.dart';
+import '../services/feeder_auto_engine.dart';
+import '../models/iot_hub_state.dart';
+import '../services/nutrition_hydration_engine.dart';
 import '../services/repositories.dart';
+import '../utils/species_catalog.dart';
+import '../widgets/pet_feeding_schedules_panel.dart';
 
 class FeederScreen extends StatefulWidget {
-  const FeederScreen({super.key, required this.auth});
+  const FeederScreen({super.key, required this.auth, this.embedded = false, this.hub, this.onSelectPet});
 
   final AuthService auth;
+  final bool embedded;
+  final IotHubState? hub;
+  final ValueChanged<String>? onSelectPet;
 
   @override
   State<FeederScreen> createState() => _FeederScreenState();
@@ -20,15 +29,27 @@ class _FeederScreenState extends State<FeederScreen> {
   NutritionPlan? _plan;
   bool _loading = true;
   double _grams = 30;
+  Timer? _pollTimer;
+
+  static const _pollInterval = Duration(seconds: 15);
 
   @override
   void initState() {
     super.initState();
     _load();
+    _pollTimer = Timer.periodic(_pollInterval, (_) {
+      if (mounted) _load(silent: true);
+    });
   }
 
-  Future<void> _load() async {
-    setState(() => _loading = true);
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _load({bool silent = false}) async {
+    if (!silent) setState(() => _loading = true);
     try {
       final list = await _repo.listFeeders();
       PetFeeder? sel = list.isNotEmpty ? list.first : null;
@@ -48,7 +69,7 @@ class _FeederScreenState extends State<FeederScreen> {
         );
       }
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _loading = silent ? _loading : false);
     }
   }
 
@@ -106,6 +127,33 @@ class _FeederScreenState extends State<FeederScreen> {
     }
   }
 
+  List<FeederLogLite> _logLites(PetFeeder f) =>
+      f.logs.map((l) => FeederLogLite(eventType: l.eventType, portionGrams: l.portionGrams, createdAt: l.createdAt)).toList();
+
+  List<FeederScheduleLite> _scheduleLites(PetFeeder f) =>
+      f.schedules.map((s) => FeederScheduleLite(time: s.time, portionGrams: s.portionGrams, label: s.label)).toList();
+
+  SuggestedPortion? _suggestedPortion(PetFeeder f) {
+    if (_plan == null) return null;
+    final species = widget.hub?.selectedPetType ?? 'dog';
+    final slots = FeederAutoEngine.getScheduleSlots(_scheduleLites(f), _logLites(f));
+    final raw = FeederAutoEngine.computeSuggestedPortion(
+      portionGrams: _plan!.portionGrams,
+      dailyGrams: _plan!.dailyGrams,
+      todayGrams: FeederAutoEngine.todayGramsFromLogs(_logLites(f)),
+      slots: slots,
+      reservoirLow: f.isLowFood,
+      species: species,
+    );
+    final clamped = SpeciesCatalog.clampPortion(species, raw.grams);
+    if (clamped == raw.grams) return raw;
+    return SuggestedPortion(
+      grams: clamped,
+      reason: '${raw.reason} (limite ${SpeciesCatalog.label(species)})',
+      compensateMissed: raw.compensateMissed,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final f = _selected;
@@ -113,32 +161,61 @@ class _FeederScreenState extends State<FeederScreen> {
       onRefresh: _load,
       child: CustomScrollView(
         slivers: [
-          SliverAppBar.large(
-            title: const Text('Distributeur IoT'),
-            backgroundColor: const Color(0xFFDBEAFE),
-          ),
+          if (!widget.embedded)
+            SliverAppBar.large(
+              title: const Text('Distributeur IoT'),
+              backgroundColor: const Color(0xFFDBEAFE),
+            ),
           if (_loading && f == null)
             const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
-          else if (_feeders.isEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.pets, size: 64, color: Colors.grey),
-                    const SizedBox(height: 16),
-                    const Text('Aucun distributeur'),
-                    const SizedBox(height: 16),
-                    FilledButton.icon(
-                      onPressed: _addFeeder,
-                      icon: const Icon(Icons.add),
-                      label: const Text('Ajouter ESP32'),
-                    ),
-                  ],
+          else ...[
+            if (widget.hub != null && widget.hub!.pets.isNotEmpty && !widget.embedded) ...[
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: PetFeedingSchedulesPanel(
+                    pets: widget.hub!.pets,
+                    selectedPetId: widget.hub!.selectedPetId,
+                    weightByPetId: widget.hub!.weightByPetId,
+                    onSelectPet: widget.onSelectPet,
+                    todayGramsByPetId: widget.hub!.todayGramsByPetId,
+                    isLive: widget.hub!.isLive,
+                  ),
                 ),
               ),
-            )
-          else ...[
+            ],
+            if (_feeders.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.pets, size: 64, color: Colors.grey),
+                        const SizedBox(height: 16),
+                        const Text('Aucun distributeur ESP32'),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.embedded
+                              ? 'Les horaires ci-dessus restent actifs pour chaque animal.'
+                              : 'Ajoutez un distributeur pour déclencher les repas.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          onPressed: _addFeeder,
+                          icon: const Icon(Icons.add),
+                          label: const Text('Ajouter ESP32'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else ...[
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 48,
@@ -164,6 +241,14 @@ class _FeederScreenState extends State<FeederScreen> {
                 padding: const EdgeInsets.all(16),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
+                    if (widget.hub?.selectedPetType != null)
+                      Card(
+                        child: ListTile(
+                          leading: Text(SpeciesCatalog.emoji(widget.hub!.selectedPetType), style: const TextStyle(fontSize: 22)),
+                          title: Text('Animal hub : ${SpeciesCatalog.label(widget.hub!.selectedPetType)}'),
+                          subtitle: const Text('Portions limitées selon espèce'),
+                        ),
+                      ),
                     if (f.isLowFood)
                       Card(
                         color: Colors.red.shade50,
@@ -172,6 +257,14 @@ class _FeederScreenState extends State<FeederScreen> {
                           title: Text('Réservoir bas — LED rouge'),
                         ),
                       ),
+                    if (_plan != null) ...[
+                      _nutritionScoreCard(f),
+                      const SizedBox(height: 12),
+                    ],
+                    if (_suggestedPortion(f) != null) ...[
+                      _autoPortionCard(f, _suggestedPortion(f)!),
+                      const SizedBox(height: 12),
+                    ],
                     _statusCard(f),
                     const SizedBox(height: 12),
                     _dispenseCard(f),
@@ -188,11 +281,70 @@ class _FeederScreenState extends State<FeederScreen> {
                   ]),
                 ),
               ),
+            ],
           ],
         ],
       ),
     );
   }
+
+  Widget _nutritionScoreCard(PetFeeder f) {
+    final todayGrams = FeederAutoEngine.todayGramsFromLogs(_logLites(f));
+    final missed = FeederAutoEngine.getScheduleSlots(_scheduleLites(f), _logLites(f))
+        .where((s) => s.status == 'missed')
+        .length;
+    final score = NutritionHydrationEngine.computeNutritionScore(
+      todayGrams: todayGrams,
+      dailyTarget: _plan!.dailyGrams,
+      missedMeals: missed,
+      reservoirLow: f.isLowFood,
+    );
+    return Card(
+      color: const Color(0xFFF0FDF4),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: const Color(0xFFD1FAE5),
+          child: Text('$score', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF059669))),
+        ),
+        title: Text('Score nutrition $score/100'),
+        subtitle: Text('$todayGrams / ${_plan!.dailyGrams} g aujourd\'hui'),
+      ),
+    );
+  }
+
+  Widget _autoPortionCard(PetFeeder f, SuggestedPortion suggestion) => Card(
+        color: Colors.orange.shade50,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.auto_awesome, color: Color(0xFFD97706)),
+                  SizedBox(width: 8),
+                  Text('Distribution auto intelligente', style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(suggestion.reason, style: const TextStyle(fontSize: 13)),
+              const SizedBox(height: 8),
+              Text('Portion suggérée : ${suggestion.grams} g', style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: f.isLowFood
+                    ? null
+                    : () {
+                        setState(() => _grams = suggestion.grams.toDouble());
+                        _dispense();
+                      },
+                icon: const Icon(Icons.play_arrow),
+                label: const Text('Distribuer portion suggérée'),
+              ),
+            ],
+          ),
+        ),
+      );
 
   Widget _statusCard(PetFeeder f) => Card(
         child: Padding(
@@ -276,13 +428,35 @@ class _FeederScreenState extends State<FeederScreen> {
               const SizedBox(height: 8),
               if (f.schedules.isEmpty)
                 const Text('Aucun créneau', style: TextStyle(color: Colors.grey))
-              else
-                ...f.schedules.map((s) => ListTile(
-                      dense: true,
-                      leading: const Icon(Icons.alarm),
-                      title: Text('${s.time} — ${s.portionGrams.toInt()} g'),
-                      subtitle: s.label != null ? Text(s.label!) : null,
-                    )),
+              else ...[
+                ...FeederAutoEngine.getScheduleSlots(_scheduleLites(f), _logLites(f)).map((slot) {
+                  final icon = switch (slot.status) {
+                    'done' => Icons.check_circle,
+                    'missed' => Icons.error_outline,
+                    'upcoming' => Icons.schedule,
+                    _ => Icons.alarm,
+                  };
+                  final color = switch (slot.status) {
+                    'done' => Colors.green,
+                    'missed' => Colors.red,
+                    'upcoming' => Colors.blue,
+                    _ => Colors.grey,
+                  };
+                  final statusLabel = switch (slot.status) {
+                    'done' => 'Distribué',
+                    'missed' => 'Manqué',
+                    'upcoming' => 'À venir',
+                    _ => slot.status,
+                  };
+                  return ListTile(
+                    dense: true,
+                    leading: Icon(icon, color: color, size: 20),
+                    title: Text('${slot.time} — ${slot.portionGrams.toInt()} g'),
+                    subtitle: Text(slot.label ?? statusLabel),
+                    trailing: Text(statusLabel, style: TextStyle(fontSize: 11, color: color)),
+                  );
+                }),
+              ],
             ],
           ),
         ),

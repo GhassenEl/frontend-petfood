@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../config/api_config.dart';
 import '../services/auth_service.dart';
+import '../services/theme_preferences.dart';
 import 'login_screen.dart';
 import 'pets_screen.dart';
 import 'delivery_tracking_screen.dart';
@@ -93,6 +94,22 @@ class ProfileScreen extends StatelessWidget {
                   onTap: () => _open(context, FoodQualityScreen(auth: auth)),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            child: ListenableBuilder(
+              listenable: ThemePreferences.instance,
+              builder: (context, _) {
+                final mono = ThemePreferences.instance.isMonochrome;
+                return SwitchListTile(
+                  secondary: Text(mono ? '🎨' : '◐', style: const TextStyle(fontSize: 22)),
+                  title: const Text('Mode noir & blanc'),
+                  subtitle: Text(mono ? 'Couleurs désactivées sur toute l\'app' : 'Interface en couleurs'),
+                  value: mono,
+                  onChanged: (_) => ThemePreferences.instance.toggle(),
+                );
+              },
             ),
           ),
           const SizedBox(height: 16),

@@ -59,33 +59,34 @@ Pipeline déclaratif : `jenkins/Jenkinsfile` — miroir GitHub Actions (build, t
 
 ## 2. Déploiement Continu (CD)
 
-Après validation CI + publication images :
+Pipeline orchestré par **`platform-pipeline.yml`** :
 
 ```mermaid
 flowchart LR
-  push[Push main] --> ci[CI + Security]
-  push --> publish[Publish GHCR]
-  publish --> vps[Deploy VPS SSH]
-  publish --> render[Deploy Render]
-  cron[02:00 UTC] --> backup[Sauvegarde nocturne]
-  cron15[*/15 min] --> uptime[Uptime + alertes]
+  push[Push main] --> platform[Platform Pipeline]
+  platform --> ci[CI + Security]
+  ci --> ready[Readiness]
+  ready --> ecr[Publish ECR]
+  ecr --> aws[Deploy AWS ECS]
+  cron[02:00 UTC] --> backup[Sauvegarde]
+  cron15[*/15 min] --> uptime[Uptime]
 ```
 
 | Workflow | Rôle |
 |----------|------|
-| `publish-ghcr.yml` | Build & push images Docker → **GHCR** (équivalent Docker Hub privé) |
-| `deploy-vps.yml` | CD SSH → serveur cloud |
-| `deploy-render.yml` | Hooks Render |
+| **`platform-pipeline.yml`** | **Orchestrateur** CI → Sec → E2E → Readiness → ECR → AWS |
+| `ci.yml` | Build Vite, tests backend, ML, Docker |
+| `security.yml` | Gitleaks, Trivy, OWASP, npm audit |
+| `publish-ecr.yml` | Images → **Amazon ECR** |
+| `deploy-aws.yml` | Rolling deploy **ECS Fargate** |
+| `publish-ghcr.yml` | Images GHCR (VPS secondaire) |
+| `deploy-vps.yml` | CD SSH docker-compose |
 | `backup-nightly.yml` | Sauvegarde 02:00 UTC |
 | `uptime.yml` | Sonde `/health` toutes les 15 min |
 
-Images publiées :
+Guide pipeline : **[DEVOPS-PIPELINE.md](./DEVOPS-PIPELINE.md)**
 
-- `ghcr.io/ghassenel/petfoodtn-frontend`
-- `ghcr.io/ghassenel/petfoodtn-backend`
-- `ghcr.io/ghassenel/petfoodtn-ml`
-
-Guide détaillé : [CD.md](./CD.md)
+Guide AWS : **[AWS-SETUP.md](./AWS-SETUP.md)** · CD : **[CD.md](./CD.md)**
 
 ---
 

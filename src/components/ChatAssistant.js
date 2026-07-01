@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, ShoppingCart, MessageSquarePlus } from 'lucide-react';
+import { MessageCircle, X, Send, ShoppingCart, MessageSquarePlus, History, Camera } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import useSocket from '../hooks/useSocket';
@@ -17,6 +17,14 @@ import {
   loadStoredChatLang,
   saveStoredChatLang,
 } from '../utils/platformChatbotEngine';
+import { analyzeChatImage } from '../services/chatHistoryService';
+
+const HISTORY_ROUTES = {
+  client: '/client/chat-history',
+  admin: '/admin/chat-history',
+  vet: '/vet/chat-history',
+  livreur: '/livreur/chat-history',
+};
 
 const PET_GREETING_LABELS = { dog: 'chien', cat: 'chat', bird: 'oiseau', fish: 'poisson', other: 'animal' };
 
@@ -170,6 +178,8 @@ const AssistantAvatar = ({ variant = 'client', size = 40 }) => {
 const mapHistoryRow = (m) => ({
   role: m.role,
   content: m.content,
+  messageType: m.messageType || null,
+  imagePreview: m.imagePreview || null,
   products: m.products || [],
   quickReplies: m.quickReplies || [],
   shouldShowVetCTA: !!m.shouldShowVetCTA,
@@ -206,8 +216,10 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
   const [historyLoading, setHistoryLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const imageFileRef = useRef(null);
   const socket = useSocket(user ? `user-${user.id || user._id}` : 'global');
   const navigate = useNavigate();
+  const historyPath = HISTORY_ROUTES[variant] || (user ? HISTORY_ROUTES.client : null);
 
   const shouldShowVetCTA = (text) => {
     const t = String(text || '').toLowerCase();
@@ -677,6 +689,52 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
     setIsBackendOnline(true);
   };
 
+  const handleImageUpload = async (file) => {
+    if (!file || !user || skipHistory) return;
+    setLoading(true);
+    try {
+      const reader = new FileReader();
+      const dataUrl = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const hint = input.trim() || `Photo ${file.name} — décrivez les signes visibles si besoin`;
+      const userMsg = {
+        role: 'user',
+        content: `📷 ${hint}`,
+        messageType: 'image',
+        products: [],
+        quickReplies: [],
+      };
+      setMessages((prev) => [...prev, userMsg]);
+      setInput('');
+      const result = await analyzeChatImage({
+        imageHint: hint,
+        imageBase64: String(dataUrl).slice(0, 500000),
+        imagePreview: String(dataUrl).slice(0, 200),
+      });
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: result.message || 'Analyse image terminée.',
+          messageType: 'image',
+          quickReplies: ['Contacter vétérinaire', 'Recommandations'],
+        },
+      ]);
+      setIsBackendOnline(true);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: 'Analyse image indisponible. Réessayez ou décrivez votre question en texte.' },
+      ]);
+    } finally {
+      setLoading(false);
+      if (imageFileRef.current) imageFileRef.current.value = '';
+    }
+  };
+
   const getDiscountedPriceValue = (product) => {
     const price = Number(product.price || 0);
     const discount = Number(product.discount || 0);
@@ -797,6 +855,20 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
           >
             <MessageSquarePlus size={18} color="#666" />
           </button>
+          {historyPath && user && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false);
+                navigate(historyPath);
+              }}
+              style={styles.iconActionBtn}
+              title="Historique chatbot"
+              aria-label="Historique chatbot"
+            >
+              <History size={18} color="#666" />
+            </button>
+          )}
           {!embedded && (
             <button
               type="button"
@@ -910,6 +982,27 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
       </div>
 
       <div style={styles.inputArea}>
+        {user && !skipHistory && (
+          <>
+            <input
+              ref={imageFileRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={(e) => handleImageUpload(e.target.files?.[0])}
+            />
+            <button
+              type="button"
+              onClick={() => imageFileRef.current?.click()}
+              disabled={loading}
+              style={styles.imageBtn}
+              title="Analyser une image"
+              aria-label="Analyser une image"
+            >
+              <Camera size={18} color="#7c3aed" />
+            </button>
+          </>
+        )}
         <input
           ref={inputRef}
           type="text"
@@ -1256,6 +1349,18 @@ const styles = {
     cursor: 'pointer',
     boxShadow: '0 4px 12px rgba(230,126,34,0.25)',
     transition: 'all 0.2s',
+  },
+  imageBtn: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '12px',
+    border: '1px solid #e9d5ff',
+    background: '#faf5ff',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
 
   vetCtaWrap: {

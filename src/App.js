@@ -5,6 +5,7 @@ import CookieConsentBanner from './components/CookieConsentBanner';
 import SessionExpiryBanner from './components/SessionExpiryBanner';
 import LiveDataBanner from './components/LiveDataBanner';
 import GlobalPlatformChat from './components/GlobalPlatformChat';
+import GlobalMonochromeToggle from './components/GlobalMonochromeToggle';
 import LoginPage from './pages/LoginPage.js';
 import RegisterPage from './pages/RegisterPage.jsx';
 import ForgotPasswordPage from './pages/ForgotPasswordPage.js';
@@ -74,6 +75,7 @@ import ContactPage from './pages/ContactPage';
 import StoreLocatorPage from './pages/StoreLocatorPage';
 import VeterinaryPage from './pages/VeterinaryPage';
 import PetFeederPage from './pages/PetFeederPage';
+import HardwarePcbPage from './pages/HardwarePcbPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const PlatformCompliancePage = lazy(() => import('./pages/PlatformCompliancePage'));
@@ -84,6 +86,7 @@ const CloudInfrastructurePage = lazy(() => import('./pages/CloudInfrastructurePa
 const BigDataPlatformPage = lazy(() => import('./pages/BigDataPlatformPage'));
 const DevOpsPlatformPage = lazy(() => import('./pages/DevOpsPlatformPage'));
 const PremiumFeaturesPage = lazy(() => import('./pages/PremiumFeaturesPage'));
+const PlatformSearchPage = lazy(() => import('./pages/PlatformSearchPage'));
 const AdminAdvancedHubPage = lazy(() => import('./pages/AdminAdvancedHubPage'));
 import LivreurDashboard from './pages/LivreurDashboard';
 import LivreurOrdersPage from './pages/LivreurOrdersPage';
@@ -188,6 +191,8 @@ import ClientEcosystemHubPage from './pages/ClientEcosystemHubPage';
 import ClientAdvancedAiPage from './pages/ClientAdvancedAiPage';
 import ClientIntelligenceAutomationPage from './pages/ClientIntelligenceAutomationPage';
 import RecommendationHubPage from './pages/RecommendationHubPage';
+import AdminRecommendationsHubPage from './pages/AdminRecommendationsHubPage';
+import ChatbotHistoryPage from './pages/ChatbotHistoryPage';
 import ClientAIAgentPage from './pages/ClientAIAgentPage';
 import ClientMlAgentPage from './pages/ClientMlAgentPage';
 import ClientWellnessPage from './pages/ClientWellnessPage';
@@ -233,6 +238,7 @@ const App = () => {
       <SessionExpiryBanner />
       <LiveDataBanner />
       <GlobalPlatformChat />
+      <GlobalMonochromeToggle />
       <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/" element={<MarketingLandingPage />} />
@@ -277,6 +283,7 @@ const App = () => {
     <SessionExpiryBanner />
     <LiveDataBanner />
     <GlobalPlatformChat />
+    <GlobalMonochromeToggle />
     <Suspense fallback={<PageLoader />}>
     <Routes>
       <Route path="/" element={<Navigate to={userHome} replace />} />
@@ -302,6 +309,7 @@ const App = () => {
       <Route path="/big-data" element={<BigDataPlatformPage />} />
       <Route path="/devops" element={<DevOpsPlatformPage />} />
       <Route path="/premium" element={<PremiumFeaturesPage />} />
+      <Route path="/search" element={<RoleLayoutShell user={user}><PlatformSearchPage /></RoleLayoutShell>} />
 
       <Route path="/admin/dashboard" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDashboard /></AdminLayout></RoleRoute>} />
       <Route path="/admin/hub" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAdvancedHubPage /></AdminLayout></RoleRoute>} />
@@ -357,6 +365,8 @@ const App = () => {
       <Route path="/admin/intelligence" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><IntelligencePlatformPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/advanced-ai" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAdvancedAiPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/analytics-decision" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAnalyticsDecisionPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/recommendations" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRecommendationsHubPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/chat-history" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><ChatbotHistoryPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/business-intelligence" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminBusinessIntelligencePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/merchant-intelligence" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminMerchantIntelligencePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/incidents-ml" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminIncidentsMlPage /></AdminLayout></RoleRoute>} />
@@ -408,6 +418,7 @@ const App = () => {
       <Route path="/client-wellness" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientWellnessPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-emotions" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientOwnerEmotionsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAIAgentPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client/chat-history" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ChatbotHistoryPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-advanced-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAdvancedAiPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-intelligence" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientIntelligenceAutomationPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-recommendations" element={<RoleRoute user={user} roles={['client']}><ClientLayout><RecommendationHubPage /></ClientLayout></RoleRoute>} />
@@ -431,6 +442,8 @@ const App = () => {
       <Route path="/store-locator" element={<RoleRoute user={user} roles={['client']}><ClientLayout><StoreLocatorPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-cities" element={<RoleRoute user={user} roles={['client']}><ClientLayout><PlatformCitiesPage /></ClientLayout></RoleRoute>} />
       <Route path="/pet-feeder" element={<RoleRoute user={user} roles={['client']}><ClientLayout><PetFeederPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-hardware-pcb" element={<RoleRoute user={user} roles={['client']}><ClientLayout><HardwarePcbPage /></ClientLayout></RoleRoute>} />
+      <Route path="/hardware-pcb" element={<Navigate to="/client-hardware-pcb" replace />} />
       <Route path="/veterinary" element={<RoleRoute user={user} roles={['client']}><ClientLayout><VeterinaryPage /></ClientLayout></RoleRoute>} />
       <Route path="/medical-dossier" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientMedicalDossierPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-teleconsult" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientTeleconsultPage /></ClientLayout></RoleRoute>} />
@@ -453,6 +466,7 @@ const App = () => {
       <Route path="/livreur/messages" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMessagesPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/earnings" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurEarningsPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/history" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurHistoryPage /></LivreurLayout></RoleRoute>} />
+      <Route path="/livreur/chat-history" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><ChatbotHistoryPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/platform-services" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><PlatformServicesPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/rse" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><RseEcologyHubPage role="livreur" /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/profile" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurProfilePage /></LivreurLayout></RoleRoute>} />
@@ -478,6 +492,7 @@ const App = () => {
       <Route path="/vet/profile" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetProfilePage /></VetLayout></RoleRoute>} />
       <Route path="/vet/security" element={<RoleRoute user={user} roles={['vet']}><VetLayout><AccountSecurityPage role="vet" /></VetLayout></RoleRoute>} />
       <Route path="/vet/recommendations" element={<RoleRoute user={user} roles={['vet']}><VetLayout><RecommendationHubPage /></VetLayout></RoleRoute>} />
+      <Route path="/vet/chat-history" element={<RoleRoute user={user} roles={['vet']}><VetLayout><ChatbotHistoryPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/leave-requests" element={<RoleRoute user={user} roles={['vet']}><VetLayout><StaffLeavePage roleLabel="Vétérinaire" demoFallback /></VetLayout></RoleRoute>} />
       <Route path="/vet/platform-services" element={<RoleRoute user={user} roles={['vet']}><VetLayout><PlatformServicesPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/teleconsult" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetTeleconsultPage /></VetLayout></RoleRoute>} />

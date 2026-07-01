@@ -12,11 +12,13 @@ export const DEMO_DEVOPS_SERVICES = [
 ];
 
 export const DEMO_PIPELINE_RUNS = [
+  { pipelineId: 'platform', status: 'success', branch: 'main', duration: '18m 42s', at: minsAgo(30), commit: 'f91d277' },
   { pipelineId: 'ci', status: 'success', branch: 'main', duration: '4m 12s', at: minsAgo(45), commit: 'f91d277' },
   { pipelineId: 'security', status: 'success', branch: 'main', duration: '2m 08s', at: hoursAgo(3), commit: 'f91d277' },
+  { pipelineId: 'readiness', status: 'success', branch: 'main', duration: '1m 15s', at: hoursAgo(5), commit: '122dbb2' },
   { pipelineId: 'e2e', status: 'success', branch: 'main', duration: '6m 34s', at: hoursAgo(5), commit: '122dbb2' },
-  { pipelineId: 'publish', status: 'success', branch: 'main', duration: '8m 01s', at: hoursAgo(6), commit: '122dbb2' },
-  { pipelineId: 'deploy-render', status: 'success', branch: 'main', duration: '3m 22s', at: hoursAgo(6.5), commit: '122dbb2' },
+  { pipelineId: 'publish-ecr', status: 'success', branch: 'main', duration: '8m 01s', at: hoursAgo(6), commit: '122dbb2' },
+  { pipelineId: 'deploy-aws', status: 'success', branch: 'main', duration: '4m 18s', at: hoursAgo(6.5), commit: '122dbb2' },
   { pipelineId: 'uptime', status: 'success', branch: 'main', duration: '0m 48s', at: minsAgo(12), commit: '—' },
   { pipelineId: 'backup', status: 'success', branch: 'main', duration: '1m 55s', at: hoursAgo(10), commit: '—' },
   { pipelineId: 'deploy-vps', status: 'skipped', branch: 'main', duration: '—', at: hoursAgo(24), commit: '—' },
@@ -26,11 +28,11 @@ export const DEMO_DEPLOYMENTS = [
   {
     id: 'dep-1',
     env: 'production',
-    target: 'Render (Blueprint)',
+    target: 'AWS ECS Fargate',
     version: 'f91d277',
     status: 'success',
     at: hoursAgo(6.5),
-    services: ['API', 'Frontend static', 'PostgreSQL'],
+    services: ['Frontend', 'API', 'ML', 'RDS PostgreSQL'],
   },
   {
     id: 'dep-2',
@@ -44,7 +46,7 @@ export const DEMO_DEPLOYMENTS = [
   {
     id: 'dep-3',
     env: 'production',
-    target: 'GHCR images',
+    target: 'Amazon ECR',
     version: '121aec4',
     status: 'success',
     at: hoursAgo(30),
@@ -87,17 +89,19 @@ export const DEMO_ENV_SECRETS = [
   { key: 'VITE_STRIPE_PK', label: 'Stripe publishable', category: 'payment', configured: true, rotationDays: null },
   { key: 'SMTP_*', label: 'Email transactionnel', category: 'mail', configured: false, rotationDays: null },
   { key: 'KONNECT_API_KEY', label: 'Konnect TN', category: 'payment', configured: false, rotationDays: null },
+  { key: 'AWS_ACCESS_KEY_ID', label: 'AWS CI/CD', category: 'cicd', configured: false, rotationDays: 90 },
+  { key: 'AWS_SECRET_ACCESS_KEY', label: 'AWS secret', category: 'cicd', configured: false, rotationDays: 90 },
   { key: 'GHCR_TOKEN', label: 'GitHub Container Registry', category: 'cicd', configured: true, rotationDays: 365 },
-  { key: 'RENDER_API_KEY', label: 'Render deploy hooks', category: 'cicd', configured: true, rotationDays: 365 },
 ];
 
 export const DEVOPS_RUNBOOKS = [
   { id: 'health', label: 'Santé stack', cmd: 'npm run devops:health' },
   { id: 'ci', label: 'CI locale', cmd: 'npm run devops:ci' },
+  { id: 'pipeline', label: 'Pipeline local audit', cmd: 'npm run devops:pipeline' },
+  { id: 'aws', label: 'Deploy AWS auto', cmd: 'npm run devops:aws:auto' },
   { id: 'docker', label: 'Stack Docker', cmd: 'npm run docker:stack:full' },
   { id: 'monitoring', label: 'Monitoring', cmd: 'npm run docker:monitoring:up' },
   { id: 'backup', label: 'Sauvegarde manuelle', cmd: 'npm run devops:backup' },
-  { id: 'render', label: 'Statut Render', cmd: 'npm run devops:render:status' },
   { id: 'audit', label: 'Audit prod', cmd: 'npm run devops:prod:audit' },
 ];
 
@@ -123,8 +127,8 @@ export const buildDemoDevOpsStatus = () => {
       score: 94,
       health: summary.stackStatus === 'healthy' ? 'healthy' : 'degraded',
       uptime: '99.7%',
-      pipelinesOk: 7,
-      pipelinesTotal: 8,
+      pipelinesOk: 9,
+      pipelinesTotal: 10,
       containersRunning: 12,
       apiP95Ms: 124,
       errorRate: 0.8,

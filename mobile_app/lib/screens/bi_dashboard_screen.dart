@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/mobile_bi.dart';
 import '../services/auth_service.dart';
@@ -16,20 +17,32 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
   late final MobileBiService _service = MobileBiService(widget.auth.api);
   BiDashboardPack? _pack;
   bool _loading = true;
+  Timer? _pollTimer;
+
+  static const _pollInterval = Duration(seconds: 30);
 
   @override
   void initState() {
     super.initState();
     _load();
+    _pollTimer = Timer.periodic(_pollInterval, (_) {
+      if (mounted) _load(silent: true);
+    });
   }
 
-  Future<void> _load() async {
-    setState(() => _loading = true);
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _load({bool silent = false}) async {
+    if (!silent) setState(() => _loading = true);
     try {
       final pack = await _service.loadPack();
       if (mounted) setState(() => _pack = pack);
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _loading = silent ? _loading : false);
     }
   }
 

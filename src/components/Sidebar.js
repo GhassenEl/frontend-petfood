@@ -27,6 +27,8 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
     {
       title: '📊 Analytics',
       items: [
+        { id: 'recommendations', label: 'Recommandé pour vous', icon: '🎯', route: '/admin/recommendations' },
+        { id: 'chat-history', label: 'Historique chatbot', icon: '💬', route: '/admin/chat-history' },
         { id: 'devops', label: 'DevOps & observabilité', icon: '⚙️' },
         { id: 'performance', label: 'Performance plateforme', icon: '⚡' },
         { id: 'nlp-models', label: 'Modèles NLP', icon: '🧠' },

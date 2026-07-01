@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+<PROJECT>
+ <TIMESTAMP RELEASE="813" FILEVER="830" MODIFIED="1740000000" CUSTID="175675344" CREATED="1740000000"/>
+ <VARIANTS/>
+ <SCRIPTS>
+  <STRING>PWRRAILS.DAT</STRING>
+ </SCRIPTS>
+ <TITLE>PetFeeder_CTRL — PetfoodTN ESP32</TITLE>
+ <NOTES>PCB controle distributeur. Importer PetFeeder_CTRL.net dans ISIS puis Netlist to ARES. Voir hardware/proteus/README.md</NOTES>
+</PROJECT>

@@ -743,7 +743,9 @@ const PetFeederPage = () => {
       )}
 
       <div style={{ marginTop: 32, padding: 20, background: '#fffbeb', borderRadius: 16, border: '1px solid #fde68a', fontSize: 14, color: '#92400e' }}>
-        <strong>ESP32 :</strong> HC-SR04, IR, HX711, DHT11, Servo, Moteur DC, LED RGB — voir <code>firmware/README.md</code>
+        <strong>ESP32 :</strong> HC-SR04, IR, HX711, DHT11, Servo, Moteur DC, LED RGB — voir{' '}
+        <Link to="/client-hardware-pcb" style={{ color: '#b45309', fontWeight: 700 }}>Cartes PCB &amp; alimentation</Link>
+        {' '}et <code>firmware/README.md</code>
       </div>
     </div>
   );

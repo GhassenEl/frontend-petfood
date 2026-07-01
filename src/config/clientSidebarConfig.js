@@ -17,6 +17,7 @@ export const CLIENT_SIDEBAR_SECTIONS = [
     items: [
       { id: 'client-iot', label: 'Centre IoT', icon: '📡' },
       { id: 'pet-feeder', label: 'Distributeur ESP32', icon: '🍽️' },
+      { id: 'client-hardware-pcb', label: 'Cartes PCB', icon: '🟢', route: '/client-hardware-pcb' },
       { id: 'client-smart-water', label: 'Consommation eau', icon: '💧' },
       { id: 'client-traceability', label: 'Traçabilité', icon: '🔗' },
       { id: 'mobile-app', label: 'Application mobile', icon: '📱', route: '/mobile#iot' },
@@ -46,6 +47,7 @@ export const CLIENT_SIDEBAR_SECTIONS = [
     title: '🤖 IA & Premium',
     items: [
       { id: 'client-recommendations', label: 'Recommandations IA', icon: '🎯' },
+      { id: 'client-chat-history', label: 'Historique chatbot', icon: '📜', route: '/client/chat-history' },
       { id: 'client-relay-points', label: 'Points relais', icon: '📍' },
     ],
   },

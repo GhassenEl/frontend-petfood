@@ -1,0 +1,15 @@
+Reference,Quantity,Value,Package,Description
+U1,1,ESP32-WROOM-32,ESP32-DEVKIT,Microcontrôleur Wi-Fi
+U2,1,AMS1117-3.3,SOT-223,Régulateur 3.3 V
+U3,1,HX711,MODULE,ADC cellule de charge
+Q1,1,RELAY-5V+2N2222,RELAY,Driver moteur DC
+R1-R3,3,220R,0805,LED RGB
+C1-C4,4,100nF,0805,Découplage
+J1,1,CONN-2X2,2.54mm,Entrée 5 V depuis PSU
+J2,1,CONN-3,2.54mm,Servo SG90
+J3,1,CONN-4,2.54mm,Moteur + relais
+J4,1,CONN-4,2.54mm,HX711
+J5,1,CONN-4,2.54mm,HC-SR04
+J6,1,CONN-6,2.54mm,IR + DHT11
+J7,1,CONN-4,2.54mm,LCD I2C
+J8,1,CONN-5,2.54mm,RGB + buzzer

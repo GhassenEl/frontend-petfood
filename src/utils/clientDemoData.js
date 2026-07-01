@@ -1104,8 +1104,12 @@ export const getDemoFeederBundle = () => ({
 });
 
 export const DEMO_WATER_PETS = [
-  { petId: 'demo-pet-1', name: 'Max', type: 'dog', alert: false },
-  { petId: 'demo-pet-2', name: 'Luna', type: 'cat', alert: true },
+  { petId: 'demo-pet-1', name: 'Max', type: 'dog', todayMl: 420, targetMl: 550, percentOfTarget: 76, alert: false },
+  { petId: 'demo-pet-2', name: 'Luna', type: 'cat', todayMl: 165, targetMl: 250, percentOfTarget: 66, alert: true },
+  { petId: 'demo-pet-3', name: 'Kiwi', type: 'bird', todayMl: 28, targetMl: 40, percentOfTarget: 70, alert: false },
+  { petId: 'demo-pet-4', name: 'Coco', type: 'rabbit', todayMl: 280, targetMl: 350, percentOfTarget: 80, alert: false },
+  { petId: 'demo-pet-5', name: 'Nemo', type: 'fish', todayMl: 0, targetMl: 0, percentOfTarget: 0, alert: false },
+  { petId: 'demo-pet-6', name: 'Pistache', type: 'hamster', todayMl: 10, targetMl: 15, percentOfTarget: 67, alert: true },
 ];
 
 const buildHourlyToday = (peakHours) => {
@@ -1194,6 +1198,40 @@ const DEMO_WATER_BY_PET = {
       { icon: '🐱', text: 'Luna boit surtout le matin — envisagez une 2e fontaine près de la litière.' },
       { icon: '🔧', text: 'Filtre bientôt à changer — goût de l\'eau moins attractif pour les chats.' },
     ],
+  },
+  'demo-pet-3': {
+    petId: 'demo-pet-3', petName: 'Kiwi', petType: 'bird', todayMl: 28, targetMl: 40, percentOfTarget: 70,
+    monitor: { id: 'demo-water-3', name: 'Abreuvoir Kiwi', status: 'online', online: true, reservoirMl: 120, reservoirCapacityMl: 200, filterDaysLeft: 30 },
+    stats: { avg7dMl: 35, maxDayMl: 45 }, alerts: [],
+    hourlyToday: buildHourlyToday([8, 12, 17]), series: buildWaterSeries(38, 5),
+    hydrationTip: 'Changez l\'eau des oiseaux 2×/jour.',
+    insights: [{ icon: '🐦', text: 'Pic matin et fin d\'après-midi.' }],
+  },
+  'demo-pet-4': {
+    petId: 'demo-pet-4', petName: 'Coco', petType: 'rabbit', todayMl: 280, targetMl: 350, percentOfTarget: 80,
+    monitor: { id: 'demo-water-4', name: 'Bol Coco', status: 'online', online: true, reservoirMl: 500, reservoirCapacityMl: 600, filterDaysLeft: 14 },
+    stats: { avg7dMl: 320, maxDayMl: 380 }, alerts: [],
+    hourlyToday: buildHourlyToday([7, 13, 19]), series: buildWaterSeries(310, 20),
+    hydrationTip: 'Les lapins boivent beaucoup — eau fraîche quotidienne.',
+    insights: [{ icon: '🐰', text: 'Consommation stable — bon signe digestif.' }],
+  },
+  'demo-pet-5': {
+    petId: 'demo-pet-5', petName: 'Nemo', petType: 'fish', todayMl: 0, targetMl: 0, percentOfTarget: 0,
+    monitor: { id: 'demo-water-5', name: 'Aquarium Nemo 60L', status: 'online', online: true, reservoirMl: 60000, reservoirCapacityMl: 60000, waterTempC: 24.5, pumpActive: true, filterDaysLeft: 21 },
+    stats: { avg7dMl: 0, maxDayMl: 0 },
+    alerts: [{ severity: 'low', message: 'Contrôle pH recommandé cette semaine.' }],
+    hourlyToday: [], series: [],
+    hydrationTip: 'Poissons : surveillez pH, température et nitrites.',
+    insights: [{ icon: '🐠', text: 'Température stable à 24,5 °C.' }],
+  },
+  'demo-pet-6': {
+    petId: 'demo-pet-6', petName: 'Pistache', petType: 'hamster', todayMl: 10, targetMl: 15, percentOfTarget: 67,
+    monitor: { id: 'demo-water-6', name: 'Biberon Pistache', status: 'online', online: true, reservoirMl: 80, reservoirCapacityMl: 120, filterDaysLeft: 30 },
+    stats: { avg7dMl: 13, maxDayMl: 18 },
+    alerts: [{ severity: 'medium', message: 'Biberon à vérifier — consommation en baisse.' }],
+    hourlyToday: buildHourlyToday([9, 21]), series: buildWaterSeries(14, 2),
+    hydrationTip: 'Hamster : biberon propre chaque jour.',
+    insights: [{ icon: '🐹', text: 'Boit surtout le soir — comportement normal.' }],
   },
 };
 

@@ -96,7 +96,7 @@ class FoodQualityEngine {
       recommendedAction: action,
       aiSummary: isNonConforme
           ? 'Anomalie IA — $state ($score%). $action.'
-          : 'Qualité $state ($score%) — stock $stockLevelPct %.',
+          : 'Qualité $state ($score%).',
       analyzedAt: DateTime.now(),
     ));
   }

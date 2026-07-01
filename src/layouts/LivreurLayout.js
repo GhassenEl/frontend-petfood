@@ -1,6 +1,7 @@
 import React from 'react';
 import LivreurSidebar from '../components/LivreurSidebar';
 import ChatAssistant from '../components/ChatAssistant';
+import RecommendedForYouButton from '../components/RecommendedForYouButton';
 import { useAuth } from '../contexts/AuthContext';
 import ResponsiveShell from './ResponsiveShell';
 import MobileBottomNav, { LIVREUR_MOBILE_NAV } from '../components/MobileBottomNav';
@@ -17,6 +18,7 @@ const LivreurLayout = ({ children }) => {
       sidebar={(onClose) => <LivreurSidebar user={user} onLogout={logout} onNavigate={onClose} />}
     >
       {children}
+      <RecommendedForYouButton bottomOffset={88} />
       <ChatAssistant key={chatKey} variant="livreur" />
     </ResponsiveShell>
   );

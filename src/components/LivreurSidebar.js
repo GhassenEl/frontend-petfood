@@ -43,6 +43,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
       title: '💬 Communications',
       items: [
         { id: 'messages', label: 'Messages', icon: '💬' },
+        { id: 'chat-history', label: 'Historique chatbot', icon: '📜' },
       ]
     },
     {

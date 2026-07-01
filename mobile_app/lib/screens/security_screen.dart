@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import '../utils/date_format_utils.dart';
 import '../models/mobile_security.dart';
 import '../services/auth_service.dart';
 import '../services/mobile_security_service.dart';
@@ -186,13 +186,12 @@ class _SessionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fmt = DateFormat('dd/MM HH:mm');
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: Icon(session.current ? Icons.phone_android : Icons.devices, color: const Color(0xFF2563EB)),
         title: Text(session.device),
-        subtitle: Text('${session.ip ?? '—'} · ${session.lastActive != null ? fmt.format(session.lastActive!) : '—'}'),
+        subtitle: Text('${session.ip ?? '—'} · ${session.lastActive != null ? DateFormatUtils.formatDateTimeShort(session.lastActive!) : '—'}'),
         trailing: session.current ? const Chip(label: Text('Actuelle')) : null,
       ),
     );
@@ -216,14 +215,13 @@ class _ThreatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fmt = DateFormat('dd/MM HH:mm');
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: Icon(Icons.warning_amber, color: _severityColor()),
         title: Text(threat.title),
         subtitle: Text(
-          '${threat.severity ?? 'info'} · ${threat.at != null ? fmt.format(threat.at!) : '—'}',
+          '${threat.severity ?? 'info'} · ${threat.at != null ? DateFormatUtils.formatDateTimeShort(threat.at!) : '—'}',
         ),
       ),
     );
