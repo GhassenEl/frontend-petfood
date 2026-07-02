@@ -32,6 +32,8 @@ class _LoginScreenState extends State<LoginScreen> {
       await widget.auth.saveApiUrl(_apiUrl.text.trim());
       await widget.auth.login(_email.text.trim(), _password.text);
       if (!mounted) return;
+      Navigator.of(context).pop();
+      if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => HomeShell(auth: widget.auth)),
       );
@@ -47,6 +49,12 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: const Color(0xFF065F46),
+        title: const Text('Connexion'),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -60,7 +68,13 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 8),
               const Text('Distributeur IoT & nutrition pets',
                   textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
-              const SizedBox(height: 32),
+              const SizedBox(height: 8),
+              const Text(
+                'Connexion optionnelle — l\'app démarre en mode démo',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              ),
+              const SizedBox(height: 24),
               TextField(
                 controller: _apiUrl,
                 decoration: const InputDecoration(
@@ -100,6 +114,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: _loading
                     ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                     : const Text('Se connecter', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: _loading ? null : () => Navigator.of(context).pop(),
+                child: const Text('Continuer en mode démo'),
               ),
             ],
           ),

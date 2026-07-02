@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'services/auth_service.dart';
-import 'screens/login_screen.dart';
+import 'screens/splash_screen.dart';
 import 'screens/home_shell.dart';
 import 'services/theme_preferences.dart';
 import 'theme/app_theme.dart';
@@ -21,6 +21,7 @@ class PetfoodTnApp extends StatefulWidget {
 class _PetfoodTnAppState extends State<PetfoodTnApp> {
   final AuthService _auth = AuthService();
   bool _ready = false;
+  String _splashMessage = 'Chargement…';
 
   @override
   void initState() {
@@ -42,8 +43,11 @@ class _PetfoodTnAppState extends State<PetfoodTnApp> {
       await ThemePreferences.instance.load().timeout(const Duration(seconds: 5));
     } catch (_) {}
     try {
-      await _auth.loadSession().timeout(const Duration(seconds: 5));
-    } catch (_) {}
+      setState(() => _splashMessage = 'Préparation de l\'espace…');
+      await _auth.loadSession().timeout(const Duration(seconds: 8));
+    } catch (_) {
+      await _auth.enterDemoMode();
+    }
     if (mounted) setState(() => _ready = true);
   }
 
@@ -59,26 +63,21 @@ class _PetfoodTnAppState extends State<PetfoodTnApp> {
   Widget build(BuildContext context) {
     if (!_ready) {
       return MaterialApp(
-        home: Scaffold(
-          body: Stack(
-            children: [
-              _wrapMonochrome(const Center(child: CircularProgressIndicator())),
-              const GlobalMonochromeToggle(),
-            ],
-          ),
+        debugShowCheckedModeBanner: false,
+        home: Stack(
+          children: [
+            _wrapMonochrome(SplashScreen(message: _splashMessage)),
+            const GlobalMonochromeToggle(),
+          ],
         ),
       );
     }
-
-    final home = _auth.isLoggedIn
-        ? HomeShell(auth: _auth)
-        : LoginScreen(auth: _auth);
 
     return MaterialApp(
       title: 'PetfoodTN',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      home: home,
+      home: HomeShell(auth: _auth),
       builder: (context, child) {
         return Stack(
           fit: StackFit.passthrough,
@@ -86,7 +85,7 @@ class _PetfoodTnAppState extends State<PetfoodTnApp> {
           children: [
             _wrapMonochrome(child ?? const SizedBox.shrink()),
             GlobalMonochromeToggle(
-              bottomOffset: _auth.isLoggedIn ? 88 : 16,
+              bottomOffset: 88,
             ),
           ],
         );

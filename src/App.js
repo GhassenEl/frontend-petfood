@@ -171,6 +171,7 @@ import ClientFamilyPage from './pages/ClientFamilyPage';
 import ClientSubscriptionsPage from './pages/ClientSubscriptionsPage';
 import ClientSmartCommercePage from './pages/ClientSmartCommercePage';
 import AdminDigitalMarketingPage from './pages/AdminDigitalMarketingPage';
+import CommercialHubPage from './pages/CommercialHubPage';
 import AdminMlAgentPage from './pages/AdminMlAgentPage';
 import AdminIncidentsMlPage from './pages/AdminIncidentsMlPage';
 import AdminBlogArticles from './pages/AdminBlogArticles';
@@ -360,6 +361,7 @@ const App = () => {
       <Route path="/capabilities" element={<CapabilitiesRoute user={user} />} />
       <Route path="/admin/blog-articles" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminBlogArticles /></AdminLayout></RoleRoute>} />
       <Route path="/admin/digital-marketing" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDigitalMarketingPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/commercial" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><CommercialHubPage role="admin" /></AdminLayout></RoleRoute>} />
       <Route path="/admin/rehabilitation" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRehabilitationPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/ml-agent" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminMlAgentPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/intelligence" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><IntelligencePlatformPage /></AdminLayout></RoleRoute>} />
@@ -512,6 +514,7 @@ const App = () => {
       <Route path="/vendor/returns" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorReturnsPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/communication" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorCommunicationPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/marketing" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorMarketingPage /></VendorLayout></RoleRoute>} />
+      <Route path="/vendor/commercial" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><CommercialHubPage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/purchase-needs" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorPurchaseNeedsPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/ml" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorMlPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/food-quality" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><FoodQualitySurveillancePage role="vendor" /></VendorLayout></RoleRoute>} />

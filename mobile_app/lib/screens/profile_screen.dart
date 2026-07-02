@@ -3,6 +3,7 @@ import '../config/api_config.dart';
 import '../services/auth_service.dart';
 import '../services/theme_preferences.dart';
 import 'login_screen.dart';
+import 'home_shell.dart';
 import 'pets_screen.dart';
 import 'delivery_tracking_screen.dart';
 import 'qr_scan_screen.dart';
@@ -18,8 +19,14 @@ class ProfileScreen extends StatelessWidget {
     await auth.logout();
     if (!context.mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => LoginScreen(auth: auth)),
+      MaterialPageRoute(builder: (_) => HomeShell(auth: auth)),
       (_) => false,
+    );
+  }
+
+  void _openLogin(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => LoginScreen(auth: auth)),
     );
   }
 
@@ -44,6 +51,21 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(user?['name']?.toString() ?? 'Client', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   Text(user?['email']?.toString() ?? '', style: const TextStyle(color: Colors.grey)),
+                  if (auth.isDemoMode) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF7ED),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: const Color(0xFFFED7AA)),
+                      ),
+                      child: const Text(
+                        'Mode démo — connectez-vous pour synchroniser',
+                        style: TextStyle(fontSize: 11, color: Color(0xFF9A3412), fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -131,15 +153,26 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          FilledButton.icon(
-            onPressed: () => _logout(context),
-            icon: const Icon(Icons.logout),
-            label: const Text('Déconnexion'),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red.shade400,
-              padding: const EdgeInsets.symmetric(vertical: 14),
+          if (auth.isDemoMode)
+            FilledButton.icon(
+              onPressed: () => _openLogin(context),
+              icon: const Icon(Icons.login),
+              label: const Text('Se connecter'),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF059669),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            )
+          else
+            FilledButton.icon(
+              onPressed: () => _logout(context),
+              icon: const Icon(Icons.logout),
+              label: const Text('Déconnexion'),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.red.shade400,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
             ),
-          ),
         ],
       ),
     );

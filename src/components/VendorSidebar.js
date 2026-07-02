@@ -40,6 +40,7 @@ const VendorSidebar = ({ onLogout, user, onNavigate }) => {
     {
       title: '📣 Marketing & communication',
       items: [
+        { to: '/vendor/commercial', label: 'Hub commercial', icon: '💼' },
         { to: '/vendor/marketing', label: 'Marketing & réseaux', icon: '📣' },
         { to: '/vendor/communication', label: 'Avis, messages & notifs', icon: '⭐' },
         { to: '/vendor/rse', label: 'RSE & écologie', icon: '🌱' },

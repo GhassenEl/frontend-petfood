@@ -14,6 +14,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: '📈' },
         { id: 'digital-marketing', label: 'Marketing digital', icon: '📣' },
+        { id: 'commercial', label: 'Hub commercial', icon: '💼', route: '/admin/commercial' },
       ],
     },
     {

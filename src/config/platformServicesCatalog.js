@@ -594,6 +594,16 @@ export const PLATFORM_SERVICES = [
     serviceKey: 'activityLogService',
   },
   {
+    id: 'admin-commercial-hub',
+    category: 'admin',
+    roles: ['admin'],
+    label: 'Hub commercial',
+    description: 'Ventes, marketing, promotions, marketplace et fidélisation en un tableau de bord.',
+    route: '/admin/commercial',
+    icon: '💼',
+    badge: 'Nouveau',
+  },
+  {
     id: 'admin-digital-marketing',
     category: 'admin',
     roles: ['admin'],
@@ -777,6 +787,16 @@ export const PLATFORM_SERVICES = [
   },
 
   // —— Vendeur (public + espace connecté) ——
+  {
+    id: 'vendor-commercial-hub',
+    category: 'vendeur',
+    roles: ['vendeur'],
+    label: 'Hub commercial vendeur',
+    description: 'CA, commissions, marketing boutique et opportunités clients.',
+    route: '/vendor/commercial',
+    icon: '💼',
+    badge: 'Pro',
+  },
   {
     id: 'vendor-hub',
     category: 'vendeur',

@@ -8,6 +8,7 @@ const ADMIN_SIDEBAR_SECTIONS = [
     items: [
       { id: 'dashboard', label: 'Dashboard', icon: '📈' },
       { id: 'digital-marketing', label: 'Marketing digital', icon: '📣' },
+      { id: 'commercial', label: 'Hub commercial', icon: '💼', route: '/admin/commercial' },
       { id: 'hub', label: 'Hub avancé', icon: '🚀' },
     ],
   },

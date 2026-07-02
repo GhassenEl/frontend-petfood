@@ -18,6 +18,7 @@ export const ROLE_PROFILE_CONFIG = {
       { to: '/admin/security', label: 'Sécurité plateforme', icon: '🔒' },
       { to: '/admin/database-security', label: 'Sécurité base de données', icon: '🗄️' },
       { to: '/admin/account-security', label: 'Mon compte & session', icon: '🛡️' },
+      { to: '/admin/commercial', label: 'Hub commercial', icon: '💼' },
       { to: '/admin/digital-marketing', label: 'Marketing digital', icon: '📣' },
     ],
   },
