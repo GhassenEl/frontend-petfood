@@ -139,7 +139,7 @@ class _IotHubScreenState extends State<IotHubScreen> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('IoT Nutrition'),
+          title: const Text('IoT — Distribution nourriture'),
           backgroundColor: const Color(0xFFDBEAFE),
           foregroundColor: const Color(0xFF1E3A5F),
           bottom: const TabBar(
@@ -168,9 +168,35 @@ class _IotHubScreenState extends State<IotHubScreen> {
                   if (_hub.pets.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                      child: SizedBox(
-                        height: 240,
-                        child: PetFeedingSchedulesPanel(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFECFDF5),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: const Color(0xFF6EE7B7)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.memory, size: 18, color: Color(0xFF059669)),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    _hub.isLive
+                                        ? 'ESP32 live · portions auto · HX711 + planning multi-animaux'
+                                        : 'Mode démo — horaires et portions simulés',
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF065F46)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            height: 240,
+                            child: PetFeedingSchedulesPanel(
                           pets: _hub.pets,
                           selectedPetId: _hub.selectedPetId,
                           weightByPetId: _hub.weightByPetId,
@@ -178,7 +204,9 @@ class _IotHubScreenState extends State<IotHubScreen> {
                           scrollable: true,
                           todayGramsByPetId: _hub.todayGramsByPetId,
                           isLive: _hub.isLive,
-                        ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   Expanded(

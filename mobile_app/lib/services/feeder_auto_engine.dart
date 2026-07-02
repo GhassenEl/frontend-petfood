@@ -113,6 +113,55 @@ class FeederAutoEngine {
 
   static bool _sameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
+
+  static ScheduleSlot? getNextMeal(List<ScheduleSlot> slots) {
+    for (final s in slots) {
+      if (s.status == 'upcoming') return s;
+    }
+    return null;
+  }
+
+  static String formatCountdown(DateTime? nextTime) {
+    if (nextTime == null) return '—';
+    final mins = nextTime.difference(DateTime.now()).inMinutes;
+    if (mins <= 0) return 'Imminent';
+    if (mins < 60) return '$mins min';
+    final h = mins ~/ 60;
+    final m = mins % 60;
+    return m > 0 ? '${h}h ${m}min' : '${h}h';
+  }
+
+  static ({int pct, int remaining}) getTodayAdherence(int todayGrams, int dailyTarget) {
+    if (dailyTarget <= 0) return (pct: 0, remaining: 0);
+    final pct = ((todayGrams / dailyTarget) * 100).round().clamp(0, 150);
+    final remaining = (dailyTarget - todayGrams).clamp(0, 9999);
+    return (pct: pct, remaining: remaining);
+  }
+
+  static Map<String, dynamic>? predictDepletion({
+    double? reservoirPercent,
+    required int todayGrams,
+    int capacityGrams = 1200,
+  }) {
+    if (reservoirPercent == null) return null;
+    final daily = todayGrams > 0 ? todayGrams : 65;
+    final remaining = (reservoirPercent / 100) * capacityGrams;
+    final daysLeft = daily > 0 ? (remaining / daily).round() : null;
+    final urgency = daysLeft != null && daysLeft <= 2
+        ? 'high'
+        : daysLeft != null && daysLeft <= 5
+            ? 'medium'
+            : 'low';
+    return {
+      'daysLeft': daysLeft,
+      'urgency': urgency,
+      'summary': daysLeft != null && daysLeft <= 2
+          ? 'Rupture estimée dans $daysLeft jour(s) — rechargez le réservoir.'
+          : daysLeft != null
+              ? 'Stock suffisant ~$daysLeft jours au rythme actuel.'
+              : 'Surveillez le niveau du réservoir.',
+    };
+  }
 }
 
 class ScheduleSlot {

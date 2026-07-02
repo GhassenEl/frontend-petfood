@@ -146,6 +146,27 @@ const AutoDistributionPanel = ({
           <Calendar size={16} /> Appliquer planning auto
         </button>
       </div>
+
+      <div className="fd-portion-presets" role="group" aria-label="Portions rapides">
+        <span className="fd-portion-presets__label">Portions rapides</span>
+        {[15, 30, 45, 60].map((g) => (
+          <button
+            key={g}
+            type="button"
+            className="fd-portion-presets__chip"
+            disabled={loading || reservoirLow}
+            onClick={() => onDispense?.(g)}
+          >
+            {g} g
+          </button>
+        ))}
+      </div>
+
+      {suggestion.compensateMissed && (
+        <p className="fd-auto-panel__compensate">
+          Repas manqué détecté — portion compensée automatiquement.
+        </p>
+      )}
       {reservoirLow && (
         <p style={{ margin: '12px 0 0', fontSize: 12, color: '#b45309', fontWeight: 600 }}>
           Réservoir bas — rechargez avant la prochaine distribution automatique.

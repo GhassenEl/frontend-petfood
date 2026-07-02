@@ -27,6 +27,7 @@ import {
 } from '../utils/nutritionHydrationEngine';
 import { PLATFORM_IMAGES } from '../utils/platformImages';
 import AutoDistributionPanel from './AutoDistributionPanel';
+import FeederLiveEventsStrip from './FeederLiveEventsStrip';
 import {
   fetchFeederBundle,
   dispenseFeeder,
@@ -228,17 +229,17 @@ export const FeederScheduleTimeline = ({ slots = [], nextMeal = null }) => (
 );
 
 /** Chaîne capteurs ESP32. */
-export const FeederPipelineStrip = () => (
-  <div className="fd-pipeline">
+export const FeederPipelineStrip = ({ online = true, animalPresent = false, lastWeightG = null }) => (
+  <div className={`fd-pipeline${online ? ' fd-pipeline--live' : ''}`}>
     {[
-      { icon: '👀', label: 'Capteur IR', desc: 'Détection animal' },
-      { icon: '⚙️', label: 'Servo SG90', desc: 'Trappe ouverture' },
-      { icon: '🔩', label: 'Moteur DC', desc: 'Vis distributeur' },
-      { icon: '⚖️', label: 'HX711', desc: 'Poids servi' },
-      { icon: '📡', label: 'HC-SR04', desc: 'Niveau réservoir' },
+      { icon: '👀', label: 'Capteur IR', desc: animalPresent ? 'Animal détecté' : 'En veille', live: animalPresent },
+      { icon: '⚙️', label: 'Servo SG90', desc: 'Trappe ouverture', live: online },
+      { icon: '🔩', label: 'Moteur DC', desc: 'Vis distributeur', live: online },
+      { icon: '⚖️', label: 'HX711', desc: lastWeightG != null ? `${lastWeightG} g servis` : 'Poids servi', live: online },
+      { icon: '📡', label: 'HC-SR04', desc: 'Niveau réservoir', live: online },
     ].map((step, i, arr) => (
       <React.Fragment key={step.label}>
-        <div className="fd-pipeline__step">
+        <div className={`fd-pipeline__step${step.live ? ' fd-pipeline__step--active' : ''}`}>
           <span className="fd-pipeline__icon">{step.icon}</span>
           <strong>{step.label}</strong>
           <small>{step.desc}</small>
@@ -528,7 +529,13 @@ const FoodDistributionPanel = ({ pack = {}, demoMode = false }) => {
         </div>
       </div>
 
-      <FeederPipelineStrip />
+      <FeederPipelineStrip
+        online={feeder?.status === 'online'}
+        animalPresent={feeder?.animalPresent}
+        lastWeightG={stats?.lastDispenseGrams ?? feeder?.foodGrams}
+      />
+
+      <FeederLiveEventsStrip history={history} />
 
       <AutoDistributionPanel
         plan={plan}

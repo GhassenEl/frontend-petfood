@@ -496,7 +496,11 @@ const PetFeederPage = () => {
                 onApplySchedules={applySchedules}
               />
 
-              <FeederPipelineStrip />
+              <FeederPipelineStrip
+                online={feeder.status === 'online'}
+                animalPresent={feeder.animalPresent}
+                lastWeightG={stats?.lastDispenseGrams ?? feeder.foodGrams}
+              />
 
               <div className="fd-panel__grid" style={{ marginBottom: 20 }}>
                 <FeederLiveBowl
