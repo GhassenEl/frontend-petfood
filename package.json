@@ -51,6 +51,8 @@
     "docker:full:up": "docker compose -f docker-compose.yml -f docker-compose.ml.yml -f docker-compose.prod.yml --env-file .env.docker up -d --build",
     "docker:ghcr:pull": "docker compose -f docker-compose.yml -f docker-compose.ghcr.yml -f docker-compose.ml.yml -f docker-compose.prod.yml --env-file .env.docker pull",
     "docker:https:up": "docker compose -f docker-compose.yml -f docker-compose.ghcr.yml -f docker-compose.ml.yml -f docker-compose.prod.yml -f docker-compose.caddy.yml --env-file .env.docker up -d",
+    "docker:serve:build": "docker compose -f docker-compose.yml -f docker-compose.ml.yml -f docker-compose.prod.yml -f docker-compose.caddy.yml --env-file .env.docker up -d --build",
+    "docker:serve:pull": "docker compose -f docker-compose.yml -f docker-compose.ghcr.yml -f docker-compose.ml.yml -f docker-compose.prod.yml -f docker-compose.caddy.yml --env-file .env.docker pull && npm run docker:https:up",
     "docker:build": "docker compose --env-file .env.docker.example build",
     "docker:vpn:up": "docker compose -f docker-compose.yml -f docker-compose.vpn.yml --env-file .env.docker up -d --build",
     "docker:vpn:down": "docker compose -f docker-compose.yml -f docker-compose.vpn.yml down",

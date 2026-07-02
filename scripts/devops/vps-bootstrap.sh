@@ -23,6 +23,12 @@ else
   git -C "${DEPLOY_PATH}" pull --ff-only
 fi
 
+if [ ! -d "${DEPLOY_PATH}/backend/.git" ]; then
+  git clone "${BACKEND_REPO:-https://github.com/GhassenEl/backend-petfood.git}" "${DEPLOY_PATH}/backend"
+else
+  git -C "${DEPLOY_PATH}/backend" pull --ff-only 2>/dev/null || true
+fi
+
 cd "${DEPLOY_PATH}"
 
 if [ ! -f .env.docker ]; then
@@ -35,4 +41,6 @@ echo "✅ Bootstrap terminé."
 echo "   1. Éditer .env.docker (DOMAIN, ACME_EMAIL, secrets)"
 echo "   2. docker login ghcr.io"
 echo "   3. Configurer secrets GitHub : VPS_HOST, VPS_USER, VPS_SSH_KEY, VPS_DEPLOY_PATH=${DEPLOY_PATH}"
-echo "   4. Premier déploiement : npm run docker:https:up  (ou workflow Deploy VPS)"
+echo "   4. Premier déploiement :"
+echo "      sudo bash scripts/devops/deploy-web-server.sh ${DEPLOY_PATH}"
+echo "      (ou npm run docker:serve:build depuis le dossier du projet)"

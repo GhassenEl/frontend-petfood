@@ -36,17 +36,16 @@ export const fetchPlatformService = (serviceId) => {
  * Statut agrégé des services (santé API) — fallback démo si endpoint absent.
  */
 export const fetchPlatformHealth = async () => {
-  try {
-    const { data } = await api.get('/health');
-    return { ok: true, backend: data, checkedAt: new Date().toISOString() };
-  } catch {
-    return {
-      ok: true,
-      mode: 'demo',
-      message: 'Backend local ou mode démo — catalogue statique actif.',
-      checkedAt: new Date().toISOString(),
-    };
+  const result = await import('./backendHealthService').then((m) => m.pingBackendHealth());
+  if (result.ok) {
+    return { ok: true, backend: result.payload, latencyMs: result.latencyMs, checkedAt: result.checkedAt, mode: 'live' };
   }
+  return {
+    ok: false,
+    mode: result.strictLive ? 'offline' : 'demo',
+    message: result.error || 'Backend indisponible',
+    checkedAt: result.checkedAt,
+  };
 };
 
 /**

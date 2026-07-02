@@ -1,11 +1,15 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
 import getSocket from '../utils/socketClient';
+import { pingBackendHealth } from '../services/backendHealthService';
 import {
   dispatchPlatformRefresh,
   fetchPlatformLive,
   PLATFORM_REFRESH_EVENT,
 } from '../services/platformLiveService';
+import { isProductionBuild } from '../config/platformRuntime';
+
+const HEALTH_POLL_MS = isProductionBuild() ? 20000 : 45000;
 
 const PlatformLiveContext = createContext(null);
 
@@ -21,6 +25,8 @@ export const PlatformLiveProvider = ({ children }) => {
   const { user } = useAuth();
   const [pulse, setPulse] = useState(null);
   const [socketConnected, setSocketConnected] = useState(false);
+  const [apiOnline, setApiOnline] = useState(true);
+  const [lastHealthCheck, setLastHealthCheck] = useState(null);
   const [syncing, setSyncing] = useState(false);
 
   const applyPulse = useCallback((data) => {
@@ -29,10 +35,18 @@ export const PlatformLiveProvider = ({ children }) => {
     dispatchPlatformRefresh(data);
   }, []);
 
+  const checkHealth = useCallback(async () => {
+    const result = await pingBackendHealth();
+    setApiOnline(result.ok);
+    setLastHealthCheck(result.checkedAt);
+    return result;
+  }, []);
+
   const refresh = useCallback(async () => {
     if (!user) return null;
     setSyncing(true);
     try {
+      await checkHealth();
       const data = await fetchPlatformLive();
       applyPulse(data);
       return data;
@@ -41,7 +55,20 @@ export const PlatformLiveProvider = ({ children }) => {
     } finally {
       setSyncing(false);
     }
-  }, [user, applyPulse]);
+  }, [user, applyPulse, checkHealth]);
+
+  useEffect(() => {
+    checkHealth();
+    const id = setInterval(checkHealth, HEALTH_POLL_MS);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') checkHealth();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [checkHealth]);
 
   useEffect(() => {
     const socket = getSocket();
@@ -87,9 +114,12 @@ export const PlatformLiveProvider = ({ children }) => {
   const value = {
     pulse,
     socketConnected,
+    apiOnline,
+    lastHealthCheck,
     syncing,
-    isLive: Boolean(pulse?.online) && (socketConnected || pulse?.mode === 'live'),
+    isLive: apiOnline && Boolean(pulse?.online) && (socketConnected || pulse?.mode === 'live'),
     refresh,
+    checkHealth,
   };
 
   return (

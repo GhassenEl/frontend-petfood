@@ -6,6 +6,7 @@ import path from 'path'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:5002'
+  const mlProxyTarget = env.VITE_ML_PROXY_TARGET || 'http://127.0.0.1:8000'
   const grafanaProxyTarget = env.VITE_GRAFANA_PROXY_TARGET || 'http://127.0.0.1:3000'
   const n8nProxyTarget = env.VITE_N8N_PROXY_TARGET || 'http://127.0.0.1:5678'
   const base = env.VITE_BASE_PATH || '/'
@@ -76,7 +77,7 @@ export default defineConfig(({ mode }) => {
         },
       },
       '/fastapi': {
-        target: 'http://localhost:8000',
+        target: mlProxyTarget,
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/fastapi/, ''),

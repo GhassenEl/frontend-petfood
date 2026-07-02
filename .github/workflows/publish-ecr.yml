@@ -72,6 +72,8 @@ jobs:
           build-args: |
             VITE_API_BASE=/api
             VITE_SOCKET_URL=
+            VITE_STRICT_LIVE=true
+            VITE_ML_API_BASE=/fastapi
             VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}
             VITE_APP_RELEASE=petfoodtn@aws
 
