@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Cpu, Droplets, Thermometer, Play, Calendar, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Cpu, Droplets, Thermometer, Play, Calendar, AlertTriangle, RefreshCw, CircuitBoard, Radio } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { getDemoFeederList, getDemoFeederBundle, DEMO_FEEDER_HISTORY } from '../utils/clientDemoData';
+import EmbeddedStackPanel from '../components/EmbeddedStackPanel';
+import { EMBEDDED_FIRMWARE, MQTT_TOPIC_SCHEMA } from '../config/embeddedPlatformCatalog';
+import '../pages/ClientIoTHub.css';
 import './VendorFeederIoTPage.css';
 
 const VendorFeederIoTPage = () => {
@@ -43,10 +47,25 @@ const VendorFeederIoTPage = () => {
   return (
     <div className="vfeeder-page">
       <header className="vfeeder-hero">
-        <h1><Cpu size={24} /> Gestion IoT — Distributeurs intelligents</h1>
-        <p>Surveillance ESP32, réservoir, température/humidité, distribution manuelle, planification et alertes.</p>
+        <h1><Cpu size={24} /> Flotte embarquée — Distributeurs ESP32</h1>
+        <p>Firmware PetFeederESP32 · PCB PF-TN-CTRL · MQTT · capteurs HX711, DHT11, HC-SR04 — gestion vendeur multi-sites.</p>
         <button type="button" className="vfeeder-btn" onClick={load}><RefreshCw size={14} /> Actualiser</button>
       </header>
+
+      <EmbeddedStackPanel
+        pack={{
+          devices: feeders.map((f) => ({ ...f, type: 'feeder', status: f.status })),
+          mqtt: { connected: true, broker: 'mqtt://broker.petfoodtn.tn:1883' },
+        }}
+        compact
+      />
+
+      <div className="vfeeder-fleet-meta">
+        <span><Radio size={14} /> {feeders.filter((f) => f.status === 'online').length}/{feeders.length} en ligne</span>
+        <span><CircuitBoard size={14} /> PCB PF-TN-CTRL-v1</span>
+        <span>Firmware {EMBEDDED_FIRMWARE[0]?.version}</span>
+        <Link to="/client-hardware-pcb">Docs PCB →</Link>
+      </div>
 
       <div className="vfeeder-fleet">
         {feeders.map((f) => (
@@ -93,6 +112,18 @@ const VendorFeederIoTPage = () => {
           <p style={{ fontSize: 12, color: '#64748b' }}>Horaires synchronisés avec l&apos;ESP32 client.</p>
         </section>
       </div>
+
+      <section className="vfeeder-panel vfeeder-mqtt">
+        <h3><Radio size={16} /> Topics MQTT actifs</h3>
+        <ul className="vfeeder-mqtt-list">
+          {MQTT_TOPIC_SCHEMA.slice(0, 4).map((t) => (
+            <li key={t.topic}>
+              <code>{t.topic.replace('{id}', feeder.deviceId || 'ESP32-FEED-001')}</code>
+              <span>{t.desc}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section className="vfeeder-panel">
         <h3>Journal des événements</h3>

@@ -13,11 +13,15 @@ const ADMIN_SIDEBAR_SECTIONS = [
     ],
   },
   {
-    title: 'IoT',
+    title: 'IoT & Embarqué',
     items: [
-      { id: 'iot-anomalies', label: 'Surveillance IoT', icon: '📡' },
+      { id: 'iot-anomalies', label: 'Command center IoT', icon: '🔌' },
       { id: 'food-quality-cam', label: 'ESP32-CAM', icon: '📷' },
       { id: 'food-quality', label: 'Qualité alimentaire', icon: '🌡️' },
+      { id: 'client-iot', label: 'Centre IoT embarqué', icon: '🔌', route: '/client-iot?tab=embedded' },
+      { id: 'pet-feeder', label: 'Distributeur ESP32', icon: '🍽️' },
+      { id: 'client-hardware-pcb', label: 'Cartes PCB ARES', icon: '🟢', route: '/client-hardware-pcb' },
+      { id: 'client-smart-water', label: 'Fontaine connectée', icon: '💧' },
     ],
   },
   {

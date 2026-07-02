@@ -16,12 +16,18 @@ const VendorSidebar = ({ onLogout, user, onNavigate }) => {
       ],
     },
     {
+      title: '🔌 Embarqué & IoT',
+      items: [
+        { id: 'feeder-iot', label: 'Flotte ESP32 & MQTT', icon: '🔌' },
+        { id: 'food-quality', label: 'ESP32-CAM qualité', icon: '📷' },
+        { id: 'client-hardware-pcb', label: 'Docs PCB', icon: '🟢', route: '/client-hardware-pcb' },
+      ],
+    },
+    {
       title: '🏷️ Gestion produits',
       items: [
         { to: '/vendor/products', label: 'Mes produits', icon: '🏷️' },
         { id: 'traceability', label: 'Traçabilité blockchain', icon: '🔗' },
-        { id: 'feeder-iot', label: 'IoT distributeur ESP32', icon: '📡' },
-        { id: 'food-quality', label: 'Qualité alimentaire IoT', icon: '🌡️' },
       ],
     },
     {

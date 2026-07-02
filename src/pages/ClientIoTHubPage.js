@@ -24,7 +24,10 @@ import IoTNetworkTopologyPanel from '../components/IoTNetworkTopologyPanel';
 import IoTEnvironmentPanel from '../components/IoTEnvironmentPanel';
 import IoTSecurityPanel from '../components/IoTSecurityPanel';
 import PetWearableDashboard from '../components/PetWearableDashboard';
-import DemoModePill from '../components/DemoModePill';
+import EmbeddedStackPanel from '../components/EmbeddedStackPanel';
+import EmbeddedSensorsMatrix from '../components/EmbeddedSensorsMatrix';
+import EmbeddedMqttConsole from '../components/EmbeddedMqttConsole';
+import EmbeddedFirmwarePanel from '../components/EmbeddedFirmwarePanel';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import useIoTLive from '../hooks/useIoTLive';
 import useIsMobile from '../hooks/useIsMobile';
@@ -41,6 +44,7 @@ const card = {
 };
 
 const TABS = [
+  { id: 'embedded', label: 'Stack embarqué', shortLabel: 'Edge', flagship: true },
   { id: 'distribution', label: 'Distribution nourriture', shortLabel: 'Distrib.' },
   { id: 'food-quality', label: 'Qualité alimentaire', shortLabel: 'Qualité' },
   { id: 'devices', label: 'Appareils', shortLabel: 'Appareils' },
@@ -82,7 +86,7 @@ const IoTModuleCard = ({ to, icon, title, subtitle, status, statusColor, badge }
 
 const ClientIoTHubPage = () => {
   const [searchParams] = useSearchParams();
-  const [tab, setTab] = useState('distribution');
+  const [tab, setTab] = useState('embedded');
   const [pack, setPack] = useState(null);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
@@ -101,7 +105,8 @@ const ClientIoTHubPage = () => {
 
   useEffect(() => {
     const t = searchParams.get('tab');
-    if (t === 'food-quality' || t === 'detection') setTab('food-quality');
+    if (t === 'embedded') setTab('embedded');
+    else if (t === 'food-quality' || t === 'detection') setTab('food-quality');
     else if (t === 'security') setTab('security');
     else if (t === 'wearable') setTab('wearable');
     else if (t && TABS.some((x) => x.id === t)) setTab(t);
@@ -124,20 +129,25 @@ const ClientIoTHubPage = () => {
 
   return (
     <div className="cc-page iot-hub">
-      <header className="cc-hero iot-hub-hero" style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #059669 100%)',
+      <header className="cc-hero iot-hub-hero iot-hub-hero--embedded" style={{
+        background: 'linear-gradient(135deg, #0f172a 0%, #134e4a 55%, #065f46 100%)',
         color: 'white', borderRadius: 20, marginBottom: 24,
       }}
       >
         <div className="iot-hub-hero__inner">
           <div className="iot-hub-hero__copy">
-            <h1>📡 Centre IoT PetfoodTN</h1>
+            <h1>🔌 PetFoodIoT — Plateforme embarquée</h1>
             <p>
-              Distributeur ESP32 · qualité alimentaire ESP32-CAM · colliers santé · fontaines connectées,
-              environnement, registre appareils et commandes à distance.
+              ESP32 · PCB ARES · MQTT · capteurs industriels — distributeur intelligent, vision ESP32-CAM,
+              cartes imprimées et télémétrie edge-to-cloud en temps réel.
             </p>
             {!loading && d.healthScore != null && (
               <div className="iot-hub-hero__scores">
+                {d.embeddedStack?.dominanceScore != null && (
+                  <span className="iot-hub-hero__score">
+                    <strong>{d.embeddedStack.dominanceScore}</strong> Score edge
+                  </span>
+                )}
                 <span className="iot-hub-hero__score">
                   <strong>{d.healthScore}</strong> Santé IoT
                 </span>
@@ -181,9 +191,12 @@ const ClientIoTHubPage = () => {
             role="tab"
             aria-selected={tab === t.id}
             onClick={() => setTab(t.id)}
-            className={`iot-tab${tab === t.id ? ' is-active' : ''}`}
+            className={`iot-tab${tab === t.id ? ' is-active' : ''}${t.flagship ? ' iot-tab--embedded' : ''}`}
           >
             {isMobile ? t.shortLabel : t.label}
+            {t.id === 'embedded' && (
+              <span className="iot-tab-badge" style={{ background: '#065f46', color: '#6ee7b7' }}>EDGE</span>
+            )}
             {t.id === 'food-quality' && (
               <span className="iot-tab-badge" style={{ background: '#ecfdf5', color: '#059669' }}>LIVE</span>
             )}
@@ -210,6 +223,18 @@ const ClientIoTHubPage = () => {
         <p style={{ textAlign: 'center', color: '#94a3b8', padding: 32 }}>Synchronisation…</p>
       ) : (
         <>
+          {tab === 'embedded' && (
+            <>
+              <EmbeddedStackPanel pack={d} />
+              <EmbeddedSensorsMatrix devices={d.devices || []} />
+              <EmbeddedMqttConsole pack={d} />
+              <EmbeddedFirmwarePanel />
+              <section style={{ marginBottom: 20 }}>
+                <IoTNetworkTopologyPanel networkHealth={d.networkHealth} mqtt={d.mqtt} />
+              </section>
+            </>
+          )}
+
           {tab === 'distribution' && (
             <>
               <IoTCommandCenter pack={d} onRefresh={load} />

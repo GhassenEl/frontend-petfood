@@ -2,6 +2,18 @@
 
 export const CLIENT_SIDEBAR_SECTIONS = [
   {
+    title: '🔌 Embarqué & IoT',
+    badge: 'EDGE',
+    items: [
+      { id: 'client-iot', label: 'Centre IoT embarqué', icon: '🔌', route: '/client-iot?tab=embedded' },
+      { id: 'pet-feeder', label: 'Distributeur ESP32', icon: '🍽️' },
+      { id: 'client-hardware-pcb', label: 'Cartes PCB ARES', icon: '🟢', route: '/client-hardware-pcb' },
+      { id: 'client-smart-water', label: 'Fontaine connectée', icon: '💧' },
+      { id: 'client-traceability', label: 'Traçabilité capteurs', icon: '🔗' },
+      { id: 'mobile-app', label: 'App mobile IoT', icon: '📱', route: '/mobile#iot' },
+    ],
+  },
+  {
     title: '🛒 Boutique',
     items: [
       { id: 'client-products', label: 'Produits', icon: '🏷️' },
@@ -10,17 +22,6 @@ export const CLIENT_SIDEBAR_SECTIONS = [
       { id: 'client-invoices', label: 'Mes factures', icon: '🧾' },
       { id: 'client-loyalty', label: 'Fidélité', icon: '🎁' },
       { id: 'client-community', label: 'Communauté', icon: '👥' },
-    ],
-  },
-  {
-    title: '📡 IoT & connecté',
-    items: [
-      { id: 'client-iot', label: 'Centre IoT', icon: '📡' },
-      { id: 'pet-feeder', label: 'Distributeur ESP32', icon: '🍽️' },
-      { id: 'client-hardware-pcb', label: 'Cartes PCB', icon: '🟢', route: '/client-hardware-pcb' },
-      { id: 'client-smart-water', label: 'Consommation eau', icon: '💧' },
-      { id: 'client-traceability', label: 'Traçabilité', icon: '🔗' },
-      { id: 'mobile-app', label: 'Application mobile', icon: '📱', route: '/mobile#iot' },
     ],
   },
   {

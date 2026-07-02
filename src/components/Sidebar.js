@@ -18,11 +18,13 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       ],
     },
     {
-      title: '📡 PetFoodIoT',
+      title: '🔌 PetFoodIoT — Embarqué',
       items: [
-        { id: 'iot-anomalies', label: 'Surveillance IoT & capteurs', icon: '📡' },
-        { id: 'food-quality-cam', label: 'ESP32-CAM PetFoodIoT', icon: '📷' },
-        { id: 'food-quality', label: 'Qualité alimentaire IoT', icon: '🌡️' },
+        { id: 'iot-anomalies', label: 'Command center IoT', icon: '🔌' },
+        { id: 'food-quality-cam', label: 'ESP32-CAM & vision', icon: '📷' },
+        { id: 'food-quality', label: 'Qualité alimentaire', icon: '🌡️' },
+        { id: 'client-hardware-pcb', label: 'Cartes PCB (docs)', icon: '🟢', route: '/client-hardware-pcb' },
+        { id: 'pet-feeder', label: 'Flotte distributeurs', icon: '🍽️', route: '/pet-feeder' },
       ],
     },
     {

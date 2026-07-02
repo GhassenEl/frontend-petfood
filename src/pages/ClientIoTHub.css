@@ -3302,3 +3302,93 @@
   color: #64748b;
   line-height: 1.3;
 }
+
+/* Stack embarqué */
+.embedded-stack {
+  background: linear-gradient(145deg, #0f172a 0%, #134e4a 45%, #1e3a8a 100%);
+  color: #f8fafc;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.25);
+}
+.embedded-stack--compact { padding: 16px; margin-bottom: 16px; }
+.embedded-stack__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.embedded-stack__kicker { margin: 0 0 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #6ee7b7; }
+.embedded-stack__title { margin: 0 0 8px; font-size: 1.35rem; display: flex; align-items: center; gap: 8px; }
+.embedded-stack__subtitle { margin: 0; font-size: 14px; color: #cbd5e1; max-width: 560px; line-height: 1.5; }
+.embedded-stack__score { text-align: center; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 12px 20px; min-width: 88px; }
+.embedded-stack__score-value { display: block; font-size: 2rem; font-weight: 900; color: #6ee7b7; line-height: 1; }
+.embedded-stack__score-label { font-size: 11px; color: #94a3b8; font-weight: 700; }
+.embedded-stack__metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.embedded-stack__metric { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 12px; text-align: center; }
+.embedded-stack__metric strong { display: block; font-size: 1.1rem; color: #f8fafc; }
+.embedded-stack__metric span { font-size: 10px; color: #94a3b8; font-weight: 600; }
+.embedded-stack__metric--hi strong { color: #6ee7b7; }
+.embedded-stack__layers { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.embedded-stack__layer { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-top: 3px solid var(--layer-color, #059669); border-radius: 14px; padding: 12px; }
+.embedded-stack__layer-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; }
+.embedded-stack__layer-icon { font-size: 18px; }
+.embedded-stack__layer-list { margin: 0; padding-left: 16px; font-size: 11px; color: #cbd5e1; line-height: 1.55; }
+.embedded-stack__firmware h3, .embedded-stack__pcb h3 { margin: 0 0 12px; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+.embedded-stack__firmware-grid, .embedded-stack__pcb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.embedded-stack__fw-card { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; font-size: 12px; }
+.embedded-stack__fw-head { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.embedded-stack__fw-ver { background: #059669; color: white; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
+.embedded-stack__fw-mcu { margin: 0 0 8px; color: #94a3b8; font-size: 11px; }
+.embedded-stack__fw-card ul { margin: 0; padding-left: 16px; color: #e2e8f0; line-height: 1.5; }
+.embedded-stack__ota { display: inline-block; margin-top: 8px; font-size: 10px; font-weight: 800; color: #fcd34d; }
+.embedded-stack__pcb-card { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.08); border-radius: 12px; padding: 12px; color: inherit; text-decoration: none; font-size: 12px; }
+.embedded-stack__pcb-card p { margin: 2px 0 0; color: #94a3b8; font-size: 11px; }
+.embedded-stack__links { display: flex; flex-wrap: wrap; gap: 10px; }
+.embedded-stack__link { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: rgba(255,255,255,0.12); border-radius: 10px; color: #f8fafc; text-decoration: none; font-size: 13px; font-weight: 700; }
+.embedded-sensors { margin-bottom: 24px; }
+.embedded-sensors__title { margin: 0 0 6px; font-size: 17px; font-weight: 800; }
+.embedded-sensors__desc { margin: 0 0 16px; font-size: 13px; color: #64748b; }
+.embedded-sensors__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.embedded-sensors__card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; }
+.embedded-sensors__card.is-live { border-color: #6ee7b7; box-shadow: 0 0 0 1px #d1fae5; }
+.embedded-sensors__card-head { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; }
+.embedded-sensors__icon { font-size: 22px; }
+.embedded-sensors__gpio { display: block; font-size: 10px; color: #94a3b8; font-weight: 700; }
+.embedded-sensors__pill { margin-left: auto; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 999px; text-transform: uppercase; }
+.embedded-sensors__pill--ok, .embedded-sensors__pill--live { background: #ecfdf5; color: #059669; }
+.embedded-sensors__pill--idle { background: #f1f5f9; color: #64748b; }
+.embedded-sensors__pill--off { background: #f1f5f9; color: #94a3b8; }
+.embedded-sensors__value { margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a; }
+.embedded-sensors__value small { font-size: 12px; color: #64748b; font-weight: 600; }
+.embedded-sensors__meta { margin: 6px 0 0; font-size: 11px; color: #94a3b8; }
+.embedded-mqtt { background: #0f172a; color: #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 24px; }
+.embedded-mqtt__head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+.embedded-mqtt__head h3 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+.embedded-mqtt__broker { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #94a3b8; }
+.embedded-mqtt__status { padding: 3px 10px; border-radius: 999px; background: #334155; font-weight: 700; font-size: 11px; }
+.embedded-mqtt__status.is-on { background: #065f46; color: #6ee7b7; }
+.embedded-mqtt__table-wrap { overflow-x: auto; }
+.embedded-mqtt__table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.embedded-mqtt__table th { text-align: left; padding: 8px 10px; color: #94a3b8; border-bottom: 1px solid #334155; }
+.embedded-mqtt__table td { padding: 10px; border-bottom: 1px solid #1e293b; vertical-align: top; }
+.embedded-mqtt__table code { font-size: 11px; color: #7dd3fc; }
+.embedded-mqtt__payload { display: block; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.embedded-mqtt__ago { display: block; font-size: 10px; color: #64748b; margin-top: 4px; }
+.embedded-mqtt__dir { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
+.embedded-mqtt__dir--pub { background: #1e3a8a; color: #93c5fd; }
+.embedded-mqtt__dir--sub { background: #065f46; color: #6ee7b7; }
+.embedded-mqtt__hint { margin: 12px 0 0; font-size: 11px; color: #64748b; }
+.embedded-firmware { margin-bottom: 24px; }
+.embedded-firmware__title { margin: 0 0 14px; font-size: 17px; font-weight: 800; }
+.embedded-firmware__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.embedded-firmware__card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; }
+.embedded-firmware__card header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.embedded-firmware__path { margin: 0 0 10px; font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 6px; }
+.embedded-firmware__card ul { margin: 0 0 12px; padding-left: 18px; font-size: 13px; color: #475569; line-height: 1.5; }
+.embedded-firmware__card footer { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; }
+.embedded-firmware__ota { background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 999px; font-weight: 800; }
+.embedded-firmware__steps { margin: 0 0 16px; padding-left: 0; list-style: none; display: grid; gap: 10px; }
+.embedded-firmware__steps li { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; }
+.embedded-firmware__steps p { margin: 4px 0 0; font-size: 13px; color: #64748b; }
+.embedded-firmware__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.embedded-firmware__btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; background: #059669; color: white; font-weight: 700; font-size: 13px; text-decoration: none; }
+.embedded-firmware__btn--ghost { background: #fff; color: #059669; border: 2px solid #059669; }
+.iot-tab--embedded { border-color: #059669 !important; background: linear-gradient(135deg, #ecfdf5, #d1fae5) !important; color: #065f46 !important; }
+.iot-hub-hero--embedded { background: linear-gradient(135deg, #0f172a 0%, #134e4a 40%, #065f46 100%) !important; }

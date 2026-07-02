@@ -6,6 +6,7 @@ import {
 } from './iotAnomalyEngine';
 import { computeNetworkHealth } from './iotEcosystemEngine';
 import { buildIoTSecurityPack } from './iotSecurityEngine';
+import { buildEmbeddedStackSummary } from '../config/embeddedPlatformCatalog';
 import { assessVitalStatus, computeAnimalState } from './wearablePetEngine';
 
 const hoursAgo = (h) => new Date(Date.now() - h * 3600000).toISOString();
@@ -399,6 +400,7 @@ export const enrichIoTPack = (pack) => {
   const partial = { ...enriched, healthScore, mqtt };
   const networkHealth = computeNetworkHealth(partial);
   const security = buildIoTSecurityPack({ ...partial, networkHealth });
+  const embeddedStack = buildEmbeddedStackSummary({ ...partial, mqtt, networkHealth });
 
   return {
     ...enriched,
@@ -413,6 +415,7 @@ export const enrichIoTPack = (pack) => {
     mqtt,
     networkHealth,
     security,
+    embeddedStack,
     intelligence: {
       insightCount: insights.length,
       anomalyCount: anomalies.length,
