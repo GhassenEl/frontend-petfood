@@ -4,7 +4,6 @@ import ChatAssistant from '../components/ChatAssistant';
 import { useAuth } from '../contexts/AuthContext';
 import ResponsiveShell from './ResponsiveShell';
 import MobileBottomNav, { VET_MOBILE_NAV } from '../components/MobileBottomNav';
-import RecommendedForYouButton from '../components/RecommendedForYouButton';
 
 const VetLayout = ({ children }) => {
   const { user, logout } = useAuth();
@@ -19,7 +18,6 @@ const VetLayout = ({ children }) => {
     >
       {children}
       <ChatAssistant key={chatKey} variant="vet" />
-      <RecommendedForYouButton />
     </ResponsiveShell>
   );
 };

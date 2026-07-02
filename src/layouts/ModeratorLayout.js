@@ -1,7 +1,6 @@
 import React from 'react';
 import ModeratorSidebar from '../components/ModeratorSidebar';
 import ChatAssistant from '../components/ChatAssistant';
-import RecommendedForYouButton from '../components/RecommendedForYouButton';
 import { useAuth } from '../contexts/AuthContext';
 import ResponsiveShell from './ResponsiveShell';
 import MobileBottomNav, { MODERATOR_MOBILE_NAV } from '../components/MobileBottomNav';
@@ -18,7 +17,6 @@ const ModeratorLayout = ({ children }) => {
       sidebar={(onClose) => <ModeratorSidebar user={user} onLogout={logout} onNavigate={onClose} />}
     >
       {children}
-      <RecommendedForYouButton bottomOffset={88} />
       <ChatAssistant key={chatKey} variant="moderator" />
     </ResponsiveShell>
   );

@@ -35,7 +35,7 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
       title: '🤖 Intelligence IA',
       items: [
         { id: 'intelligence', label: 'Intelligence livraison', icon: '🧠' },
-        { id: 'recommendations', label: 'Recommandations IA', icon: '🎯' },
+        { id: 'recommendations', label: 'Recommandations IA', icon: '🎯', route: '/livreur/recommendations' },
         { id: 'ml', label: 'Prévisions ML', icon: '📊' },
       ],
     },
@@ -83,10 +83,12 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
             <p className="admin-sidebar-section-title">
               {section.title}
             </p>
-            {section.items.map((item) => (
+            {section.items.map((item) => {
+              const to = item.route || `/livreur/${item.id}`;
+              return (
                 <NavLink
                   key={item.id}
-                  to={`/livreur/${item.id}`}
+                  to={to}
                   onClick={() => onNavigate?.()}
                   className={({ isActive }) =>
                     `admin-sidebar-item ${isActive ? 'active' : ''}`
@@ -95,7 +97,8 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
                   <span className="icon">{item.icon}</span>
                   <span>{item.label}</span>
                 </NavLink>
-            ))}
+              );
+            })}
           </div>
         ))}
       </nav>

@@ -5,7 +5,6 @@ import CookieConsentBanner from './components/CookieConsentBanner';
 import SessionExpiryBanner from './components/SessionExpiryBanner';
 import LiveDataBanner from './components/LiveDataBanner';
 import GlobalPlatformChat from './components/GlobalPlatformChat';
-import GlobalMonochromeToggle from './components/GlobalMonochromeToggle';
 import LoginPage from './pages/LoginPage.js';
 import RegisterPage from './pages/RegisterPage.jsx';
 import ForgotPasswordPage from './pages/ForgotPasswordPage.js';
@@ -239,7 +238,6 @@ const App = () => {
       <SessionExpiryBanner />
       <LiveDataBanner />
       <GlobalPlatformChat />
-      <GlobalMonochromeToggle />
       <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/" element={<MarketingLandingPage />} />
@@ -284,7 +282,6 @@ const App = () => {
     <SessionExpiryBanner />
     <LiveDataBanner />
     <GlobalPlatformChat />
-    <GlobalMonochromeToggle />
     <Suspense fallback={<PageLoader />}>
     <Routes>
       <Route path="/" element={<Navigate to={userHome} replace />} />

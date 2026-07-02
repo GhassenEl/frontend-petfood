@@ -164,3 +164,67 @@
   padding: 40px;
   color: #64748b;
 }
+
+.rechub-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.rechub-tab {
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+}
+
+.rechub-tab--active {
+  border-color: #7c3aed;
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.rechub-api-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.rechub-api-badge--ok {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.rechub-api-badge--warn {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.rechub-api-badge--neutral {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.rechub-error {
+  color: #dc2626;
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+
+.rechub-search-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}

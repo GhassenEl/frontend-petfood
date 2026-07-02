@@ -13,7 +13,7 @@ const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
       title: '🛡️ Modération',
       items: [
         { id: 'dashboard', label: 'Tableau de bord', icon: '📊' },
-        { id: 'recommendations', label: 'Recommandations IA', icon: '🎯' },
+        { id: 'recommendations', label: 'Recommandations IA', icon: '🎯', route: '/moderator/recommendations' },
         { id: 'users', label: 'Comptes clients', icon: '👤' },
         { id: 'content', label: 'Contenu & produits', icon: '🏷️' },
         { id: 'fraud', label: 'Centre anti-fraude', icon: '🚨' },
@@ -64,7 +64,7 @@ const ModeratorSidebar = ({ onLogout, user, onNavigate }) => {
           <div key={section.title} className="admin-sidebar-section">
             <p className="admin-sidebar-section-title">{section.title}</p>
             {section.items.map((item) => {
-              const to = `/moderator/${item.id}`;
+              const to = item.route || `/moderator/${item.id}`;
               return (
                 <NavLink
                   key={item.id}

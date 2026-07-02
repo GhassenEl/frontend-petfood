@@ -34,7 +34,7 @@ export const VET_SIDEBAR_SECTIONS = [
   {
     title: '🤖 Intelligence clinique',
     items: [
-      { id: 'recommendations', label: 'Recommandations IA', icon: '🎯' },
+      { id: 'recommendations', label: 'Recommandations IA', icon: '🎯', route: '/vet/recommendations' },
       { id: 'chat-history', label: 'Historique chatbot', icon: '💬', route: '/vet/chat-history' },
     ],
   },

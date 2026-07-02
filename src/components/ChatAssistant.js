@@ -432,9 +432,15 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
     } catch (err) {
       const isOffline = err?.isBackendOffline || !err?.response;
       const isNotFound = err?.isNotFound || err?.response?.status === 404;
+      const isServerError = (err?.response?.status || 0) >= 500;
+      const useLocalFallback =
+        isOffline
+        || isNotFound
+        || isServerError
+        || ['admin', 'livreur', 'moderator', 'vendor', 'vet'].includes(variant);
 
-      if (isOffline || isNotFound) {
-        applyLocalReply(getPlatformChatReply({ message: text.trim(), role: variant, language: activeLang }));
+      if (useLocalFallback) {
+        applyLocalReply(getPlatformChatReply({ message: text.trim(), role: portalRole, language: activeLang }));
       } else {
         setIsBackendOnline(false);
         setMessages((prev) => [
@@ -513,6 +519,8 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
       Produits: '/admin/products',
       Avis: '/admin/reviews',
       Réclamations: '/admin/complaints',
+      Factures: '/admin/invoices',
+      Utilisateurs: '/admin/users',
       Dashboard: '/admin/dashboard',
     };
     if (variant === 'admin' && adminNav[cleanReply]) {

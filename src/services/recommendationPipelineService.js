@@ -9,6 +9,7 @@ import { DEMO_VET_BI, DEMO_VET_PHARMACY_MEDS } from '../utils/vetDemoData';
 import { DEMO_MODERATOR_PENDING_PRODUCTS, DEMO_MODERATOR_INAPPROPRIATE } from '../utils/moderatorDemoData';
 import { DEMO_LIVREUR_ORDERS } from '../utils/livreurDemoData';
 import { fetchHybridRecommendations } from './hybridRecommendationService';
+import { normalizeRecommendationPack } from '../utils/normalizeRecommendationPack';
 
 const mapProduct = (p) => ({
   id: String(p.id || p._id),
@@ -184,15 +185,12 @@ export async function loadRecommendationPipeline(role = 'client', userId) {
 
   if (['client', 'vet', 'admin', 'livreur', 'moderator', 'vendor'].includes(normalizedRole)) {
     try {
-      const apiPack = await fetchHybridRecommendations({ role: normalizedRole, limit: 10 });
-      if (apiPack?.recommendations?.length) {
+      const apiPack = await fetchHybridRecommendations({ role: normalizedRole, limit: 12 });
+      const normalized = normalizeRecommendationPack(apiPack, normalizedRole);
+      if (normalized?.recommendations?.length) {
         return {
-          ...apiPack,
-          mode: apiPack.pythonPowered ? 'hybrid-live' : apiPack.mode,
-          pipeline: apiPack.pipeline || {
-            weights: apiPack.pipeline?.weights || { content: 0.55, collaborative: 0.45 },
-            steps: ['content_based', 'collaborative_filtering', 'review_nlp_filter', 'hybrid_blend'],
-          },
+          ...normalized,
+          mode: apiPack.pythonPowered ? 'hybrid-live' : (apiPack.mode || 'hybrid-api'),
         };
       }
     } catch {
@@ -218,7 +216,10 @@ export async function loadRecommendationPipeline(role = 'client', userId) {
     limit: 10,
   });
 
-  return { ...result, mode: profile.historyItemIds?.length ? 'hybrid' : 'demo' };
+  return normalizeRecommendationPack(
+    { ...result, mode: profile.historyItemIds?.length ? 'hybrid' : 'demo' },
+    normalizedRole,
+  );
 }
 
 /** Fusionne les recommandations pipeline avec le catalogue boutique (match par id) */

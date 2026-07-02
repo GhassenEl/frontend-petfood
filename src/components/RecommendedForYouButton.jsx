@@ -2,27 +2,16 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { getRecommendationHubRoute, RECOMMENDATION_ALLOWED_ROLES } from '../config/recommendationRoutes';
 import './RecommendedForYouButton.css';
-
-const HUB_BY_ROLE = {
-  client: '/client-recommendations',
-  vet: '/vet/recommendations',
-  veterinarian: '/vet/recommendations',
-  admin: '/admin/recommendations',
-  livreur: '/livreur/recommendations',
-  moderator: '/moderator/recommendations',
-  vendor: '/vendor/recommendations',
-};
-
-const ALLOWED_ROLES = ['client', 'vet', 'veterinarian', 'admin', 'livreur', 'moderator', 'vendor'];
 
 const RecommendedForYouButton = ({ bottomOffset = 88, align = 'right' }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const role = user?.role || 'client';
-  const to = HUB_BY_ROLE[role];
+  const to = getRecommendationHubRoute(role);
 
-  if (!to || !ALLOWED_ROLES.includes(role)) {
+  if (!to || !RECOMMENDATION_ALLOWED_ROLES.includes(role)) {
     return null;
   }
 

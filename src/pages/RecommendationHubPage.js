@@ -1,22 +1,48 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { loadRecommendationPipeline } from '../services/recommendationPipelineService';
-import { ROLE_PIPELINE_META } from '../utils/recommendationDemoData';
+import { fetchHybridRecommendations } from '../services/hybridRecommendationService';
+import { getRecommendationHubRoute, normalizeRecommendationRole } from '../config/recommendationRoutes';
+import { normalizeRecommendationPack } from '../utils/normalizeRecommendationPack';
 import { getVendorPetProfileRecommendations } from '../utils/vendorPetRecommendationEngine';
 import './RecommendationHubPage.css';
 
 const RecommendationHubPage = () => {
   const { user } = useAuth();
-  const role = user?.role || 'client';
-  const meta = ROLE_PIPELINE_META[role === 'veterinarian' ? 'vet' : role] || ROLE_PIPELINE_META.client;
+  const role = normalizeRecommendationRole(user?.role || 'client');
+  const hubRoute = getRecommendationHubRoute(role);
+  const meta = useMemo(() => {
+    const pack = normalizeRecommendationPack({ role }, role);
+    return pack?.meta || { title: 'Recommandations IA', subtitle: 'Moteur hybride PetfoodTN' };
+  }, [role]);
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
+    setApiError('');
     try {
-      const pack = await loadRecommendationPipeline(role, user?.id || user?._id);
+      let pack = null;
+      try {
+        const apiRaw = await fetchHybridRecommendations({
+          role,
+          limit: 12,
+        });
+        pack = normalizeRecommendationPack(apiRaw, role);
+        if (!pack?.recommendations?.length) {
+          pack = null;
+        }
+      } catch (e) {
+        setApiError(e?.response?.data?.error || 'API indisponible — fallback local.');
+      }
+
+      if (!pack) {
+        pack = await loadRecommendationPipeline(role, user?.id || user?._id);
+      }
+
       setData(pack);
     } catch {
       setData(null);
@@ -39,12 +65,20 @@ const RecommendationHubPage = () => {
     [role, data?.recommendations],
   );
 
+  const weights = data?.pipeline?.weights || { content: 0.55, collaborative: 0.45 };
+  const steps = data?.pipeline?.steps || [];
+
   if (loading) {
     return <div className="rechub-page rechub-empty">Pipeline de recommandation en cours…</div>;
   }
 
   if (!data) {
-    return <div className="rechub-page rechub-empty">Recommandations indisponibles.</div>;
+    return (
+      <div className="rechub-page rechub-empty">
+        <p>Recommandations indisponibles.</p>
+        <button type="button" className="rechub-refresh" onClick={load}>Réessayer</button>
+      </div>
+    );
   }
 
   return (
@@ -53,13 +87,15 @@ const RecommendationHubPage = () => {
         <h1>{meta.title}</h1>
         <p>{meta.subtitle}</p>
         <p style={{ marginTop: 8, fontSize: 12, opacity: 0.8 }}>
-          Poids hybride — contenu {(data.pipeline.weights.content * 100).toFixed(0)}% · collaboratif {(data.pipeline.weights.collaborative * 100).toFixed(0)}%
+          Poids hybride — contenu {(weights.content * 100).toFixed(0)}% · collaboratif {(weights.collaborative * 100).toFixed(0)}%
           {data.mode === 'demo' && ' · Mode démo'}
-          {data.pythonPowered && ' · FastAPI live'}
-          {data.mode === 'hybrid-live' && ' · Moteur hybride NLP'}
+          {data.mode === 'hybrid-live' && ' · FastAPI live'}
+          {data.mode === 'hybrid-fallback' && ' · Fallback Node'}
+          {data.mode === 'hybrid-api' && ' · API hybride'}
         </p>
+        {apiError && <p className="rechub-error" style={{ fontSize: 12 }}>{apiError}</p>}
         <button type="button" className="rechub-refresh" onClick={load}>
-          Actualiser le pipeline
+          Actualiser via API
         </button>
       </header>
 
@@ -72,7 +108,7 @@ const RecommendationHubPage = () => {
                 <span className="rechub-rank">#{i + 1}</span>
                 <h3>{item.name}</h3>
                 <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>
-                  Score hybride {(item.hybridScore * 100).toFixed(0)}%
+                  Score hybride {((item.hybridScore || 0) * 100).toFixed(0)}%
                 </p>
               </article>
             ))}
@@ -99,19 +135,21 @@ const RecommendationHubPage = () => {
         </section>
       )}
 
-      <div className="rechub-pipeline">
-        {data.pipeline.steps.map((step) => (
-          <div key={step.id} className={`rechub-step${step.status === 'done' ? ' rechub-step--done' : ''}`}>
-            <strong>{step.label}</strong>
-            <span>{step.detail || (step.weight != null ? `Poids ${(step.weight * 100).toFixed(0)}%` : step.status)}</span>
-          </div>
-        ))}
-      </div>
+      {steps.length > 0 && (
+        <div className="rechub-pipeline">
+          {steps.map((step) => (
+            <div key={step.id} className={`rechub-step${step.status === 'done' ? ' rechub-step--done' : ''}`}>
+              <strong>{step.label}</strong>
+              <span>{step.detail || (step.weight != null ? `Poids ${(step.weight * 100).toFixed(0)}%` : step.status)}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {data.similarUsers?.length > 0 && (
         <div className="rechub-similar">
           <strong>Utilisateurs similaires :</strong>{' '}
-          {data.similarUsers.map((u) => `${u.userId} (${(u.similarity * 100).toFixed(0)}%)`).join(' · ')}
+          {data.similarUsers.map((u) => `${u.userId} (${((u.similarity || 0) * 100).toFixed(0)}%)`).join(' · ')}
         </div>
       )}
 
@@ -128,13 +166,13 @@ const RecommendationHubPage = () => {
               </p>
               <div className="rechub-scores">
                 <span className="rechub-badge rechub-badge--hybrid">
-                  Hybride {(item.hybridScore * 100).toFixed(0)}%
+                  Hybride {((item.hybridScore || 0) * 100).toFixed(0)}%
                 </span>
                 <span className="rechub-badge rechub-badge--content">
-                  Contenu {(item.contentScore * 100).toFixed(0)}%
+                  Contenu {((item.contentScore || 0) * 100).toFixed(0)}%
                 </span>
                 <span className="rechub-badge rechub-badge--collab">
-                  Collab. {(item.collaborativeScore * 100).toFixed(0)}%
+                  Collab. {((item.collaborativeScore || 0) * 100).toFixed(0)}%
                 </span>
               </div>
               {item.reasons?.length > 0 && (
@@ -147,6 +185,12 @@ const RecommendationHubPage = () => {
             </article>
           ))}
         </div>
+      )}
+
+      {role === 'admin' && (
+        <p style={{ marginTop: 20, fontSize: 12 }}>
+          <Link to={hubRoute}>Hub admin complet →</Link>
+        </p>
       )}
     </div>
   );

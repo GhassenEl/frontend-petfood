@@ -7,18 +7,9 @@ import {
   loadRecommendationPipeline,
   enrichRecommendationsWithCatalog,
 } from '../services/recommendationPipelineService';
+import { getRecommendationHubRoute } from '../config/recommendationRoutes';
 import { ROLE_PIPELINE_META } from '../utils/recommendationDemoData';
 import './RecommendationPipelinePanel.css';
-
-const HUB_LINKS = {
-  client: '/client-recommendations',
-  vet: '/vet/recommendations',
-  veterinarian: '/vet/recommendations',
-  admin: '/admin/recommendations',
-  vendor: '/vendor/recommendations',
-  livreur: '/livreur/recommendations',
-  moderator: '/moderator/recommendations',
-};
 
 const RecommendationPipelinePanel = ({
   role: roleProp,
@@ -34,7 +25,7 @@ const RecommendationPipelinePanel = ({
   const role = roleProp || user?.role || 'client';
   const normalizedRole = role === 'veterinarian' ? 'vet' : role;
   const meta = ROLE_PIPELINE_META[normalizedRole] || ROLE_PIPELINE_META.client;
-  const fullHubLink = hubLink || HUB_LINKS[normalizedRole] || HUB_LINKS.client;
+  const fullHubLink = hubLink || getRecommendationHubRoute(normalizedRole);
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);

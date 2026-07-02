@@ -46,7 +46,7 @@ export const CLIENT_SIDEBAR_SECTIONS = [
   {
     title: '🤖 IA & Premium',
     items: [
-      { id: 'client-recommendations', label: 'Recommandations IA', icon: '🎯' },
+      { id: 'recommendations', label: 'Recommandations IA', icon: '🎯', route: '/client-recommendations' },
       { id: 'client-chat-history', label: 'Historique chatbot', icon: '📜', route: '/client/chat-history' },
       { id: 'client-relay-points', label: 'Points relais', icon: '📍' },
     ],
