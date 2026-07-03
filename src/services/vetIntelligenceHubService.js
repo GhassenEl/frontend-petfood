@@ -24,6 +24,33 @@ export const VET_CLINICAL_QUICK_PROMPTS = [
   'Résumer les contre-indications AINS chez le chien',
 ];
 
+const buildPatientsFromClients = (clients) => {
+  const patients = [];
+  (clients || []).forEach((client) => {
+    const ownerId = client.id || client._id;
+    (client.pets || []).forEach((pet) => {
+      const lastVisit = pet.lastVisit ? new Date(pet.lastVisit) : null;
+      const daysSinceLastVisit = lastVisit
+        ? Math.floor((Date.now() - lastVisit.getTime()) / 86400000)
+        : null;
+      patients.push({
+        id: pet.id || `p-${ownerId}-${pet.name}`,
+        petName: pet.name,
+        ownerName: client.name,
+        ownerId,
+        type: pet.type,
+        weightKg: pet.weight ?? pet.weightKg,
+        breed: pet.breed,
+        chronicCondition: pet.chronicCondition || pet.notes,
+        daysSinceLastVisit,
+        symptomsPending: client.notes?.includes('urgent') ? client.notes : undefined,
+        priority: daysSinceLastVisit != null && daysSinceLastVisit > 60 ? 'medium' : 'low',
+      });
+    });
+  });
+  return patients;
+};
+
 const buildDemoPatients = () => [
   {
     id: 'p-mimi',
@@ -99,8 +126,10 @@ export async function loadVetIntelligenceHubPack() {
     /* démo */
   }
 
-  const patients = buildDemoPatients();
-  const selectedPet = patients[0];
+  const patients = mode === 'live'
+    ? buildPatientsFromClients(clients)
+    : buildDemoPatients();
+  const selectedPet = patients[0] || buildDemoPatients()[0];
 
   const pack = enrichVetIntelligencePack({
     mode,

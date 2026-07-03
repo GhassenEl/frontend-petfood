@@ -1,6 +1,8 @@
 /** Données de démonstration lorsque l'API renvoie des listes vides (espace vétérinaire). */
 
-export { withDemoFallback } from './liveDataResolver';
+import { withDemoFallback, allowDemoFallback } from './liveDataResolver';
+
+export { withDemoFallback, allowDemoFallback } from './liveDataResolver';
 
 const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString();
 const hoursFromNow = (h) => new Date(Date.now() + h * 3600000).toISOString();
@@ -457,7 +459,8 @@ export const DEMO_VET_BI = {
 };
 
 export const mergeVetBiData = (apiData) => {
-  if (!apiData) return DEMO_VET_BI;
+  if (!apiData) return allowDemoFallback() ? DEMO_VET_BI : null;
+  if (!allowDemoFallback()) return apiData;
   return {
     ...DEMO_VET_BI,
     ...apiData,
@@ -478,8 +481,22 @@ export const mergeVetBiData = (apiData) => {
 export const withDemoDashboard = (data) => {
   if (data?.todayList?.length || data?.stats?.todayAppointments > 0) return data;
   if (data?.clinic?.clinicName && data?.todayAppointments > 0) return data;
-  if (data?.todayAppointments > 0) return { ...DEMO_VET_DASHBOARD, ...data };
-  return DEMO_VET_DASHBOARD;
+  if (data?.todayAppointments > 0) {
+    return allowDemoFallback() ? { ...DEMO_VET_DASHBOARD, ...data } : data;
+  }
+  return allowDemoFallback() ? DEMO_VET_DASHBOARD : (data ?? {
+    todayAppointments: 0,
+    pendingAppointments: 0,
+    pendingContactRequests: 0,
+    totalConsultations: 0,
+    totalPrescriptions: 0,
+    todayList: [],
+    upcomingAppointments: [],
+    unassignedPreview: [],
+    weekStats: {},
+    clinicStats: {},
+    clinic: {},
+  });
 };
 
 export const DEMO_PATIENT_CONTEXT = {
@@ -757,7 +774,16 @@ const filterByPatient = (items, ownerId, petName, ownerField = 'ownerId') => {
 };
 
 export const mergeVetHistory = (apiData) => {
-  if (!apiData) return { ...DEMO_VET_HISTORY };
+  if (!apiData) {
+    return allowDemoFallback() ? { ...DEMO_VET_HISTORY } : {
+      consultations: [],
+      appointments: [],
+      prescriptions: [],
+      dossierEntries: [],
+      records: [],
+    };
+  }
+  if (!allowDemoFallback()) return apiData;
   return {
     ...DEMO_VET_HISTORY,
     ...apiData,
@@ -778,7 +804,9 @@ export const filterVetHistory = (data, ownerId, petName) => ({
 });
 
 export const filterVetTimeline = (timeline, ownerId, petName) => {
-  const base = timeline?.length ? timeline : DEMO_VET_TIMELINE;
+  const base = timeline?.length
+    ? timeline
+    : (allowDemoFallback() ? DEMO_VET_TIMELINE : []);
   if (!ownerId && !petName) return base;
   return base;
 };
@@ -803,9 +831,10 @@ export const saveExtraVetClient = (client) => {
 };
 
 export const mergeVetClients = (apiClients) => {
-  const api = withDemoFallback(apiClients, []);
+  const list = Array.isArray(apiClients) ? apiClients : [];
+  if (!allowDemoFallback()) return list;
   const extra = loadExtraVetClients();
-  const merged = [...extra, ...withDemoFallback(api, DEMO_VET_CLIENTS)];
+  const merged = [...extra, ...withDemoFallback(list, DEMO_VET_CLIENTS)];
   const seen = new Set();
   return merged.filter((c) => {
     const id = c.id || c._id;

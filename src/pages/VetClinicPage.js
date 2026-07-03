@@ -3,6 +3,7 @@ import api from '../utils/api';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import RegionSelect from '../components/RegionSelect';
 import VetClinicalAlertsBar from '../components/VetClinicalAlertsBar';
+import VetEmergencyPanel from '../components/VetEmergencyPanel';
 
 const DAYS = [
   { key: 'mon', label: 'Lundi' },
@@ -93,6 +94,11 @@ const VetClinicPage = () => {
       </p>
 
       <VetClinicalAlertsBar />
+
+      <VetEmergencyPanel
+        emergencyPhone={profile?.emergencyPhone}
+        clinicName={profile?.clinicName}
+      />
 
       {stats && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 24 }}>

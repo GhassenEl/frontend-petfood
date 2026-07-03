@@ -13,7 +13,7 @@ export const fetchPharmacyCatalog = async () => {
     const { data } = await api.get('/vet/pharmacy/medications');
     return withDemoFallback(data, DEMO_VET_PHARMACY_MEDS);
   } catch {
-    return DEMO_VET_PHARMACY_MEDS;
+    return withDemoFallback([], DEMO_VET_PHARMACY_MEDS);
   }
 };
 

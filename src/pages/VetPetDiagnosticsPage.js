@@ -200,6 +200,14 @@ const VetPetDiagnosticsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clients, searchParams]);
 
+  useEffect(() => {
+    const scenarioId = searchParams.get('scenario');
+    if (!scenarioId || analyzing || result) return;
+    const scenario = DEMO_SCENARIOS.find((s) => s.id === scenarioId);
+    if (scenario) runScenario(scenario);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   const selectedClient = useMemo(
     () => clients.find((c) => (c.id || c._id) === ownerId),
     [clients, ownerId]

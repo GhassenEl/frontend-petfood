@@ -162,6 +162,7 @@ const VetDashboard = () => {
     { to: '/vet/pharmacy', icon: PackageX, label: 'Pharmacie', desc: 'Stock médicaments' },
     { to: '/vet/clinic', icon: FileText, label: 'Ma clinique', desc: 'Profil & alertes' },
     { to: '/vet/nutrition', icon: UtensilsCrossed, label: 'Conseils nutrition', desc: 'Plans alimentaires' },
+    { to: '/vet/intelligence', icon: Brain, label: 'Hub intelligence', desc: 'Diagnostic, suivi & ordonnances IA' },
     { to: '/vet/recommendations', icon: Target, label: 'Recommandations IA', desc: 'Contenu + similaires' },
     { to: '/vet/ml-agent', icon: Brain, label: 'Agents IA', desc: 'ML & diagnostic' },
   ];
