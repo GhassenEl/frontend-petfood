@@ -10,6 +10,7 @@
 const { prisma, connectDB } = require('../prismaClient');
 const { generateGoogleMeetLink } = require('../utils/googleMeet');
 const bcrypt = require('bcryptjs');
+const { assertSeedAllowed, resolveSeedPassword } = require('./seedGuard.cjs');
 
 const VET_EMAIL = 'vet@petfood.tn';
 
@@ -69,7 +70,7 @@ const birthFromAge = (ageYears) => {
 async function ensureClient(clientDef) {
   let user = await prisma.user.findFirst({ where: { email: clientDef.email } });
   if (!user) {
-    const hash = await bcrypt.hash('MonChat123!', 10);
+    const hash = await bcrypt.hash(clientSeedPassword, 12);
     user = await prisma.user.create({
       data: {
         email: clientDef.email,
@@ -146,6 +147,8 @@ async function seedVetClinicProfile(vet) {
 }
 
 async function main() {
+  assertSeedAllowed();
+  const clientSeedPassword = resolveSeedPassword('SEED_CLIENT_PASSWORD', 'MonChat123!');
   await connectDB();
   const vet = await prisma.user.findFirst({ where: { email: VET_EMAIL } });
   if (!vet) {

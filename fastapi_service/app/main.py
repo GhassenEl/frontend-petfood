@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.auth_jwt import require_jwt
 from app.routers import legacy, platform, recommendations, sales
 
 app = FastAPI(
@@ -8,6 +9,8 @@ app = FastAPI(
     description="XGBoost : CA, demande produit, churn, annulation, ranking senior, fraude",
     version="2.0.0",
 )
+
+JWT_PROTECTED = [Depends(require_jwt)]
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,10 +20,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(sales.router)
-app.include_router(platform.router)
-app.include_router(recommendations.router)
-app.include_router(legacy.router)
+app.include_router(sales.router, dependencies=JWT_PROTECTED)
+app.include_router(platform.router, dependencies=JWT_PROTECTED)
+app.include_router(recommendations.router, dependencies=JWT_PROTECTED)
+app.include_router(legacy.router, dependencies=JWT_PROTECTED)
 
 
 @app.get("/health")

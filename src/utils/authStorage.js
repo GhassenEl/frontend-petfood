@@ -1,5 +1,6 @@
 import { getCookie, setCookie, removeCookie } from './cookies';
 import { isCategoryAllowed } from './cookieConsent';
+import { useHttpOnlyAuthCookie } from '../config/authPolicy';
 
 const TOKEN_SESSION_KEY = 'token';
 const TOKEN_LS_KEY = 'token';
@@ -23,12 +24,14 @@ const getLocalStorage = () => {
 };
 
 export const getStoredToken = () => {
+  if (useHttpOnlyAuthCookie()) return null;
   const session = getSessionStorage();
   const local = getLocalStorage();
   return session?.getItem(TOKEN_SESSION_KEY) || local?.getItem(TOKEN_LS_KEY) || null;
 };
 
 export const persistAuthToken = (token, rememberMe = false) => {
+  if (useHttpOnlyAuthCookie()) return;
   const session = getSessionStorage();
   const local = getLocalStorage();
 

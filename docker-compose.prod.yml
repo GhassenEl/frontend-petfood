@@ -19,6 +19,9 @@ services:
       DEMO_MODE: 'false'
       RUN_SEED: 'false'
       NODE_ENV: production
+      AUTH_HTTPONLY_COOKIES: 'true'
+      AUTH_COOKIE_SECURE: 'false'
+      ALLOW_DEMO_LOGIN: 'false'
     logging:
       driver: json-file
       options:

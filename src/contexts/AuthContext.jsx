@@ -15,6 +15,7 @@ import {
   userFromToken,
   validateTokenClaims,
 } from '../utils/jwtSecurity';
+import { useHttpOnlyAuthCookie } from '../config/authPolicy';
 
 const SESSION_CHECK_MS = 30_000;
 const SESSION_WARNING_MS = 5 * 60 * 1000;
@@ -77,7 +78,22 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        const cookieMode = useHttpOnlyAuthCookie();
         const storedToken = getStoredToken();
+
+        if (cookieMode && !storedToken) {
+          try {
+            const meRes = await api.get('/auth/me', { _skipAuthRefresh: true });
+            if (meRes.data?.user) {
+              setUser(meRes.data.user);
+              setToken('cookie');
+            }
+          } catch {
+            /* pas de session cookie */
+          }
+          return;
+        }
+
         if (storedToken) {
           const result = applySession(storedToken);
           if (result.ok) {
@@ -131,7 +147,22 @@ export const AuthProvider = ({ children }) => {
   }, [applySession, user]);
 
   useEffect(() => {
-    if (!token) return undefined;
+    if (!token || token === 'cookie') {
+      if (token === 'cookie' && useHttpOnlyAuthCookie()) {
+        const intervalId = window.setInterval(async () => {
+          try {
+            await api.get('/auth/me', { _skipAuthRefresh: true });
+          } catch {
+            logout();
+            if (!window.location.pathname.includes('/login')) {
+              window.location.assign('/login');
+            }
+          }
+        }, SESSION_CHECK_MS);
+        return () => window.clearInterval(intervalId);
+      }
+      return undefined;
+    }
 
     let warned = false;
 
@@ -172,6 +203,12 @@ export const AuthProvider = ({ children }) => {
 
       persistAuthToken(accessToken, rememberMe);
       const sessionUser = userFromToken(validation.decoded, apiUser);
+      if (useHttpOnlyAuthCookie()) {
+        setToken('cookie');
+        setUser(sessionUser);
+        delete api.defaults.headers.common.Authorization;
+        return { success: true, user: sessionUser };
+      }
       setToken(accessToken);
       setUser(sessionUser);
       api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;

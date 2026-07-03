@@ -20,6 +20,7 @@ const { defaultBlogArticles } = require('../utils/defaultBlogArticles');
 const { seedRefunds } = require('../utils/seedRefunds');
 const { seedTeleconsultAppointments } = require('../utils/seedTeleconsult');
 const { seedModeratorData } = require('../utils/seedModerator');
+const { assertSeedAllowed } = require('./seedGuard.cjs');
 
 const mapProductRow = (product) => ({
   id: product._id,
@@ -57,6 +58,7 @@ async function seedProductsIfEmpty() {
 }
 
 async function main() {
+  assertSeedAllowed();
   await connectDB();
   console.log('🌱 Seed plateforme live (idempotent)');
 

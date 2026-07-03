@@ -1,7 +1,8 @@
 # PetfoodTN — Comptes d'accès (démo / développement)
 
 > **Attention** : ne pas utiliser ces mots de passe en production.  
-> Comptes créés par le seed backend (`RUN_SEED=true`).
+> En **production** : `ALLOW_DEMO_LOGIN=false`, seeds protégés par `SEED_SECRET`, cookies HttpOnly actifs.  
+> Changez tous les mots de passe via **Compte → Sécurité** après le premier déploiement.
 
 | Paramètre | Valeur |
 |-----------|--------|
