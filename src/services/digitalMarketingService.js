@@ -3,6 +3,7 @@ import { getProducts } from './productService';
 import { DEMO_ADMIN_ORDERS } from '../utils/adminDemoData';
 import { withDemoFallback } from '../utils/clientDemoData';
 import { buildDigitalMarketingPack } from '../utils/digitalMarketingEngine';
+import { fetchMarketingLiveContext, mergeMarketingLiveData } from './marketingLiveEnrichment';
 
 const NEWSLETTER_KEY = 'petfoodtn_newsletter_subs';
 
@@ -23,7 +24,10 @@ const writeLocalNewsletter = (items) => {
 export async function fetchDigitalMarketingPack() {
   try {
     const remote = await api.get('/admin/marketing/pack').then((r) => r.data);
-    if (remote?.kpis) return { ...remote, source: 'api' };
+    if (remote?.kpis) {
+      const liveContext = await fetchMarketingLiveContext();
+      return mergeMarketingLiveData({ ...remote, source: 'api' }, liveContext);
+    }
   } catch {
     /* fallback local */
   }
@@ -39,12 +43,15 @@ export async function fetchDigitalMarketingPack() {
   const products = Array.isArray(productsRes) ? productsRes : [];
   const newsletterSubs = readLocalNewsletter();
 
-  return buildDigitalMarketingPack({
+  const base = buildDigitalMarketingPack({
     orders,
     users,
     products,
     newsletterSubs,
   });
+
+  const liveContext = await fetchMarketingLiveContext();
+  return mergeMarketingLiveData(base, liveContext);
 }
 
 /** Inscription newsletter publique */

@@ -370,3 +370,72 @@
 .mkt-newsletter-msg--err {
   color: #fecaca;
 }
+
+.mkt-live-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.mkt-live-panel__head h3 {
+  margin: 0;
+}
+
+.mkt-live-panel__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.mkt-live-panel--compact {
+  margin-bottom: 20px;
+}
+
+.mkt-live-insights {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mkt-live-insights li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 13px;
+}
+
+.mkt-live-insights li svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #4f46e5;
+}
+
+.mkt-live-insights li div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mkt-live-insights li span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.mkt-live-insights li a {
+  font-weight: 700;
+  color: #4f46e5;
+  text-decoration: none;
+  font-size: 12px;
+  white-space: nowrap;
+}

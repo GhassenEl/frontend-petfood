@@ -157,7 +157,25 @@ Concevoir, développer et déployer une plateforme numérique complète pour le 
 | EF-64 | Hub DevOps (CI/CD, déploiements, runbooks, Grafana) | Should |
 | EF-65 | Rapports automatiques multi-domaines (ventes, IoT, vet) | Should |
 
-### 4.8 Module IA & ML
+### 4.8 Module marketing digital
+
+| ID | Exigence | Priorité |
+|----|----------|----------|
+| EF-75 | Hub marketing digital admin (`/admin/digital-marketing`) | Must |
+| EF-76 | KPIs acquisition : impressions, CTR, conversions, ROAS, newsletter | Must |
+| EF-77 | Campagnes IA par segment client (email, push, social, SMS) | Should |
+| EF-78 | Entonnoir de conversion et trafic par canal (7 jours) | Should |
+| EF-79 | Calendrier social + score SEO + mots-clés marché tunisien | Should |
+| EF-80 | Newsletter publique (landing `/`) + liste admin abonnés | Must |
+| EF-81 | **Lien audience live** — sessions connectées pour ciblage campagnes | Should |
+| EF-82 | **Lien BI** — segmentation, Power BI, snapshot plateforme (vet, IoT) | Should |
+| EF-83 | Intégrations documentées : Meta Ads, Google Analytics, SMTP | Could |
+
+**Routes :** `GET /admin/marketing/pack`, `POST /marketing/newsletter`, `GET /admin/marketing/newsletter`  
+**Services frontend :** `digitalMarketingService.js`, `marketingLiveEnrichment.js` (audience + analytics + BI)  
+**Pages liées :** `/admin/live-audience`, `/admin/business-intelligence`, `/admin/promotions`, `/commercial`
+
+### 4.9 Module IA & ML
 
 | ID | Exigence | Priorité |
 |----|----------|----------|

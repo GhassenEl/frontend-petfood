@@ -455,3 +455,36 @@ export const MARKETING_SECURITY_PILLARS = [
     text: 'HTTPS obligatoire en prod, mots de passe forts, pas de comptes démo exposés. Audience live soumise au consentement cookies.',
   },
 ];
+
+/** Marketing digital — présentation publique PFE / landing */
+export const MARKETING_DIGITAL_FEATURES = {
+  badge: 'Marketing digital',
+  title: 'Acquisition multicanal & données live',
+  lead:
+    'Hub admin central : campagnes IA, newsletter, SEO, réseaux sociaux et entonnoir de conversion — '
+    + 'alimenté par l\'audience temps réel, le BI et les commandes live.',
+  pillars: [
+    {
+      icon: '📣',
+      title: 'Campagnes IA',
+      text: 'Recommandations par segment client (VIP, à risque churn, nouveaux) — email, push, SMS, social.',
+    },
+    {
+      icon: '📡',
+      title: 'Audience live',
+      text: 'Visiteurs et clients connectés en temps réel — ciblage campagnes depuis /admin/live-audience.',
+    },
+    {
+      icon: '📊',
+      title: 'Lien BI',
+      text: 'Croisement segmentation, Power BI et KPIs commandes pour mesurer le ROAS et le CTR.',
+    },
+    {
+      icon: '📧',
+      title: 'Newsletter & SEO',
+      text: 'Inscription sur la landing, mots-clés tunisiens (croquettes, véto en ligne), calendrier social.',
+    },
+  ],
+  adminRoute: '/admin/digital-marketing',
+  publicTouchpoints: ['Landing /', 'Codes promo inscription', 'Formulaire newsletter', 'Hub commercial /commercial'],
+};

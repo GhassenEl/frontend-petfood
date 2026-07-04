@@ -1,17 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Megaphone, BarChart3, Mail, Share2, Search, RefreshCw, ExternalLink, Plug,
+  Megaphone, BarChart3, Mail, Share2, Search, RefreshCw, ExternalLink, Plug, Radio,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import { fetchDigitalMarketingPack } from '../services/digitalMarketingService';
+import MarketingAudienceBiPanel from '../components/MarketingAudienceBiPanel';
 import './AdminDigitalMarketing.css';
 
 const TABS = [
   { id: 'overview', label: 'Vue d\'ensemble', icon: BarChart3 },
+  { id: 'audience', label: 'Audience & BI', icon: Radio },
   { id: 'campaigns', label: 'Campagnes IA', icon: Megaphone },
   { id: 'channels', label: 'Canaux', icon: Mail },
   { id: 'social', label: 'Social & SEO', icon: Share2 },
@@ -96,7 +98,10 @@ const AdminDigitalMarketingPage = () => {
                 <Kpi label="Newsletter" value={fmt(k.newsletterSubs)} />
                 <Kpi label="Ouverture email" value={`${k.emailOpenRate} %`} />
                 <Kpi label="ROAS pub" value={`${k.adRoas}x`} />
+                {k.onlineNow != null && <Kpi label="En ligne (live)" value={fmt(k.onlineNow)} />}
               </div>
+
+              <MarketingAudienceBiPanel pack={pack} compact />
 
               <div className="mkt-grid-2">
                 <div className="mkt-panel">
@@ -151,6 +156,42 @@ const AdminDigitalMarketingPage = () => {
                       {i.name}
                     </span>
                   ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {tab === 'audience' && (
+            <>
+              <MarketingAudienceBiPanel pack={pack} />
+              <div className="mkt-grid-2" style={{ marginTop: 16 }}>
+                <div className="mkt-panel">
+                  <h3>Sessions actives</h3>
+                  {(pack.audienceLive?.sessions || []).length === 0 ? (
+                    <p style={{ color: '#94a3b8' }}>Aucune session live — polling toutes les 5 s sur /admin/presence/live.</p>
+                  ) : (
+                    <ul className="mkt-newsletter-list">
+                      {pack.audienceLive.sessions.map((s) => (
+                        <li key={s.sessionId || `${s.role}-${s.path}`}>
+                          <strong>{s.role || '—'}</strong>
+                          {s.region ? ` · ${s.region}` : ''}
+                          <span style={{ color: '#94a3b8', marginLeft: 8 }}>{s.path || '/'}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div className="mkt-panel">
+                  <h3>Liens décisionnels</h3>
+                  <p style={{ fontSize: 13, color: '#64748b', marginTop: 0 }}>
+                    Croisez audience, segmentation BI et campagnes pour cibler les bons segments en temps réel.
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <Link to="/admin/live-audience" className="mkt-btn-ghost" style={{ textDecoration: 'none', justifyContent: 'center' }}>Audience temps réel →</Link>
+                    <Link to="/admin/business-intelligence" className="mkt-btn-ghost" style={{ textDecoration: 'none', justifyContent: 'center' }}>Hub BI (segments) →</Link>
+                    <Link to="/admin/powerbi" className="mkt-btn-ghost" style={{ textDecoration: 'none', justifyContent: 'center' }}>Power BI & exports →</Link>
+                    <Link to="/admin/promotions" className="mkt-btn-ghost" style={{ textDecoration: 'none', justifyContent: 'center' }}>Promotions produits →</Link>
+                  </div>
                 </div>
               </div>
             </>

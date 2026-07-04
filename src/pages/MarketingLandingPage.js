@@ -16,6 +16,7 @@ import {
   MARKETING_TECH_STACK,
   MARKETING_BI_DEVOPS,
   MARKETING_SECURITY_PILLARS,
+  MARKETING_DIGITAL_FEATURES,
 } from '../config/marketingContent';
 import { fetchMarketingLiveData } from '../services/marketingService';
 import { SERVICE_RATE_CARDS } from '../utils/clientDemoData';
@@ -115,6 +116,7 @@ const MarketingLandingPage = () => {
           <PetfoodLogo size="xs" showTagline />
         </Link>
         <div className="mkt-nav__links">
+          <a href="#marketing-digital" className="mkt-nav__link mkt-nav__link--hide-mobile">Marketing</a>
           <a href="#projet" className="mkt-nav__link mkt-nav__link--hide-mobile">Projet PFE</a>
           <a href="#services" className="mkt-nav__link mkt-nav__link--hide-mobile">Services</a>
           <a href="#acteurs" className="mkt-nav__link mkt-nav__link--hide-mobile">Acteurs</a>
@@ -220,6 +222,28 @@ const MarketingLandingPage = () => {
           {SPECIES.map((s) => (
             <span key={s}>{s}</span>
           ))}
+        </div>
+      </section>
+
+      <section id="marketing-digital" className="mkt-section mkt-marketing-digital">
+        <span className="mkt-project__badge">{MARKETING_DIGITAL_FEATURES.badge}</span>
+        <h2 className="mkt-section__title">{MARKETING_DIGITAL_FEATURES.title}</h2>
+        <p className="mkt-section__sub mkt-project__lead">{MARKETING_DIGITAL_FEATURES.lead}</p>
+        <div className="mkt-pillars mkt-pillars--4">
+          {MARKETING_DIGITAL_FEATURES.pillars.map((p) => (
+            <article key={p.title} className="mkt-pillar">
+              <div className="mkt-pillar__icon">{p.icon}</div>
+              <h3>{p.title}</h3>
+              <p>{p.text}</p>
+            </article>
+          ))}
+        </div>
+        <p className="mkt-section__sub" style={{ marginTop: 16, fontSize: 13 }}>
+          Points de contact : {MARKETING_DIGITAL_FEATURES.publicTouchpoints.join(' · ')}
+        </p>
+        <div className="mkt-project__cta">
+          <Link to="/login" className="mkt-btn mkt-btn--secondary">Hub admin marketing →</Link>
+          <Link to="/commercial" className="mkt-btn mkt-btn--ghost">Hub commercial →</Link>
         </div>
       </section>
 
@@ -573,6 +597,7 @@ const MarketingLandingPage = () => {
           </div>
           <div>
             <strong>Produit</strong>
+            <a href="#marketing-digital">Marketing digital</a>
             <a href="#projet">Projet PFE</a>
             <a href="#services">Services</a>
             <a href="#iot">IoT</a>
