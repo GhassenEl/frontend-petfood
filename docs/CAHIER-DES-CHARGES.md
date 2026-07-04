@@ -259,6 +259,49 @@ Concevoir, développer et déployer une plateforme numérique complète pour le 
 - API versionnée `/api/v1/` (convention cible)
 - Réponses JSON homogènes
 
+### 6.3 Application mobile Flutter ↔ API backend
+
+L'application **Flutter** (`mobile_app/`) consomme la **même API REST** que le frontend React. Il n'existe pas de backend Dart séparé : le mobile est un **client HTTP** du monolithe Node.js.
+
+| Élément | Détail |
+|---------|--------|
+| **Dossier** | `mobile_app/` — Flutter 3.11+, Dart |
+| **Client HTTP** | `lib/services/api_client.dart` — `GET` / `POST` / `DELETE` + JSON |
+| **Auth** | `POST /api/auth/login` → JWT stocké (`SharedPreferences`) + header `Authorization: Bearer` |
+| **Profil** | `GET /api/users/profile` au démarrage si token valide |
+| **URL configurable** | Écran login + `ApiConfig.setBaseUrl()` — émulateur Android `10.0.2.2:5002` |
+| **Mode démo** | Données locales si backend indisponible (IoT, BI, sécurité) |
+
+**Endpoints backend consommés par le mobile :**
+
+| Domaine | Routes API |
+|---------|------------|
+| Auth & profil | `/auth/login`, `/users/profile` |
+| Animaux | `/pets` (CRUD) |
+| Produits | `/products`, `/products/recommendations/pets` |
+| Commandes / livraison | `/orders` |
+| Distributeur IoT | `/feeder`, `/feeder/:id/dispense`, nutrition-plan, schedules |
+| Qualité alimentaire | `/client/iot/food-quality/*` (lectures ESP32-CAM) |
+| Eau / hydratation | `/ecosystem/water-monitor/*` |
+| Dashboard client BI | `/client/dashboard` |
+| Sécurité | `/security/status`, `/security/threats`, `/security/sessions` |
+
+**Lancement :**
+
+```bash
+# Terminal 1 — backend (port 5002)
+cd backend && npm run dev
+
+# Terminal 2 — Flutter
+cd mobile_app && flutter pub get && flutter run
+```
+
+**Production :** pointer l'URL vers `https://votredomaine.tn/api` (sans proxy Vite). CORS backend doit autoriser l'origine mobile si requêtes cross-origin (appareil → serveur).
+
+**Écart sécurité connu :** le web admin utilise des cookies **HttpOnly** en prod ; le mobile conserve le JWT en `SharedPreferences` (standard mobile). Prévoir rotation token + stockage sécurisé (Keychain/Keystore) en évolution.
+
+**Documentation :** `mobile_app/README.md`, `ARCHITECTURE.md` § mobile.
+
 ---
 
 ## 7. Données et intégrations
