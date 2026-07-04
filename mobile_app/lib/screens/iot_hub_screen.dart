@@ -6,10 +6,12 @@ import '../models/iot_hub_state.dart';
 import '../models/water_tracking.dart';
 import '../services/auth_service.dart';
 import '../services/feeder_auto_engine.dart';
+import '../services/iot_pack_service.dart';
 import '../services/pet_service.dart';
 import '../services/repositories.dart';
 import '../services/water_repository.dart';
 import '../utils/species_catalog.dart';
+import '../widgets/iot_ecosystem_panel.dart';
 import '../widgets/iot_pet_selector_bar.dart';
 import '../widgets/pet_feeding_schedules_panel.dart';
 import 'feeder_screen.dart';
@@ -30,6 +32,7 @@ class _IotHubScreenState extends State<IotHubScreen> {
   IotHubState _hub = IotHubState();
   bool _init = true;
   late final WaterRepository _waterRepo;
+  late final IotPackService _iotPackService;
   Timer? _pollTimer;
 
   static const _pollInterval = Duration(seconds: 20);
@@ -38,6 +41,7 @@ class _IotHubScreenState extends State<IotHubScreen> {
   void initState() {
     super.initState();
     _waterRepo = WaterRepository(widget.auth.api);
+    _iotPackService = IotPackService(widget.auth.api);
     _bootstrap();
     _pollTimer = Timer.periodic(_pollInterval, (_) {
       if (mounted) _bootstrap(silent: true);
@@ -83,6 +87,8 @@ class _IotHubScreenState extends State<IotHubScreen> {
     }
 
     final todayGrams = await _loadTodayGrams(pets, isLive: isLive);
+    final iotPack = await _iotPackService.fetchPack();
+    final hubLive = isLive || _iotPackService.lastFetchWasLive;
 
     final sel = _hub.selectedPetId;
     final selected = pets.any((p) => p.petId == sel)
@@ -94,10 +100,11 @@ class _IotHubScreenState extends State<IotHubScreen> {
         _hub = IotHubState(
           selectedPetId: selected,
           pets: pets,
-          isLive: isLive,
+          isLive: hubLive,
           weightByPetId: weights,
           petTypeByPetId: types,
           todayGramsByPetId: todayGrams,
+          iotPack: iotPack,
         );
         _init = false;
       });
@@ -165,6 +172,14 @@ class _IotHubScreenState extends State<IotHubScreen> {
                     isLive: _hub.isLive,
                     onRefresh: () => _bootstrap(),
                   ),
+                  if (_hub.iotPack != null)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                      child: IotEcosystemPanel(
+                        pack: _hub.iotPack!,
+                        onRefresh: () => _bootstrap(),
+                      ),
+                    ),
                   if (_hub.pets.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
@@ -185,8 +200,8 @@ class _IotHubScreenState extends State<IotHubScreen> {
                                 Expanded(
                                   child: Text(
                                     _hub.isLive
-                                        ? 'ESP32 live · portions auto · HX711 + planning multi-animaux'
-                                        : 'Mode démo — horaires et portions simulés',
+                                        ? 'Backend IoT live · /client/iot/pack · ESP32 · HX711 · MQTT'
+                                        : 'Mode démo — pack IoT simulé (backend hors ligne)',
                                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF065F46)),
                                   ),
                                 ),

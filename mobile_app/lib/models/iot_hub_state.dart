@@ -1,6 +1,7 @@
 import '../models/water_tracking.dart';
+import '../models/iot_pack.dart';
 
-/// État partagé du hub IoT — animal sélectionné, liste, source données, poids, grammes.
+/// État partagé du hub IoT — animal sélectionné, liste, source données, poids, grammes, pack IoT.
 class IotHubState {
   IotHubState({
     this.selectedPetId,
@@ -9,6 +10,7 @@ class IotHubState {
     this.weightByPetId = const {},
     this.petTypeByPetId = const {},
     this.todayGramsByPetId = const {},
+    this.iotPack,
   });
 
   final String? selectedPetId;
@@ -18,6 +20,8 @@ class IotHubState {
   final Map<String, double> weightByPetId;
   final Map<String, String> petTypeByPetId;
   final Map<String, int> todayGramsByPetId;
+  /// Pack unifié `/client/iot/pack` — distributeur, ESP32-CAM, fontaine, anomalies.
+  final IotPack? iotPack;
 
   String? get selectedPetType =>
       selectedPetId != null ? petTypeByPetId[selectedPetId] : null;
@@ -31,6 +35,7 @@ class IotHubState {
     Map<String, double>? weightByPetId,
     Map<String, String>? petTypeByPetId,
     Map<String, int>? todayGramsByPetId,
+    IotPack? iotPack,
   }) =>
       IotHubState(
         selectedPetId: selectedPetId ?? this.selectedPetId,
@@ -39,6 +44,7 @@ class IotHubState {
         weightByPetId: weightByPetId ?? this.weightByPetId,
         petTypeByPetId: petTypeByPetId ?? this.petTypeByPetId,
         todayGramsByPetId: todayGramsByPetId ?? this.todayGramsByPetId,
+        iotPack: iotPack ?? this.iotPack,
       );
 }
 

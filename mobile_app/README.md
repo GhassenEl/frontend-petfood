@@ -9,6 +9,7 @@ Application mobile pour contrôler le **distributeur IoT**, surveiller la **qual
 - **Qualité alimentaire IoT** (ESP32-CAM) : score temps réel, **IA** (classification, moisissures, stock, péremption), alertes, notifications, journal
 - **Distributeur IoT** : statut capteurs, distribution manuelle, plan nutritionnel, planning, journal
 - **Hub IoT Nutrition** (onglet IoT) :
+  - **Pack unifié** : `GET /client/iot/pack` — distributeurs, ESP32-CAM, fontaines, score santé, anomalies (aligné web)
   - **Distribution** : distributeur ESP32, score nutrition, portions auto intelligentes, planning repas (manqués / à venir)
   - **Eau** : fontaine connectée, consommation ml/jour, score hydratation, graphiques 7 jours, remplissage, alertes
   - **Synergie** : équilibre alimentation ↔ hydratation, ratio ml/g, conseils personnalisés
@@ -75,10 +76,11 @@ lib/
   config/api_config.dart
   models/models.dart, food_quality.dart
   services/api_client.dart, auth_service.dart, repositories.dart
-  services/food_quality_engine.dart, food_quality_repository.dart, food_quality_ai_engine.dart
+  services/iot_pack_service.dart, food_quality_repository.dart, food_quality_ai_engine.dart
   widgets/food_quality_ai_panel.dart
   models/mobile_bi.dart, mobile_security.dart
   services/mobile_bi_service.dart, mobile_security_service.dart
+  models/iot_pack.dart, widgets/iot_ecosystem_panel.dart
   screens/login_screen.dart, home_shell.dart, bi_dashboard_screen.dart, security_screen.dart
   screens/food_quality_screen.dart, feeder_screen.dart, iot_hub_screen.dart
   screens/water_screen.dart, synergy_screen.dart, products_screen.dart, profile_screen.dart

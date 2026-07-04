@@ -281,7 +281,9 @@ L'application **Flutter** (`mobile_app/`) consomme la **même API REST** que le 
 | Produits | `/products`, `/products/recommendations/pets` |
 | Commandes / livraison | `/orders` |
 | Distributeur IoT | `/feeder`, `/feeder/:id/dispense`, nutrition-plan, schedules |
-| Qualité alimentaire | `/client/iot/food-quality/*` (lectures ESP32-CAM) |
+| **Pack IoT unifié** | `/client/iot/pack` — devices, scores, alertes (aligné web) |
+| **Commandes IoT** | `/client/iot/commands`, `/client/iot/automations/:id` (PATCH) |
+| Qualité alimentaire | `/client/iot/food-quality`, `/client/iot/food-quality/reading` |
 | Eau / hydratation | `/ecosystem/water-monitor/*` |
 | Dashboard client BI | `/client/dashboard` |
 | Sécurité | `/security/status`, `/security/threats`, `/security/sessions` |
@@ -300,7 +302,18 @@ cd mobile_app && flutter pub get && flutter run
 
 **Écart sécurité connu :** le web admin utilise des cookies **HttpOnly** en prod ; le mobile conserve le JWT en `SharedPreferences` (standard mobile). Prévoir rotation token + stockage sécurisé (Keychain/Keystore) en évolution.
 
-**Documentation :** `mobile_app/README.md`, `ARCHITECTURE.md` § mobile.
+**Liaison IoT (alignée web React) :**
+
+| Couche | Fichier Flutter | API |
+|--------|-----------------|-----|
+| Pack écosystème | `lib/services/iot_pack_service.dart` | `GET /client/iot/pack` |
+| Hub IoT UI | `lib/screens/iot_hub_screen.dart` + `widgets/iot_ecosystem_panel.dart` | Agrège pack + feeder + eau |
+| ESP32-CAM | `lib/services/food_quality_repository.dart` | `GET/POST /client/iot/food-quality*` |
+| BI mobile | `lib/services/mobile_bi_service.dart` | Dashboard + métriques pack IoT |
+
+**MQTT / ESP32 :** le firmware envoie les lectures au backend ; Flutter les consomme via l'API (pas de MQTT direct dans l'app — même architecture que le web).
+
+**Documentation IoT :** `docs/petfoodiot-use-case.md`, `mobile_app/README.md`.
 
 ---
 
