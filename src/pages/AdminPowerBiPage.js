@@ -8,6 +8,7 @@ import useAnalyticsHub from '../hooks/useAnalyticsHub';
 import PowerBiDashboardPanel from '../components/PowerBiDashboardPanel';
 import AdminPowerBiInsightsPanel from '../components/AdminPowerBiInsightsPanel';
 import BiPlatformSnapshotPanel from '../components/BiPlatformSnapshotPanel';
+import DevOpsBiAutomationPanel from '../components/DevOpsBiAutomationPanel';
 import { fetchDatasetsCatalog } from '../services/analyticsHubService';
 import { loadBiPlatformSnapshot } from '../services/biPlatformSnapshotService';
 import api from '../utils/api';
@@ -130,6 +131,10 @@ const AdminPowerBiPage = () => {
               loading={platformLoading}
               compact
             />
+          </section>
+
+          <section style={{ ...card, marginBottom: 20 }}>
+            <DevOpsBiAutomationPanel compact refreshMs={60000} />
           </section>
 
           <PowerBiDashboardPanel

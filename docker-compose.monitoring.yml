@@ -82,6 +82,7 @@ services:
     environment:
       BACKEND_URL: http://backend:5002
       SCRAPE_INTERVAL_MS: ${METRICS_SCRAPE_INTERVAL_MS:-30000}
+      METRICS_ADMIN_TOKEN: ${METRICS_ADMIN_TOKEN:-}
     ports:
       - '${METRICS_EXPORTER_PORT:-9105}:9105'
     depends_on:

@@ -19,6 +19,7 @@ import DevOpsEnvSecretsPanel from '../components/DevOpsEnvSecretsPanel';
 import DevOpsRunbookPanel from '../components/DevOpsRunbookPanel';
 import DevOpsMetricsCharts from '../components/DevOpsMetricsCharts';
 import AdminPrometheusGrafanaPanel from '../components/AdminPrometheusGrafanaPanel';
+import DevOpsBiAutomationPanel from '../components/DevOpsBiAutomationPanel';
 import DemoModePill from '../components/DemoModePill';
 import MobileBottomNav, { AUTH_PUBLIC_MOBILE_NAV } from '../components/MobileBottomNav';
 import './DevOpsPlatformPage.css';
@@ -270,37 +271,43 @@ npm run docker:stack:full`}</pre>
       )}
 
       {tab === 'monitoring' && (
-        <section className="devops-section">
-          <h2>Outils d&apos;observabilité</h2>
-          <div className="devops-grid">
-            {DEVOPS_MONITORING.map((item) => {
-              const live = services.find((s) => s.id === item.id);
-              const isUp = live?.ok;
-              return (
-                <article key={item.id} className="devops-card">
-                  <h3>{item.label}</h3>
-                  <p>{item.desc}</p>
-                  {item.url ? (
-                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="devops-ext-link">
-                      {item.url}
-                    </a>
-                  ) : (
-                    <Link to={item.route} className="devops-card__cta">Ouvrir dans l&apos;app →</Link>
-                  )}
-                  <span className={`devops-badge ${statusClass(live ? (isUp ? 'ok' : 'partial') : item.status === 'app' ? 'ok' : 'local')}`}>
-                    {live ? (isUp ? 'UP · live' : 'DOWN') : (item.status === 'app' ? 'Intégré' : 'Local Docker')}
-                  </span>
-                </article>
-              );
-            })}
-          </div>
-          <div className="devops-card" style={{ marginTop: 16 }}>
-            <h3>Dashboard Grafana</h3>
-            <p>Fichier : <code>infra/monitoring/grafana/dashboards/petfoodtn-overview.json</code></p>
-            <p>Métriques : commandes, ESP32-CAM, capteurs IoT, latence API, qualité modèle ML.</p>
-            <p>Lancer : <code>npm run docker:monitoring:up</code></p>
-          </div>
-        </section>
+        <>
+          <section className="devops-section">
+            <h2>Outils d&apos;observabilité</h2>
+            <div className="devops-grid">
+              {DEVOPS_MONITORING.map((item) => {
+                const live = services.find((s) => s.id === item.id);
+                const isUp = live?.ok;
+                return (
+                  <article key={item.id} className="devops-card">
+                    <h3>{item.label}</h3>
+                    <p>{item.desc}</p>
+                    {item.url ? (
+                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="devops-ext-link">
+                        {item.url}
+                      </a>
+                    ) : (
+                      <Link to={item.route} className="devops-card__cta">Ouvrir dans l&apos;app →</Link>
+                    )}
+                    <span className={`devops-badge ${statusClass(live ? (isUp ? 'ok' : 'partial') : item.status === 'app' ? 'ok' : 'local')}`}>
+                      {live ? (isUp ? 'UP · live' : 'DOWN') : (item.status === 'app' ? 'Intégré' : 'Local Docker')}
+                    </span>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+          {adminMode && (
+            <section className="devops-section">
+              <DevOpsBiAutomationPanel />
+            </section>
+          )}
+          {adminMode && (
+            <section className="devops-section">
+              <AdminPrometheusGrafanaPanel refreshMs={5000} />
+            </section>
+          )}
+        </>
       )}
 
       {tab === 'infra' && (

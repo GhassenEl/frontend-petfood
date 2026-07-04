@@ -1,0 +1,101 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "uid": "petfoodtn-bi-platform",
+  "links": [
+    {
+      "title": "Hub BI admin",
+      "url": "/admin/business-intelligence",
+      "type": "link",
+      "icon": "external link"
+    }
+  ],
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Utilisateurs en ligne",
+      "type": "stat",
+      "targets": [{ "expr": "petfood_users_online" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "title": "Cas vet actifs",
+      "type": "stat",
+      "targets": [{ "expr": "petfood_vet_active_cases" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "title": "Alertes IoT",
+      "type": "stat",
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 3 }, { "color": "red", "value": 8 }] } }, "overrides": [] },
+      "targets": [{ "expr": "petfood_iot_alerts_total" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "title": "Commandes",
+      "type": "stat",
+      "targets": [{ "expr": "petfood_orders_total" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "id": 5,
+      "title": "Audience & commandes",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "petfood_users_online", "legendFormat": "En ligne" },
+        { "expr": "petfood_orders_total", "legendFormat": "Commandes" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "id": 6,
+      "title": "IoT & ESP32-CAM",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "petfood_iot_sensors_active", "legendFormat": "Capteurs actifs" },
+        { "expr": "petfood_esp32_cam_connected", "legendFormat": "ESP32-CAM" },
+        { "expr": "petfood_iot_alerts_total", "legendFormat": "Alertes IoT" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "id": 7,
+      "title": "Clinique vétérinaire",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "petfood_vet_active_cases", "legendFormat": "Cas actifs" },
+        { "expr": "petfood_vet_upcoming_appointments", "legendFormat": "RDV à venir" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "id": 8,
+      "title": "Latence API & qualité ML",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "petfood_api_latency_ms", "legendFormat": "Latence ms" },
+        { "expr": "petfood_ml_model_quality_score * 100", "legendFormat": "Qualité ML %" }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["petfoodtn", "bi", "vet", "iot", "devops"],
+  "time": { "from": "now-6h", "to": "now" },
+  "title": "PetfoodTN — BI plateforme (vet · IoT · audience)",
+  "version": 1
+}

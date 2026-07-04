@@ -6,6 +6,7 @@ import MarketTrendsPanel from '../components/MarketTrendsPanel';
 import PredictiveStockPanel from '../components/PredictiveStockPanel';
 import AdminGeographicSalesPanel from '../components/AdminGeographicSalesPanel';
 import BiPlatformSnapshotPanel from '../components/BiPlatformSnapshotPanel';
+import DevOpsBiAutomationPanel from '../components/DevOpsBiAutomationPanel';
 import { loadBusinessIntelligencePack } from '../services/businessIntelligenceService';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import './AdminBusinessIntelligence.css';
@@ -72,6 +73,9 @@ const AdminBusinessIntelligencePage = () => {
           <RefreshCw size={16} aria-hidden />
           Actualiser
         </button>
+        <Link to="/admin/devops" style={{ fontSize: 13, fontWeight: 700, color: '#1e40af' }}>
+          DevOps →
+        </Link>
         <Link to="/admin/powerbi" style={{ fontSize: 13, fontWeight: 700, color: '#1e40af', marginLeft: 'auto' }}>
           Power BI →
         </Link>
@@ -134,6 +138,9 @@ const AdminBusinessIntelligencePage = () => {
               Données live agrégées depuis l&apos;API : sessions connectées, dossiers vétérinaires et capteurs PetFoodIoT.
             </p>
             <BiPlatformSnapshotPanel snapshot={pack?.platform} loading={loading} />
+            <div style={{ marginTop: 20 }}>
+              <DevOpsBiAutomationPanel compact refreshMs={60000} />
+            </div>
           </>
         )}
         {tab === 'segments' && (

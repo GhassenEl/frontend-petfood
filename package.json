@@ -62,6 +62,8 @@
     "docker:stack:full": "docker compose -f docker-compose.yml -f docker-compose.ml.yml -f docker-compose.iot.yml -f docker-compose.monitoring.yml -f docker-compose.prod.yml --env-file .env.docker up -d --build",
     "devops:backup": "bash scripts/devops/backup-nightly.sh",
     "devops:health": "node scripts/devops/health-check.mjs",
+    "devops:dashboards:validate": "node scripts/devops/provision-dashboards.mjs --validate",
+    "devops:dashboards:provision": "node scripts/devops/provision-dashboards.mjs --provision",
     "seed:vet-live": "docker cp scripts/seedGuard.cjs petfood-backend:/app/scripts/seedGuard.cjs && docker cp scripts/seed-vet-live-data.cjs petfood-backend:/app/scripts/seed-vet-live-data.cjs && docker exec petfood-backend node /app/scripts/seed-vet-live-data.cjs",
     "seed:platform-live": "docker cp scripts/seedGuard.cjs petfood-backend:/app/scripts/seedGuard.cjs && docker cp scripts/seed-platform-live-data.cjs petfood-backend:/app/scripts/seed-platform-live-data.cjs && docker cp scripts/seed-vet-live-data.cjs petfood-backend:/app/scripts/seed-vet-live-data.cjs && docker exec petfood-backend node /app/scripts/seed-platform-live-data.cjs && docker exec petfood-backend node /app/scripts/seed-vet-live-data.cjs",
     "security:apply": "node scripts/apply-backend-security-patches.mjs",

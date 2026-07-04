@@ -11,6 +11,7 @@ export const DEVOPS_PIPELINES = [
   { id: 'deploy-vps', name: 'CD VPS', status: 'ok', detail: 'SSH docker-compose.ghcr.yml', file: '.github/workflows/deploy-vps.yml' },
   { id: 'backup', name: 'Sauvegarde nocturne', status: 'ok', detail: 'pg_dump chiffré 02:00 UTC', file: '.github/workflows/backup-nightly.yml' },
   { id: 'uptime', name: 'Uptime & alertes', status: 'ok', detail: 'Sonde /health toutes les 15 min', file: '.github/workflows/uptime.yml' },
+  { id: 'dashboards', name: 'Provision dashboards', status: 'ok', detail: 'Validation JSON + push Grafana API', file: '.github/workflows/provision-dashboards.yml' },
   { id: 'e2e', name: 'E2E Playwright', status: 'ok', detail: 'Tests navigateur sur PR', file: '.github/workflows/e2e.yml' },
 ];
 
@@ -22,6 +23,7 @@ export const DEVOPS_MONITORING = [
   { id: 'admin-perf', label: 'Performance plateforme', route: '/admin/performance', desc: 'Latence API, heap, SQL, sockets — vue admin', status: 'app' },
   { id: 'admin-devops', label: 'Hub DevOps admin', route: '/admin/devops', desc: 'CI/CD, déploiements, secrets, runbooks', status: 'app' },
   { id: 'admin-iot', label: 'Surveillance IoT', route: '/admin/iot-anomalies', desc: 'Anomalies capteurs & ESP32-CAM', status: 'app' },
+  { id: 'admin-bi', label: 'Hub BI', route: '/admin/business-intelligence', desc: 'Vet, IoT, audience — sync Grafana', status: 'app' },
 ];
 
 export const DEVOPS_STACKS = [
@@ -43,6 +45,7 @@ export const DEVOPS_ADMIN_INTERFACES = [
   { id: 'security', icon: '🛡️', label: 'Centre de sécurité', route: '/admin/security', desc: 'IDS, anti-virus, menaces' },
   { id: 'activity-logs', icon: '📋', label: 'Journaux d\'activité', route: '/admin/activity-logs', desc: 'Audit connexions & actions admin' },
   { id: 'iot-anomalies', icon: '📡', label: 'IoT & capteurs', route: '/admin/iot-anomalies', desc: 'Alertes distributeurs & qualité nourriture' },
+  { id: 'bi-hub', icon: '📊', label: 'Hub BI & Grafana', route: '/admin/business-intelligence', desc: 'Dashboards vet, IoT, audience — auto DevOps' },
 ];
 
 export const DEVOPS_PLATFORM_LINKS = [
