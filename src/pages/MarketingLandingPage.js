@@ -12,6 +12,10 @@ import {
   MARKETING_PROMO_CODES,
   MARKETING_FAQ,
   MARKETING_PLATFORM_ACTORS,
+  MARKETING_PFE_CONTEXT,
+  MARKETING_TECH_STACK,
+  MARKETING_BI_DEVOPS,
+  MARKETING_SECURITY_PILLARS,
 } from '../config/marketingContent';
 import { fetchMarketingLiveData } from '../services/marketingService';
 import { SERVICE_RATE_CARDS } from '../utils/clientDemoData';
@@ -111,6 +115,7 @@ const MarketingLandingPage = () => {
           <PetfoodLogo size="xs" showTagline />
         </Link>
         <div className="mkt-nav__links">
+          <a href="#projet" className="mkt-nav__link mkt-nav__link--hide-mobile">Projet PFE</a>
           <a href="#services" className="mkt-nav__link mkt-nav__link--hide-mobile">Services</a>
           <a href="#acteurs" className="mkt-nav__link mkt-nav__link--hide-mobile">Acteurs</a>
           <Link to="/contact" className="mkt-nav__link mkt-nav__link--hide-mobile">Contact</Link>
@@ -132,6 +137,7 @@ const MarketingLandingPage = () => {
             <p className="mkt-hero__lead">
               Boutique, nutrition multi-espèces, soins réservables, IoT connecté, vétérinaire
               et intelligence artificielle — pour propriétaires, cliniques et professionnels.
+              Architecture full-stack de niveau production : BI, DevOps, sécurité et déploiement cloud.
             </p>
             <div className="mkt-hero__cta">
               <Link to="/register" className="mkt-btn mkt-btn--primary">Commencer gratuitement</Link>
@@ -198,7 +204,8 @@ const MarketingLandingPage = () => {
         <h2 className="mkt-section__title">Pourquoi PetfoodTN ?</h2>
         <p className="mkt-section__sub">
           Une plateforme complète pensée pour le marché tunisien : races locales, climat chaud,
-          refuges partenaires et marketplace de fournisseurs certifiés.
+          refuges partenaires, marketplace certifiée — et une architecture PFE full-stack
+          (BI, DevOps, sécurité) prête pour la production.
         </p>
         <div className="mkt-pillars mkt-pillars--4">
           {PILLARS.map((p) => (
@@ -213,6 +220,74 @@ const MarketingLandingPage = () => {
           {SPECIES.map((s) => (
             <span key={s}>{s}</span>
           ))}
+        </div>
+      </section>
+
+      <section id="projet" className="mkt-section mkt-section--alt mkt-project">
+        <div className="mkt-project__intro">
+          <span className="mkt-project__badge">{MARKETING_PFE_CONTEXT.badge}</span>
+          <h2 className="mkt-section__title">{MARKETING_PFE_CONTEXT.title}</h2>
+          <p className="mkt-section__sub mkt-project__lead">{MARKETING_PFE_CONTEXT.lead}</p>
+          <ul className="mkt-project__objectives">
+            {MARKETING_PFE_CONTEXT.objectives.map((obj) => (
+              <li key={obj}>{obj}</li>
+            ))}
+          </ul>
+        </div>
+
+        <h3 className="mkt-project__subtitle">Stack technique</h3>
+        <div className="mkt-stack-grid">
+          {MARKETING_TECH_STACK.map((layer) => (
+            <article
+              key={layer.id}
+              className="mkt-stack-card"
+              style={{ '--stack-accent': layer.color }}
+            >
+              <div className="mkt-stack-card__head">
+                <span aria-hidden>{layer.icon}</span>
+                <strong>{layer.label}</strong>
+              </div>
+              <ul>
+                {layer.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+
+        <h3 className="mkt-project__subtitle">BI, DevOps &amp; observabilité</h3>
+        <div className="mkt-bidevops-grid">
+          {MARKETING_BI_DEVOPS.map((block) => (
+            <article key={block.id} className="mkt-bidevops-card">
+              <div className="mkt-bidevops-card__icon" aria-hidden>{block.icon}</div>
+              <h4>{block.title}</h4>
+              <p>{block.text}</p>
+              <div className="mkt-bidevops-card__links">
+                {block.links.map((l) => (
+                  <Link key={l.label} to={l.route} className="mkt-bidevops-link">
+                    {l.label} →
+                  </Link>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <h3 className="mkt-project__subtitle">Sécurité &amp; conformité</h3>
+        <div className="mkt-security-grid">
+          {MARKETING_SECURITY_PILLARS.map((s) => (
+            <article key={s.title} className="mkt-security-card">
+              <span className="mkt-security-card__icon" aria-hidden>{s.icon}</span>
+              <h4>{s.title}</h4>
+              <p>{s.text}</p>
+            </article>
+          ))}
+        </div>
+
+        <div className="mkt-project__cta">
+          <Link to="/devops" className="mkt-btn mkt-btn--secondary">Voir le hub DevOps public</Link>
+          <Link to="/enterprise" className="mkt-btn mkt-btn--ghost">Fonctionnalités entreprise →</Link>
         </div>
       </section>
 
@@ -491,10 +566,14 @@ const MarketingLandingPage = () => {
         <div className="mkt-footer__grid">
           <div>
             <PetfoodLogo size="sm" showTagline />
-            <p style={{ marginTop: 8 }}>Plateforme animaux Tunisie — boutique, santé, IoT & IA.</p>
+            <p style={{ marginTop: 8 }}>
+              Plateforme animaux Tunisie — boutique, santé, IoT, IA, BI &amp; DevOps.
+              Projet PFE full-stack déployable en production.
+            </p>
           </div>
           <div>
             <strong>Produit</strong>
+            <a href="#projet">Projet PFE</a>
             <a href="#services">Services</a>
             <a href="#iot">IoT</a>
             <a href="#tarifs">Tarifs</a>

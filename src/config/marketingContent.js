@@ -337,3 +337,121 @@ export const MARKETING_PLATFORM_ACTORS = [
     accent: '#dc2626',
   },
 ];
+
+/** Contexte PFE, stack technique, BI/DevOps et sécurité — page d'accueil publique */
+export const MARKETING_PFE_CONTEXT = {
+  badge: 'Projet de fin d\'études (PFE)',
+  title: 'Une plateforme full-stack pensée pour la production',
+  lead:
+    'PetfoodTN est un projet de fin d\'études qui démontre une architecture e-commerce animale complète : '
+    + 'marketplace multi-acteurs, clinique vétérinaire, IoT embarqué, intelligence artificielle et pilotage '
+    + 'entreprise (BI, DevOps, sécurité). Conçu pour le marché tunisien, déployable en Docker avec CI/CD.',
+  objectives: [
+    'Centraliser boutique, nutrition, santé et IoT pour propriétaires et professionnels',
+    'Intégrer des workflows vétérinaires (dossiers, RDV, ordonnances) avec RBAC strict',
+    'Exposer des dashboards décisionnels et du monitoring temps réel (Grafana, Prometheus)',
+    'Appliquer les bonnes pratiques sécurité : HTTPS, JWT HttpOnly, en-têtes nginx, audit clinique',
+  ],
+};
+
+export const MARKETING_TECH_STACK = [
+  {
+    id: 'frontend',
+    icon: '⚛️',
+    label: 'Frontend',
+    items: ['React 18 · Vite', 'Recharts & cartes live', 'Socket.IO · PWA mobile'],
+    color: '#2563eb',
+  },
+  {
+    id: 'backend',
+    icon: '🟢',
+    label: 'Backend & données',
+    items: ['Node.js · Express · Prisma', 'PostgreSQL · API REST /api/v1', 'Seeds idempotents & mode live'],
+    color: '#059669',
+  },
+  {
+    id: 'ml',
+    icon: '🧠',
+    label: 'IA & ML',
+    items: ['FastAPI · modèles clinique', 'Recommandations nutrition', 'Détection qualité ESP32-CAM'],
+    color: '#7c3aed',
+  },
+  {
+    id: 'iot',
+    icon: '📡',
+    label: 'IoT & embarqué',
+    items: ['MQTT Mosquitto', 'ESP32 distributeur & caméra', 'Simulateur qualité alimentaire'],
+    color: '#0d9488',
+  },
+  {
+    id: 'infra',
+    icon: '🐳',
+    label: 'Infra & déploiement',
+    items: ['Docker Compose multi-stack', 'nginx · Caddy HTTPS', 'GHCR · AWS ECS · VPS'],
+    color: '#1e40af',
+  },
+  {
+    id: 'mobile',
+    icon: '📱',
+    label: 'Mobile',
+    items: ['Flutter (companion app)', 'BI mobile & notifications', 'Parité services client'],
+    color: '#d97706',
+  },
+];
+
+export const MARKETING_BI_DEVOPS = [
+  {
+    id: 'bi',
+    icon: '📊',
+    title: 'Business Intelligence',
+    text: 'Hub BI admin : segmentation clients, stocks prédictifs, audience live, données vet et IoT. Exports CSV/PDF pour Power BI Desktop.',
+    links: [
+      { label: 'Hub BI', route: '/login' },
+      { label: 'Power BI', route: '/login' },
+    ],
+  },
+  {
+    id: 'grafana',
+    icon: '📈',
+    title: 'Monitoring Grafana',
+    text: 'Dashboards provisionnés depuis Git — CPU, commandes, capteurs, latence API. Pipeline CI valide et pousse les JSON Grafana après déploiement.',
+    links: [{ label: 'DevOps admin', route: '/login' }],
+  },
+  {
+    id: 'cicd',
+    icon: '🔄',
+    title: 'CI/CD & DevOps',
+    text: 'Platform Pipeline : build, DevSecOps (Gitleaks, Trivy), E2E Playwright, readiness gate, publish ECR/GHCR et deploy AWS ECS ou VPS.',
+    links: [{ label: 'Hub DevOps', route: '/devops' }],
+  },
+  {
+    id: 'uptime',
+    icon: '🛰️',
+    title: 'Observabilité',
+    text: 'Prometheus scrape 15s, node-exporter, cAdvisor, blackbox /health. Alertes uptime et sauvegardes PostgreSQL nocturnes chiffrées.',
+    links: [{ label: 'Performance', route: '/login' }],
+  },
+];
+
+export const MARKETING_SECURITY_PILLARS = [
+  {
+    icon: '🔐',
+    title: 'Authentification',
+    text: 'JWT en cookies HttpOnly + Secure en production. RBAC par rôle (admin, vet, client, livreur, vendeur, modérateur).',
+  },
+  {
+    icon: '🛡️',
+    title: 'Reverse proxy',
+    text: 'nginx : CSP, X-Frame-Options, HSTS via Caddy. Routes ML /fastapi/ protégées par JWT vet. Seeds bloqués en prod sans secret.',
+  },
+  {
+    icon: '📋',
+    title: 'Audit & conformité',
+    text: 'Journalisation des accès dossiers médicaux vet. Cadre ISO, sauvegardes, activity logs admin et centre DevSecOps intégré.',
+  },
+  {
+    icon: '🔒',
+    title: 'Données sensibles',
+    text: 'HTTPS obligatoire en prod, mots de passe forts, pas de comptes démo exposés. Audience live soumise au consentement cookies.',
+  },
+];
