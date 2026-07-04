@@ -8,12 +8,14 @@ import {
 import { segmentClientsByPurchases } from '../utils/clientSegmentationEngine';
 import { detectMarketTrends } from '../utils/marketTrendDetector';
 import { predictStockOutages } from '../utils/predictiveStockEngine';
+import { loadBiPlatformSnapshot } from './biPlatformSnapshotService';
 
 export async function loadBusinessIntelligencePack() {
-  const [ordersRes, usersRes, stockRes] = await Promise.all([
+  const [ordersRes, usersRes, stockRes, platform] = await Promise.all([
     api.get('/orders').catch(() => ({ data: [] })),
     api.get('/users').catch(() => ({ data: [] })),
     api.get('/admin/stock').catch(() => ({ data: [] })),
+    loadBiPlatformSnapshot().catch(() => null),
   ]);
 
   const orders = withDemoFallback(ordersRes.data, DEMO_ADMIN_ORDERS);
@@ -29,10 +31,14 @@ export async function loadBusinessIntelligencePack() {
     segmentation,
     marketTrends,
     stockPredictions,
+    platform,
     kpi: {
       clientSegments: segmentation.segments?.length || 0,
       atRiskStock: stockPredictions.filter((p) => p.urgency === 'critical' || p.urgency === 'high').length,
       topCategory: marketTrends.topCategories?.[0]?.label || '—',
+      onlineUsers: platform?.audience?.onlineTotal ?? null,
+      vetActiveCases: platform?.vet?.activeCases ?? null,
+      iotAlerts: platform?.iot?.alerts ?? null,
     },
   };
 }

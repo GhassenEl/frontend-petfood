@@ -7,7 +7,9 @@ import {
 import useAnalyticsHub from '../hooks/useAnalyticsHub';
 import PowerBiDashboardPanel from '../components/PowerBiDashboardPanel';
 import AdminPowerBiInsightsPanel from '../components/AdminPowerBiInsightsPanel';
+import BiPlatformSnapshotPanel from '../components/BiPlatformSnapshotPanel';
 import { fetchDatasetsCatalog } from '../services/analyticsHubService';
+import { loadBiPlatformSnapshot } from '../services/biPlatformSnapshotService';
 import api from '../utils/api';
 import { getStoredToken } from '../utils/authStorage';
 import { isValidToken } from '../utils/jwtSecurity';
@@ -29,6 +31,8 @@ const severityStyle = {
 const AdminPowerBiPage = () => {
   const { data: apiData, loading, reload } = useAnalyticsHub();
   const [catalog, setCatalog] = useState(null);
+  const [platformSnapshot, setPlatformSnapshot] = useState(null);
+  const [platformLoading, setPlatformLoading] = useState(true);
   const data = {
     ...DEMO_ADMIN_ANALYTICS,
     ...(apiData?.kpiSummary ? { kpiSummary: { ...DEMO_ADMIN_ANALYTICS.kpiSummary, ...apiData.kpiSummary } } : {}),
@@ -50,6 +54,23 @@ const AdminPowerBiPage = () => {
       .then(setCatalog)
       .catch(() => setCatalog(DEMO_ADMIN_DATASETS));
   }, []);
+
+  const reloadPlatform = () => {
+    setPlatformLoading(true);
+    loadBiPlatformSnapshot()
+      .then(setPlatformSnapshot)
+      .catch(() => setPlatformSnapshot(null))
+      .finally(() => setPlatformLoading(false));
+  };
+
+  useEffect(() => {
+    reloadPlatform();
+  }, []);
+
+  const handleReload = () => {
+    reload();
+    reloadPlatform();
+  };
 
   const downloadCsv = async (table) => {
     const token = getStoredToken();
@@ -93,7 +114,7 @@ const AdminPowerBiPage = () => {
         <p style={{ margin: 0, opacity: 0.9 }}>
           Tableaux de bord, alertes opérationnelles et exports pour Power BI Desktop.
         </p>
-        <button type="button" onClick={reload} style={btnLight}>
+        <button type="button" onClick={handleReload} style={btnLight}>
           <RefreshCw size={14} /> Actualiser
         </button>
       </motion.header>
@@ -102,6 +123,15 @@ const AdminPowerBiPage = () => {
         <p style={{ color: '#94a3b8' }}>Chargement du hub analytique…</p>
       ) : (
         <>
+          <section style={{ ...card, marginBottom: 20 }}>
+            <h2 style={h2}>Vue plateforme — vet · IoT · audience</h2>
+            <BiPlatformSnapshotPanel
+              snapshot={platformSnapshot}
+              loading={platformLoading}
+              compact
+            />
+          </section>
+
           <PowerBiDashboardPanel
             showHeader={false}
             className="pbi-panel--page"

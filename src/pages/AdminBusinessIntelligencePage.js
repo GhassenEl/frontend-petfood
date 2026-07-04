@@ -1,15 +1,17 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BarChart3, Users, TrendingUp, Package, RefreshCw, MapPin } from 'lucide-react';
+import { BarChart3, Users, TrendingUp, Package, RefreshCw, MapPin, Layers } from 'lucide-react';
 import ClientSegmentationPanel from '../components/ClientSegmentationPanel';
 import MarketTrendsPanel from '../components/MarketTrendsPanel';
 import PredictiveStockPanel from '../components/PredictiveStockPanel';
 import AdminGeographicSalesPanel from '../components/AdminGeographicSalesPanel';
+import BiPlatformSnapshotPanel from '../components/BiPlatformSnapshotPanel';
 import { loadBusinessIntelligencePack } from '../services/businessIntelligenceService';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import './AdminBusinessIntelligence.css';
 
 const TABS = [
+  { id: 'platform', label: 'Vue plateforme', icon: Layers },
   { id: 'segments', label: 'Segmentation clients', icon: Users },
   { id: 'trends', label: 'Tendances marché', icon: TrendingUp },
   { id: 'stock', label: 'Stocks prédictifs', icon: Package },
@@ -17,7 +19,7 @@ const TABS = [
 ];
 
 const AdminBusinessIntelligencePage = () => {
-  const [tab, setTab] = useState('segments');
+  const [tab, setTab] = useState('platform');
   const [pack, setPack] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -48,7 +50,7 @@ const AdminBusinessIntelligencePage = () => {
         Business Intelligence
       </h1>
       <p className="bi-lead">
-        Segmentation automatique des clients, tendances marché et prévision des ruptures de stock.
+        Segmentation clients, tendances marché, stocks prédictifs — plus audience live, clinique vet et capteurs IoT.
       </p>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 16, alignItems: 'center' }}>
@@ -73,6 +75,9 @@ const AdminBusinessIntelligencePage = () => {
         <Link to="/admin/powerbi" style={{ fontSize: 13, fontWeight: 700, color: '#1e40af', marginLeft: 'auto' }}>
           Power BI →
         </Link>
+        <Link to="/admin/live-audience" style={{ fontSize: 13, fontWeight: 700, color: '#1e40af' }}>
+          Audience live →
+        </Link>
         <Link to="/admin/stock-bi" style={{ fontSize: 13, fontWeight: 700, color: '#1e40af' }}>
           Stock BI →
         </Link>
@@ -90,6 +95,18 @@ const AdminBusinessIntelligencePage = () => {
         <div className="bi-kpi">
           <span>SKU à risque stock</span>
           <strong>{kpi.atRiskStock ?? '—'}</strong>
+        </div>
+        <div className="bi-kpi">
+          <span>En ligne (live)</span>
+          <strong>{kpi.onlineUsers ?? '—'}</strong>
+        </div>
+        <div className="bi-kpi">
+          <span>Cas vet actifs</span>
+          <strong>{kpi.vetActiveCases ?? '—'}</strong>
+        </div>
+        <div className="bi-kpi">
+          <span>Alertes IoT</span>
+          <strong>{kpi.iotAlerts ?? '—'}</strong>
         </div>
       </div>
 
@@ -110,6 +127,15 @@ const AdminBusinessIntelligencePage = () => {
       </div>
 
       <div className="bi-panel-wrap" role="tabpanel">
+        {tab === 'platform' && (
+          <>
+            <h2 style={{ marginTop: 0, fontSize: 18 }}>Vue plateforme — vet, IoT &amp; audience</h2>
+            <p className="bi-lead" style={{ marginBottom: 16 }}>
+              Données live agrégées depuis l&apos;API : sessions connectées, dossiers vétérinaires et capteurs PetFoodIoT.
+            </p>
+            <BiPlatformSnapshotPanel snapshot={pack?.platform} loading={loading} />
+          </>
+        )}
         {tab === 'segments' && (
           <>
             <h2 style={{ marginTop: 0, fontSize: 18 }}>Segmentation automatique des clients</h2>
