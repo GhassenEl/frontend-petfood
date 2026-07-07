@@ -7,7 +7,7 @@ class MenuItem {
 }
 
 class FoodOrder {
-  const FoodOrder({
+  FoodOrder({
     required this.id,
     required this.client,
     required this.items,
@@ -18,7 +18,7 @@ class FoodOrder {
   final String client;
   final String items;
   final int total;
-  final String status;
+  String status;
 }
 
 class Promo {
@@ -28,7 +28,7 @@ class Promo {
   final String code;
 }
 
-const menuItems = <MenuItem>[
+const initialMenu = <MenuItem>[
   MenuItem(name: 'Menu Burger Classic', category: 'Burger', price: 18, emoji: '🍔'),
   MenuItem(name: 'Double Cheese', category: 'Burger', price: 22, emoji: '🧀'),
   MenuItem(name: 'Wrap Poulet', category: 'Wrap', price: 14, emoji: '🌯'),
@@ -37,14 +37,14 @@ const menuItems = <MenuItem>[
   MenuItem(name: 'Milkshake Vanille', category: 'Boisson', price: 9, emoji: '🥤'),
 ];
 
-const foodOrders = <FoodOrder>[
+final initialOrders = <FoodOrder>[
   FoodOrder(id: 'QB-1042', client: 'Amine B.', items: 'Burger + Frites', total: 25, status: 'En préparation'),
   FoodOrder(id: 'QB-1041', client: 'Salma K.', items: 'Wrap x2', total: 28, status: 'Prête'),
   FoodOrder(id: 'QB-1040', client: 'Karim M.', items: 'Menu Enfant', total: 12, status: 'Livrée'),
   FoodOrder(id: 'QB-1039', client: 'Ines T.', items: 'Double Cheese', total: 22, status: 'En attente'),
 ];
 
-const promos = <Promo>[
+const initialPromos = <Promo>[
   Promo(title: 'Midi -15 %', description: 'Tous les menus 11h–14h', code: 'MIDI15'),
   Promo(title: '2 achetés = 1 offert', description: 'Frites uniquement', code: 'FRITE2+1'),
   Promo(title: 'Livraison gratuite', description: 'Commande > 40 DT', code: 'LIVRAISON0'),

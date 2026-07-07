@@ -52,6 +52,49 @@ class QuickBiteHome extends StatefulWidget {
 
 class _QuickBiteHomeState extends State<QuickBiteHome> {
   int _tab = 0;
+  int _orderSeq = 1043;
+  final List<MenuItem> _menu = List.of(initialMenu);
+  final List<FoodOrder> _orders = List.of(initialOrders);
+  final List<Promo> _promos = List.of(initialPromos);
+  static const _statuses = ['En attente', 'En préparation', 'Prête', 'Livrée'];
+
+  int get _revenue => _orders.fold(0, (sum, o) => sum + o.total);
+  int get _activeOrders => _orders.where((o) => o.status != 'Livrée').length;
+
+  void _addOrder() async {
+    final client = TextEditingController();
+    final items = TextEditingController();
+    final total = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Nouvelle commande'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          TextField(controller: client, decoration: const InputDecoration(labelText: 'Client')),
+          TextField(controller: items, decoration: const InputDecoration(labelText: 'Articles')),
+          TextField(controller: total, decoration: const InputDecoration(labelText: 'Total DT'), keyboardType: TextInputType.number),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Créer')),
+        ],
+      ),
+    );
+    if (ok == true && client.text.isNotEmpty) {
+      setState(() => _orders.insert(0, FoodOrder(
+        id: 'QB-${_orderSeq++}',
+        client: client.text,
+        items: items.text,
+        total: int.tryParse(total.text) ?? 0,
+        status: 'En attente',
+      )));
+    }
+  }
+
+  void _cycleStatus(FoodOrder o) {
+    final i = _statuses.indexOf(o.status);
+    setState(() => o.status = _statuses[(i + 1) % _statuses.length]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,91 +102,61 @@ class _QuickBiteHomeState extends State<QuickBiteHome> {
       appBar: AppBar(
         title: const Text('🍔 QuickBite'),
         actions: [
-          IconButton(
-            onPressed: widget.onToggleTheme,
-            icon: Icon(widget.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
-          ),
+          IconButton(onPressed: widget.onToggleTheme, icon: Icon(widget.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined)),
         ],
       ),
+      floatingActionButton: _tab == 1
+          ? null
+          : FloatingActionButton(
+              onPressed: _tab == 2 ? _addOrder : null,
+              child: const Icon(Icons.add),
+            ),
       body: IndexedStack(
         index: _tab,
         children: [
-          ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              Text('Tableau de bord', style: Theme.of(context).textTheme.headlineSmall),
-              const SizedBox(height: 12),
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: 1.6,
-                children: const [
-                  _Kpi(label: 'Commandes jour', value: '47'),
-                  _Kpi(label: 'CA du jour', value: '892 DT'),
-                  _Kpi(label: 'Temps moyen', value: '12 min'),
-                  _Kpi(label: 'Satisfaction', value: '4.6★'),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Text('Commandes en cours', style: TextStyle(fontWeight: FontWeight.w700)),
-              ...foodOrders.take(3).map((o) => Card(
-                    child: ListTile(
-                      title: Text('${o.id} — ${o.client}'),
-                      subtitle: Text(o.items),
-                      trailing: Text('${o.total} DT'),
-                    ),
-                  )),
-            ],
-          ),
-          ListView(
-            padding: const EdgeInsets.all(16),
-            children: menuItems.map((m) => Card(
-                  child: ListTile(
-                    leading: Text(m.emoji, style: const TextStyle(fontSize: 28)),
-                    title: Text(m.name),
-                    subtitle: Text(m.category),
-                    trailing: Text('${m.price} DT', style: const TextStyle(fontWeight: FontWeight.w800)),
-                  ),
-                )).toList(),
-          ),
-          ListView(
-            padding: const EdgeInsets.all(16),
-            children: foodOrders.map((o) => Card(
-                  child: ListTile(
-                    title: Text(o.id),
-                    subtitle: Text('${o.client} · ${o.items}'),
-                    trailing: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text('${o.total} DT', style: const TextStyle(fontWeight: FontWeight.w700)),
-                        Text(o.status, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.secondary)),
-                      ],
-                    ),
-                  ),
-                )).toList(),
-          ),
-          ListView(
-            padding: const EdgeInsets.all(16),
-            children: promos.map((p) => Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(p.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-                        const SizedBox(height: 6),
-                        Text(p.description),
-                        const SizedBox(height: 8),
-                        Text('Code : ${p.code}', style: const TextStyle(fontWeight: FontWeight.w700)),
-                      ],
-                    ),
-                  ),
-                )).toList(),
-          ),
+          ListView(padding: const EdgeInsets.all(16), children: [
+            Text('Tableau de bord', style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 12),
+            GridView.count(
+              crossAxisCount: 2, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 10, crossAxisSpacing: 10, childAspectRatio: 1.6,
+              children: [
+                _Kpi(label: 'Commandes actives', value: '$_activeOrders'),
+                _Kpi(label: 'CA total', value: '$_revenue DT'),
+                _Kpi(label: 'Articles menu', value: '${_menu.length}'),
+                _Kpi(label: 'Promos', value: '${_promos.length}'),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Text('Commandes en cours', style: TextStyle(fontWeight: FontWeight.w700)),
+            ..._orders.where((o) => o.status != 'Livrée').take(4).map((o) => Card(
+              child: ListTile(title: Text('${o.id} — ${o.client}'), subtitle: Text(o.items), trailing: Text('${o.total} DT')),
+            )),
+          ]),
+          ListView(padding: const EdgeInsets.all(16), children: _menu.map((m) => Card(
+            child: ListTile(
+              leading: Text(m.emoji, style: const TextStyle(fontSize: 28)),
+              title: Text(m.name), subtitle: Text(m.category),
+              trailing: Text('${m.price} DT', style: const TextStyle(fontWeight: FontWeight.w800)),
+            ),
+          )).toList()),
+          ListView(padding: const EdgeInsets.all(16), children: _orders.map((o) => Card(
+            child: ListTile(
+              title: Text(o.id), subtitle: Text('${o.client} · ${o.items}'),
+              onTap: () => _cycleStatus(o),
+              trailing: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Text('${o.total} DT', style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(o.status, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.secondary)),
+              ]),
+            ),
+          )).toList()),
+          ListView(padding: const EdgeInsets.all(16), children: _promos.map((p) => Card(
+            child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(p.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 6), Text(p.description),
+              const SizedBox(height: 8), Text('Code : ${p.code}', style: const TextStyle(fontWeight: FontWeight.w700)),
+            ])),
+          )).toList()),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -166,19 +179,13 @@ class _Kpi extends StatelessWidget {
   final String value;
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.secondary)),
-            const SizedBox(height: 6),
-            Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
-          ],
-        ),
-      ),
-    );
+    return Card(child: Padding(padding: const EdgeInsets.all(14), child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.secondary)),
+        const SizedBox(height: 6),
+        Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+      ],
+    )));
   }
 }

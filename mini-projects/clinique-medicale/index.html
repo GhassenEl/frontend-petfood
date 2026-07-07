@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediLink — Clinique</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-theme="light">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand__icon">🏥</span><div><strong>MediLink</strong><small>Clinique</small></div></div>
+      <nav class="nav">
+        <button type="button" class="nav__btn nav__btn--active" data-view="dashboard">Tableau de bord</button>
+        <button type="button" class="nav__btn" data-view="doctors">Médecins</button>
+        <button type="button" class="nav__btn" data-view="patients">Patients</button>
+        <button type="button" class="nav__btn" data-view="appointments">Rendez-vous</button>
+        <button type="button" class="nav__btn" data-view="medications">Médicaments</button>
+      </nav>
+      <p class="sidebar__note">Données dynamiques · sauvegarde locale</p>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <h1 id="page-title">Tableau de bord</h1>
+        <div class="topbar__meta">
+          <span class="pill">Noir & blanc</span>
+          <button type="button" class="theme-toggle" id="theme-toggle">◐ Thème</button>
+        </div>
+      </header>
+      <section id="view-dashboard" class="view view--active">
+        <div class="kpi-grid" id="kpi-grid"></div>
+        <div class="split">
+          <article class="card"><h2>RDV aujourd'hui</h2><ul class="list" id="today-appointments"></ul></article>
+          <article class="card"><h2>Ordonnances récentes</h2><ul class="list" id="recent-meds"></ul></article>
+        </div>
+      </section>
+      <section id="view-doctors" class="view">
+        <article class="card">
+          <div class="card__head"><h2>Médecins</h2><button type="button" class="btn" id="add-doctor-btn">+ Médecin</button></div>
+          <form class="form" id="doctor-form" hidden>
+            <input type="text" name="name" placeholder="Nom" required />
+            <input type="text" name="specialty" placeholder="Spécialité" required />
+            <input type="text" name="phone" placeholder="Téléphone" />
+            <button type="submit" class="btn btn--primary">Ajouter</button>
+          </form>
+          <div class="grid" id="doctors-grid"></div>
+        </article>
+      </section>
+      <section id="view-patients" class="view">
+        <article class="card">
+          <div class="card__head"><h2>Patients</h2><button type="button" class="btn" id="add-patient-btn">+ Patient</button></div>
+          <form class="form" id="patient-form" hidden>
+            <input type="text" name="name" placeholder="Nom" required />
+            <input type="number" name="age" placeholder="Âge" min="1" max="120" required />
+            <input type="text" name="phone" placeholder="Téléphone" />
+            <input type="text" name="condition" placeholder="Motif / antécédent" />
+            <button type="submit" class="btn btn--primary">Ajouter</button>
+          </form>
+          <input type="search" class="search" id="patient-search" placeholder="Rechercher un patient…" />
+          <div class="table-wrap" style="margin-top:14px">
+            <table><thead><tr><th>Patient</th><th>Âge</th><th>Téléphone</th><th>Motif</th><th></th></tr></thead><tbody id="patients-table"></tbody></table>
+          </div>
+        </article>
+      </section>
+      <section id="view-appointments" class="view">
+        <article class="card">
+          <div class="card__head"><h2>Rendez-vous</h2><button type="button" class="btn" id="add-rdv-btn">+ RDV</button></div>
+          <form class="form" id="rdv-form" hidden>
+            <input type="date" name="date" required />
+            <input type="time" name="time" required />
+            <input type="text" name="patient" placeholder="Patient" required />
+            <input type="text" name="doctor" placeholder="Médecin" required />
+            <select name="status">
+              <option value="Planifié">Planifié</option>
+              <option value="En salle">En salle</option>
+              <option value="Terminé">Terminé</option>
+              <option value="Annulé">Annulé</option>
+            </select>
+            <button type="submit" class="btn btn--primary">Planifier</button>
+          </form>
+          <p class="hint">Cliquez sur le statut pour le faire avancer.</p>
+          <div class="table-wrap"><table><thead><tr><th>Date</th><th>Heure</th><th>Patient</th><th>Médecin</th><th>Statut</th><th></th></tr></thead><tbody id="rdv-table"></tbody></table></div>
+        </article>
+      </section>
+      <section id="view-medications" class="view">
+        <article class="card">
+          <div class="card__head"><h2>Ordonnances</h2><button type="button" class="btn" id="add-med-btn">+ Ordonnance</button></div>
+          <form class="form" id="med-form" hidden>
+            <input type="text" name="patient" placeholder="Patient" required />
+            <input type="text" name="doctor" placeholder="Médecin" required />
+            <input type="text" name="drug" placeholder="Médicament" required />
+            <input type="text" name="dosage" placeholder="Posologie ex: 1 cp/j" required />
+            <input type="number" name="duration" placeholder="Durée (jours)" min="1" required />
+            <button type="submit" class="btn btn--primary">Prescrire</button>
+          </form>
+          <div class="grid" id="meds-grid"></div>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,1 +1,52 @@
 @import url('../salle-de-sport/styles.css');
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.form input, .form select {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  min-width: 140px;
+}
+
+.btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn--primary { background: var(--accent); color: var(--accent-inv); border-color: var(--accent); }
+.btn--ghost { background: transparent; padding: 4px 8px; font-size: 12px; }
+
+.status-select {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.hours-btn {
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: underline;
+}

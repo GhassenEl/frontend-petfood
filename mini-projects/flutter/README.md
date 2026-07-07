@@ -1,28 +1,17 @@
 # Mini-projets Flutter autonomes
 
-Applications **Flutter** indépendantes de PetfoodTN et de `mobile_app/`.
-
 | Application | Dossier | Description |
 |-------------|---------|-------------|
-| **FitClub Gym** | `fitclub_gym/` | Salle de sport |
-| **FitConnect** | `fitconnect_platform/` | Plateforme fitness |
-| **QuickBite** | `quickbite_fastfood/` | Fast-food (menu, commandes, promos) |
-| **AutoPilot** | `autopilot_ecole/` | Auto-école (élèves, planning, formules) |
+| FitClub Gym | `fitclub_gym/` | Salle de sport |
+| FitConnect | `fitconnect_platform/` | Plateforme fitness |
+| **QuickBite** | `quickbite_fastfood/` | Fast-food dynamique |
+| **AutoPilot** | `autopilot_ecole/` | Auto-école dynamique |
+| **MediLink** | `medilink_clinique/` | Clinique RDV + médicaments |
 
-Thème noir & blanc · bascule clair/sombre dans l'app bar.
-
-## Lancer
+Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 
 ```bash
-cd quickbite_fastfood
+cd medilink_clinique
 flutter pub get
 flutter run -d chrome
 ```
-
-```bash
-cd autopilot_ecole
-flutter pub get
-flutter run -d chrome
-```
-
-Stack : Flutter / Dart — Material 3, données démo locales, aucune API externe.

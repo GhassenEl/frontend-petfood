@@ -1,32 +1,41 @@
 # Mini-projets autonomes
 
-Projets de démonstration **indépendants** de la plateforme PetfoodTN et de `mobile_app/`.
+Projets de démonstration **indépendants** de PetfoodTN et de `mobile_app/`.
 
-Thème **noir & blanc** avec bascule clair/sombre sur chaque projet.
+Thème **noir & blanc** · données **dynamiques** (CRUD + `localStorage` web / état Flutter).
 
 ## Web (HTML / CSS / JavaScript)
 
-| Projet | Dossier | Port démo | Description |
-|--------|---------|-----------|-------------|
-| **FitClub — Salle de sport** | `salle-de-sport/` | 5501 | Adhérents, planning, abonnements |
-| **FitConnect — Fitness** | `fitness-platform/` | 5502 | Programmes, coachs, réservation |
-| **QuickBite — Fast-food** | `fastfood/` | 5522 | Menu, commandes, promotions |
-| **AutoPilot — Auto-école** | `auto-ecole/` | 5523 | Élèves, leçons, formules permis |
+| Projet | Dossier | Port | Description |
+|--------|---------|------|-------------|
+| FitClub — Salle de sport | `salle-de-sport/` | 5501 | Adhérents, planning |
+| FitConnect — Fitness | `fitness-platform/` | 5502 | Coachs, programmes |
+| **QuickBite — Fast-food** | `fastfood/` | 5522 | Menu, commandes, promos |
+| **AutoPilot — Auto-école** | `auto-ecole/` | 5523 | Élèves, leçons, formules |
+| **MediLink — Clinique** | `clinique-medicale/` | 5524 | Médecins, patients, RDV, médicaments |
 
 ## Flutter
 
-| Application | Dossier | Description |
-|-------------|---------|-------------|
-| FitClub Gym | `flutter/fitclub_gym/` | Salle de sport |
-| FitConnect | `flutter/fitconnect_platform/` | Plateforme fitness |
-| QuickBite | `flutter/quickbite_fastfood/` | Fast-food |
-| AutoPilot | `flutter/autopilot_ecole/` | Auto-école |
+| Application | Dossier |
+|-------------|---------|
+| FitClub Gym | `flutter/fitclub_gym/` |
+| FitConnect | `flutter/fitconnect_platform/` |
+| QuickBite | `flutter/quickbite_fastfood/` |
+| AutoPilot | `flutter/autopilot_ecole/` |
+| MediLink | `flutter/medilink_clinique/` |
 
-Voir [flutter/README.md](flutter/README.md).
+## Branches GitHub dédiées
+
+| Branche | Projet |
+|---------|--------|
+| `project-quickbite` | Fast-food |
+| `project-autopilot` | Auto-école |
+| `project-medilink` | Clinique médicale |
+| `mini-projects` | Tous les mini-projets |
 
 ## Lancer un projet web
 
 ```bash
-cd mini-projects/fastfood
-npx --yes serve -l 5522
+cd mini-projects/clinique-medicale
+npx --yes serve -l 5524
 ```

@@ -16,7 +16,7 @@
         <button type="button" class="nav__btn" data-view="lessons">Planning leçons</button>
         <button type="button" class="nav__btn" data-view="packages">Formules</button>
       </nav>
-      <p class="sidebar__note">Mini-projet autonome — démo locale</p>
+      <p class="sidebar__note">Données dynamiques · sauvegarde locale</p>
     </aside>
     <main class="main">
       <header class="topbar">
@@ -34,10 +34,57 @@
         </div>
       </section>
       <section id="view-students" class="view">
-        <article class="card"><input type="search" class="search" id="student-search" placeholder="Rechercher un élève…" /><div class="table-wrap" style="margin-top:14px"><table><thead><tr><th>Élève</th><th>Formule</th><th>Heures</th><th>Statut</th></tr></thead><tbody id="students-table"></tbody></table></div></article>
+        <article class="card">
+          <div class="card__head">
+            <h2>Élèves</h2>
+            <button type="button" class="btn" id="add-student-btn">+ Élève</button>
+          </div>
+          <form class="form form--inline" id="student-form" hidden>
+            <input type="text" name="name" placeholder="Nom complet" required />
+            <select name="pack" required>
+              <option value="Permis B — 20h">Permis B — 20h</option>
+              <option value="Permis B — 30h">Permis B — 30h</option>
+              <option value="Conduite accompagnée">Conduite accompagnée</option>
+            </select>
+            <input type="text" name="hours" placeholder="Heures ex: 8/30" required />
+            <select name="status">
+              <option value="Débutant">Débutant</option>
+              <option value="En cours">En cours</option>
+              <option value="Exam. code">Exam. code</option>
+              <option value="Exam. conduite">Exam. conduite</option>
+            </select>
+            <button type="submit" class="btn btn--primary">Ajouter</button>
+          </form>
+          <input type="search" class="search" id="student-search" placeholder="Rechercher un élève…" />
+          <div class="table-wrap" style="margin-top:14px">
+            <table><thead><tr><th>Élève</th><th>Formule</th><th>Heures</th><th>Statut</th><th></th></tr></thead><tbody id="students-table"></tbody></table>
+          </div>
+        </article>
       </section>
       <section id="view-lessons" class="view">
-        <div class="schedule" id="schedule-grid"></div>
+        <article class="card">
+          <div class="card__head">
+            <h2>Planning</h2>
+            <button type="button" class="btn" id="add-lesson-btn">+ Leçon</button>
+          </div>
+          <form class="form form--inline" id="lesson-form" hidden>
+            <input type="time" name="time" required />
+            <input type="text" name="student" placeholder="Élève" required />
+            <input type="text" name="type" placeholder="Type (Créneau…)" required />
+            <input type="text" name="moniteur" placeholder="Moniteur" required />
+            <select name="day">
+              <option value="today">Aujourd'hui</option>
+              <option value="Lun">Lundi</option>
+              <option value="Mar">Mardi</option>
+              <option value="Mer">Mercredi</option>
+              <option value="Jeu">Jeudi</option>
+              <option value="Ven">Vendredi</option>
+              <option value="Sam">Samedi</option>
+            </select>
+            <button type="submit" class="btn btn--primary">Planifier</button>
+          </form>
+          <div class="schedule" id="schedule-grid"></div>
+        </article>
       </section>
       <section id="view-packages" class="view">
         <div class="plans" id="packages-grid"></div>

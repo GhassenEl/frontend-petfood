@@ -1,23 +1,21 @@
 class DrivingStudent {
-  const DrivingStudent({
+  DrivingStudent({
     required this.name,
     required this.packageName,
-    required this.hours,
+    required this.hoursDone,
+    required this.hoursTotal,
     required this.status,
   });
   final String name;
   final String packageName;
-  final String hours;
-  final String status;
+  int hoursDone;
+  final int hoursTotal;
+  String status;
+  String get hours => '$hoursDone/$hoursTotal';
 }
 
 class DrivingLesson {
-  const DrivingLesson({
-    required this.time,
-    required this.student,
-    required this.type,
-    required this.instructor,
-  });
+  const DrivingLesson({required this.time, required this.student, required this.type, required this.instructor});
   final String time;
   final String student;
   final String type;
@@ -25,39 +23,33 @@ class DrivingLesson {
 }
 
 class DrivingPackage {
-  const DrivingPackage({
-    required this.name,
-    required this.price,
-    required this.features,
-    this.featured = false,
-  });
+  const DrivingPackage({required this.name, required this.price, required this.features, this.featured = false});
   final String name;
   final String price;
   final List<String> features;
   final bool featured;
 }
 
-const students = <DrivingStudent>[
-  DrivingStudent(name: 'Amine Trabelsi', packageName: 'Permis B — 30h', hours: '18/30', status: 'En cours'),
-  DrivingStudent(name: 'Salma Gharbi', packageName: 'Permis B — 20h', hours: '20/20', status: 'Exam. code'),
-  DrivingStudent(name: 'Karim Bouazizi', packageName: 'Conduite accompagnée', hours: '12/20', status: 'En cours'),
-  DrivingStudent(name: 'Ines Mejri', packageName: 'Permis B — 30h', hours: '8/30', status: 'Débutant'),
-  DrivingStudent(name: 'Youssef Sassi', packageName: 'Permis B — 20h', hours: '20/20', status: 'Exam. conduite'),
+final initialStudents = <DrivingStudent>[
+  DrivingStudent(name: 'Amine Trabelsi', packageName: 'Permis B — 30h', hoursDone: 18, hoursTotal: 30, status: 'En cours'),
+  DrivingStudent(name: 'Salma Gharbi', packageName: 'Permis B — 20h', hoursDone: 20, hoursTotal: 20, status: 'Exam. code'),
+  DrivingStudent(name: 'Karim Bouazizi', packageName: 'Conduite accompagnée', hoursDone: 12, hoursTotal: 20, status: 'En cours'),
+  DrivingStudent(name: 'Ines Mejri', packageName: 'Permis B — 30h', hoursDone: 8, hoursTotal: 30, status: 'Débutant'),
+  DrivingStudent(name: 'Youssef Sassi', packageName: 'Permis B — 20h', hoursDone: 20, hoursTotal: 20, status: 'Exam. conduite'),
 ];
 
-const lessonsToday = <DrivingLesson>[
+const initialLessonsToday = <DrivingLesson>[
   DrivingLesson(time: '08:30', student: 'Amine T.', type: 'Circulation', instructor: 'Hedi'),
   DrivingLesson(time: '10:00', student: 'Ines M.', type: 'Créneau', instructor: 'Leila'),
   DrivingLesson(time: '14:30', student: 'Karim B.', type: 'Manœuvres', instructor: 'Hedi'),
-  DrivingLesson(time: '16:00', student: 'Nadia F.', type: 'Autoroute', instructor: 'Sami'),
 ];
 
 const weekLessons = <String, List<String>>{
-  'Lun': ['08h Amine', '14h Karim', '17h Nadia'],
+  'Lun': ['08h Amine', '14h Karim'],
   'Mar': ['09h Ines', '15h Salma'],
-  'Mer': ['08h Youssef', '11h Amine', '16h Karim'],
+  'Mer': ['08h Youssef', '11h Amine'],
   'Jeu': ['10h Nadia', '14h Ines'],
-  'Ven': ['08h Salma', '13h Amine', '17h Youssef'],
+  'Ven': ['08h Salma', '17h Youssef'],
   'Sam': ['09h Examens blancs'],
 };
 

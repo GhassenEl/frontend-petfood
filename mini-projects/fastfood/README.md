@@ -1,6 +1,6 @@
 # QuickBite — Fast-food
 
-Mini-projet web autonome : gestion fast-food (menu, commandes, promotions).
+Mini-projet web autonome **dynamique** : menu, commandes, promotions (CRUD, statuts cliquables, `localStorage`).
 
 ```bash
 npx --yes serve -l 5522
