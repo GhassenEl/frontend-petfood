@@ -7,6 +7,7 @@
 | **QuickBite** | `quickbite_fastfood/` | Fast-food dynamique |
 | **AutoPilot** | `autopilot_ecole/` | Auto-école dynamique |
 | **MediLink** | `medilink_clinique/` | Clinique RDV + médicaments |
+| **DriveRent** | `driverent_location/` | Location voitures (flotte, clients, locations) |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 

@@ -1,0 +1,56 @@
+@import url('../salle-de-sport/styles.css');
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.car-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  position: relative;
+}
+
+.car-card h3 { margin: 0 0 6px; }
+.car-card p { margin: 4px 0; color: var(--muted); font-size: 14px; }
+.car-card .price { font-size: 20px; font-weight: 800; margin-top: 10px; }
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.form input, .form select {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  min-width: 140px;
+}
+
+.btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn--primary { background: var(--accent); color: var(--accent-inv); border-color: var(--accent); }
+.btn--ghost { background: transparent; padding: 4px 8px; font-size: 12px; }
+
+.hint { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+.status-btn { cursor: pointer; border: none; background: none; padding: 0; }
+.card-actions { position: absolute; top: 10px; right: 10px; }

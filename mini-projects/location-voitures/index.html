@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DriveRent — Location voitures</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-theme="dark">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand__icon">🚙</span><div><strong>DriveRent</strong><small>Location voitures</small></div></div>
+      <nav class="nav">
+        <button type="button" class="nav__btn nav__btn--active" data-view="dashboard">Tableau de bord</button>
+        <button type="button" class="nav__btn" data-view="fleet">Flotte</button>
+        <button type="button" class="nav__btn" data-view="clients">Clients</button>
+        <button type="button" class="nav__btn" data-view="rentals">Locations</button>
+      </nav>
+      <p class="sidebar__note">Données dynamiques · sauvegarde locale</p>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <h1 id="page-title">Tableau de bord</h1>
+        <div class="topbar__meta">
+          <span class="pill">Noir & blanc</span>
+          <button type="button" class="theme-toggle" id="theme-toggle">◐ Thème</button>
+        </div>
+      </header>
+      <section id="view-dashboard" class="view view--active">
+        <div class="kpi-grid" id="kpi-grid"></div>
+        <div class="split">
+          <article class="card"><h2>Locations en cours</h2><ul class="list" id="active-rentals"></ul></article>
+          <article class="card"><h2>Prochaines réservations</h2><ul class="list" id="upcoming-rentals"></ul></article>
+        </div>
+      </section>
+      <section id="view-fleet" class="view">
+        <article class="card">
+          <div class="card__head"><h2>Flotte</h2><button type="button" class="btn" id="add-car-btn">+ Véhicule</button></div>
+          <form class="form" id="car-form" hidden>
+            <input type="text" name="model" placeholder="Modèle ex: Peugeot 208" required />
+            <input type="text" name="category" placeholder="Catégorie ex: Citadine" required />
+            <input type="number" name="price" placeholder="Prix / jour DT" min="1" required />
+            <select name="status">
+              <option value="Disponible">Disponible</option>
+              <option value="Louée">Louée</option>
+              <option value="Maintenance">Maintenance</option>
+            </select>
+            <button type="submit" class="btn btn--primary">Ajouter</button>
+          </form>
+          <div class="grid" id="fleet-grid"></div>
+        </article>
+      </section>
+      <section id="view-clients" class="view">
+        <article class="card">
+          <div class="card__head"><h2>Clients</h2><button type="button" class="btn" id="add-client-btn">+ Client</button></div>
+          <form class="form" id="client-form" hidden>
+            <input type="text" name="name" placeholder="Nom complet" required />
+            <input type="text" name="phone" placeholder="Téléphone" required />
+            <input type="text" name="license" placeholder="N° permis" />
+            <button type="submit" class="btn btn--primary">Ajouter</button>
+          </form>
+          <input type="search" class="search" id="client-search" placeholder="Rechercher un client…" />
+          <div class="table-wrap" style="margin-top:14px">
+            <table><thead><tr><th>Client</th><th>Téléphone</th><th>Permis</th><th></th></tr></thead><tbody id="clients-table"></tbody></table>
+          </div>
+        </article>
+      </section>
+      <section id="view-rentals" class="view">
+        <article class="card">
+          <div class="card__head"><h2>Locations</h2><button type="button" class="btn" id="add-rental-btn">+ Location</button></div>
+          <form class="form" id="rental-form" hidden>
+            <input type="text" name="client" placeholder="Client" required />
+            <input type="text" name="car" placeholder="Véhicule" required />
+            <input type="date" name="start" required />
+            <input type="date" name="end" required />
+            <input type="number" name="total" placeholder="Total DT" min="1" required />
+            <button type="submit" class="btn btn--primary">Créer</button>
+          </form>
+          <p class="hint">Cliquez sur le statut pour le faire avancer.</p>
+          <div class="table-wrap"><table><thead><tr><th>N°</th><th>Client</th><th>Véhicule</th><th>Début</th><th>Fin</th><th>Total</th><th>Statut</th><th></th></tr></thead><tbody id="rentals-table"></tbody></table></div>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

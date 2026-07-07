@@ -91,6 +91,75 @@ class _QuickBiteHomeState extends State<QuickBiteHome> {
     }
   }
 
+  void _addMenuItem() async {
+    final name = TextEditingController();
+    final category = TextEditingController();
+    final price = TextEditingController();
+    final emoji = TextEditingController(text: '🍽️');
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Nouvel article'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          TextField(controller: name, decoration: const InputDecoration(labelText: 'Nom')),
+          TextField(controller: category, decoration: const InputDecoration(labelText: 'Catégorie')),
+          TextField(controller: price, decoration: const InputDecoration(labelText: 'Prix DT'), keyboardType: TextInputType.number),
+          TextField(controller: emoji, decoration: const InputDecoration(labelText: 'Emoji')),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Ajouter')),
+        ],
+      ),
+    );
+    if (ok == true && name.text.isNotEmpty) {
+      setState(() => _menu.add(MenuItem(
+        name: name.text,
+        category: category.text,
+        price: int.tryParse(price.text) ?? 0,
+        emoji: emoji.text.isEmpty ? '🍽️' : emoji.text,
+      )));
+    }
+  }
+
+  void _addPromo() async {
+    final title = TextEditingController();
+    final description = TextEditingController();
+    final code = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Nouvelle promo'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          TextField(controller: title, decoration: const InputDecoration(labelText: 'Titre')),
+          TextField(controller: description, decoration: const InputDecoration(labelText: 'Description')),
+          TextField(controller: code, decoration: const InputDecoration(labelText: 'Code')),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Ajouter')),
+        ],
+      ),
+    );
+    if (ok == true && title.text.isNotEmpty) {
+      setState(() => _promos.add(Promo(title: title.text, description: description.text, code: code.text)));
+    }
+  }
+
+  VoidCallback? get _fabAction {
+    switch (_tab) {
+      case 0:
+      case 2:
+        return _addOrder;
+      case 1:
+        return _addMenuItem;
+      case 3:
+        return _addPromo;
+      default:
+        return null;
+    }
+  }
+
   void _cycleStatus(FoodOrder o) {
     final i = _statuses.indexOf(o.status);
     setState(() => o.status = _statuses[(i + 1) % _statuses.length]);
@@ -105,12 +174,11 @@ class _QuickBiteHomeState extends State<QuickBiteHome> {
           IconButton(onPressed: widget.onToggleTheme, icon: Icon(widget.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined)),
         ],
       ),
-      floatingActionButton: _tab == 1
-          ? null
-          : FloatingActionButton(
-              onPressed: _tab == 2 ? _addOrder : null,
-              child: const Icon(Icons.add),
-            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _fabAction,
+        tooltip: _tab == 1 ? 'Ajouter un article' : _tab == 3 ? 'Ajouter une promo' : 'Nouvelle commande',
+        child: const Icon(Icons.add),
+      ),
       body: IndexedStack(
         index: _tab,
         children: [
