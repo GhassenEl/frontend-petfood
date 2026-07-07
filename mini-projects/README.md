@@ -13,7 +13,7 @@ Thème **noir & blanc** · données **dynamiques** (CRUD + `localStorage` web / 
 | QuickBite — Fast-food | `fastfood/` | 5522 | Menu, commandes, promos |
 | AutoPilot — Auto-école | `auto-ecole/` | 5523 | Élèves, leçons, formules |
 | MediLink — Clinique | `clinique-medicale/` | 5524 | Médecins, patients, RDV |
-| **DriveRent — Location voitures** | `location-voitures/` | 5525 | Flotte, clients, locations |
+| DriveRent — Location voitures | `location-voitures/` | 5525 | Flotte, clients, locations |
 
 ## Flutter
 
@@ -24,21 +24,23 @@ Thème **noir & blanc** · données **dynamiques** (CRUD + `localStorage` web / 
 | QuickBite | `flutter/quickbite_fastfood/` | 5522 |
 | AutoPilot | `flutter/autopilot_ecole/` | 5523 |
 | MediLink | `flutter/medilink_clinique/` | 5524 |
-| **DriveRent** | `flutter/driverent_location/` | 5525 |
+| DriveRent | `flutter/driverent_location/` | 5525 |
+| **LinguaHub — Centre de langues** | `flutter/linguahub_center/` | 5526 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-linguahub` | Centre de langues |
+| `project-driverent` | Location voitures |
 | `project-quickbite` | Fast-food |
 | `project-autopilot` | Auto-école |
 | `project-medilink` | Clinique |
-| `project-driverent` | Location voitures |
 | `mini-projects` | Tous |
 
-## Lancer DriveRent (Flutter)
+## Lancer LinguaHub
 
 ```bash
-cd mini-projects/flutter/driverent_location
-flutter run -d web-server --web-port=5525
+cd mini-projects/flutter/linguahub_center
+flutter run -d web-server --web-port=5526
 ```
