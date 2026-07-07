@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitClub — Gestion salle de sport</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand__icon">🏋️</span>
+        <div>
+          <strong>FitClub</strong>
+          <small>Salle de sport</small>
+        </div>
+      </div>
+      <nav class="nav">
+        <button type="button" class="nav__btn nav__btn--active" data-view="dashboard">Tableau de bord</button>
+        <button type="button" class="nav__btn" data-view="members">Adhérents</button>
+        <button type="button" class="nav__btn" data-view="classes">Planning cours</button>
+        <button type="button" class="nav__btn" data-view="subscriptions">Abonnements</button>
+      </nav>
+      <p class="sidebar__note">Mini-projet autonome — démo locale</p>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <h1 id="page-title">Tableau de bord</h1>
+        <div class="topbar__meta">
+          <span id="today-label"></span>
+          <span class="pill pill--live">En ligne</span>
+        </div>
+      </header>
+
+      <section id="view-dashboard" class="view view--active">
+        <div class="kpi-grid" id="kpi-grid"></div>
+        <div class="split">
+          <article class="card">
+            <h2>Cours du jour</h2>
+            <ul class="list" id="today-classes"></ul>
+          </article>
+          <article class="card">
+            <h2>Dernières inscriptions</h2>
+            <ul class="list" id="recent-members"></ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-members" class="view">
+        <article class="card">
+          <div class="card__head">
+            <h2>Liste des adhérents</h2>
+            <input type="search" id="member-search" placeholder="Rechercher un adhérent…" class="search" />
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nom</th>
+                  <th>Formule</th>
+                  <th>Fin abonnement</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody id="members-table"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section id="view-classes" class="view">
+        <article class="card">
+          <h2>Planning hebdomadaire</h2>
+          <div class="schedule" id="schedule-grid"></div>
+        </article>
+      </section>
+
+      <section id="view-subscriptions" class="view">
+        <div class="plans" id="plans-grid"></div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

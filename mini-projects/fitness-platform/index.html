@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitConnect — Plateforme fitness en ligne</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header__inner">
+      <a href="#" class="logo">Fit<span>Connect</span></a>
+      <nav class="header__nav">
+        <a href="#programmes">Programmes</a>
+        <a href="#coachs">Coachs</a>
+        <a href="#reserver">Réserver</a>
+      </nav>
+      <button type="button" class="btn btn--primary" id="cta-header">Essai gratuit</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero__content">
+      <p class="hero__tag">Plateforme fitness 100 % en ligne</p>
+      <h1>Entraînez-vous où vous voulez, quand vous voulez</h1>
+      <p class="hero__text">
+        Programmes personnalisés, coachs certifiés et réservation de séances live —
+        mini-projet démo indépendant.
+      </p>
+      <div class="hero__actions">
+        <button type="button" class="btn btn--primary btn--lg" id="cta-hero">Commencer</button>
+        <button type="button" class="btn btn--ghost btn--lg" id="cta-demo">Voir la démo</button>
+      </div>
+      <div class="hero__stats">
+        <div><strong>48</strong><span>Programmes</span></div>
+        <div><strong>12</strong><span>Coachs</span></div>
+        <div><strong>2.4k</strong><span>Membres</span></div>
+      </div>
+    </div>
+    <div class="hero__card" id="hero-preview">
+      <p class="hero__card-label">Prochaine séance live</p>
+      <h2>Full Body — 45 min</h2>
+      <p>Avec Coach Maya · Aujourd'hui 18:00</p>
+      <button type="button" class="btn btn--primary" style="width:100%;margin-top:12px">Rejoindre</button>
+    </div>
+  </section>
+
+  <section class="section" id="programmes">
+    <div class="section__head">
+      <h2>Programmes populaires</h2>
+      <p>Musculation, cardio, yoga, perte de poids — filtres interactifs.</p>
+    </div>
+    <div class="filters" id="program-filters"></div>
+    <div class="grid" id="programs-grid"></div>
+  </section>
+
+  <section class="section section--alt" id="coachs">
+    <div class="section__head">
+      <h2>Nos coachs</h2>
+      <p>Profils, spécialités et notes des utilisateurs.</p>
+    </div>
+    <div class="grid grid--coaches" id="coaches-grid"></div>
+  </section>
+
+  <section class="section" id="reserver">
+    <div class="section__head">
+      <h2>Réserver une séance</h2>
+      <p>Choisissez un créneau — confirmation instantanée (démo).</p>
+    </div>
+    <form class="booking" id="booking-form">
+      <label>
+        Programme
+        <select id="booking-program" required></select>
+      </label>
+      <label>
+        Date
+        <input type="date" id="booking-date" required />
+      </label>
+      <label>
+        Créneau
+        <select id="booking-slot" required>
+          <option value="">Choisir…</option>
+          <option>08:00 — Matin énergie</option>
+          <option>12:30 — Express 30 min</option>
+          <option>18:00 — Soirée cardio</option>
+          <option>20:00 — Stretch & récup</option>
+        </select>
+      </label>
+      <label>
+        Email
+        <input type="email" id="booking-email" placeholder="vous@email.tn" required />
+      </label>
+      <button type="submit" class="btn btn--primary btn--lg">Confirmer la réservation</button>
+    </form>
+    <div class="booking-result" id="booking-result" hidden></div>
+  </section>
+
+  <footer class="footer">
+    <p>FitConnect — mini-projet web autonome · HTML / CSS / JavaScript</p>
+  </footer>
+
+  <div class="toast" id="toast" hidden></div>
+  <script src="app.js"></script>
+</body>
+</html>
