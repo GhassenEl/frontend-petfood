@@ -1,21 +1,28 @@
 # Mini-projets web autonomes
 
-Projets de démonstration **indépendants** de la plateforme PetfoodTN et de l'application mobile Flutter.
+Projets de démonstration **indépendants** de la plateforme PetfoodTN et de l'application mobile principale (`mobile_app/`).
 
-Chaque dossier est une application web statique (HTML, CSS, JavaScript) ouvrable directement dans le navigateur.
+## Web (HTML / CSS / JavaScript)
 
 | Projet | Dossier | Description |
 |--------|---------|-------------|
 | **FitClub — Salle de sport** | `salle-de-sport/` | Gestion adhérents, planning cours, abonnements |
 | **FitConnect — Plateforme fitness** | `fitness-platform/` | Coachs, programmes, réservations en ligne |
 
-## Lancer en local
+## Flutter
 
-Ouvrir `index.html` dans le navigateur, ou servir le dossier :
+| Application | Dossier | Description |
+|-------------|---------|-------------|
+| **FitClub Gym** | `flutter/fitclub_gym/` | App mobile gestion salle de sport |
+| **FitConnect** | `flutter/fitconnect_platform/` | App plateforme fitness en ligne |
+
+Voir [flutter/README.md](flutter/README.md) pour lancer les apps Flutter.
+
+## Lancer les projets web
+
+Ouvrir `index.html` dans le navigateur, ou :
 
 ```bash
 cd mini-projects/salle-de-sport
 npx --yes serve -l 5500
 ```
-
-Puis ouvrir `http://localhost:5500`.
