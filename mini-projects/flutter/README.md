@@ -9,6 +9,8 @@
 | **MediLink** | `medilink_clinique/` | Clinique RDV + médicaments |
 | **DriveRent** | `driverent_location/` | Location voitures |
 | **LinguaHub** | `linguahub_center/` | Centre de langues étrangères |
+| **TravelHub** | `travelhub_agency/` | Centre de voyage |
+| **FunPark** | `funpark_attractions/` | Parc d'attractions |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 
