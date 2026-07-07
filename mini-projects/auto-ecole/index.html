@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoPilot — Auto-école</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-theme="light">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand__icon">🚗</span><div><strong>AutoPilot</strong><small>Auto-école</small></div></div>
+      <nav class="nav">
+        <button type="button" class="nav__btn nav__btn--active" data-view="dashboard">Tableau de bord</button>
+        <button type="button" class="nav__btn" data-view="students">Élèves</button>
+        <button type="button" class="nav__btn" data-view="lessons">Planning leçons</button>
+        <button type="button" class="nav__btn" data-view="packages">Formules</button>
+      </nav>
+      <p class="sidebar__note">Mini-projet autonome — démo locale</p>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <h1 id="page-title">Tableau de bord</h1>
+        <div class="topbar__meta">
+          <span class="pill">Noir & blanc</span>
+          <button type="button" class="theme-toggle" id="theme-toggle">◐ Thème</button>
+        </div>
+      </header>
+      <section id="view-dashboard" class="view view--active">
+        <div class="kpi-grid" id="kpi-grid"></div>
+        <div class="split">
+          <article class="card"><h2>Leçons aujourd'hui</h2><ul class="list" id="today-lessons"></ul></article>
+          <article class="card"><h2>Examens à venir</h2><ul class="list" id="upcoming-exams"></ul></article>
+        </div>
+      </section>
+      <section id="view-students" class="view">
+        <article class="card"><input type="search" class="search" id="student-search" placeholder="Rechercher un élève…" /><div class="table-wrap" style="margin-top:14px"><table><thead><tr><th>Élève</th><th>Formule</th><th>Heures</th><th>Statut</th></tr></thead><tbody id="students-table"></tbody></table></div></article>
+      </section>
+      <section id="view-lessons" class="view">
+        <div class="schedule" id="schedule-grid"></div>
+      </section>
+      <section id="view-packages" class="view">
+        <div class="plans" id="packages-grid"></div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

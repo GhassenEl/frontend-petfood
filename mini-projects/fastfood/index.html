@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuickBite — Fast-food</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-theme="dark">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand__icon">🍔</span><div><strong>QuickBite</strong><small>Fast-food</small></div></div>
+      <nav class="nav">
+        <button type="button" class="nav__btn nav__btn--active" data-view="dashboard">Tableau de bord</button>
+        <button type="button" class="nav__btn" data-view="menu">Menu</button>
+        <button type="button" class="nav__btn" data-view="orders">Commandes</button>
+        <button type="button" class="nav__btn" data-view="promos">Promotions</button>
+      </nav>
+      <p class="sidebar__note">Mini-projet autonome — démo locale</p>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <h1 id="page-title">Tableau de bord</h1>
+        <div class="topbar__meta">
+          <span class="pill">Noir & blanc</span>
+          <button type="button" class="theme-toggle" id="theme-toggle">◐ Thème</button>
+        </div>
+      </header>
+      <section id="view-dashboard" class="view view--active">
+        <div class="kpi-grid" id="kpi-grid"></div>
+        <div class="split">
+          <article class="card"><h2>Commandes en cours</h2><ul class="list" id="active-orders"></ul></article>
+          <article class="card"><h2>Top ventes</h2><ul class="list" id="top-sales"></ul></article>
+        </div>
+      </section>
+      <section id="view-menu" class="view">
+        <div class="grid" id="menu-grid"></div>
+      </section>
+      <section id="view-orders" class="view">
+        <article class="card"><div class="table-wrap"><table><thead><tr><th>N°</th><th>Client</th><th>Articles</th><th>Total</th><th>Statut</th></tr></thead><tbody id="orders-table"></tbody></table></div></article>
+      </section>
+      <section id="view-promos" class="view">
+        <div class="grid" id="promos-grid"></div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

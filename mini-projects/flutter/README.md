@@ -4,19 +4,23 @@ Applications **Flutter** indépendantes de PetfoodTN et de `mobile_app/`.
 
 | Application | Dossier | Description |
 |-------------|---------|-------------|
-| **FitClub Gym** | `fitclub_gym/` | Gestion salle de sport (dashboard, adhérents, planning) |
-| **FitConnect** | `fitconnect_platform/` | Plateforme fitness en ligne (programmes, coachs, réservation) |
+| **FitClub Gym** | `fitclub_gym/` | Salle de sport |
+| **FitConnect** | `fitconnect_platform/` | Plateforme fitness |
+| **QuickBite** | `quickbite_fastfood/` | Fast-food (menu, commandes, promos) |
+| **AutoPilot** | `autopilot_ecole/` | Auto-école (élèves, planning, formules) |
+
+Thème noir & blanc · bascule clair/sombre dans l'app bar.
 
 ## Lancer
 
 ```bash
-cd fitclub_gym
+cd quickbite_fastfood
 flutter pub get
 flutter run -d chrome
 ```
 
 ```bash
-cd fitconnect_platform
+cd autopilot_ecole
 flutter pub get
 flutter run -d chrome
 ```
