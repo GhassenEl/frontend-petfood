@@ -29,6 +29,7 @@ import { getEffectiveDiscount, getPromoPrice, isOnPromotion } from '../utils/pro
 import { productId, dedupeProducts, withProductIds } from '../utils/productId';
 import { resolveNaturalProductImage, sanitizeProductImageUrl } from '../utils/productImages';
 import ProductPacksPanel from '../components/ProductPacksPanel';
+import ProductStarRating from '../components/ProductStarRating';
 import { DEMO_NEAREST_STORE } from '../utils/clientDemoData';
 
 const VENDOR_BY_CATEGORY = {
@@ -164,6 +165,8 @@ const ClientProductsPage = () => {
       ...vendor,
       stock: Number(stockRaw || 0),
       price: Number(priceRaw || 0),
+      rating_avg: Number(p.rating_avg ?? p.ratingAvg ?? p.rating ?? 0),
+      rating_count: Number(p.rating_count ?? p.ratingCount ?? p.reviewCount ?? 0),
       imageUrl: sanitizeProductImageUrl(imageRaw, p) || resolveNaturalProductImage({ ...p, imageUrl: imageRaw }),
     };
     return withProductIds({ ...base, discount: getEffectiveDiscount(base) });
@@ -789,6 +792,9 @@ const ProductCard = ({ product, onAdd, onOrder, onVendor, onLike, getPrice, isPr
 
       <div style={{ padding: '18px' }}>
         <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>{product.name}</h3>
+        <div style={{ marginBottom: 6 }}>
+          <ProductStarRating product={product} size="sm" />
+        </div>
         <div style={{ marginBottom: 8 }}>
           <RseEcoBadge product={product} size="xs" showScore />
         </div>

@@ -59,7 +59,7 @@ const PlatformCompliancePage = () => {
     <div className="pcmp-page">
       <header className="pcmp-hero">
         <Link to="/rse" className="pcmp-back" style={{ marginRight: 16 }}>🌱 Hub RSE &amp; écologie</Link>
-        <Link to="/" className="pcmp-back">← Accueil PetfoodTN</Link>
+        <Link to="/marketing" className="pcmp-back">← Accueil PetfoodTN</Link>
         <h1>Conformité ISO &amp; développement durable</h1>
         <p>
           ISO 27001 (sécurité), ISO 9001 (qualité), traçabilité blockchain, RBAC

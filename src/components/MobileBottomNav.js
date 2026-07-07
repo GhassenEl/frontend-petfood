@@ -93,15 +93,6 @@ export const CLIENT_MOBILE_NAV = [
   { id: 'menu', action: 'menu', icon: '☰', label: 'Menu' },
 ];
 
-/** Navigation basse contextuelle — parcours IoT client (distribution, eau, mobile). */
-export const CLIENT_IOT_MOBILE_NAV = [
-  { id: 'iot', to: '/client-iot', icon: '📡', label: 'IoT', match: '/client-iot', matchQuery: 'tab=distribution' },
-  { id: 'feeder', to: '/pet-feeder', icon: '🍽️', label: 'Distrib.', match: '/pet-feeder' },
-  { id: 'cam', to: '/client-iot?tab=food-quality', icon: '📷', label: 'Qualité', matchQuery: 'tab=food-quality' },
-  { id: 'water', to: '/client-smart-water', icon: '💧', label: 'Eau', match: '/client-smart-water' },
-  { id: 'mobile', to: '/mobile#iot', icon: '📱', label: 'App', match: '/mobile' },
-];
-
 export const LIVREUR_MOBILE_NAV = [
   { id: 'dash', to: '/livreur/dashboard', icon: '📊', label: 'Accueil' },
   { id: 'orders', to: '/livreur/orders', icon: '📦', label: 'Courses' },
@@ -165,8 +156,8 @@ export const VENDOR_PUBLIC_MOBILE_NAV = [
 ];
 
 export const AUTH_PUBLIC_MOBILE_NAV = [
-  { id: 'home', to: '/', icon: '🏠', label: 'Accueil' },
-  { id: 'services', to: '/#services', icon: '📋', label: 'Services' },
+  { id: 'home', to: '/marketing', icon: '🏠', label: 'Accueil' },
+  { id: 'services', to: '/marketing#services', icon: '📋', label: 'Services' },
   { id: 'contact', to: '/contact', icon: '📧', label: 'Contact' },
   { id: 'login', to: '/login', icon: '🔑', label: 'Connexion' },
   { id: 'register', to: '/register', icon: '✨', label: 'Inscrire' },

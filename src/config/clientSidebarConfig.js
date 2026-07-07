@@ -2,18 +2,6 @@
 
 export const CLIENT_SIDEBAR_SECTIONS = [
   {
-    title: '🔌 Embarqué & IoT',
-    badge: 'EDGE',
-    items: [
-      { id: 'client-iot', label: 'Centre IoT embarqué', icon: '🔌', route: '/client-iot?tab=embedded' },
-      { id: 'pet-feeder', label: 'Distributeur ESP32', icon: '🍽️' },
-      { id: 'client-hardware-pcb', label: 'Cartes PCB ARES', icon: '🟢', route: '/client-hardware-pcb' },
-      { id: 'client-smart-water', label: 'Fontaine connectée', icon: '💧' },
-      { id: 'client-traceability', label: 'Traçabilité capteurs', icon: '🔗' },
-      { id: 'mobile-app', label: 'App mobile IoT', icon: '📱', route: '/mobile#iot' },
-    ],
-  },
-  {
     title: '🛒 Boutique',
     items: [
       { id: 'client-products', label: 'Produits', icon: '🏷️' },
@@ -48,7 +36,6 @@ export const CLIENT_SIDEBAR_SECTIONS = [
     title: '🤖 IA & Premium',
     items: [
       { id: 'recommendations', label: 'Recommandations IA', icon: '🎯', route: '/client-recommendations' },
-      { id: 'client-chat-history', label: 'Historique chatbot', icon: '📜', route: '/client/chat-history' },
       { id: 'client-relay-points', label: 'Points relais', icon: '📍' },
     ],
   },

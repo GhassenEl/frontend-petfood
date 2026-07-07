@@ -27,7 +27,6 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
     {
       title: '🚚 Livraison',
       items: [
-        { id: 'delivery-cold-chain', label: 'Livraison chaud / froid', icon: '🌡️' },
         { id: 'rse', label: 'Logistique verte', icon: '🌱' },
       ],
     },
@@ -43,7 +42,6 @@ const LivreurSidebar = ({ onLogout, user, onNavigate }) => {
       title: '💬 Communications',
       items: [
         { id: 'messages', label: 'Messages', icon: '💬' },
-        { id: 'chat-history', label: 'Historique chatbot', icon: '📜' },
       ]
     },
     {

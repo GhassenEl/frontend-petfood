@@ -23,15 +23,13 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'iot-anomalies', label: 'Command center IoT', icon: '🔌' },
         { id: 'food-quality-cam', label: 'ESP32-CAM & vision', icon: '📷' },
         { id: 'food-quality', label: 'Qualité alimentaire', icon: '🌡️' },
-        { id: 'client-hardware-pcb', label: 'Cartes PCB (docs)', icon: '🟢', route: '/client-hardware-pcb' },
-        { id: 'pet-feeder', label: 'Flotte distributeurs', icon: '🍽️', route: '/pet-feeder' },
+        { id: 'client-hardware-pcb', label: 'Cartes PCB (docs)', icon: '🟢', route: '/hardware-pcb' },
       ],
     },
     {
       title: '📊 Analytics',
       items: [
         { id: 'recommendations', label: 'Recommandations IA', icon: '🎯', route: '/admin/recommendations' },
-        { id: 'chat-history', label: 'Historique chatbot', icon: '💬', route: '/admin/chat-history' },
         { id: 'devops', label: 'DevOps & observabilité', icon: '⚙️' },
         { id: 'performance', label: 'Performance plateforme', icon: '⚡' },
         { id: 'nlp-models', label: 'Modèles NLP', icon: '🧠' },
@@ -53,7 +51,6 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
       title: '🛒 Gestion',
       items: [
         { id: 'orders', label: 'Commandes', icon: '📦' },
-        { id: 'sales', label: 'Ventes & CA', icon: '💰' },
         { id: 'invoices', label: 'Factures', icon: '🧾' },
         { id: 'products', label: 'Produits', icon: '🏷️' },
         { id: 'cities', label: 'Réseau villes', icon: '🏙️' },

@@ -16,6 +16,7 @@ import {
   validateTokenClaims,
 } from '../utils/jwtSecurity';
 import { useHttpOnlyAuthCookie } from '../config/authPolicy';
+import { ensureDemo2FAForUser } from '../utils/twoFactorPolicy';
 
 const SESSION_CHECK_MS = 30_000;
 const SESSION_WARNING_MS = 5 * 60 * 1000;
@@ -54,6 +55,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     const sessionUser = userFromToken(validation.decoded, apiUser);
+    ensureDemo2FAForUser(sessionUser);
     setToken(nextToken);
     setUser(sessionUser);
     api.defaults.headers.common.Authorization = `Bearer ${nextToken}`;
@@ -86,6 +88,7 @@ export const AuthProvider = ({ children }) => {
             const meRes = await api.get('/auth/me', { _skipAuthRefresh: true });
             if (meRes.data?.user) {
               setUser(meRes.data.user);
+              ensureDemo2FAForUser(meRes.data.user);
               setToken('cookie');
             }
           } catch {
@@ -203,6 +206,7 @@ export const AuthProvider = ({ children }) => {
 
       persistAuthToken(accessToken, rememberMe);
       const sessionUser = userFromToken(validation.decoded, apiUser);
+      ensureDemo2FAForUser(sessionUser);
       if (useHttpOnlyAuthCookie()) {
         setToken('cookie');
         setUser(sessionUser);
@@ -220,6 +224,7 @@ export const AuthProvider = ({ children }) => {
         const validation = validateTokenClaims(demo.token);
         if (validation.valid) {
           persistAuthToken(demo.token, rememberMe);
+          ensureDemo2FAForUser(demo.user);
           setToken(demo.token);
           setUser(demo.user);
           api.defaults.headers.common.Authorization = `Bearer ${demo.token}`;

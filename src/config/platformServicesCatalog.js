@@ -88,19 +88,10 @@ export const PLATFORM_SERVICES = [
     api: 'GET /api/loyalty',
     serviceKey: 'loyaltyService',
   },
+
+  // —— Livraison client ——
   {
-    id: 'traceability',
-    category: 'iot',
-    roles: ['client'],
-    label: 'Traçabilité blockchain',
-    description: 'Origine des lots, chaîne d\'approvisionnement et vérification.',
-    route: '/client-traceability',
-    icon: '🔗',
-    api: 'GET /api/ecosystem/traceability',
-    serviceKey: 'ecosystemService',
-  },
-  {
-    id: 'platform-compliance',
+    id: 'compliance',
     category: 'ecosystem',
     roles: ['client'],
     label: 'Conformité ISO & environnement',
@@ -227,17 +218,6 @@ export const PLATFORM_SERVICES = [
     icon: '💡',
     serviceKey: 'userService',
   },
-  {
-    id: 'smart-water',
-    category: 'iot',
-    roles: ['client'],
-    label: 'Fontaine connectée',
-    description: 'Suivi hydratation, rappels et courbes de consommation.',
-    route: '/client-smart-water',
-    icon: '💧',
-    api: 'GET /api/ecosystem/water-monitor',
-    serviceKey: 'ecosystemService',
-  },
 
   // —— Soins réservables ——
   {
@@ -301,49 +281,6 @@ export const PLATFORM_SERVICES = [
     serviceKey: 'ecosystemService',
   },
 
-  // —— IoT ——
-  {
-    id: 'client-iot',
-    category: 'iot',
-    roles: ['client'],
-    label: 'Centre IoT',
-    description: 'Tableau de bord unifié : distributeur, fontaine, livraison et traçabilité.',
-    route: '/client-iot',
-    icon: '📡',
-    serviceKey: 'ecosystemService',
-  },
-  {
-    id: 'client-esp32cam-food-quality',
-    category: 'iot',
-    roles: ['client'],
-    label: 'ESP32-CAM qualité croquettes',
-    description: 'Détection temps réel : couleur, moisissure, température et humidité du bac.',
-    route: '/client-iot?tab=food-quality',
-    icon: '📷',
-    api: 'GET /api/client/iot/food-quality',
-    serviceKey: 'iotFoodQualityService',
-  },
-  {
-    id: 'pet-feeder',
-    category: 'iot',
-    roles: ['client'],
-    label: 'Distributeur IoT',
-    description: 'Portions automatiques, horaires et alertes niveau croquettes.',
-    route: '/pet-feeder',
-    icon: '🍽️',
-    api: 'GET /api/feeder',
-    serviceKey: 'feederFirebaseService',
-  },
-  {
-    id: 'hardware-pcb',
-    category: 'iot',
-    roles: ['client'],
-    label: 'Cartes PCB & alimentation',
-    description: 'PCB contrôle ESP32 et carte PSU 5 V — schémas, BOM, ARES et export Gerber.',
-    route: '/client-hardware-pcb',
-    icon: '🟢',
-    badge: 'ARES',
-  },
 
   // —— Livraison client ——
   {
@@ -710,17 +647,6 @@ export const PLATFORM_SERVICES = [
     route: '/livreur/intelligence',
     icon: '🧠',
     serviceKey: 'livreurIntelligenceHubService',
-  },
-  {
-    id: 'livreur-delivery-cold-chain',
-    category: 'livreur',
-    roles: ['livreur'],
-    label: 'Chaîne du froid livraison',
-    description: 'Capteurs IoT véhicule — température et qualité en transit.',
-    route: '/livreur/delivery-cold-chain',
-    icon: '🌡️',
-    api: 'GET /api/livreur/delivery/cold-chain',
-    serviceKey: 'deliveryColdChainService',
   },
   {
     id: 'livreur-ml',

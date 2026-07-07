@@ -1,6 +1,17 @@
 import api from './httpClient';
 import { DEMO_REVIEWS } from '../utils/clientDemoData';
+import { DEMO_ADMIN_REVIEWS } from '../utils/adminDemoData';
+import { withDemoFallback } from '../utils/liveDataResolver';
 import { filterReviewsByProduct } from '../utils/reviewInsightAnalyzer';
+
+export async function getAllReviews() {
+  try {
+    const { data } = await api.get('/reviews');
+    return withDemoFallback(Array.isArray(data) ? data : [], DEMO_ADMIN_REVIEWS);
+  } catch {
+    return withDemoFallback([], DEMO_ADMIN_REVIEWS);
+  }
+}
 
 export async function getMyReviews() {
   const { data } = await api.get('/reviews');
@@ -37,12 +48,6 @@ export async function getProductReviews(productId) {
   }
 
   return filterReviewsByProduct(DEMO_REVIEWS, pid);
-}
-
-/** Admin : tous les avis produits */
-export async function getAllReviews() {
-  const { data } = await api.get('/reviews');
-  return Array.isArray(data) ? data : [];
 }
 
 export async function createReview(payload) {

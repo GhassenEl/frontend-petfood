@@ -108,7 +108,6 @@ export const INTELLIGENCE_PILLARS = [
       text: 'Humidité 78 % — risque détérioration détecté sur distributeur #3.',
     },
     routes: [
-      { label: 'Centre IoT', path: '/client-iot', roles: ['client'] },
       { label: 'Anomalies IoT', path: '/admin/iot-anomalies', roles: ['admin'] },
       { label: 'Grafana', path: '/admin/performance', roles: ['admin'] },
     ],
@@ -130,7 +129,6 @@ export const INTELLIGENCE_PILLARS = [
       text: 'Qualité alimentaire : 87/100 — aucune moisissure détectée.',
     },
     routes: [
-      { label: 'ESP32-CAM qualité', path: '/client-iot?tab=food-quality', roles: ['client'] },
       { label: 'Surveillance admin', path: '/admin/food-quality-cam', roles: ['admin'] },
     ],
     metricKeys: ['camerasOnline', 'qualityScore'],

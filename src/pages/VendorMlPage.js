@@ -119,7 +119,7 @@ const VendorMlPage = () => {
                   ))}
                 </ul>
               )}
-              <Link to="/vendor/bi" className="vnd-btn vnd-btn--ghost vnd-btn--sm" style={{ marginTop: 12 }}>Dashboard BI →</Link>
+              <Link to="/vendor/dashboard" className="vnd-btn vnd-btn--ghost vnd-btn--sm" style={{ marginTop: 12 }}>Tableau de bord →</Link>
             </section>
 
             <section className="vnd-card">

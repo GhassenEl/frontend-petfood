@@ -58,9 +58,9 @@ const PILLARS = [
     text: 'Croquettes, traçabilité blockchain, fidélité, livraison prédictive et recommandations ML.',
   },
   {
-    icon: '📡',
-    title: 'IoT & connecté',
-    text: 'Distributeur ESP32, fontaine, livraison prédictive et traçabilité — pilotés depuis le Centre IoT.',
+    icon: '🎯',
+    title: 'Recommandations IA',
+    text: 'Moteur hybride ML/NLP : produits personnalisés selon profil animal, avis et historique d\'achats.',
   },
 ];
 
@@ -72,7 +72,7 @@ const SPECIES = ['🐕 Chien', '🐈 Chat', '🐦 Oiseau', '🐟 Poisson', '🐰
 
 const HERO_HIGHLIGHTS = [
   { icon: '🤖', label: 'Chat NLP', sub: 'Règles + émotions' },
-  { icon: '📡', label: 'Centre IoT', sub: 'ESP32 & fontaine' },
+  { icon: '🎯', label: 'Recommandations', sub: 'IA hybride ML/NLP' },
   { icon: '⭐', label: 'Avis 5★', sub: 'Sentiments analysés' },
 ];
 
@@ -123,7 +123,7 @@ const MarketingLandingPage = () => {
           <Link to="/contact" className="mkt-nav__link mkt-nav__link--hide-mobile">Contact</Link>
           <Link to="/vendor" className="mkt-nav__link mkt-nav__link--hide-mobile">Vendeur</Link>
           <Link to="/moderator" className="mkt-nav__link mkt-nav__link--hide-mobile">Modération</Link>
-          <a href="#iot" className="mkt-nav__link mkt-nav__link--hide-mobile">IoT</a>
+          <a href="#digital" className="mkt-nav__link mkt-nav__link--hide-mobile">Services digitaux</a>
           <a href="#temoignages" className="mkt-nav__link mkt-nav__link--hide-mobile">Avis</a>
           <a href="#faq" className="mkt-nav__link mkt-nav__link--hide-mobile">FAQ</a>
           <Link to="/login" className="mkt-nav__link">Connexion</Link>
@@ -137,7 +137,7 @@ const MarketingLandingPage = () => {
             <span className="mkt-hero__badge">🇹🇳 Plateforme animaux · Tunisie</span>
             <h1>Tout pour le bien-être de vos compagnons, en un seul endroit</h1>
             <p className="mkt-hero__lead">
-              Boutique, nutrition multi-espèces, soins réservables, IoT connecté, vétérinaire
+              Boutique, nutrition multi-espèces, soins réservables, recommandations IA, vétérinaire
               et intelligence artificielle — pour propriétaires, cliniques et professionnels.
               Architecture full-stack de niveau production : BI, DevOps, sécurité et déploiement cloud.
             </p>
@@ -369,10 +369,10 @@ const MarketingLandingPage = () => {
         </div>
       </section>
 
-      <section id="iot" className="mkt-section mkt-iot">
-        <h2 className="mkt-section__title">📡 IoT & écosystème connecté</h2>
+      <section id="digital" className="mkt-section mkt-iot">
+        <h2 className="mkt-section__title">🎯 Services digitaux client</h2>
         <p className="mkt-section__sub">
-          Pilotez distributeur, fontaine, livraison et traçabilité depuis un seul tableau de bord — disponible après inscription.
+          Boutique, recommandations personnalisées, santé animale et suivi commandes — disponibles après inscription.
         </p>
         <div className="mkt-iot-grid">
           {MARKETING_IOT_FEATURES.map((f) => (
@@ -384,7 +384,7 @@ const MarketingLandingPage = () => {
           ))}
         </div>
         <div className="mkt-iot-cta">
-          <Link to="/register" className="mkt-btn mkt-btn--primary">Accéder au Centre IoT</Link>
+          <Link to="/register" className="mkt-btn mkt-btn--primary">Créer un compte gratuit</Link>
         </div>
       </section>
 
@@ -434,7 +434,7 @@ const MarketingLandingPage = () => {
       <section id="temoignages" className="mkt-section">
         <h2 className="mkt-section__title">Ils nous font confiance</h2>
         <p className="mkt-section__sub">
-          Avis 1–5★ sur produits et services — toilettage, véto, commandes, nutrition et IoT.
+          Avis 1–5★ sur produits et services — toilettage, véto, commandes et nutrition.
         </p>
         <div className="mkt-rating-summary">
           <div>
@@ -571,13 +571,13 @@ const MarketingLandingPage = () => {
 
       <section className="mkt-section-newsletter" aria-labelledby="newsletter-title">
         <h2 id="newsletter-title">Newsletter PetfoodTN</h2>
-        <p>Promotions, conseils nutrition et nouveautés IoT — directement dans votre boîte mail.</p>
+        <p>Promotions, conseils nutrition et recommandations IA — directement dans votre boîte mail.</p>
         <MarketingNewsletterForm />
       </section>
 
       <section className="mkt-cta-band">
         <h2>Prêt à prendre soin de votre animal ?</h2>
-        <p>Inscription en 2 minutes — boutique, nutrition, IoT, RDV vétérinaire et assistant chat NLP.</p>
+        <p>Inscription en 2 minutes — boutique, nutrition, recommandations IA, RDV vétérinaire et assistant chat NLP.</p>
         <div className="mkt-cta-band__actions">
           <Link to="/register" className="mkt-btn mkt-btn--secondary">Créer mon compte</Link>
           <Link to="/login" className="mkt-btn mkt-btn--ghost mkt-btn--cta-ghost">
@@ -591,7 +591,7 @@ const MarketingLandingPage = () => {
           <div>
             <PetfoodLogo size="sm" showTagline />
             <p style={{ marginTop: 8 }}>
-              Plateforme animaux Tunisie — boutique, santé, IoT, IA, BI &amp; DevOps.
+              Plateforme animaux Tunisie — boutique, santé, IA, BI &amp; DevOps.
               Projet PFE full-stack déployable en production.
             </p>
           </div>
@@ -600,7 +600,7 @@ const MarketingLandingPage = () => {
             <a href="#marketing-digital">Marketing digital</a>
             <a href="#projet">Projet PFE</a>
             <a href="#services">Services</a>
-            <a href="#iot">IoT</a>
+            <a href="#digital">Services digitaux</a>
             <a href="#tarifs">Tarifs</a>
             <a href="#faq">FAQ</a>
           </div>

@@ -4,6 +4,7 @@
  */
 import { getLocalVetAssistantReply } from './vetAssistantEngine';
 import { buildLocalChatNlp } from './chatNlpPayload';
+import { extractLocalSources } from './productRating';
 
 export const SUPPORTED_LANGS = ['fr', 'en', 'ar'];
 export const LANG_LABELS = { fr: 'FR', en: 'EN', ar: 'AR' };
@@ -93,9 +94,9 @@ const ROLE_GREETINGS = {
       ar: 'مرحباً! أجيب على جميع أسئلتك — المنتجات، العروض، الطلبات، الدفع، IoT ومواعيد الطبيب البيطري.',
     },
     quickReplies: {
-      fr: ['Recommandations', 'Codes promo', 'Mes commandes', 'Guide paiement', 'Centre IoT'],
-      en: ['Recommendations', 'Promo codes', 'My orders', 'Payment guide', 'IoT hub'],
-      ar: ['توصيات', 'أكواد خصم', 'طلباتي', 'دليل الدفع', 'مركز IoT'],
+      fr: ['Recommandations', 'Codes promo', 'Mes commandes', 'Guide paiement', 'Santé animale'],
+      en: ['Recommendations', 'Promo codes', 'My orders', 'Payment guide', 'Pet health'],
+      ar: ['توصيات', 'أكواد خصم', 'طلباتي', 'دليل الدفع', 'صحة الحيوان'],
     },
   },
   admin: {
@@ -114,8 +115,8 @@ const ROLE_GREETINGS = {
   livreur: {
     title: { fr: 'Assistant Livreur', en: 'Courier Assistant', ar: 'مساعد التوصيل' },
     content: {
-      fr: 'Assistant livreur — commandes, carte, itinéraire, messages, gains et chaîne du froid. Je réponds en FR, EN ou AR.',
-      en: 'Courier assistant — orders, map, route, messages, earnings and cold chain. I reply in FR, EN or AR.',
+      fr: 'Assistant livreur — commandes, carte, itinéraire, messages et gains. Je réponds en FR, EN ou AR.',
+      en: 'Courier assistant — orders, map, route, messages and earnings. I reply in FR, EN or AR.',
       ar: 'مساعد التوصيل — الطلبات، الخريطة، المسار، الرسائل، الأرباح وسلسلة التبريد.',
     },
     quickReplies: {
@@ -209,9 +210,9 @@ const SHARED_QUESTIONS = [
   {
     keys: ['iot', 'esp32', 'distributeur', 'fontaine', 'camera', 'caméra', 'oled', 'capteur', 'sensor'],
     reply: {
-      fr: 'Centre IoT client (/client-iot) : distribution nourriture, ESP32-CAM, afficheur OLED, consommation eau, traçabilité, alertes et automatisations. Pilotable depuis l\'app mobile.',
-      en: 'Client IoT hub (/client-iot): food dispenser, ESP32-CAM, OLED display, water intake, traceability, alerts and automations. Controllable from the mobile app.',
-      ar: 'مركز IoT (/client-iot): موزع الطعام، ESP32-CAM، شاشة OLED، استهلاك الماء، التتبع، التنبيهات والأتمتة.',
+      fr: 'Le pilotage IoT (ESP32, distributeurs, capteurs) est réservé aux espaces admin et vendeur. Consultez /admin/iot-anomalies ou /vendor/feeder-iot.',
+      en: 'IoT management (ESP32, feeders, sensors) is available in admin and vendor spaces. See /admin/iot-anomalies or /vendor/feeder-iot.',
+      ar: 'إدارة IoT متاحة لمساحات المسؤول والبائع. راجع /admin/iot-anomalies أو /vendor/feeder-iot.',
     },
   },
   {
@@ -524,14 +525,6 @@ const ROLE_QUESTIONS = {
         ar: 'الرسائل /livreur/messages.',
       },
     },
-    {
-      keys: ['froid', 'cold', 'chaine', 'chain', 'temperature', 'تبريد'],
-      reply: {
-        fr: 'Chaîne du froid /livreur/delivery-cold-chain — capteurs température, alertes seuil.',
-        en: 'Cold chain /livreur/delivery-cold-chain — temperature sensors, threshold alerts.',
-        ar: 'سلسلة التبريد /livreur/delivery-cold-chain.',
-      },
-    },
   ],
   vet: [],
 };
@@ -548,6 +541,100 @@ const OTHER_QUESTION = {
   ar: 'سؤال آخر',
 };
 
+/** Réponses détaillées inline pour les boutons rapides (sans redirection). */
+const QUICK_TOPIC_REPLIES = {
+  fr: {
+    Commandes: {
+      livreur: 'Vos commandes du jour regroupent les livraisons assignées, leur statut (en attente, en cours, livrée) et les adresses clients. Vous pouvez accepter une course, signaler un problème ou joindre une preuve de livraison photo. Les commandes urgentes ou avec créneau horaire apparaissent en priorité. Consultez aussi les instructions spéciales (étage, code, animaux).',
+      admin: 'La gestion des commandes couvre tout le cycle : création client, paiement, préparation vendeur, assignation livreur et clôture. Vous pouvez filtrer par statut, région ou vendeur, exporter les données et réassigner un livreur en cas d\'incident. Les commandes en litige sont signalées pour traitement prioritaire.',
+      client: 'Vos commandes affichent le statut en temps réel : confirmation, préparation, expédition, livraison. Vous y retrouvez le détail des articles, le montant, le mode de paiement et le suivi du livreur si assigné. Une notification vous informe à chaque étape. En cas de retard, vous pouvez ouvrir une réclamation directement depuis la commande concernée.',
+      default: 'Les commandes sont le cœur de PetfoodTN : suivi client, préparation vendeur et livraison. Précisez votre rôle ou votre besoin pour une réponse plus ciblée.',
+    },
+    Carte: {
+      livreur: 'La carte affiche vos arrêts du jour, l\'itinéraire optimisé et le trafic estimé. Chaque point correspond à une commande avec adresse, téléphone client et fenêtre de livraison. Vous pouvez lancer la navigation GPS externe ou signaler une adresse introuvable. Les points relais sont distingués des livraisons à domicile.',
+      default: 'La carte livreur centralise tournée, GPS et points de passage pour organiser vos courses efficacement.',
+    },
+    Messages: {
+      livreur: 'La messagerie vous permet d\'échanger avec les clients (retard, accès immeuble) et le support dispatch. Les messages non lus sont mis en évidence. Répondez rapidement pour améliorer votre note de service. L\'historique des conversations est conservé par client.',
+      vendor: 'La messagerie vendeur regroupe les questions clients sur les produits, les commandes et les retours. Répondez sous 24 h pour maintenir une bonne réputation. Vous pouvez joindre des précisions sur la disponibilité ou proposer une alternative en cas de rupture.',
+      moderator: 'La messagerie modérateur sert à traiter les litiges entre clients, vendeurs et livreurs. Chaque fil est lié à un ticket ou une réclamation. Documentez vos décisions pour l\'audit.',
+      default: 'La messagerie interne facilite la communication entre tous les acteurs de la plateforme.',
+    },
+    Gains: {
+      livreur: 'Vos gains comprennent la commission par livraison (5 DT par course en moyenne), les bonus ponctualité et les pourboires éventuels. Le tableau récapitule la semaine en cours, l\'historique des paiements et les courses en attente de validation. Les graphiques montrent l\'évolution sur 7 jours.',
+      default: 'Les gains livreur sont calculés par course livrée, avec bonus et historique détaillé.',
+    },
+    'Tableau de bord': {
+      livreur: 'Le tableau de bord livreur résume votre activité : courses du jour, gains de la semaine, taux de ponctualité, messages non lus et alertes. Les graphiques « Livraisons & gains » et « Activité 7 jours » visualisent votre performance. Vous y accédez aussi aux raccourcis commandes, carte et messagerie.',
+      admin: 'Le tableau de bord admin centralise les KPI : ventes, commandes en cours, alertes stock, audience temps réel, réclamations et graphiques Power BI. C\'est votre point d\'entrée pour piloter la plateforme au quotidien.',
+      vendor: 'Le tableau de bord vendeur affiche le chiffre d\'affaires, les commandes actives, les alertes stock, les avis récents et le panneau Business Intelligence intégré. Vous y voyez aussi vos commissions payées et en attente.',
+      moderator: 'Le tableau de bord modérateur liste les vendeurs en attente, les signalements, les avis à modérer et les litiges remboursement. Les indicateurs anti-fraude mettent en avant les dossiers prioritaires.',
+      default: 'Le tableau de bord résume l\'activité essentielle de votre espace PetfoodTN.',
+    },
+    Dashboard: {
+      admin: 'Le dashboard admin regroupe ventes, pharmacie vétérinaire, maladies signalées, livraisons et audience temps réel. Les graphiques Power BI sont intégrés directement — pas besoin d\'une page séparée. Utilisez les filtres par période pour analyser les tendances.',
+      vendor: 'Votre dashboard vendeur inclut le CA, le classement marketplace, les produits à réapprovisionner et le panneau BI. Les courbes de ventes et la répartition des commandes vous aident à anticiper la demande.',
+      moderator: 'Le dashboard modérateur synthétise les tâches en attente : validation vendeurs, contenu signalé, remboursements litigieux et messagerie. Traitez les éléments urgents en premier.',
+      default: 'Le dashboard est votre vue d\'ensemble personnalisée selon votre rôle sur PetfoodTN.',
+    },
+    Produits: {
+      admin: 'La gestion produits admin couvre le catalogue global, les catégories, les promotions plateforme et la synchronisation avec les vendeurs. Vous pouvez modérer les fiches, forcer une mise hors ligne ou ajuster les prix selon la gouvernance tarifaire.',
+      vendor: '« Mes produits » permet d\'ajouter, modifier ou retirer vos références : prix, stock, photos, descriptions et promotions. Les alertes stock signalent les ruptures. La traçabilité blockchain est disponible pour certains articles alimentaires.',
+      default: 'Le catalogue produits PetfoodTN regroupe croquettes, pâtées, accessoires et hygiène pour chiens, chats et NAC.',
+    },
+    'Mes commandes': {
+      vendor: 'Vos commandes vendeur listent les ventes en attente d\'acceptation, en préparation, expédiées ou livrées. Acceptez ou refusez avec motif, mettez à jour le statut et communiquez avec le client. Chaque commande affiche la commission prélevée et le montant net.',
+      client: 'Retrouvez toutes vos commandes passées et en cours, avec suivi livreur, facture et possibilité de demander un retour dans les 14 jours selon la politique en vigueur.',
+      default: 'Les commandes regroupent l\'historique d\'achat et le suivi des livraisons en cours.',
+    },
+    'Mes produits': {
+      vendor: 'Gérez votre catalogue : titres, descriptions, prix TTC, stock, images et promotions. Les produits en rupture ou stock faible sont signalés. Les ventes par référence alimentent les recommandations ML pour optimiser votre assortiment.',
+    },
+    'Assistant ML': {
+      vendor: 'L\'assistant ML analyse vos ventes, prévoit la demande sur 7 jours, suggère des promotions et identifie les produits à fort potentiel ou en sous-performance. Les alertes stock priorisent les réapprovisionnements urgents. Les ajustements de prix IA proposent des variations selon la concurrence et la saisonnalité.',
+    },
+    Recommandations: {
+      client: 'Les recommandations IA s\'appuient sur le profil de votre animal (race, âge, poids), vos achats passés et les avis clients. Vous recevez des suggestions croquettes, pâtées, accessoires et soins adaptés. Mettez à jour le profil animal pour affiner les résultats.',
+      vendor: 'Les recommandations vendeur identifient les produits à promouvoir, les bundles rentables et les références à retirer. Elles croisent vos ventes, les avis clients et les tendances marketplace.',
+      visitor: 'Après inscription gratuite, PetfoodTN propose des recommandations nutrition personnalisées selon l\'espèce, l\'âge et les préférences alimentaires de votre animal. Un simulateur aide à estimer les besoins caloriques quotidiens.',
+      default: 'Les recommandations IA personnalisent l\'expérience selon le profil animal et l\'historique d\'achat.',
+    },
+    'Codes promo': {
+      client: 'Les codes promo actifs s\'appliquent automatiquement au panier si vous êtes éligible. Exemples courants : BIENVENUE10 pour les nouveaux clients, FIDELITE5 pour les membres fidélité. Vérifiez la date d\'expiration et les conditions (montant minimum, catégories exclues). Les promotions produit sont cumulables selon les règles affichées.',
+    },
+    'Guide paiement': {
+      client: 'PetfoodTN accepte la carte bancaire (Visa, Mastercard), le wallet interne et le paiement à la livraison selon votre zone. Le paiement est sécurisé (3-D Secure). Les factures sont générées automatiquement et accessibles dans « Mes factures ». En cas d\'échec, vérifiez le plafond de votre carte ou réessayez avec le wallet.',
+    },
+    'Vendeurs en attente': {
+      moderator: 'Les vendeurs en attente ont soumis une candidature partenaire avec documents boutique, SIRET ou équivalent et coordonnées. Vérifiez la cohérence des informations, l\'absence de doublons et l\'historique anti-fraude avant validation. Un refus doit être motivé et notifié au candidat.',
+    },
+    'Centre anti-fraude': {
+      moderator: 'Le centre anti-fraude agrège les scores de risque, les commandes suspectes, les remboursements répétés et les avis spam. Chaque alerte propose des actions : bloquer, demander des pièces, escalader à l\'admin. Les patterns ML détectent les comportements anormaux (multiples comptes, adresses identiques).',
+    },
+    'Produits à valider': {
+      moderator: 'Les fiches produit en attente sont vérifiées pour le contenu (photos conformes, prix réalistes, descriptions sans contrefaçon). Validez, demandez une correction ou rejetez avec motif. Les produits alimentaires nécessitent une attention particulière sur les allégations santé.',
+    },
+    Devops: {
+      admin: 'Le hub DevOps intègre CI/CD, monitoring Grafana/Prometheus, état des conteneurs Docker, sauvegardes et alertes sécurité. Consultez les pipelines de déploiement, les logs centralisés et les métriques de performance API. Les sauvegardes automatiques sont planifiées quotidiennement.',
+    },
+    Sauvegardes: {
+      admin: 'Les sauvegardes couvrent la base de données, les fichiers uploadés et la configuration. Vous pouvez lancer une sauvegarde manuelle, restaurer un point antérieur ou vérifier l\'intégrité des archives. La rétention par défaut est de 30 jours.',
+    },
+  },
+};
+
+const matchQuickTopic = (message, role, lang) => {
+  const topics = QUICK_TOPIC_REPLIES[lang] || QUICK_TOPIC_REPLIES.fr;
+  const hay = normalize(message);
+  for (const [topic, roleReplies] of Object.entries(topics)) {
+    if (hay === normalize(topic) || hay.includes(normalize(topic))) {
+      const reply = roleReplies[role] || roleReplies.default;
+      if (reply) return { topic, reply };
+    }
+  }
+  return null;
+};
+
 function matchQuestions(questionList, hay) {
   for (const questionEntry of questionList) {
     if (questionEntry.keys.some((k) => hay.includes(normalize(k)))) return questionEntry;
@@ -560,7 +647,14 @@ export const getPlatformChatReply = ({ message, role = 'visitor', language = 'fr
   const hay = normalize(message);
   const nlp = buildLocalChatNlp(message, role);
 
-  const withNlp = (payload) => ({ ...payload, nlp, language: lang });
+  const withNlp = (payload) => ({
+    ...payload,
+    nlp,
+    language: lang,
+    sources: payload.sources?.length
+      ? payload.sources
+      : extractLocalSources(payload.message || '', payload.source ? [{ type: 'doc', label: `Moteur local (${payload.source})`, ref: payload.source }] : []),
+  });
 
   if (role === 'vet') {
     const vet = getLocalVetAssistantReply(message, pet);
@@ -572,6 +666,16 @@ export const getPlatformChatReply = ({ message, role = 'visitor', language = 'fr
         source: 'local-vet',
       });
     }
+  }
+
+  const quickHit = matchQuickTopic(message, role, lang);
+  if (quickHit) {
+    const greeting = ROLE_GREETINGS[role] || ROLE_GREETINGS.visitor;
+    return withNlp({
+      message: quickHit.reply,
+      quickReplies: [pick(OTHER_QUESTION, lang), ...pick(greeting.quickReplies, lang).slice(0, 2)],
+      source: 'local-quick-topic',
+    });
   }
 
   const shared = matchQuestions(SHARED_QUESTIONS, hay);

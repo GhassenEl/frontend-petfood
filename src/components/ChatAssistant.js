@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, ShoppingCart, MessageSquarePlus, History, Camera } from 'lucide-react';
+import { MessageCircle, X, Send, ShoppingCart, MessageSquarePlus, Camera } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import useSocket from '../hooks/useSocket';
 import { useNavigate } from 'react-router-dom';
 import { getEffectiveDiscount, isOnPromotion } from '../utils/productDetails';
 import ChatNlpInsight from './ChatNlpInsight';
+import ChatSourcesPanel from './ChatSourcesPanel';
 import {
   CHAT_UI,
   LANG_LABELS,
@@ -18,13 +19,6 @@ import {
   saveStoredChatLang,
 } from '../utils/platformChatbotEngine';
 import { analyzeChatImage } from '../services/chatHistoryService';
-
-const HISTORY_ROUTES = {
-  client: '/client/chat-history',
-  admin: '/admin/chat-history',
-  vet: '/vet/chat-history',
-  livreur: '/livreur/chat-history',
-};
 
 const PET_GREETING_LABELS = { dog: 'chien', cat: 'chat', bird: 'oiseau', fish: 'poisson', other: 'animal' };
 
@@ -219,7 +213,6 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
   const imageFileRef = useRef(null);
   const socket = useSocket(user ? `user-${user.id || user._id}` : 'global');
   const navigate = useNavigate();
-  const historyPath = HISTORY_ROUTES[variant] || (user ? HISTORY_ROUTES.client : null);
 
   const shouldShowVetCTA = (text) => {
     const t = String(text || '').toLowerCase();
@@ -362,7 +355,9 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
         quickReplies: local.quickReplies || [],
         shouldShowVetCTA: !!local.shouldShowVetCTA,
         nlp: local.nlp || null,
+        sources: local.sources || [],
         isLocal: true,
+        ragPowered: !!local.ragPowered,
       };
       setMessages((prev) => {
         const updated = [...prev];
@@ -417,6 +412,8 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
         quickReplies: data.quickReplies || [],
         shouldShowVetCTA: !!data.shouldShowVetCTA,
         nlp: data.nlp || null,
+        sources: data.sources || [],
+        ragPowered: !!data.ragPowered,
       };
       setMessages((prev) => {
         const updated = [...prev];
@@ -485,202 +482,18 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
   const handleQuickReply = (reply) => {
     const cleanReply = reply.replace(/^\p{Extended_Pictographic}\s*/u, '').trim() || reply;
 
-    if (cleanReply === 'Aller sur Événements') {
-      navigate('/events');
-      return;
-    }
-
-    if (cleanReply === 'Agent IA complet') {
-      setIsOpen(false);
-      return;
-    }
-
-    if (cleanReply === 'Mes commandes') {
-      setIsOpen(false);
-      navigate('/client-orders');
-      return;
-    }
-
-    const livreurNav = {
-      Commandes: '/livreur/orders',
-      Carte: '/livreur/map',
-      Messages: '/livreur/messages',
-      Gains: '/livreur/earnings',
-      'Tableau de bord': '/livreur/dashboard',
-    };
-    if (variant === 'livreur' && livreurNav[cleanReply]) {
-      setIsOpen(false);
-      navigate(livreurNav[cleanReply]);
-      return;
-    }
-
-    const adminNav = {
-      Commandes: '/admin/orders',
-      Produits: '/admin/products',
-      Avis: '/admin/reviews',
-      Réclamations: '/admin/complaints',
-      Factures: '/admin/invoices',
-      Utilisateurs: '/admin/users',
-      Dashboard: '/admin/dashboard',
-    };
-    if (variant === 'admin' && adminNav[cleanReply]) {
-      setIsOpen(false);
-      navigate(adminNav[cleanReply]);
-      return;
-    }
-
-    const moderatorNav = {
-      'Vendeurs en attente': '/moderator/vendors',
-      'Centre anti-fraude': '/moderator/fraud',
-      'Produits à valider': '/moderator/content',
-      Messagerie: '/moderator/messages',
-      Dashboard: '/moderator/dashboard',
-      Remboursements: '/moderator/refunds',
-      Signalements: '/moderator/reports',
-      Réclamations: '/moderator/complaints',
-      Rapports: '/moderator/analytics',
-    };
-    if (variant === 'moderator' && moderatorNav[cleanReply]) {
-      setIsOpen(false);
-      navigate(moderatorNav[cleanReply]);
-      return;
-    }
-
-    const vendorNav = {
-      Dashboard: '/vendor/dashboard',
-      'Assistant ML': '/vendor/ml',
-      'Mes commandes': '/vendor/orders',
-      'Mes produits': '/vendor/products',
-      'Alertes stock': '/vendor/ml',
-      'Recommandations produits': '/vendor/recommendations',
-      Recommandations: '/vendor/recommendations',
-      Commissions: '/vendor/dashboard',
-      Retours: '/vendor/returns',
-      Messagerie: '/vendor/communication',
-      'Mes ventes': '/vendor/sales',
-      'Traçabilité blockchain': '/vendor/traceability',
-      'IoT distributeur': '/vendor/feeder-iot',
-    };
-    if (variant === 'vendor' && vendorNav[cleanReply]) {
-      setIsOpen(false);
-      navigate(vendorNav[cleanReply]);
-      return;
-    }
-
-    const publicNav = {
-      Recommandations: '/register',
-      'Simulateur nutrition': '/register',
-      'Boutique produits': '/client-products',
-      'Catalogue produits': '/client-products',
-      'Devenir vendeur': '/vendor#devenir-partenaire',
-      'Hub vendeur': '/vendor',
-      Connexion: '/login',
-      Accueil: '/',
-      Inscription: '/register',
-      Contact: '/contact',
-    };
-    if (variant === 'visitor' && publicNav[cleanReply]) {
-      setIsOpen(false);
-      navigate(publicNav[cleanReply]);
-      return;
-    }
-
-    if (cleanReply === 'Réclamation' || cleanReply === 'Réclamations') {
-      setIsOpen(false);
-      navigate(variant === 'admin' ? '/admin/complaints' : '/client-complaints');
-      return;
-    }
-
     if (cleanReply === 'Contacter le support') {
       sendMessage('J\'ai un problème avec ma commande et j\'ai besoin d\'aide');
       return;
     }
 
-    if (cleanReply === 'Contacter vétérinaire') {
-      setIsOpen(false);
-      navigate('/veterinary');
-      return;
-    }
-
-    if (cleanReply === 'Centre IoT') {
-      setIsOpen(false);
-      navigate('/client-iot');
-      return;
-    }
-
-    if (cleanReply === 'Guide paiement') {
-      sendMessage('Guide paiement');
-      return;
-    }
-
-    if (cleanReply === 'Codes promo disponibles' || cleanReply === 'Codes promo') {
-      sendMessage('Codes promo disponibles');
-      return;
-    }
-
-    if (cleanReply === 'Recommandations' || cleanReply === 'Voir les promotions') {
-      sendMessage(cleanReply === 'Voir les promotions' ? 'Voir les promotions' : 'Recommandations pour mon animal');
-      return;
-    }
-
-    // Auto-workflow triggers
     if (cleanReply === 'Lancer automatiquement') {
-
-      // 1) Aller chercher les produits remisés côté serveur
-      // 2) Les mettre au panier via event addToCart
-      // 3) Ouvrir le checkout (puis créer commande via la page)
-      (async () => {
-        try {
-          const res = await api.get('/products');
-          const discounted = (res.data || []).filter((p) => getEffectiveDiscount(p) > 0 || p.isOnSale);
-          discounted.slice(0, 4).forEach(addToCart);
-          navigate('/checkout');
-        } catch (e) {
-          setMessages((prev) => [
-            ...prev,
-            { role: 'assistant', content: 'Impossible de récupérer les produits avec remise pour l\'instant.', quickReplies: [], products: [] },
-          ]);
-        }
-      })();
-      return;
-    }
-
-    if (cleanReply === 'Passer commande') {
-      setIsOpen(false);
-      navigate('/checkout');
+      sendMessage('Quels produits en promotion puis-je ajouter à mon panier automatiquement ?');
       return;
     }
 
     if (cleanReply === 'Payer mes factures') {
-      // Auto-paiement: payer toutes les factures non payées
-      (async () => {
-        try {
-          const res = await api.get('/invoices');
-          const pending = (res.data || []).filter(inv => inv.status !== 'paid');
-          if (pending.length === 0) {
-            setMessages((prev) => [
-              ...prev,
-              { role: 'assistant', content: 'Toutes vos factures sont déjà payées ✅', quickReplies: [], products: [] },
-            ]);
-            return;
-          }
-
-          for (const inv of pending) {
-            // paymentMethod par défaut : cash
-            await api.post(`/invoices/${inv._id}/pay`, { paymentMethod: inv.paymentMethod || 'cash' });
-          }
-
-          setMessages((prev) => [
-            ...prev,
-            { role: 'assistant', content: `Paiement terminé: ${pending.length} facture(s) payée(s) ✅`, quickReplies: [], products: [] },
-          ]);
-        } catch (e) {
-          setMessages((prev) => [
-            ...prev,
-            { role: 'assistant', content: 'Erreur lors du paiement automatique des factures. Essayez depuis la page Factures.', quickReplies: ['Payer mes factures'], products: [] },
-          ]);
-        }
-      })();
+      sendMessage('Comment payer mes factures en attente et quels moyens de paiement sont acceptés ?');
       return;
     }
 
@@ -863,20 +676,6 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
           >
             <MessageSquarePlus size={18} color="#666" />
           </button>
-          {historyPath && user && (
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false);
-                navigate(historyPath);
-              }}
-              style={styles.iconActionBtn}
-              title="Historique chatbot"
-              aria-label="Historique chatbot"
-            >
-              <History size={18} color="#666" />
-            </button>
-          )}
           {!embedded && (
             <button
               type="button"
@@ -913,6 +712,10 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
             <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5, fontSize: '14px' }}>{formatChatText(msg.content)}</div>
 
             {msg.nlp && <ChatNlpInsight nlp={msg.nlp} compact={msg.role === 'user'} />}
+
+            {msg.role === 'assistant' && msg.sources?.length > 0 && (
+              <ChatSourcesPanel sources={msg.sources} />
+            )}
 
             {msg.products && msg.products.length > 0 && (
               <div style={styles.productsGrid}>

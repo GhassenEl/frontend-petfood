@@ -22,7 +22,6 @@ import {
   processPayPalPayment,
   processTunisianPayment,
 } from '../utils/onlinePayment';
-import { validateCouponCode } from '../services/couponService';
 import { getWallet } from '../services/walletService';
 
 const CART_STORAGE_KEY = 'petfood_cart';
@@ -51,17 +50,13 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
   const [deliveryMode, setDeliveryMode] = useState('home');
   const [relayPoints, setRelayPoints] = useState([]);
   const [selectedRelayId, setSelectedRelayId] = useState('');
-  const [promoCode, setPromoCode] = useState('');
-  const [promoDiscount, setPromoDiscount] = useState(0);
-  const [promoMessage, setPromoMessage] = useState('');
-  const [promoLoading, setPromoLoading] = useState(false);
   const cart = Array.isArray(cartProp) && cartProp.length > 0 ? cartProp : storedCart;
   const computedSubtotal = cart.reduce(
     (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
     0
   );
   const subtotal = Number(Number(totalCartProp ?? computedSubtotal).toFixed(2));
-  const totalCart = Math.max(0, Number((subtotal - promoDiscount).toFixed(2)));
+  const totalCart = subtotal;
   const closeCheckout = onClose || (() => navigate('/client-products'));
 
   const loadPaymentConfig = useCallback(async () => {
@@ -147,28 +142,6 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
     return false;
   };
 
-  const applyPromoCode = async () => {
-    const code = promoCode.trim().toUpperCase();
-    if (!code) {
-      setPromoDiscount(0);
-      setPromoMessage('');
-      return;
-    }
-    setPromoLoading(true);
-    try {
-      const result = await validateCouponCode(code, subtotal);
-      if (!result.valid) {
-        setPromoDiscount(0);
-        setPromoMessage(result.message || 'Code invalide ou expiré.');
-        return;
-      }
-      setPromoDiscount(result.discount);
-      setPromoMessage(result.message);
-    } finally {
-      setPromoLoading(false);
-    }
-  };
-
   const handleCheckout = async () => {
     if (!cart.length) {
       window.alert('Votre panier est vide');
@@ -225,8 +198,6 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
         })),
         total: totalCart,
         paid: paidOnline,
-        promoCode: promoCode.trim() || undefined,
-        promoDiscount: promoDiscount || undefined,
       };
 
       const result = onPlaceOrder
@@ -340,11 +311,6 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
         <p style={{ color: '#888', margin: 0 }}>
           Total :{' '}
           <strong style={{ color: '#e67e22', fontSize: '20px' }}>{totalCart.toFixed(2)} DT</strong>
-          {promoDiscount > 0 && (
-            <span style={{ marginLeft: 8, fontSize: 14, color: '#15803d' }}>
-              (économie {promoDiscount.toFixed(2)} DT)
-            </span>
-          )}
         </p>
       </motion.div>
 
@@ -421,32 +387,6 @@ const CheckoutForm = ({ cart: cartProp, totalCart: totalCartProp, onPlaceOrder, 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25 }}
-        style={sectionStyle}
-      >
-        <h3 style={sectionTitleStyle}>🏷️ Code promo / coupon</h3>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            placeholder="Ex. PETFOOD10, WELCOME20"
-            value={promoCode}
-            onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-            style={{ flex: '1 1 180px', padding: '12px 14px', borderRadius: 12, border: '2px solid #e5e7eb' }}
-          />
-          <button type="button" onClick={applyPromoCode} disabled={promoLoading} style={{ padding: '12px 18px', borderRadius: 12, border: 'none', background: '#e67e22', color: 'white', fontWeight: 700, cursor: promoLoading ? 'wait' : 'pointer', opacity: promoLoading ? 0.7 : 1 }}>
-            {promoLoading ? '…' : 'Appliquer'}
-          </button>
-        </div>
-        {promoMessage && (
-          <p style={{ margin: '10px 0 0', fontSize: 13, color: promoDiscount > 0 ? '#15803d' : '#dc2626', fontWeight: 600 }}>
-            {promoMessage}
-          </p>
-        )}
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
         style={sectionStyle}
       >
         <h3 style={sectionTitleStyle}>

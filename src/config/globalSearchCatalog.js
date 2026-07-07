@@ -18,17 +18,12 @@ const ADMIN_SIDEBAR_SECTIONS = [
       { id: 'iot-anomalies', label: 'Command center IoT', icon: '🔌' },
       { id: 'food-quality-cam', label: 'ESP32-CAM', icon: '📷' },
       { id: 'food-quality', label: 'Qualité alimentaire', icon: '🌡️' },
-      { id: 'client-iot', label: 'Centre IoT embarqué', icon: '🔌', route: '/client-iot?tab=embedded' },
-      { id: 'pet-feeder', label: 'Distributeur ESP32', icon: '🍽️' },
-      { id: 'client-hardware-pcb', label: 'Cartes PCB ARES', icon: '🟢', route: '/client-hardware-pcb' },
-      { id: 'client-smart-water', label: 'Fontaine connectée', icon: '💧' },
     ],
   },
   {
     title: 'Analytics',
     items: [
       { id: 'recommendations', label: 'Recommandations IA', icon: '🎯', route: '/admin/recommendations' },
-      { id: 'chat-history', label: 'Historique chatbot', icon: '💬', route: '/admin/chat-history' },
       { id: 'devops', label: 'DevOps', icon: '⚙️' },
       { id: 'performance', label: 'Performance', icon: '⚡' },
       { id: 'nlp-models', label: 'Modèles NLP', icon: '🧠' },

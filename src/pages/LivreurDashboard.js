@@ -6,6 +6,8 @@ import { livreurCancelOrder } from '../services/orderService';
 import { withDemoDashboard, enrichLivreurChartStats } from '../utils/livreurDemoData';
 import useLivreurGps from '../hooks/useLivreurGps';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import LivreurMissionPanel from '../components/LivreurMissionPanel';
+import DeliveryProofModal from '../components/DeliveryProofModal';
 import LivreurDashboardCharts from '../components/LivreurDashboardCharts';
 
 const oid = (o) => o?.id || o?._id;

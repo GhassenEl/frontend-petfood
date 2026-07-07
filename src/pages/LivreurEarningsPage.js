@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { DollarSign, TrendingUp, Calendar, Package, CreditCard, BarChart3 } from 'lucide-react';
 import api from '../utils/api';
-import { DEMO_LIVREUR_ORDERS, getLivreurCommission, withDemoFallback } from '../utils/livreurDemoData';
+import { DEMO_LIVREUR_ORDERS, getLivreurCommission, withDemoFallback, buildDailyChart } from '../utils/livreurDemoData';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 
 const LivreurEarningsPage = () => {
@@ -76,7 +76,17 @@ const LivreurEarningsPage = () => {
     return Object.values(data);
   };
 
-  const chartData = weeklyData();
+  const chartData = (() => {
+    const values = weeklyData();
+    if (values.every((d) => d.earnings === 0)) {
+      return buildDailyChart().map((d) => ({
+        label: d.label,
+        earnings: d.commission,
+        count: d.count,
+      }));
+    }
+    return values;
+  })();
   const maxEarnings = Math.max(...chartData.map(d => d.earnings), 1);
 
   if (loading) {

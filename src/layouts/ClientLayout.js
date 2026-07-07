@@ -1,20 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import ResponsiveShell from './ResponsiveShell';
 import ClientSidebar from '../components/ClientSidebar';
 import ChatAssistant from '../components/ChatAssistant';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
-import MobileBottomNav, { CLIENT_MOBILE_NAV, CLIENT_IOT_MOBILE_NAV } from '../components/MobileBottomNav';
-const CLIENT_IOT_PATHS = [
-  '/client-iot',
-  '/pet-feeder',
-  '/client-hardware-pcb',
-  '/client-smart-water',
-  '/client-smart-delivery',
-  '/food-quality-surveillance',
-];
+import MobileBottomNav, { CLIENT_MOBILE_NAV } from '../components/MobileBottomNav';
 
 const CART_STORAGE_KEY = 'petfood_cart';
 
@@ -96,9 +88,7 @@ const ClientLayout = ({ children }) => {
     }
   };
 
-  const mobileNavItems = CLIENT_IOT_PATHS.some((p) => location.pathname.startsWith(p))
-    ? CLIENT_IOT_MOBILE_NAV
-    : CLIENT_MOBILE_NAV;
+  const mobileNavItems = CLIENT_MOBILE_NAV;
 
   return (
     <ResponsiveShell
@@ -106,7 +96,7 @@ const ClientLayout = ({ children }) => {
       bottomNav={<MobileBottomNav items={mobileNavItems} />}
       sidebar={(onClose) => <ClientSidebar onLogout={logout} onNavigate={onClose} />}
     >
-      {children}
+      {children ?? <Outlet />}
       <button
         type="button"
         className="platform-cart-fab"

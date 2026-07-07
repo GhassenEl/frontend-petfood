@@ -260,10 +260,20 @@ export const DEMO_ADMIN_REVIEWS = DEMO_REVIEWS.map((r, i) => ({
   user: { name: i === 0 ? 'Sami Ben Ali' : 'Ines Trabelsi', email: i === 0 ? 'client@petfood.tn' : 'ines.trabelsi@email.tn' },
 }));
 
-export const DEMO_ADMIN_COMPLAINTS = DEMO_COMPLAINTS.map((c, i) => ({
-  ...c,
-  user: { name: i === 0 ? 'Sami Ben Ali' : 'Ines Trabelsi', email: i === 0 ? 'client@petfood.tn' : 'ines.trabelsi@email.tn' },
-}));
+export const DEMO_ADMIN_COMPLAINTS = DEMO_COMPLAINTS.map((c, i) => {
+  const clients = [
+    { name: 'Sami Ben Ali', email: 'client@petfood.tn' },
+    { name: 'Ines Trabelsi', email: 'ines.trabelsi@email.tn' },
+    { name: 'Youssef Gharbi', email: 'youssef.gharbi@email.tn' },
+    { name: 'Lina Mejri', email: 'lina.mejri@email.tn' },
+    { name: 'Karim M.', email: 'karim.m@email.tn' },
+  ];
+  return {
+    ...c,
+    user: clients[i % clients.length],
+    orderId: i % 2 === 0 ? `adm-order-20${i + 1}` : undefined,
+  };
+});
 
 export const DEMO_ADMIN_VET_RECORDS = [
   {
@@ -314,7 +324,14 @@ export const DEMO_ADMIN_VET_RECORDS = [
 ];
 
 export const DEMO_ADMIN_LEAVE_REQUESTS = [
-  ...DEMO_LIVREUR_LEAVE_REQUESTS.map((r) => ({ ...r, staffName: 'Karim Mansouri', staffRole: 'livreur' })),
+  ...DEMO_LIVREUR_LEAVE_REQUESTS.map((r, i) => ({
+    ...r,
+    staffRole: 'livreur',
+    user: {
+      name: i === 0 || i === 2 ? 'Karim Mansouri' : 'Mohamed B.',
+      email: i === 0 || i === 2 ? 'livreur@petfood.tn' : 'mohamed.livreur@petfood.tn',
+    },
+  })),
   {
     id: 'leave-vet-1',
     _id: 'leave-vet-1',
@@ -323,8 +340,8 @@ export const DEMO_ADMIN_LEAVE_REQUESTS = [
     endDate: '2026-08-15',
     reason: 'Congrès vétérinaire à Sfax',
     status: 'pending',
-    staffName: 'Dr. Amira Khelifi',
     staffRole: 'vet',
+    user: { name: 'Dr. Amira Khelifi', email: 'vet@petfood.tn' },
   },
   {
     id: 'leave-vet-2',
@@ -335,8 +352,30 @@ export const DEMO_ADMIN_LEAVE_REQUESTS = [
     reason: 'Indisposition — remplacement Dr. Sassi',
     status: 'approved',
     adminNote: 'Validé — bon rétablissement.',
-    staffName: 'Dr. Amira Khelifi',
     staffRole: 'vet',
+    user: { name: 'Dr. Amira Khelifi', email: 'vet@petfood.tn' },
+  },
+  {
+    id: 'leave-vet-3',
+    _id: 'leave-vet-3',
+    type: 'maladie',
+    startDate: '2026-06-18',
+    endDate: '2026-06-20',
+    reason: 'Grippe — certificat transmis, consultations reportées.',
+    status: 'pending',
+    staffRole: 'vet',
+    user: { name: 'Dr. Hichem Sassi', email: 'hichem.vet@petfood.tn' },
+  },
+  {
+    id: 'leave-liv-4',
+    _id: 'leave-liv-4',
+    type: 'maladie',
+    startDate: '2026-06-25',
+    endDate: '2026-06-26',
+    reason: 'Fièvre — impossible de prendre la tournée du matin.',
+    status: 'pending',
+    staffRole: 'livreur',
+    user: { name: 'Sami Livreur', email: 'sami.livreur@petfood.tn' },
   },
 ];
 
@@ -344,6 +383,110 @@ export const DEMO_ADMIN_REGIONS = [
   'Tunis', 'Ariana', 'La Marsa', 'Lac 1', 'Sfax', 'Sousse', 'Nabeul', 'Hammamet',
   'Bizerte', 'Monastir', 'Mahdia', 'Gabès', 'Kairouan', 'Gafsa', 'Djerba', 'Tozeur',
 ];
+
+/** Audience temps réel admin — sessions, régions et comptes inscrits. */
+export const DEMO_ADMIN_LIVE_PRESENCE = {
+  live: {
+    onlineTotal: 14,
+    updatedAt: new Date().toISOString(),
+    totals: {
+      visitor: 3,
+      client: 5,
+      livreur: 2,
+      vet: 2,
+      vendor: 1,
+      moderator: 1,
+      admin: 0,
+    },
+    sessions: [
+      { sessionId: 'sess-1', userId: 'demo-client-1', name: 'Sami Ben Ali', role: 'client', region: 'La Marsa', path: '/client-products', connectedAt: hoursAgo(0.3), lastSeenAt: hoursAgo(0.01) },
+      { sessionId: 'sess-2', userId: 'demo-client-2', name: 'Ines Trabelsi', role: 'client', region: 'Ariana', path: '/client-orders', connectedAt: hoursAgo(0.5), lastSeenAt: hoursAgo(0.05) },
+      { sessionId: 'sess-3', userId: 'demo-livreur-1', name: 'Karim Mansouri', role: 'livreur', region: 'Grand Tunis', path: '/livreur/dashboard', connectedAt: hoursAgo(1.2), lastSeenAt: hoursAgo(0.02) },
+      { sessionId: 'sess-4', userId: 'demo-vet-1', name: 'Dr. Amira Khelifi', role: 'vet', region: 'Tunis', path: '/vet/dashboard', connectedAt: hoursAgo(2), lastSeenAt: hoursAgo(0.08) },
+      { sessionId: 'sess-5', userId: null, name: 'Visiteur #4821', role: 'visitor', region: 'Sfax', path: '/', connectedAt: hoursAgo(0.1), lastSeenAt: hoursAgo(0.01) },
+      { sessionId: 'sess-6', userId: 'demo-vendor-1', name: 'Leila Mansouri', role: 'vendor', region: 'Tunis', path: '/vendor/dashboard', connectedAt: hoursAgo(0.8), lastSeenAt: hoursAgo(0.04) },
+      { sessionId: 'sess-7', userId: 'demo-client-3', name: 'Youssef Gharbi', role: 'client', region: 'Lac 1', path: '/veterinary', connectedAt: hoursAgo(0.4), lastSeenAt: hoursAgo(0.03) },
+      { sessionId: 'sess-8', userId: 'demo-livreur-2', name: 'Mohamed B.', role: 'livreur', region: 'Ariana', path: '/livreur/orders', connectedAt: hoursAgo(0.6), lastSeenAt: hoursAgo(0.02) },
+      { sessionId: 'sess-9', userId: null, name: 'Visiteur #5102', role: 'visitor', region: 'Sousse', path: '/register', connectedAt: hoursAgo(0.15), lastSeenAt: hoursAgo(0.01) },
+      { sessionId: 'sess-10', userId: 'demo-moderator-1', name: 'Nadia Mod', role: 'moderator', region: 'Tunis', path: '/moderator/dashboard', connectedAt: hoursAgo(1.5), lastSeenAt: hoursAgo(0.06) },
+    ],
+    byRegion: [
+      { region: 'Grand Tunis', total: 5, visitor: 0, client: 2, livreur: 1, vet: 1, vendor: 1, moderator: 0 },
+      { region: 'Ariana', total: 3, visitor: 0, client: 1, livreur: 1, vet: 0, vendor: 0, moderator: 0 },
+      { region: 'La Marsa', total: 1, visitor: 0, client: 1, livreur: 0, vet: 0, vendor: 0, moderator: 0 },
+      { region: 'Sfax', total: 1, visitor: 1, client: 0, livreur: 0, vet: 0, vendor: 0, moderator: 0 },
+      { region: 'Sousse', total: 1, visitor: 1, client: 0, livreur: 0, vet: 0, vendor: 0, moderator: 0 },
+      { region: 'Tunis', total: 2, visitor: 0, client: 0, livreur: 0, vet: 0, vendor: 0, moderator: 1 },
+    ],
+    recentEvents: [
+      { id: 'ev-1', type: 'connect', at: hoursAgo(0.1), name: 'Visiteur #5102', role: 'visitor', region: 'Sousse', path: '/register' },
+      { id: 'ev-2', type: 'connect', at: hoursAgo(0.15), name: 'Youssef Gharbi', role: 'client', region: 'Lac 1', path: '/veterinary' },
+      { id: 'ev-3', type: 'disconnect', at: hoursAgo(0.2), name: 'Visiteur #4799', role: 'visitor', region: 'Nabeul', path: '/' },
+      { id: 'ev-4', type: 'connect', at: hoursAgo(0.3), name: 'Sami Ben Ali', role: 'client', region: 'La Marsa', path: '/client-products' },
+      { id: 'ev-5', type: 'connect', at: hoursAgo(0.4), name: 'Karim Mansouri', role: 'livreur', region: 'Grand Tunis', path: '/livreur/dashboard' },
+      { id: 'ev-6', type: 'connect', at: hoursAgo(0.5), name: 'Dr. Amira Khelifi', role: 'vet', region: 'Tunis', path: '/vet/calendar' },
+    ],
+  },
+  registered: {
+    totals: { all: DEMO_ADMIN_USERS.length },
+    byRegion: [
+      {
+        region: 'Grand Tunis',
+        total: 4,
+        client: 2,
+        livreur: 1,
+        vet: 0,
+        vendor: 1,
+        moderator: 0,
+        users: [
+          DEMO_ADMIN_USERS.find((u) => u.email === 'client@petfood.tn'),
+          DEMO_ADMIN_USERS.find((u) => u.email === 'youssef.gharbi@email.tn'),
+          DEMO_ADMIN_USERS.find((u) => u.email === 'livreur@petfood.tn'),
+          DEMO_ADMIN_USERS.find((u) => u.email === 'vendor@petfood.tn'),
+        ].filter(Boolean),
+      },
+      {
+        region: 'Ariana',
+        total: 2,
+        client: 1,
+        livreur: 1,
+        vet: 0,
+        vendor: 0,
+        moderator: 0,
+        users: [
+          DEMO_ADMIN_USERS.find((u) => u.email === 'ines.trabelsi@email.tn'),
+          DEMO_ADMIN_USERS.find((u) => u.email === 'mohamed.livreur@petfood.tn'),
+        ].filter(Boolean),
+      },
+      {
+        region: 'Sousse',
+        total: 2,
+        client: 0,
+        livreur: 1,
+        vet: 1,
+        vendor: 0,
+        moderator: 0,
+        users: [
+          DEMO_ADMIN_USERS.find((u) => u.email === 'sami.livreur@petfood.tn'),
+          DEMO_ADMIN_USERS.find((u) => u.email === 'hichem.vet@petfood.tn'),
+        ].filter(Boolean),
+      },
+      {
+        region: 'Sfax',
+        total: 2,
+        client: 0,
+        livreur: 0,
+        vet: 1,
+        vendor: 1,
+        moderator: 0,
+        users: [
+          DEMO_ADMIN_USERS.find((u) => u.email === 'salma.vet@petfood.tn'),
+          DEMO_ADMIN_USERS.find((u) => u.email === 'ridha.animalerie@email.tn'),
+        ].filter(Boolean),
+      },
+    ],
+  },
+};
 
 export const DEMO_ADMIN_VENDORS = [
   {

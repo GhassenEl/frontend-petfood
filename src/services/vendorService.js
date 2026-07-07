@@ -1,8 +1,7 @@
 import api from '../utils/api';
+import { allowDemoFallback } from '../config/liveDataPolicy';
 import { getDemoVendorStore } from '../utils/vendorDemoData';
 import { logActivity } from './activityLogService';
-import { resolveApiCall } from '../utils/liveDataResolver';
-
 let demoStore = null;
 
 const ensureDemoStore = () => {
@@ -12,10 +11,35 @@ const ensureDemoStore = () => {
 
 const uid = (prefix) => `${prefix}-${Date.now().toString(36)}`;
 
+const mergeVendorPayload = (data, fallback) => {
+  if (!allowDemoFallback()) return data || fallback;
+  if (!data || typeof data !== 'object') return fallback;
+  const out = { ...fallback, ...data };
+  ['products', 'categories', 'orders', 'history', 'returns', 'reviews', 'notifications', 'threads'].forEach((key) => {
+    if (Array.isArray(fallback[key]) && fallback[key].length > 0
+      && (!Array.isArray(data[key]) || data[key].length === 0)) {
+      out[key] = fallback[key];
+    }
+  });
+  if (fallback.conversations && (!data.conversations || !Object.keys(data.conversations).length)) {
+    out.conversations = fallback.conversations;
+  }
+  return out;
+};
+
 const withDemo = async (apiCall, fallbackFn, logFn) => {
-  const result = await resolveApiCall(apiCall, fallbackFn);
-  if (logFn) logFn(result.data);
-  return result;
+  const fallback = fallbackFn();
+  try {
+    const data = await apiCall();
+    const merged = mergeVendorPayload(data, fallback);
+    const isDemo = JSON.stringify(merged) === JSON.stringify(fallback)
+      || (Array.isArray(merged.products) && merged.products === fallback.products);
+    if (logFn && isDemo) logFn(merged);
+    return { data: merged, demo: isDemo };
+  } catch {
+    if (logFn) logFn(fallback);
+    return { data: fallback, demo: true };
+  }
 };
 
 const vendorLog = (action, target, details = '') => {

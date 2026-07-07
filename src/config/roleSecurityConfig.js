@@ -47,7 +47,6 @@ export const SECURITY_QUICK_LINKS = {
   client: [
     { to: '/privacy-policy', label: 'Politique de confidentialité', icon: '🔒' },
     { to: '/cookies-policy', label: 'Politique cookies', icon: '🍪' },
-    { to: '/client-iot', label: 'Sécurité IoT', icon: '📡' },
   ],
   vet: [
     { to: '/privacy-policy', label: 'Confidentialité', icon: '🔒' },

@@ -41,7 +41,6 @@ export const VET_SIDEBAR_SECTIONS = [
         route: '/vet/intelligence',
       },
       { id: 'recommendations', label: 'Recommandations IA', icon: '🎯', route: '/vet/recommendations' },
-      { id: 'chat-history', label: 'Historique chatbot', icon: '💬', route: '/vet/chat-history' },
     ],
   },
   {

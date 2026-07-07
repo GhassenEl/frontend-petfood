@@ -1,4 +1,5 @@
 import React from 'react';
+import { Outlet } from 'react-router-dom';
 import ModeratorSidebar from '../components/ModeratorSidebar';
 import ChatAssistant from '../components/ChatAssistant';
 import { useAuth } from '../contexts/AuthContext';
@@ -16,7 +17,7 @@ const ModeratorLayout = ({ children }) => {
       bottomNav={<MobileBottomNav items={MODERATOR_MOBILE_NAV} />}
       sidebar={(onClose) => <ModeratorSidebar user={user} onLogout={logout} onNavigate={onClose} />}
     >
-      {children}
+      {children ?? <Outlet />}
       <ChatAssistant key={chatKey} variant="moderator" />
     </ResponsiveShell>
   );

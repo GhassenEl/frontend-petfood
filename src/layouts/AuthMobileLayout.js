@@ -7,7 +7,7 @@ import PetfoodLogo from '../components/PetfoodLogo';
 const AuthMobileLayout = ({ children, title = 'Connexion' }) => (
   <div className="auth-mobile-shell platform-workspace platform-workspace--with-bottom-nav">
     <header className="auth-mobile-header">
-      <Link to="/" className="auth-mobile-brand" aria-label="Accueil PetfoodTN">
+      <Link to="/marketing" className="auth-mobile-brand" aria-label="Présentation PetfoodTN">
         <PetfoodLogo size="sm" showTagline />
       </Link>
       <span className="auth-mobile-title">{title}</span>

@@ -30,7 +30,7 @@ const EnterpriseFeaturesPage = () => {
 
   return (
     <div className="ef-page">
-      <Link to="/" className="ef-back">← Accueil PetfoodTN</Link>
+      <Link to="/marketing" className="ef-back">← Accueil PetfoodTN</Link>
 
       <header className="ef-hero">
         <h1>Fonctionnalités entreprise PetfoodTN</h1>

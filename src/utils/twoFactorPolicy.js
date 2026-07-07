@@ -1,3 +1,4 @@
+import { getDemoAccountByEmail } from '../config/demoAccounts';
 import { ROLE_SECURITY_HUB_ROUTES, getPasswordChangeRoute } from '../config/roleSecurityConfig';
 
 export const TWO_FA_STORAGE_KEY = 'petfoodtn:2fa:accounts';
@@ -54,9 +55,21 @@ export const set2FAEnabled = (userId, enabled, meta = {}) => {
 export const getSecurityHubRoute = (role) =>
   ROLE_SECURITY_HUB_ROUTES[role] || ROLE_SECURITY_HUB_ROUTES.client;
 
+/** Comptes seed/démo : 2FA pré-activée pour ne pas bloquer la navigation sidebar. */
+export const ensureDemo2FAForUser = (user) => {
+  if (!user?.role || !is2FARequiredForRole(user.role)) return;
+  const email = String(user.email || '').trim().toLowerCase();
+  if (!getDemoAccountByEmail(email)) return;
+  const key = getUserStorageKey(user);
+  if (key && !is2FAEnabled(key)) {
+    set2FAEnabled(key, true, { channel: 'demo-auto', demo: true });
+  }
+};
+
 export const needs2FASetup = (user) => {
   if (!user?.role) return false;
   if (!is2FARequiredForRole(user.role)) return false;
+  ensureDemo2FAForUser(user);
   const key = getUserStorageKey(user);
   return !is2FAEnabled(key);
 };

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import getSocket from '../utils/socketClient';
 import { fetchAdminLivePresence } from '../services/adminPresenceService';
+import { DEMO_ADMIN_LIVE_PRESENCE } from '../utils/adminDemoData';
 
 const POLL_MS = 5000;
 
@@ -15,7 +16,7 @@ const useAdminLivePresence = () => {
       const data = await fetchAdminLivePresence();
       setPack(data);
     } catch {
-      setPack(null);
+      setPack(DEMO_ADMIN_LIVE_PRESENCE);
     } finally {
       setLoading(false);
     }

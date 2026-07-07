@@ -368,7 +368,7 @@ const RegisterPage = () => {
           Déjà inscrit ? <Link to="/login" style={styles.registerLink}>Se connecter</Link>
         </p>
         <p style={{ ...styles.helperText, marginTop: 12 }}>
-          <Link to="/" style={{ ...styles.registerLink, color: '#059669' }}>← Voir la présentation PetfoodTN</Link>
+          <Link to="/marketing" style={{ ...styles.registerLink, color: '#059669' }}>← Voir la présentation PetfoodTN</Link>
         </p>
       </div>
     </div>

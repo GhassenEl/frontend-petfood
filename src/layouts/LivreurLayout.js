@@ -1,4 +1,5 @@
 import React from 'react';
+import { Outlet } from 'react-router-dom';
 import LivreurSidebar from '../components/LivreurSidebar';
 import ChatAssistant from '../components/ChatAssistant';
 import { useAuth } from '../contexts/AuthContext';
@@ -16,7 +17,7 @@ const LivreurLayout = ({ children }) => {
       bottomNav={<MobileBottomNav items={LIVREUR_MOBILE_NAV} />}
       sidebar={(onClose) => <LivreurSidebar user={user} onLogout={logout} onNavigate={onClose} />}
     >
-      {children}
+      {children ?? <Outlet />}
       <ChatAssistant key={chatKey} variant="livreur" />
     </ResponsiveShell>
   );

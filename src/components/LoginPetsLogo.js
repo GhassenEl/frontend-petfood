@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import PetfoodLogo from './PetfoodLogo';
 
 const LoginPetsLogo = () => (
-  <Link to="/" className="login-brand-link" aria-label="PetfoodTN — retour à l'accueil">
+  <Link to="/marketing" className="login-brand-link" aria-label="PetfoodTN — présentation">
     <PetfoodLogo size="lg" showTagline />
   </Link>
 );

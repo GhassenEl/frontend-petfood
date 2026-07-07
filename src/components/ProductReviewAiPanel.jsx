@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Sparkles, ThumbsUp, ThumbsDown, Star } from 'lucide-react';
 import { getProductReviews } from '../services/reviewService';
 import { analyzeProductReviews } from '../utils/reviewInsightAnalyzer';
+import { renderStars } from '../utils/productRating';
 
 const EMOTION_LABELS = {
   happy: '😊 Très positif',
@@ -13,6 +14,7 @@ const EMOTION_LABELS = {
 
 const ProductReviewAiPanel = ({ productId, productName }) => {
   const [insights, setInsights] = useState(null);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,9 +27,11 @@ const ProductReviewAiPanel = ({ productId, productName }) => {
     setLoading(true);
 
     getProductReviews(productId)
-      .then((reviews) => {
+      .then((list) => {
         if (cancelled) return;
-        setInsights(analyzeProductReviews(reviews));
+        const safeList = Array.isArray(list) ? list : [];
+        setReviews(safeList);
+        setInsights(analyzeProductReviews(safeList));
       })
       .catch(() => {
         if (!cancelled) setInsights(null);
@@ -105,6 +109,39 @@ const ProductReviewAiPanel = ({ productId, productName }) => {
           </div>
         )}
       </div>
+
+      {reviews.length > 0 && (
+        <div style={{ marginTop: 14 }}>
+          <p style={sectionTitle}>Avis clients (1–5 ★)</p>
+          <ul style={listStyle}>
+            {reviews.slice(0, 6).map((review) => {
+              const id = review._id || review.id;
+              const rating = Math.min(5, Math.max(1, Number(review.rating || 0)));
+              return (
+                <li
+                  key={id}
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    background: 'white',
+                    border: '1px solid #e9d5ff',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{ color: '#f59e0b', fontWeight: 800, letterSpacing: 1 }} aria-hidden>
+                      {renderStars(rating)}
+                    </span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#92400e' }}>{rating}/5</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: 13, color: '#374151', lineHeight: 1.5 }}>
+                    {review.comment || 'Avis sans commentaire.'}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

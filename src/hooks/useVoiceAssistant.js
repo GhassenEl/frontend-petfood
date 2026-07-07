@@ -34,9 +34,9 @@ const VOICE_INTENTS = [
     action: { type: 'navigate', path: '/client-traceability' },
   },
   {
-    patterns: [/iot|distributeur|capteur/i],
-    response: 'Ouverture du centre IoT.',
-    action: { type: 'navigate', path: '/client-iot' },
+    patterns: [/recommandation|suggestion/i],
+    response: 'Ouverture des recommandations personnalisées.',
+    action: { type: 'navigate', path: '/client-recommendations' },
   },
 ];
 

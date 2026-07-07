@@ -160,24 +160,24 @@ export const MARKETING_HOW_IT_WORKS = [
 
 export const MARKETING_IOT_FEATURES = [
   {
-    icon: '📡',
-    title: 'Centre IoT',
-    text: 'Tableau de bord unifié : alertes, statuts et accès rapide à tous vos appareils connectés.',
+    icon: '🎯',
+    title: 'Recommandations IA',
+    text: 'Produits adaptés au profil animal : contenu, collaboratif et filtre NLP des avis clients.',
   },
   {
-    icon: '🍽️',
-    title: 'Distributeur ESP32',
-    text: 'Portions automatiques, horaires, capteurs niveau et température — pilotage depuis l\'app.',
+    icon: '🛒',
+    title: 'Boutique & fidélité',
+    text: 'Catalogue croquettes et accessoires, panier, paiement sécurisé et programme de points.',
   },
   {
-    icon: '💧',
-    title: 'Fontaine connectée',
-    text: 'Suivi hydratation, réservoir, filtres et courbes de consommation par animal.',
+    icon: '🩺',
+    title: 'Santé & vétérinaire',
+    text: 'RDV en ligne, dossier médical, téléconsultation et rappels vaccins.',
   },
   {
     icon: '🔗',
-    title: 'Traçabilité blockchain',
-    text: 'Origine des aliments, certifications et chaîne d\'approvisionnement vérifiée (SHA-256).',
+    title: 'Traçabilité produits',
+    text: 'Origine des aliments, certifications et historique des commandes vérifiées.',
   },
 ];
 

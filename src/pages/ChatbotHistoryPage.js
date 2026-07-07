@@ -15,6 +15,8 @@ const ROLE_LABELS = {
   admin: 'Administration',
   vet: 'Vétérinaire',
   livreur: 'Livreur',
+  vendor: 'Vendeur',
+  moderator: 'Modérateur',
 };
 
 const formatDate = (value) => {

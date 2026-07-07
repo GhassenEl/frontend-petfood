@@ -971,6 +971,10 @@ body.dark .platform-live-badge--live {
   min-width: 0;
 }
 
+.page-content-shell {
+  min-height: 40vh;
+}
+
 @media (max-width: 1024px) {
   .platform-workspace.flex {
     flex-direction: column;

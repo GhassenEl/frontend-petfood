@@ -4,6 +4,7 @@ import { X, ShoppingCart, Star, Package, Tag, Beaker, BookOpen, Sparkles, Store 
 import { getProductDetailFields, getEffectiveDiscount, getPromoPrice } from '../utils/productDetails';
 import VerifiedPriceBadge from './VerifiedPriceBadge';
 import ProductReviewAiPanel from './ProductReviewAiPanel';
+import ProductStarRating from './ProductStarRating';
 
 const ANIMAL_LABELS = { dog: 'Chien', cat: 'Chat', bird: 'Oiseau', fish: 'Poisson', other: 'Autre' };
 
@@ -120,11 +121,7 @@ const ProductDetailModal = ({ product, onClose, onAddToCart, onOrder, onVendor, 
                 </>
               )}
               <VerifiedPriceBadge product={product} />
-              {product.rating_avg > 0 && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 14, color: '#f59e0b', fontWeight: 700 }}>
-                  <Star size={16} fill="#f59e0b" /> {Number(product.rating_avg).toFixed(1)} ({product.rating_count || 0})
-                </span>
-              )}
+              <ProductStarRating product={product} size="md" />
             </div>
 
             <p style={{ margin: '0 0 16px', color: '#4b5563', lineHeight: 1.65, fontSize: 15 }}>

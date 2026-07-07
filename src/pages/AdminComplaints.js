@@ -51,7 +51,7 @@ const AdminComplaints = () => {
         getAllComplaints(),
         api.get('/users').catch(() => ({ data: [] })),
       ]);
-      setComplaints(withDemoFallback(list, DEMO_ADMIN_COMPLAINTS));
+      setComplaints(withDemoFallback(Array.isArray(list) ? list : [], DEMO_ADMIN_COMPLAINTS));
       setUsers(withDemoFallback(usersRes.data || [], DEMO_ADMIN_USERS));
     } catch {
       setComplaints(DEMO_ADMIN_COMPLAINTS);

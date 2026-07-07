@@ -28,7 +28,8 @@ const writeSocialLinks = (links) => {
 export async function fetchVendorMarketingPack() {
   try {
     const res = await api.get('/ecosystem/vendor/marketing');
-    if (res.data?.campaigns) {
+    const campaigns = res.data?.campaigns;
+    if (Array.isArray(campaigns) && campaigns.length > 0) {
       return { ...res.data, source: 'api', socialLinks: readSocialLinks() };
     }
   } catch {

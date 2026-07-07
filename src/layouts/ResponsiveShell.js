@@ -14,7 +14,19 @@ const ResponsiveShell = ({ children, sidebar, roleBadge, className = '', bottomN
 
   useEffect(() => {
     setMobileNavOpen(false);
-  }, [location.pathname]);
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    const main = document.getElementById('contenu-principal');
+    if (main) {
+      main.scrollTop = 0;
+      if (typeof main.focus === 'function') {
+        try {
+          main.focus({ preventScroll: true });
+        } catch {
+          main.focus();
+        }
+      }
+    }
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     const openMenu = () => setMobileNavOpen(true);
@@ -74,7 +86,7 @@ const ResponsiveShell = ({ children, sidebar, roleBadge, className = '', bottomN
             {showCitySelector ? <CitySelector compact /> : null}
           </div>
         </div>
-        <div className="page-content-shell">{children}</div>
+        <div className="page-content-shell" key={`${location.pathname}${location.search}`}>{children}</div>
       </main>
       {bottomNav}
     </div>

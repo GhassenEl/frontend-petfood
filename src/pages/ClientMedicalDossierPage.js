@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
+import { withDemoFallback } from '../utils/liveDataResolver';
+import {
+  DEMO_CLIENT_MEDICAL_DOSSIERS,
+  getDemoClientMedicalDossier,
+} from '../utils/clientMedicalDemoData';
 import { exportMedicalDossierPdf } from '../utils/medicalDossierPdf';
 import ClientPrescriptionCard from '../components/ClientPrescriptionCard';
 import ClientHealthRemindersPanel from '../components/ClientHealthRemindersPanel';
@@ -17,8 +22,8 @@ const ClientMedicalDossierPage = () => {
   useEffect(() => {
     api
       .get('/veterinary/my/dossiers')
-      .then(({ data }) => setDossiers(data || []))
-      .catch(console.error)
+      .then(({ data }) => setDossiers(withDemoFallback(data || [], DEMO_CLIENT_MEDICAL_DOSSIERS)))
+      .catch(() => setDossiers(DEMO_CLIENT_MEDICAL_DOSSIERS))
       .finally(() => setLoading(false));
   }, []);
 
@@ -27,9 +32,13 @@ const ClientMedicalDossierPage = () => {
     setVerifyResult(null);
     try {
       const { data } = await api.get(`/veterinary/my/dossiers/${id}`);
-      setSelected(data);
+      if (data?.entries?.length || data?.prescriptions?.length) {
+        setSelected(data);
+      } else {
+        setSelected(getDemoClientMedicalDossier(id) || data);
+      }
     } catch {
-      setSelected(null);
+      setSelected(getDemoClientMedicalDossier(id));
     } finally {
       setLoading(false);
     }

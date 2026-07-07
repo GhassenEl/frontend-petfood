@@ -12,7 +12,7 @@ import {
 const AdminLeaveRequestsPage = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState('pending');
+  const [filterStatus, setFilterStatus] = useState('all');
   const [filterRole, setFilterRole] = useState('all');
   const [reviewModal, setReviewModal] = useState(null);
   const [adminNote, setAdminNote] = useState('');
@@ -26,7 +26,7 @@ const AdminLeaveRequestsPage = () => {
       if (filterRole && filterRole !== 'all') params.set('staffRole', filterRole);
       const qs = params.toString();
       const { data } = await api.get(`/leave-requests${qs ? `?${qs}` : ''}`);
-      setRequests(withDemoFallback(data || [], DEMO_ADMIN_LEAVE_REQUESTS));
+      setRequests(withDemoFallback(Array.isArray(data) ? data : [], DEMO_ADMIN_LEAVE_REQUESTS));
     } catch (error) {
       console.error(error);
       setRequests(DEMO_ADMIN_LEAVE_REQUESTS);

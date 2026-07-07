@@ -62,11 +62,7 @@ import ClientInvoicesPage from './pages/ClientInvoicesPage';
 import ClientHistoryPage from './pages/ClientHistoryPage';
 import ClientPetAdvicePage from './pages/ClientPetAdvicePage';
 import ClientServicesPage from './pages/ClientServicesPage';
-import ClientTraceabilityPage from './pages/ClientTraceabilityPage';
-import ClientSmartWaterPage from './pages/ClientSmartWaterPage';
 import ClientSmartHubPage from './pages/ClientSmartHubPage';
-import ClientIoTHubPage from './pages/ClientIoTHubPage';
-import ClientSmartDeliveryPage from './pages/ClientSmartDeliveryPage';
 import EventsPage from './pages/EventsPage';
 import FoundMePage from './pages/FoundMePage';
 import ClientPurchaseNeedsPage from './pages/ClientPurchaseNeedsPage';
@@ -241,7 +237,7 @@ const App = () => {
       <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/" element={<MarketingLandingPage />} />
-        <Route path="/marketing" element={<MarketingLandingPage />} />
+        <Route path="/marketing" element={<Navigate to="/" replace />} />
         <Route path="/services" element={<MarketingLandingPage />} />
         <Route path="/register" element={<AuthMobileRoute title="Inscription"><RegisterPage /></AuthMobileRoute>} />
         <Route path="/forgot-password" element={<AuthMobileRoute title="Mot de passe"><ForgotPasswordPage /></AuthMobileRoute>} />
@@ -365,7 +361,7 @@ const App = () => {
       <Route path="/admin/advanced-ai" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAdvancedAiPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/analytics-decision" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminAnalyticsDecisionPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/recommendations" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRecommendationsHubPage /></AdminLayout></RoleRoute>} />
-      <Route path="/admin/chat-history" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><ChatbotHistoryPage /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/chat-history" element={<Navigate to="/admin/dashboard" replace />} />
       <Route path="/admin/business-intelligence" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminBusinessIntelligencePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/merchant-intelligence" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminMerchantIntelligencePage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/incidents-ml" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminIncidentsMlPage /></AdminLayout></RoleRoute>} />
@@ -417,7 +413,7 @@ const App = () => {
       <Route path="/client-wellness" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientWellnessPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-emotions" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientOwnerEmotionsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAIAgentPage /></ClientLayout></RoleRoute>} />
-      <Route path="/client/chat-history" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ChatbotHistoryPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client/chat-history" element={<Navigate to="/client-products" replace />} />
       <Route path="/client-advanced-ai" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientAdvancedAiPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-intelligence" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientIntelligenceAutomationPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-recommendations" element={<RoleRoute user={user} roles={['client']}><ClientLayout><RecommendationHubPage /></ClientLayout></RoleRoute>} />
@@ -428,11 +424,11 @@ const App = () => {
       <Route path="/client-rehabilitation" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientRehabilitationPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-relay-points" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientRelayPointsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-product-packs" element={<Navigate to="/client-products#packs-produits" replace />} />
-      <Route path="/client-traceability" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientTraceabilityPage /></ClientLayout></RoleRoute>} />
-      <Route path="/client-iot" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientIoTHubPage /></ClientLayout></RoleRoute>} />
-      <Route path="/client-esp32cam-food-quality" element={<Navigate to="/client-iot?tab=food-quality" replace />} />
-      <Route path="/client-smart-water" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSmartWaterPage /></ClientLayout></RoleRoute>} />
-      <Route path="/client-smart-delivery" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientSmartDeliveryPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-traceability" element={<Navigate to="/client-products" replace />} />
+      <Route path="/client-iot" element={<Navigate to="/client-products" replace />} />
+      <Route path="/client-esp32cam-food-quality" element={<Navigate to="/client-products" replace />} />
+      <Route path="/client-smart-water" element={<Navigate to="/client-products" replace />} />
+      <Route path="/client-smart-delivery" element={<Navigate to="/client-orders" replace />} />
       <Route path="/contact" element={
         user?.role === 'client'
           ? <RoleRoute user={user} roles={['client']}><ClientLayout><ContactPage /></ClientLayout></RoleRoute>
@@ -440,9 +436,9 @@ const App = () => {
       } />
       <Route path="/store-locator" element={<RoleRoute user={user} roles={['client']}><ClientLayout><StoreLocatorPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-cities" element={<RoleRoute user={user} roles={['client']}><ClientLayout><PlatformCitiesPage /></ClientLayout></RoleRoute>} />
-      <Route path="/pet-feeder" element={<RoleRoute user={user} roles={['client']}><ClientLayout><PetFeederPage /></ClientLayout></RoleRoute>} />
-      <Route path="/client-hardware-pcb" element={<RoleRoute user={user} roles={['client']}><ClientLayout><HardwarePcbPage /></ClientLayout></RoleRoute>} />
-      <Route path="/hardware-pcb" element={<Navigate to="/client-hardware-pcb" replace />} />
+      <Route path="/pet-feeder" element={<RoleRoute user={user} roles={['admin', 'vendor']}><RoleLayoutShell user={user}><PetFeederPage /></RoleLayoutShell></RoleRoute>} />
+      <Route path="/client-hardware-pcb" element={<Navigate to="/client-products" replace />} />
+      <Route path="/hardware-pcb" element={<RoleRoute user={user} roles={['admin', 'vendor']}><RoleLayoutShell user={user}><HardwarePcbPage /></RoleLayoutShell></RoleRoute>} />
       <Route path="/veterinary" element={<RoleRoute user={user} roles={['client']}><ClientLayout><VeterinaryPage /></ClientLayout></RoleRoute>} />
       <Route path="/medical-dossier" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientMedicalDossierPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-teleconsult" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientTeleconsultPage /></ClientLayout></RoleRoute>} />
@@ -459,13 +455,12 @@ const App = () => {
       <Route path="/livreur/ml" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMlPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/intelligence" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurIntelligenceHubPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/recommendations" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><RecommendationHubPage /></LivreurLayout></RoleRoute>} />
-      <Route path="/livreur/delivery-cold-chain" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><DeliveryColdChainSurveillancePage role="livreur" /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/stats" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurStatsPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/bi" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><RoleBiDashboardPage role="livreur" /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/messages" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurMessagesPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/earnings" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurEarningsPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/history" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurHistoryPage /></LivreurLayout></RoleRoute>} />
-      <Route path="/livreur/chat-history" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><ChatbotHistoryPage /></LivreurLayout></RoleRoute>} />
+      <Route path="/livreur/chat-history" element={<Navigate to="/livreur/dashboard" replace />} />
       <Route path="/livreur/platform-services" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><PlatformServicesPage /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/rse" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><RseEcologyHubPage role="livreur" /></LivreurLayout></RoleRoute>} />
       <Route path="/livreur/profile" element={<RoleRoute user={user} roles={['livreur']}><LivreurLayout><LivreurProfilePage /></LivreurLayout></RoleRoute>} />
@@ -491,7 +486,9 @@ const App = () => {
       <Route path="/vet/profile" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetProfilePage /></VetLayout></RoleRoute>} />
       <Route path="/vet/security" element={<RoleRoute user={user} roles={['vet']}><VetLayout><AccountSecurityPage role="vet" /></VetLayout></RoleRoute>} />
       <Route path="/vet/recommendations" element={<RoleRoute user={user} roles={['vet']}><VetLayout><RecommendationHubPage /></VetLayout></RoleRoute>} />
-      <Route path="/vet/chat-history" element={<RoleRoute user={user} roles={['vet']}><VetLayout><ChatbotHistoryPage /></VetLayout></RoleRoute>} />
+      <Route path="/vet/chat-history" element={<Navigate to="/vet/dashboard" replace />} />
+      <Route path="/vendor/chat-history" element={<Navigate to="/vendor/dashboard" replace />} />
+      <Route path="/moderator/chat-history" element={<Navigate to="/moderator/dashboard" replace />} />
       <Route path="/vet/leave-requests" element={<RoleRoute user={user} roles={['vet']}><VetLayout><StaffLeavePage roleLabel="Vétérinaire" demoFallback /></VetLayout></RoleRoute>} />
       <Route path="/vet/platform-services" element={<RoleRoute user={user} roles={['vet']}><VetLayout><PlatformServicesPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/teleconsult" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetTeleconsultPage /></VetLayout></RoleRoute>} />
@@ -514,15 +511,15 @@ const App = () => {
       <Route path="/vendor/commercial" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><CommercialHubPage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/purchase-needs" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorPurchaseNeedsPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/ml" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorMlPage /></VendorLayout></RoleRoute>} />
-      <Route path="/vendor/food-quality" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><FoodQualitySurveillancePage role="vendor" /></VendorLayout></RoleRoute>} />
-      <Route path="/vendor/bi" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RoleBiDashboardPage role="vendor" /></VendorLayout></RoleRoute>} />
+      <Route path="/vendor/food-quality" element={<Navigate to="/vendor/dashboard" replace />} />
+      <Route path="/vendor/bi" element={<Navigate to="/vendor/dashboard" replace />} />
       <Route path="/vendor/platform-services" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><PlatformServicesPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/rse" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RseEcologyHubPage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/profile" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorProfilePage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/security" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><AccountSecurityPage role="vendor" /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/recommendations" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><RecommendationHubPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/traceability" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorTraceabilityPage /></VendorLayout></RoleRoute>} />
-      <Route path="/vendor/feeder-iot" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorFeederIoTPage /></VendorLayout></RoleRoute>} />
+      <Route path="/vendor/feeder-iot" element={<Navigate to="/vendor/dashboard" replace />} />
 
       <Route path="/moderator/dashboard" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorDashboard /></ModeratorLayout></RoleRoute>} />
       <Route path="/moderator/intelligence" element={<RoleRoute user={user} roles={['moderator']}><ModeratorLayout><ModeratorIntelligenceHubPage /></ModeratorLayout></RoleRoute>} />

@@ -7,6 +7,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
+import { DEMO_ADMIN_ANALYTICS } from '../utils/adminDemoData';
 import { DEMO_LIVREUR_STATS } from '../utils/livreurDemoData';
 import './PowerBiDashboardPanel.css';
 
@@ -38,12 +39,18 @@ const AdminPowerBiInsightsPanel = ({
   livreurStats = null,
   compact = false,
 }) => {
+  const demoBi = DEMO_ADMIN_ANALYTICS.biCharts;
   const {
-    topMedications = [],
-    topDiseases = [],
-    animalDistribution = [],
-    regionDistribution = [],
+    topMedications = demoBi.topMedications,
+    topDiseases = demoBi.topDiseases,
+    animalDistribution = demoBi.animalDistribution,
+    regionDistribution = demoBi.regionDistribution,
   } = biCharts;
+
+  const meds = topMedications?.length ? topMedications : demoBi.topMedications;
+  const diseases = topDiseases?.length ? topDiseases : demoBi.topDiseases;
+  const animals = animalDistribution?.length ? animalDistribution : demoBi.animalDistribution;
+  const regions = regionDistribution?.length ? regionDistribution : demoBi.regionDistribution;
 
   const livreur = livreurStats || DEMO_LIVREUR_STATS;
   const dailyChart = livreur.dailyChart?.length ? livreur.dailyChart : DEMO_LIVREUR_STATS.dailyChart;
@@ -71,7 +78,7 @@ const AdminPowerBiInsightsPanel = ({
       <div className="pbi-insights__grid">
         <ChartCard title="Top médicaments prescrits" icon={Pill} iconColor="#0ea5e9">
           <ResponsiveContainer width="100%" height={chartH}>
-            <BarChart data={topMedications.slice(0, 8)} layout="vertical" margin={{ left: 4, right: 12 }}>
+            <BarChart data={meds.slice(0, 8)} layout="vertical" margin={{ left: 4, right: 12 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
               <XAxis type="number" tick={{ fontSize: 11 }} />
               <YAxis type="category" dataKey="name" width={compact ? 90 : 120} tick={{ fontSize: 10 }} />
@@ -85,7 +92,7 @@ const AdminPowerBiInsightsPanel = ({
 
         <ChartCard title="Top maladies diagnostiquées" icon={Activity} iconColor="#dc2626">
           <ResponsiveContainer width="100%" height={chartH}>
-            <BarChart data={topDiseases.slice(0, 8)} layout="vertical" margin={{ left: 4, right: 12 }}>
+            <BarChart data={diseases.slice(0, 8)} layout="vertical" margin={{ left: 4, right: 12 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
               <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
               <YAxis type="category" dataKey="name" width={compact ? 90 : 120} tick={{ fontSize: 10 }} />
@@ -99,7 +106,7 @@ const AdminPowerBiInsightsPanel = ({
           <ResponsiveContainer width="100%" height={chartH}>
             <PieChart>
               <Pie
-                data={animalDistribution}
+                data={animals}
                 dataKey="value"
                 nameKey="name"
                 cx="50%"
@@ -109,7 +116,7 @@ const AdminPowerBiInsightsPanel = ({
                 paddingAngle={3}
                 label={({ name, value }) => `${name} ${value}%`}
               >
-                {animalDistribution.map((_, i) => (
+                {animals.map((_, i) => (
                   <Cell key={i} fill={PBI_COLORS[i % PBI_COLORS.length]} />
                 ))}
               </Pie>
@@ -126,7 +133,7 @@ const AdminPowerBiInsightsPanel = ({
           <ResponsiveContainer width="100%" height={chartH}>
             <PieChart>
               <Pie
-                data={regionDistribution}
+                data={regions}
                 dataKey="value"
                 nameKey="name"
                 cx="50%"
@@ -136,7 +143,7 @@ const AdminPowerBiInsightsPanel = ({
                 paddingAngle={2}
                 label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
               >
-                {regionDistribution.map((_, i) => (
+                {regions.map((_, i) => (
                   <Cell key={i} fill={PBI_COLORS[(i + 2) % PBI_COLORS.length]} />
                 ))}
               </Pie>

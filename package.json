@@ -35,6 +35,8 @@
     "dev": "concurrently \"vite --host --port 3001\" \"npm --prefix backend run dev\"",
     "dev:ml": "cd fastapi_service && .venv\\Scripts\\python.exe -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
     "dev:full": "concurrently -n web,api,ml -c blue,green,magenta \"vite --host --port 3001\" \"npm --prefix backend run dev\" \"npm run dev:ml\"",
+    "flutter:web:build": "cd mobile_app && flutter build web --release",
+    "flutter:web": "npm run flutter:web:build && cd mobile_app/build/web && python -m http.server 3003",
     "n8n:up": "docker compose -f docker-compose.n8n.yml up -d",
     "n8n:down": "docker compose -f docker-compose.n8n.yml down",
     "n8n:logs": "docker compose -f docker-compose.n8n.yml logs -f n8n",

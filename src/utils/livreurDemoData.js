@@ -11,7 +11,7 @@ const hoursAgo = (h) => new Date(Date.now() - h * 3600000).toISOString();
 export const getLivreurCommission = (order) =>
   order?.commission ?? COMMISSION_PER_DELIVERY;
 
-const buildDailyChart = () => {
+export const buildDailyChart = () => {
   const counts = [3, 5, 2, 4, 6, 3, 4];
   const now = new Date();
   return Array.from({ length: 7 }, (_, i) => {
@@ -165,6 +165,18 @@ export const enrichLivreurChartStats = (stats, dashboard = null) => {
         statusBreakdown: Object.fromEntries(statusPie.map((d) => [d.key, d.value])),
       };
     }
+  }
+
+  const nonZeroDays = enriched.dailyChart?.filter((d) => (d.count || 0) > 0).length || 0;
+  if (nonZeroDays < 3) {
+    const demoChart = buildDailyChart();
+    enriched = {
+      ...enriched,
+      dailyChart: demoChart,
+      weekDelivered: sumChart(demoChart, 'count'),
+      weekCommission: sumChart(demoChart, 'commission'),
+      chartSource: 'demo-filled',
+    };
   }
 
   return enriched;
