@@ -3,25 +3,65 @@ import 'package:fitconnect_platform/data/demo_data.dart';
 
 void main() => runApp(const FitConnectApp());
 
-class FitConnectApp extends StatelessWidget {
+class FitConnectApp extends StatefulWidget {
   const FitConnectApp({super.key});
+
+  @override
+  State<FitConnectApp> createState() => _FitConnectAppState();
+}
+
+class _FitConnectAppState extends State<FitConnectApp> {
+  ThemeMode _mode = ThemeMode.light;
+
+  static final _light = ThemeData(
+    brightness: Brightness.light,
+    useMaterial3: true,
+    colorScheme: const ColorScheme.light(
+      primary: Colors.black,
+      onPrimary: Colors.white,
+      secondary: Color(0xFF525252),
+      surface: Colors.white,
+      onSurface: Colors.black,
+    ),
+    scaffoldBackgroundColor: const Color(0xFFFAFAFA),
+  );
+
+  static final _dark = ThemeData(
+    brightness: Brightness.dark,
+    useMaterial3: true,
+    colorScheme: const ColorScheme.dark(
+      primary: Colors.white,
+      onPrimary: Colors.black,
+      secondary: Color(0xFFAAAAAA),
+      surface: Color(0xFF121212),
+      onSurface: Colors.white,
+    ),
+    scaffoldBackgroundColor: Colors.black,
+  );
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'FitConnect',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6366F1)),
-        useMaterial3: true,
+      theme: _light,
+      darkTheme: _dark,
+      themeMode: _mode,
+      home: FitConnectHome(
+        isDark: _mode == ThemeMode.dark,
+        onToggleTheme: () => setState(() {
+          _mode = _mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+        }),
       ),
-      home: const FitConnectHome(),
     );
   }
 }
 
 class FitConnectHome extends StatefulWidget {
-  const FitConnectHome({super.key});
+  const FitConnectHome({super.key, required this.isDark, required this.onToggleTheme});
+
+  final bool isDark;
+  final VoidCallback onToggleTheme;
 
   @override
   State<FitConnectHome> createState() => _FitConnectHomeState();
@@ -50,14 +90,27 @@ class _FitConnectHomeState extends State<FitConnectHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text.rich(
+        title: Text.rich(
           TextSpan(
             children: [
-              TextSpan(text: 'Fit', style: TextStyle(fontWeight: FontWeight.w900)),
-              TextSpan(text: 'Connect', style: TextStyle(color: Color(0xFF6366F1), fontWeight: FontWeight.w900)),
+              const TextSpan(text: 'Fit', style: TextStyle(fontWeight: FontWeight.w900)),
+              TextSpan(
+                text: 'Connect',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
             ],
           ),
         ),
+        actions: [
+          IconButton(
+            tooltip: widget.isDark ? 'Mode clair' : 'Mode sombre',
+            onPressed: widget.onToggleTheme,
+            icon: Icon(widget.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
+          ),
+        ],
       ),
       body: IndexedStack(
         index: _tab,
@@ -124,12 +177,17 @@ class _HomeTab extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFF6366F1).withValues(alpha: 0.1),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25)),
           ),
-          child: const Text(
-            'Plateforme fitness 100 % en ligne',
-            style: TextStyle(color: Color(0xFF6366F1), fontWeight: FontWeight.w700, fontSize: 12),
+          child: Text(
+            'Plateforme fitness · Noir & blanc',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -140,7 +198,7 @@ class _HomeTab extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           'Programmes, coachs certifiés et séances live — mini-projet Flutter autonome.',
-          style: TextStyle(color: Colors.grey.shade600),
+          style: TextStyle(color: Theme.of(context).colorScheme.secondary),
         ),
         const SizedBox(height: 20),
         FilledButton(onPressed: onBook, child: const Text('Réserver une séance')),
@@ -160,10 +218,20 @@ class _HomeTab extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Prochaine séance live', style: TextStyle(color: Color(0xFF06B6D4), fontWeight: FontWeight.w700, fontSize: 12)),
+                Text(
+                  'Prochaine séance live',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 const Text('Full Body — 45 min', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-                Text('Avec Coach Maya · Aujourd\'hui 18:00', style: TextStyle(color: Colors.grey.shade600)),
+                Text(
+                  'Avec Coach Maya · Aujourd\'hui 18:00',
+                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                ),
               ],
             ),
           ),
@@ -209,7 +277,13 @@ class _ProgramsTab extends StatelessWidget {
                 leading: Text(p.emoji, style: const TextStyle(fontSize: 28)),
                 title: Text(p.name),
                 subtitle: Text('${p.duration} · ${p.level}'),
-                trailing: const Text('★ 4.8', style: TextStyle(color: Color(0xFF6366F1), fontWeight: FontWeight.w700)),
+                trailing: Text(
+                  '★ 4.8',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             )),
       ],
@@ -239,13 +313,20 @@ class _CoachesTab extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 32,
-                  backgroundColor: const Color(0xFF6366F1),
-                  child: Text(c.initial, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800)),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  child: Text(
+                    c.initial,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Text(c.name, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700)),
-                Text(c.specialty, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                Text('★ ${c.rating}', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.w700)),
+                Text(c.specialty, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.secondary)),
+                Text('★ ${c.rating}', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w700)),
               ],
             ),
           ),
@@ -317,11 +398,17 @@ class _BookingTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.green.shade50,
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.green.shade200),
+              border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
             ),
-            child: Text(message!, style: TextStyle(color: Colors.green.shade800, fontWeight: FontWeight.w600)),
+            child: Text(
+              message!,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ],
@@ -340,7 +427,7 @@ class _Stat extends StatelessWidget {
     return Column(
       children: [
         Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+        Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.secondary)),
       ],
     );
   }

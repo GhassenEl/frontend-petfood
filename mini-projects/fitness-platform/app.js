@@ -114,3 +114,11 @@ renderFilters();
 renderPrograms();
 renderCoaches();
 fillBookingPrograms();
+
+const savedTheme = localStorage.getItem('fitconnect-theme') || 'light';
+document.body.dataset.theme = savedTheme;
+document.getElementById('theme-toggle')?.addEventListener('click', () => {
+  const next = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.body.dataset.theme = next;
+  localStorage.setItem('fitconnect-theme', next);
+});

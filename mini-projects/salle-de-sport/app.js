@@ -137,6 +137,16 @@ document.getElementById('today-label').textContent = new Date().toLocaleDateStri
   year: 'numeric',
 });
 
+const themeToggle = document.getElementById('theme-toggle');
+const savedTheme = localStorage.getItem('fitclub-theme') || 'dark';
+document.body.dataset.theme = savedTheme;
+
+themeToggle?.addEventListener('click', () => {
+  const next = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.body.dataset.theme = next;
+  localStorage.setItem('fitclub-theme', next);
+});
+
 renderKpis();
 renderToday();
 renderMembers();

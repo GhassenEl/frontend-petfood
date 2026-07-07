@@ -3,30 +3,67 @@ import 'package:fitclub_gym/data/demo_data.dart';
 
 void main() => runApp(const FitClubApp());
 
-class FitClubApp extends StatelessWidget {
+class FitClubApp extends StatefulWidget {
   const FitClubApp({super.key});
+
+  @override
+  State<FitClubApp> createState() => _FitClubAppState();
+}
+
+class _FitClubAppState extends State<FitClubApp> {
+  ThemeMode _mode = ThemeMode.dark;
+
+  static final _light = ThemeData(
+    brightness: Brightness.light,
+    useMaterial3: true,
+    colorScheme: const ColorScheme.light(
+      primary: Colors.black,
+      onPrimary: Colors.white,
+      secondary: Color(0xFF404040),
+      surface: Colors.white,
+      onSurface: Colors.black,
+      outline: Color(0xFFE5E5E5),
+    ),
+    scaffoldBackgroundColor: const Color(0xFFFAFAFA),
+  );
+
+  static final _dark = ThemeData(
+    brightness: Brightness.dark,
+    useMaterial3: true,
+    colorScheme: const ColorScheme.dark(
+      primary: Colors.white,
+      onPrimary: Colors.black,
+      secondary: Color(0xFFB0B0B0),
+      surface: Color(0xFF141414),
+      onSurface: Colors.white,
+      outline: Color(0xFF333333),
+    ),
+    scaffoldBackgroundColor: Colors.black,
+  );
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'FitClub — Salle de sport',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFF97316),
-          brightness: Brightness.dark,
-          surface: const Color(0xFF1A2332),
-        ),
-        useMaterial3: true,
+      theme: _light,
+      darkTheme: _dark,
+      themeMode: _mode,
+      home: FitClubHome(
+        isDark: _mode == ThemeMode.dark,
+        onToggleTheme: () => setState(() {
+          _mode = _mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+        }),
       ),
-      home: const FitClubHome(),
     );
   }
 }
 
 class FitClubHome extends StatefulWidget {
-  const FitClubHome({super.key});
+  const FitClubHome({super.key, required this.isDark, required this.onToggleTheme});
+
+  final bool isDark;
+  final VoidCallback onToggleTheme;
 
   @override
   State<FitClubHome> createState() => _FitClubHomeState();
@@ -51,12 +88,21 @@ class _FitClubHomeState extends State<FitClubHome> {
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: widget.isDark ? 'Mode clair' : 'Mode sombre',
+            onPressed: widget.onToggleTheme,
+            icon: Icon(widget.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: Chip(
-              label: const Text('Démo locale'),
-              backgroundColor: Colors.green.withValues(alpha: 0.15),
-              labelStyle: const TextStyle(color: Colors.greenAccent, fontSize: 12),
+              label: const Text('Noir & blanc'),
+              backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+              labelStyle: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -101,7 +147,7 @@ class _DashboardTab extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           _todayLabel(),
-          style: TextStyle(color: Colors.grey.shade400),
+          style: TextStyle(color: Theme.of(context).colorScheme.secondary),
         ),
         const SizedBox(height: 16),
         GridView.count(
@@ -141,7 +187,10 @@ class _DashboardTab extends StatelessWidget {
                 .map((m) => ListTile(
                       dense: true,
                       title: Text(m.name),
-                      trailing: Text(m.plan, style: const TextStyle(color: Colors.orange)),
+                      trailing: Text(m.plan, style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      )),
                     ))
                 .toList(),
           ),
@@ -209,7 +258,10 @@ class _ScheduleTab extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(e.key, style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.w700)),
+                    Text(e.key, style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    )),
                     const SizedBox(height: 8),
                     ...e.value.map((slot) => Padding(
                           padding: const EdgeInsets.only(bottom: 6),
@@ -233,14 +285,29 @@ class _PlansTab extends StatelessWidget {
         Text('Formules', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 12),
         ...plans.map((p) => Card(
-              color: p.featured ? Colors.orange.withValues(alpha: 0.12) : null,
+              color: p.featured
+                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.08)
+                  : null,
+              shape: p.featured
+                  ? RoundedRectangleBorder(
+                      side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                      borderRadius: BorderRadius.circular(12),
+                    )
+                  : null,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(p.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                    Text(p.price, style: const TextStyle(fontSize: 22, color: Colors.orange, fontWeight: FontWeight.w800)),
+                    Text(
+                      p.price,
+                      style: TextStyle(
+                        fontSize: 22,
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     ...p.features.map((f) => Text('✓ $f')),
                   ],
@@ -267,7 +334,7 @@ class _KpiCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(label, style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
+            Text(label, style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
             const SizedBox(height: 6),
             Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
           ],
@@ -308,17 +375,18 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     Color bg;
     Color fg;
     if (status == 'Actif') {
-      bg = Colors.green.withValues(alpha: 0.15);
-      fg = Colors.greenAccent;
+      bg = scheme.primary.withValues(alpha: 0.15);
+      fg = scheme.primary;
     } else if (status.contains('Expire')) {
-      bg = Colors.orange.withValues(alpha: 0.15);
-      fg = Colors.orange;
+      bg = scheme.secondary.withValues(alpha: 0.2);
+      fg = scheme.secondary;
     } else {
-      bg = Colors.red.withValues(alpha: 0.15);
-      fg = Colors.redAccent;
+      bg = scheme.outline.withValues(alpha: 0.5);
+      fg = scheme.onSurface.withValues(alpha: 0.6);
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

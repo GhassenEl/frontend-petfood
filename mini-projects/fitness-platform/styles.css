@@ -1,15 +1,26 @@
-:root {
-  --bg: #f8fafc;
+:root,
+[data-theme="light"] {
+  --bg: #fafafa;
   --surface: #ffffff;
-  --text: #0f172a;
-  --muted: #64748b;
-  --primary: #6366f1;
-  --primary-dark: #4f46e5;
-  --accent: #06b6d4;
-  --border: #e2e8f0;
+  --text: #000000;
+  --muted: #525252;
+  --primary: #000000;
+  --primary-inv: #ffffff;
+  --border: #e5e5e5;
   --radius: 16px;
-  --shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
   --font: 'Segoe UI', system-ui, sans-serif;
+}
+
+[data-theme="dark"] {
+  --bg: #000000;
+  --surface: #141414;
+  --text: #ffffff;
+  --muted: #a3a3a3;
+  --primary: #ffffff;
+  --primary-inv: #000000;
+  --border: #2a2a2a;
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
 * { box-sizing: border-box; }
@@ -20,13 +31,30 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.5;
+  transition: background 0.25s, color 0.25s;
+}
+
+.theme-toggle {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  background: var(--primary);
+  color: var(--primary-inv);
 }
 
 .header {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(255,255,255,0.92);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
 }
@@ -48,7 +76,7 @@ body {
   color: var(--text);
 }
 
-.logo span { color: var(--primary); }
+.logo span { font-weight: 900; }
 
 .header__nav {
   display: flex;
@@ -63,7 +91,7 @@ body {
   font-size: 14px;
 }
 
-.header__nav a:hover { color: var(--primary); }
+.header__nav a:hover { color: var(--text); }
 
 .btn {
   border: none;
@@ -76,8 +104,8 @@ body {
 }
 
 .btn--primary {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-inv);
 }
 
 .btn--ghost {
@@ -100,8 +128,9 @@ body {
 
 .hero__tag {
   display: inline-block;
-  background: rgba(99, 102, 241, 0.1);
-  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--text);
+  border: 1px solid var(--border);
   padding: 6px 12px;
   border-radius: 999px;
   font-size: 13px;
@@ -141,7 +170,7 @@ body {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--accent);
+  color: var(--muted);
   font-weight: 700;
 }
 
@@ -154,7 +183,12 @@ body {
   padding: 40px 20px;
 }
 
-.section--alt { background: #eef2ff; border-radius: 24px; max-width: 100%; }
+.section--alt {
+  background: color-mix(in srgb, var(--surface) 60%, var(--bg));
+  border-radius: 24px;
+  max-width: 100%;
+}
+
 .section--alt > * { max-width: 1100px; margin-left: auto; margin-right: auto; }
 
 .section__head { margin-bottom: 22px; }
@@ -182,7 +216,7 @@ body {
 .filter-btn--active {
   background: var(--primary);
   border-color: var(--primary);
-  color: #fff;
+  color: var(--primary-inv);
 }
 
 .grid {
@@ -196,7 +230,6 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 18px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
 }
 
 .program-card__emoji { font-size: 32px; margin-bottom: 8px; }
@@ -207,7 +240,6 @@ body {
   justify-content: space-between;
   font-size: 12px;
   font-weight: 700;
-  color: var(--primary);
 }
 
 .coach-card {
@@ -222,8 +254,8 @@ body {
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-inv);
   display: grid;
   place-items: center;
   font-size: 28px;
@@ -233,7 +265,7 @@ body {
 
 .coach-card h3 { margin: 0 0 4px; }
 .coach-card .spec { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
-.coach-card .rating { color: #f59e0b; font-weight: 700; font-size: 14px; }
+.coach-card .rating { font-weight: 700; font-size: 14px; }
 
 .booking {
   display: grid;
@@ -261,15 +293,16 @@ body {
   border: 1px solid var(--border);
   font-size: 14px;
   font-family: inherit;
+  background: var(--bg);
+  color: var(--text);
 }
 
 .booking-result {
   margin-top: 16px;
   padding: 16px;
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border: 1px solid var(--border);
   border-radius: 12px;
-  color: #065f46;
   font-weight: 600;
   max-width: 720px;
 }
@@ -286,8 +319,8 @@ body {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: var(--text);
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-inv);
   padding: 14px 20px;
   border-radius: 12px;
   font-weight: 600;
