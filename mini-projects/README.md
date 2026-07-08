@@ -37,11 +37,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **Calcify — Calculatrice** | `flutter/calcify_app/` | 5548 |
 | **SpendWise — Gestionnaire de dépenses** | `flutter/spendwise_budget/` | 5549 |
 | **ParkSmart — Smart Parking** | `flutter/parksmart_parking/` | 5550 |
+| **GarageSmart — Smart Garage** | `flutter/garagesmart_auto/` | 5551 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-garagesmart` | Smart Garage |
 | `project-parksmart` | Smart Parking |
 | `project-spendwise` | Gestionnaire dépenses / graphiques / PDF |
 | `project-calcify` | Calculatrice |
