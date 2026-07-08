@@ -24,6 +24,8 @@
 | **LibHub** | `libhub_books/` | Bibliothèque en ligne (livres, journaux, Coran) |
 | **StayHub** | `stayhub_hotels/` | Réservation hôtels |
 | **TrailHub** | `trailhub_excursions/` | Randonnées et excursions |
+| **Carthage Land** | `carthage_land/` | Parc d'attractions Carthage Land |
+| **WildZoo** | `wildzoo_animals/` | Zoo animaux |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 

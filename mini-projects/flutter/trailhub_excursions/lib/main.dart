@@ -169,11 +169,15 @@ class _TrailHubHomeState extends State<TrailHubHome> {
         title: const Text('🥾 TrailHub'),
         actions: [IconButton(onPressed: widget.onToggleTheme, icon: Icon(widget.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined))],
       ),
-      floatingActionButton: FloatingActionButton(onPressed: _fabAction, child: const Icon(Icons.add)),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: FloatingActionButton(onPressed: _fabAction, child: const Icon(Icons.add)),
+      ),
       body: IndexedStack(
         index: _tab,
         children: [
-          ListView(padding: const EdgeInsets.all(16), children: [
+          ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 88), children: [
             Text('Randonnées & excursions', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 12),
             GridView.count(
@@ -203,7 +207,7 @@ class _TrailHubHomeState extends State<TrailHubHome> {
               trailing: Text('${h.participants}/${h.maxParticipants}'),
             ))),
           ]),
-          ListView(padding: const EdgeInsets.all(16), children: _hikes.map((h) => Card(
+          ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 88), children: _hikes.map((h) => Card(
             child: ListTile(
               leading: const Text('🥾', style: TextStyle(fontSize: 28)),
               title: Text(h.name),
@@ -217,7 +221,7 @@ class _TrailHubHomeState extends State<TrailHubHome> {
               ]),
             ),
           )).toList()),
-          ListView(padding: const EdgeInsets.all(16), children: _excursions.map((e) => Card(
+          ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 88), children: _excursions.map((e) => Card(
             child: ListTile(
               leading: const Text('🚌', style: TextStyle(fontSize: 28)),
               title: Text('${e.id} — ${e.title}'),
@@ -233,14 +237,25 @@ class _TrailHubHomeState extends State<TrailHubHome> {
           )).toList()),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _tab,
-        onDestinationSelected: (i) => setState(() => _tab = i),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.dashboard_outlined), label: 'Accueil'),
-          NavigationDestination(icon: Icon(Icons.hiking_outlined), label: 'Randonnées'),
-          NavigationDestination(icon: Icon(Icons.tour_outlined), label: 'Excursions'),
-        ],
+      bottomNavigationBar: Material(
+        elevation: 12,
+        color: Theme.of(context).colorScheme.surface,
+        child: SafeArea(
+          top: false,
+          child: BottomNavigationBar(
+            currentIndex: _tab,
+            onTap: (i) => setState(() => _tab = i),
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: Theme.of(context).colorScheme.primary,
+            unselectedItemColor: Theme.of(context).colorScheme.secondary,
+            showUnselectedLabels: true,
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), label: 'Accueil'),
+              BottomNavigationBarItem(icon: Icon(Icons.directions_walk), label: 'Randonnées'),
+              BottomNavigationBarItem(icon: Icon(Icons.map_outlined), label: 'Excursions'),
+            ],
+          ),
+        ),
       ),
     );
   }
