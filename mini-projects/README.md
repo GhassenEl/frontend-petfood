@@ -34,11 +34,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **KidsCircle — Jardin d'enfants + IA** | `flutter/kidscircle_nursery/` | 5545 |
 | **SummerStay — Maisons d'été, bungalows, villas + IA** | `flutter/summerstay_rentals/` | 5546 |
 | **ActPharma — Pharmacie intelligente (Act Pharma)** | `flutter/actpharma_smart/` | 5547 |
+| **Calcify — Calculatrice** | `flutter/calcify_app/` | 5548 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-calcify` | Calculatrice |
 | `project-actpharma` | Pharmacie intelligente Act Pharma |
 | `project-summerstay` | Location maisons d'été / bungalows / villas |
 | `project-kidscircle` | Jardin d'enfants / crèche |

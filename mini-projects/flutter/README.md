@@ -30,6 +30,7 @@
 | **KidsCircle** | `kidscircle_nursery/` | Jardin d'enfants, crèche, activités, IA |
 | **SummerStay** | `summerstay_rentals/` | Location maisons d'été, bungalows, villas + IA |
 | **ActPharma** | `actpharma_smart/` | Pharmacie intelligente Act Pharma (IoT, stock, QR) |
+| **Calcify** | `calcify_app/` | Calculatrice (ops, √, historique) |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 
