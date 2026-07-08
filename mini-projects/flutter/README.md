@@ -31,6 +31,7 @@
 | **SummerStay** | `summerstay_rentals/` | Location maisons d'été, bungalows, villas + IA |
 | **ActPharma** | `actpharma_smart/` | Pharmacie intelligente Act Pharma (IoT, stock, QR) |
 | **Calcify** | `calcify_app/` | Calculatrice (ops, √, historique) |
+| **SpendWise** | `spendwise_budget/` | Gestionnaire dépenses, graphiques, PDF |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 

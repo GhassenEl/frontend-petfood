@@ -35,11 +35,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **SummerStay — Maisons d'été, bungalows, villas + IA** | `flutter/summerstay_rentals/` | 5546 |
 | **ActPharma — Pharmacie intelligente (Act Pharma)** | `flutter/actpharma_smart/` | 5547 |
 | **Calcify — Calculatrice** | `flutter/calcify_app/` | 5548 |
+| **SpendWise — Gestionnaire de dépenses** | `flutter/spendwise_budget/` | 5549 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-spendwise` | Gestionnaire dépenses / graphiques / PDF |
 | `project-calcify` | Calculatrice |
 | `project-actpharma` | Pharmacie intelligente Act Pharma |
 | `project-summerstay` | Location maisons d'été / bungalows / villas |
