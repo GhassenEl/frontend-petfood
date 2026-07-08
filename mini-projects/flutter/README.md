@@ -29,6 +29,7 @@
 | **StyleHub** | `stylehub_fashion/` | Boutique de vêtements + StyleBot IA |
 | **KidsCircle** | `kidscircle_nursery/` | Jardin d'enfants, crèche, activités, IA |
 | **SummerStay** | `summerstay_rentals/` | Location maisons d'été, bungalows, villas + IA |
+| **ActPharma** | `actpharma_smart/` | Pharmacie intelligente Act Pharma (IoT, stock, QR) |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 

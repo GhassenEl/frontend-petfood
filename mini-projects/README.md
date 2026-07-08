@@ -33,11 +33,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **StyleHub — Boutique vêtements + IA** | `flutter/stylehub_fashion/` | 5544 |
 | **KidsCircle — Jardin d'enfants + IA** | `flutter/kidscircle_nursery/` | 5545 |
 | **SummerStay — Maisons d'été, bungalows, villas + IA** | `flutter/summerstay_rentals/` | 5546 |
+| **ActPharma — Pharmacie intelligente (Act Pharma)** | `flutter/actpharma_smart/` | 5547 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-actpharma` | Pharmacie intelligente Act Pharma |
 | `project-summerstay` | Location maisons d'été / bungalows / villas |
 | `project-kidscircle` | Jardin d'enfants / crèche |
 | `project-stylehub` | Boutique de vêtements |
