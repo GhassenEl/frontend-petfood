@@ -5,6 +5,7 @@
 import { getLocalVetAssistantReply } from './vetAssistantEngine';
 import { buildLocalChatNlp } from './chatNlpPayload';
 import { extractLocalSources } from './productRating';
+import { getLocalMarketplaceKpiReply } from './marketplaceKpiLocal';
 
 export const SUPPORTED_LANGS = ['fr', 'en', 'ar'];
 export const LANG_LABELS = { fr: 'FR', en: 'EN', ar: 'AR' };
@@ -102,14 +103,14 @@ const ROLE_GREETINGS = {
   admin: {
     title: { fr: 'Assistant Administration', en: 'Admin Assistant', ar: 'مساعد الإدارة' },
     content: {
-      fr: 'Assistant administration PetfoodTN — commandes, produits, utilisateurs, vendeurs, BI, DevOps, sécurité et IoT. Posez n\'importe quelle question.',
-      en: 'PetfoodTN admin assistant — orders, products, users, vendors, BI, DevOps, security and IoT. Ask anything.',
-      ar: 'مساعد إدارة PetfoodTN — الطلبات، المنتجات، المستخدمون، البائعون، BI، DevOps، الأمان و IoT. اسأل أي سؤال.',
+      fr: 'Assistant administration — commandes, produits, BI et **KPI marketplace** (ventes, notes, catégories, souhaits).',
+      en: 'Admin assistant — orders, products, BI and **marketplace KPIs** (sales, ratings, categories, wishlists).',
+      ar: 'مساعد إدارة PetfoodTN — الطلبات، المنتجات، BI و**مؤشرات السوق**.',
     },
     quickReplies: {
-      fr: ['Commandes', 'Produits', 'Dashboard', 'DevOps', 'Sauvegardes'],
-      en: ['Orders', 'Products', 'Dashboard', 'DevOps', 'Backups'],
-      ar: ['الطلبات', 'المنتجات', 'لوحة التحكم', 'DevOps', 'النسخ الاحتياطي'],
+      fr: ['KPI marketplace', 'Top ventes', 'Commandes', 'Produits', 'Dashboard'],
+      en: ['Marketplace KPIs', 'Top sales', 'Orders', 'Products', 'Dashboard'],
+      ar: ['مؤشرات السوق', 'أعلى المبيعات', 'الطلبات', 'المنتجات', 'لوحة التحكم'],
     },
   },
   livreur: {
@@ -675,6 +676,15 @@ export const getPlatformChatReply = ({ message, role = 'visitor', language = 'fr
       message: quickHit.reply,
       quickReplies: [pick(OTHER_QUESTION, lang), ...pick(greeting.quickReplies, lang).slice(0, 2)],
       source: 'local-quick-topic',
+    });
+  }
+
+  const marketplaceKpi = getLocalMarketplaceKpiReply(message, role);
+  if (marketplaceKpi) {
+    return withNlp({
+      message: marketplaceKpi.message,
+      quickReplies: marketplaceKpi.quickReplies || [],
+      source: 'local-marketplace-kpi',
     });
   }
 
