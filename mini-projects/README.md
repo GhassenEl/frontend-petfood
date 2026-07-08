@@ -40,11 +40,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **GarageSmart — Smart Garage** | `flutter/garagesmart_auto/` | 5551 |
 | **NoteHub — Prise de notes (SQLite)** | `flutter/notehub_app/` | 5552 |
 | **FitCoach — Coach sportif + IA** | `flutter/fitcoach_pro/` | 5553 |
+| **DentiHub — Cabinet dentaire + téléconsultation** | `flutter/dentihub_cabinet/` | 5554 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-dentihub` | Cabinet dentaire / téléconsultation |
 | `project-fitcoach` | Coach sportif IA |
 | `project-notehub` | Prise de notes SQLite |
 | `project-garagesmart` | Smart Garage |

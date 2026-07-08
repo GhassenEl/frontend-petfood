@@ -36,6 +36,7 @@
 | **GarageSmart** | `garagesmart_auto/` | Smart garage: atelier, IoT, alertes, QR |
 | **NoteHub** | `notehub_app/` | Notes CRUD, recherche, SQLite local |
 | **FitCoach** | `fitcoach_pro/` | Coach sportif IA, calories, montre connectée |
+| **DentiHub** | `dentihub_cabinet/` | Cabinet dentaire, téléconsultation, SQLite, IA |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 
