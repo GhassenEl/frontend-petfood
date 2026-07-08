@@ -38,11 +38,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **SpendWise — Gestionnaire de dépenses** | `flutter/spendwise_budget/` | 5549 |
 | **ParkSmart — Smart Parking** | `flutter/parksmart_parking/` | 5550 |
 | **GarageSmart — Smart Garage** | `flutter/garagesmart_auto/` | 5551 |
+| **NoteHub — Prise de notes (SQLite)** | `flutter/notehub_app/` | 5552 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-notehub` | Prise de notes SQLite |
 | `project-garagesmart` | Smart Garage |
 | `project-parksmart` | Smart Parking |
 | `project-spendwise` | Gestionnaire dépenses / graphiques / PDF |
