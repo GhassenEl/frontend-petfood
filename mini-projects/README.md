@@ -23,11 +23,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **GreenLeaf — Boutique plantes + IA** | `flutter/greenleaf_plants/` | 5534 |
 | **UniCampus — Éducation en ligne** | `flutter/unicampus_edu/` | 5535 |
 | **MatchUp — Matchs foot & basket** | `flutter/matchup_sports/` | 5536 |
+| **BankFlow — Application bancaire** | `flutter/bankflow_app/` | 5537 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-bankflow` | Application bancaire Flutter |
 | `project-matchup` | Matchs amicaux football & basket |
 | `project-unicampus` | Éducation en ligne profs/étudiants |
 | `project-greenleaf` | Boutique plantes en ligne avec IA |

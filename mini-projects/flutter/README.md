@@ -19,6 +19,7 @@
 | **GreenLeaf** | `greenleaf_plants/` | Boutique plantes en ligne + GreenBot IA |
 | **UniCampus** | `unicampus_edu/` | Éducation en ligne profs & étudiants |
 | **MatchUp** | `matchup_sports/` | Matchs amicaux football & basket |
+| **BankFlow** | `bankflow_app/` | Application bancaire |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 
