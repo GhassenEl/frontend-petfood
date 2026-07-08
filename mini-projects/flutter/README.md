@@ -21,6 +21,7 @@
 | **MatchUp** | `matchup_sports/` | Matchs amicaux football & basket |
 | **BankFlow** | `bankflow_app/` | Application bancaire |
 | **LexHub** | `lexhub_avocat/` | Cabinet avocat, RDV, tribunal, secrétariat, IA |
+| **LibHub** | `libhub_books/` | Bibliothèque en ligne (livres, journaux, Coran) |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 

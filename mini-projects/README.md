@@ -25,11 +25,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **MatchUp — Matchs foot & basket** | `flutter/matchup_sports/` | 5536 |
 | **BankFlow — Application bancaire** | `flutter/bankflow_app/` | 5537 |
 | **LexHub — Cabinet avocat + IA** | `flutter/lexhub_avocat/` | 5538 |
+| **LibHub — Bibliothèque en ligne** | `flutter/libhub_books/` | 5539 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-libhub` | Bibliothèque en ligne livres/journaux/Coran |
 | `project-lexhub` | Cabinet avocat RDV tribunal IA |
 | `project-bankflow` | Application bancaire Flutter |
 | `project-matchup` | Matchs amicaux football & basket |
