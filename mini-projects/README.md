@@ -26,11 +26,15 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **BankFlow — Application bancaire** | `flutter/bankflow_app/` | 5537 |
 | **LexHub — Cabinet avocat + IA** | `flutter/lexhub_avocat/` | 5538 |
 | **LibHub — Bibliothèque en ligne** | `flutter/libhub_books/` | 5539 |
+| **StayHub — Réservation hôtels** | `flutter/stayhub_hotels/` | 5540 |
+| **TrailHub — Randonnées & excursions** | `flutter/trailhub_excursions/` | 5541 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-trailhub` | Randonnées et excursions |
+| `project-stayhub` | Réservation hôtels |
 | `project-libhub` | Bibliothèque en ligne livres/journaux/Coran |
 | `project-lexhub` | Cabinet avocat RDV tribunal IA |
 | `project-bankflow` | Application bancaire Flutter |

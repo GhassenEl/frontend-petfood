@@ -22,6 +22,8 @@
 | **BankFlow** | `bankflow_app/` | Application bancaire |
 | **LexHub** | `lexhub_avocat/` | Cabinet avocat, RDV, tribunal, secrétariat, IA |
 | **LibHub** | `libhub_books/` | Bibliothèque en ligne (livres, journaux, Coran) |
+| **StayHub** | `stayhub_hotels/` | Réservation hôtels |
+| **TrailHub** | `trailhub_excursions/` | Randonnées et excursions |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 
