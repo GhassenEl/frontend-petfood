@@ -28,6 +28,7 @@
 | **WildZoo** | `wildzoo_animals/` | Zoo animaux |
 | **StyleHub** | `stylehub_fashion/` | Boutique de vêtements + StyleBot IA |
 | **KidsCircle** | `kidscircle_nursery/` | Jardin d'enfants, crèche, activités, IA |
+| **SummerStay** | `summerstay_rentals/` | Location maisons d'été, bungalows, villas + IA |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 
