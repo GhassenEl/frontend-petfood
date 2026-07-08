@@ -39,11 +39,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **ParkSmart — Smart Parking** | `flutter/parksmart_parking/` | 5550 |
 | **GarageSmart — Smart Garage** | `flutter/garagesmart_auto/` | 5551 |
 | **NoteHub — Prise de notes (SQLite)** | `flutter/notehub_app/` | 5552 |
+| **FitCoach — Coach sportif + IA** | `flutter/fitcoach_pro/` | 5553 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-fitcoach` | Coach sportif IA |
 | `project-notehub` | Prise de notes SQLite |
 | `project-garagesmart` | Smart Garage |
 | `project-parksmart` | Smart Parking |
