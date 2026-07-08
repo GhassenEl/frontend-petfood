@@ -20,6 +20,7 @@
 | **UniCampus** | `unicampus_edu/` | Éducation en ligne profs & étudiants |
 | **MatchUp** | `matchup_sports/` | Matchs amicaux football & basket |
 | **BankFlow** | `bankflow_app/` | Application bancaire |
+| **LexHub** | `lexhub_avocat/` | Cabinet avocat, RDV, tribunal, secrétariat, IA |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 
