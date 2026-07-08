@@ -14,6 +14,8 @@
 | **TouristHub** | `touristhub_center/` | Centre de tourisme (circuits, guides) |
 | **RideShop** | `rideshop_mobility/` | Vente trottinettes & vélos |
 | **TaxiGo** | `taxigo_rides/` | Application taxi type Uber |
+| **HRHub** | `hrhub_platform/` | Plateforme RH (employés, congés, recrutement) |
+| **StreamAI** | `streamai_netflix/` | Netflix dynamique + assistant IA |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 
