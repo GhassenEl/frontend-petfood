@@ -26,6 +26,7 @@
 | **TrailHub** | `trailhub_excursions/` | Randonnées et excursions |
 | **Carthage Land** | `carthage_land/` | Parc d'attractions Carthage Land |
 | **WildZoo** | `wildzoo_animals/` | Zoo animaux |
+| **StyleHub** | `stylehub_fashion/` | Boutique de vêtements |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 

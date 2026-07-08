@@ -30,11 +30,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **TrailHub — Randonnées & excursions** | `flutter/trailhub_excursions/` | 5541 |
 | **Carthage Land — Parc d'attractions** | `flutter/carthage_land/` | 5542 |
 | **WildZoo — Zoo animaux** | `flutter/wildzoo_animals/` | 5543 |
+| **StyleHub — Boutique vêtements** | `flutter/stylehub_fashion/` | 5544 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-stylehub` | Boutique de vêtements |
 | `project-wildzoo` | Zoo animaux |
 | `project-carthageland` | Parc d'attractions Carthage Land |
 | `project-trailhub` | Randonnées et excursions |
