@@ -9,6 +9,7 @@ import { getLocalMarketplaceKpiReply } from './marketplaceKpiLocal';
 
 export const SUPPORTED_LANGS = ['fr', 'en', 'ar'];
 export const LANG_LABELS = { fr: 'FR', en: 'EN', ar: 'AR' };
+export const LANG_BCP47 = { fr: 'fr-FR', en: 'en-US', ar: 'ar-TN' };
 export const CHAT_LANG_STORAGE_KEY = 'petfood-chat-lang';
 
 const normalize = (s) =>
@@ -59,6 +60,11 @@ export const CHAT_UI = {
     close: 'Fermer',
     langLabel: 'Langue',
     localBadge: 'Réponse locale multilingue',
+    voiceStart: 'Message vocal',
+    voiceStop: 'Arrêter le micro',
+    voiceUnsupported: 'Vocal non supporté (Chrome/Edge recommandé).',
+    voiceReplyOn: 'Lecture vocale activée',
+    voiceReplyOff: 'Lecture vocale désactivée',
   },
   en: {
     placeholder: 'Type a message…',
@@ -70,6 +76,11 @@ export const CHAT_UI = {
     close: 'Close',
     langLabel: 'Language',
     localBadge: 'Multilingual local reply',
+    voiceStart: 'Voice message',
+    voiceStop: 'Stop microphone',
+    voiceUnsupported: 'Voice not supported (use Chrome/Edge).',
+    voiceReplyOn: 'Voice playback on',
+    voiceReplyOff: 'Voice playback off',
   },
   ar: {
     placeholder: 'اكتب رسالة…',
@@ -81,8 +92,22 @@ export const CHAT_UI = {
     close: 'إغلاق',
     langLabel: 'اللغة',
     localBadge: 'رد محلي متعدد اللغات',
+    voiceStart: 'رسالة صوتية',
+    voiceStop: 'إيقاف الميكروفون',
+    voiceUnsupported: 'الصوت غير مدعوم (استخدم Chrome/Edge).',
+    voiceReplyOn: 'تشغيل الرد الصوتي',
+    voiceReplyOff: 'إيقاف الرد الصوتي',
   },
 };
+
+/** Texte assistant lisible par synthèse vocale (sans markdown). */
+export const stripTextForSpeech = (text) =>
+  String(text || '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/[•·]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
 const pick = (obj, lang) => obj[lang] || obj.fr;
 

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, ShoppingCart, MessageSquarePlus, Camera } from 'lucide-react';
+import { MessageCircle, X, Send, ShoppingCart, MessageSquarePlus, Camera, Mic, MicOff, Volume2 } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import useSocket from '../hooks/useSocket';
+import useVoiceAssistant from '../hooks/useVoiceAssistant';
 import { useNavigate } from 'react-router-dom';
 import { getEffectiveDiscount, isOnPromotion } from '../utils/productDetails';
 import ChatNlpInsight from './ChatNlpInsight';
@@ -11,12 +12,14 @@ import ChatSourcesPanel from './ChatSourcesPanel';
 import {
   CHAT_UI,
   LANG_LABELS,
+  LANG_BCP47,
   SUPPORTED_LANGS,
   detectLanguage,
   getPlatformChatReply,
   getRoleGreeting,
   loadStoredChatLang,
   saveStoredChatLang,
+  stripTextForSpeech,
 } from '../utils/platformChatbotEngine';
 import { analyzeChatImage } from '../services/chatHistoryService';
 
@@ -208,11 +211,31 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
   const [loading, setLoading] = useState(false);
   const [isBackendOnline, setIsBackendOnline] = useState(true);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [voiceReplyOn, setVoiceReplyOn] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const imageFileRef = useRef(null);
+  const sendMessageRef = useRef(null);
+  const lastSpokenIdxRef = useRef(-1);
   const socket = useSocket(user ? `user-${user.id || user._id}` : 'global');
   const navigate = useNavigate();
+
+  const {
+    supported: voiceSupported,
+    listening: voiceListening,
+    error: voiceError,
+    start: startVoice,
+    stop: stopVoice,
+    speak: speakVoice,
+  } = useVoiceAssistant({
+    lang: LANG_BCP47[language] || LANG_BCP47.fr,
+    mode: 'chat',
+    onTranscript: (text) => {
+      if (text?.trim() && sendMessageRef.current) {
+        sendMessageRef.current(text.trim());
+      }
+    },
+  });
 
   const shouldShowVetCTA = (text) => {
     const t = String(text || '').toLowerCase();
@@ -331,6 +354,17 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
       setTimeout(() => inputRef.current?.focus(), 300);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!voiceReplyOn || loading || messages.length === 0) return;
+    const lastIdx = messages.length - 1;
+    const msg = messages[lastIdx];
+    if (lastIdx === lastSpokenIdxRef.current) return;
+    if (msg?.role === 'assistant' && msg.content) {
+      lastSpokenIdxRef.current = lastIdx;
+      speakVoice(stripTextForSpeech(msg.content));
+    }
+  }, [messages, loading, voiceReplyOn, speakVoice]);
 
   const sendMessage = async (text, context) => {
     if (!text.trim()) return;
@@ -455,6 +489,8 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
     }
   };
 
+  sendMessageRef.current = sendMessage;
+
   const pickErrorMessage = (lang) => {
     const m = {
       fr: 'Désolé, une erreur est survenue. Réessayez dans un instant.',
@@ -508,6 +544,7 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
     }
     setMessages([makeGreetingMessage]);
     setIsBackendOnline(true);
+    lastSpokenIdxRef.current = -1;
   };
 
   const handleImageUpload = async (file) => {
@@ -793,6 +830,40 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
       </div>
 
       <div style={styles.inputArea}>
+        {voiceError && (
+          <p style={styles.voiceError} role="alert">
+            {voiceError}
+          </p>
+        )}
+        <div style={styles.inputRow}>
+        <button
+          type="button"
+          onClick={() => (voiceListening ? stopVoice() : startVoice())}
+          disabled={!voiceSupported || loading}
+          style={{
+            ...styles.voiceBtn,
+            ...(voiceListening ? styles.voiceBtnActive : {}),
+            opacity: voiceSupported && !loading ? 1 : 0.45,
+          }}
+          title={voiceSupported ? (voiceListening ? ui.voiceStop : ui.voiceStart) : ui.voiceUnsupported}
+          aria-label={voiceSupported ? (voiceListening ? ui.voiceStop : ui.voiceStart) : ui.voiceUnsupported}
+          aria-pressed={voiceListening}
+        >
+          {voiceListening ? <MicOff size={18} color="#dc2626" /> : <Mic size={18} color="#7c3aed" />}
+        </button>
+        <button
+          type="button"
+          onClick={() => setVoiceReplyOn((on) => !on)}
+          style={{
+            ...styles.voiceBtn,
+            ...(voiceReplyOn ? styles.voiceReplyOn : {}),
+          }}
+          title={voiceReplyOn ? ui.voiceReplyOn : ui.voiceReplyOff}
+          aria-label={voiceReplyOn ? ui.voiceReplyOn : ui.voiceReplyOff}
+          aria-pressed={voiceReplyOn}
+        >
+          <Volume2 size={18} color={voiceReplyOn ? '#059669' : '#6b7280'} />
+        </button>
         {user && !skipHistory && (
           <>
             <input
@@ -833,6 +904,7 @@ const ChatAssistant = ({ variant = 'client', title: titleOverride, embedded = fa
         >
           <Send size={18} color="white" />
         </button>
+        </div>
       </div>
     </motion.div>
   );
@@ -1135,8 +1207,48 @@ const styles = {
     borderTop: '1px solid #e5e7eb',
     background: 'white',
     display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+  },
+  inputRow: {
+    display: 'flex',
     gap: '10px',
     alignItems: 'center',
+    width: '100%',
+  },
+  voiceError: {
+    margin: 0,
+    fontSize: '11px',
+    color: '#dc2626',
+    lineHeight: 1.4,
+  },
+  voiceHint: {
+    margin: 0,
+    fontSize: '11px',
+    color: '#9ca3af',
+    lineHeight: 1.4,
+  },
+  voiceBtn: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '12px',
+    border: '1px solid #e9d5ff',
+    background: '#faf5ff',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    transition: 'all 0.2s',
+  },
+  voiceBtnActive: {
+    borderColor: '#fecaca',
+    background: '#fef2f2',
+    boxShadow: '0 0 0 2px rgba(220,38,38,0.15)',
+  },
+  voiceReplyOn: {
+    borderColor: '#a7f3d0',
+    background: '#ecfdf5',
   },
   input: {
     flex: 1,

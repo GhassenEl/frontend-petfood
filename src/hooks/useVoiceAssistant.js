@@ -58,7 +58,12 @@ export const parseVoiceIntent = (transcript = '') => {
   };
 };
 
-export default function useVoiceAssistant({ lang = 'fr-FR', onResult } = {}) {
+/**
+ * @param {{ lang?: string, mode?: 'intent' | 'chat', onResult?: Function, onTranscript?: Function }} options
+ * - intent : navigation locale (Smart Hub client)
+ * - chat   : retourne la transcription brute pour le chatbot
+ */
+export default function useVoiceAssistant({ lang = 'fr-FR', mode = 'intent', onResult, onTranscript } = {}) {
   const [supported, setSupported] = useState(false);
   const [listening, setListening] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -109,6 +114,14 @@ export default function useVoiceAssistant({ lang = 'fr-FR', onResult } = {}) {
     rec.onresult = (event) => {
       const text = event.results[0]?.[0]?.transcript || '';
       setTranscript(text);
+      if (!text.trim()) return;
+
+      if (mode === 'chat') {
+        onTranscript?.(text);
+        onResult?.({ transcript: text, mode: 'chat' });
+        return;
+      }
+
       const intent = parseVoiceIntent(text);
       if (intent) {
         setResponse(intent.response);
@@ -122,7 +135,7 @@ export default function useVoiceAssistant({ lang = 'fr-FR', onResult } = {}) {
     } catch {
       setError('Impossible de démarrer le micro.');
     }
-  }, [lang, onResult, speak]);
+  }, [lang, mode, onResult, onTranscript, speak]);
 
   useEffect(() => () => {
     recRef.current?.abort?.();
