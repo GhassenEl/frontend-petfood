@@ -16,6 +16,7 @@
 | **TaxiGo** | `taxigo_rides/` | Application taxi type Uber |
 | **HRHub** | `hrhub_platform/` | Plateforme RH (employés, congés, recrutement) |
 | **StreamAI** | `streamai_netflix/` | Netflix dynamique + assistant IA |
+| **GreenLeaf** | `greenleaf_plants/` | Boutique plantes en ligne + GreenBot IA |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 

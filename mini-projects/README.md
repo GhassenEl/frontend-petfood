@@ -20,11 +20,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **TaxiGo — Taxi & Uber** | `flutter/taxigo_rides/` | 5531 |
 | **HRHub — Plateforme RH** | `flutter/hrhub_platform/` | 5532 |
 | **StreamAI — Netflix + IA** | `flutter/streamai_netflix/` | 5533 |
+| **GreenLeaf — Boutique plantes + IA** | `flutter/greenleaf_plants/` | 5534 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-greenleaf` | Boutique plantes en ligne avec IA |
 | `project-streamai` | Netflix dynamique avec IA |
 | `project-hrhub` | Plateforme RH |
 | `project-taxigo` | Application taxi type Uber |

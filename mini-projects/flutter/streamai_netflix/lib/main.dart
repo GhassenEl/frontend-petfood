@@ -234,13 +234,10 @@ class _StreamAIHomeState extends State<StreamAIHome> {
               subtitle: Text('${t.type} · ${t.genre} · ${t.duration}'),
               onTap: () => _showSynopsis(t),
               onLongPress: () => _rateTitle(t),
-              trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                if (t.userScore > 0) Text('★$t.userScore ', style: const TextStyle(fontSize: 12)),
-                IconButton(
-                  icon: Icon(t.inWatchlist ? Icons.bookmark : Icons.bookmark_border),
-                  onPressed: () => _toggleWatchlist(t),
-                ),
-              ]),
+              trailing: IconButton(
+                icon: Icon(t.inWatchlist ? Icons.bookmark : Icons.bookmark_border),
+                onPressed: () => _toggleWatchlist(t),
+              ),
             ),
           )).toList()),
           ListView(padding: const EdgeInsets.all(16), children: [
