@@ -17,6 +17,8 @@
 | **HRHub** | `hrhub_platform/` | Plateforme RH (employés, congés, recrutement) |
 | **StreamAI** | `streamai_netflix/` | Netflix dynamique + assistant IA |
 | **GreenLeaf** | `greenleaf_plants/` | Boutique plantes en ligne + GreenBot IA |
+| **UniCampus** | `unicampus_edu/` | Éducation en ligne profs & étudiants |
+| **MatchUp** | `matchup_sports/` | Matchs amicaux football & basket |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 
