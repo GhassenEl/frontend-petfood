@@ -62,6 +62,12 @@ class _StyleHubHomeState extends State<StyleHubHome> {
   final List<FashionOrder> _orders = List.of(initialOrders);
   final List<FashionPromo> _promos = List.of(initialPromos);
   final List<CartItem> _cart = [];
+  final List<StyleAiMessage> _chat = [
+    StyleAiMessage(role: 'ai', text: 'Bonjour ! Je suis StyleBot 🛍️\nDemandez : « look été », « budget », « analyse mon panier », « promo » ou « stock ».'),
+  ];
+  final TextEditingController _aiInput = TextEditingController();
+  final ScrollController _chatScroll = ScrollController();
+  bool _aiThinking = false;
 
   int get _revenue => _orders.where((o) => o.status != 'Annulée').fold(0, (s, o) => s + o.total);
   int get _activeOrders => _orders.where((o) => o.status != 'Livrée' && o.status != 'Annulée').length;
@@ -252,6 +258,52 @@ class _StyleHubHomeState extends State<StyleHubHome> {
     }
   }
 
+  void _sendAi([String? preset]) {
+    final text = (preset ?? _aiInput.text).trim();
+    if (text.isEmpty || _aiThinking) return;
+    _aiInput.clear();
+    setState(() {
+      _chat.add(StyleAiMessage(role: 'user', text: text));
+      _aiThinking = true;
+    });
+    Future.delayed(const Duration(milliseconds: 550), () {
+      if (!mounted) return;
+      final lower = text.toLowerCase();
+      String reply = aiStyleChat(text, _products, _cart, _promos, _orders);
+      final match = _products.where((p) => lower.contains(p.name.toLowerCase().split(' ').first)).firstOrNull;
+      if (match != null && (lower.contains('conseil') || lower.contains('tip') || lower.contains(match.name.toLowerCase().split(' ').first))) {
+        reply = aiStyleTip(match);
+      }
+      setState(() {
+        _chat.add(StyleAiMessage(role: 'ai', text: reply));
+        _aiThinking = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_chatScroll.hasClients) {
+          _chatScroll.animateTo(_chatScroll.position.maxScrollExtent, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+        }
+      });
+    });
+  }
+
+  void _aiFillLook() {
+    final picks = aiRecommendFashion(_products, 'été bureau', cart: _cart);
+    setState(() {
+      for (final p in picks) {
+        if (p.stock <= 0) continue;
+        final existing = _cart.where((c) => identical(c.product, p)).firstOrNull;
+        if (existing == null) _cart.add(CartItem(product: p));
+      }
+      _chat.add(StyleAiMessage(role: 'user', text: 'Compose-moi un look'));
+      _chat.add(StyleAiMessage(
+        role: 'ai',
+        text: 'Look ajouté au panier :\n${picks.map((p) => '• ${p.emoji} ${p.name}').join('\n')}\nOuvrez Panier pour finaliser.',
+      ));
+      _tab = 4;
+    });
+    _toast('Look IA ajouté au panier');
+  }
+
   VoidCallback? get _fabAction {
     switch (_tab) {
       case 0:
@@ -264,6 +316,8 @@ class _StyleHubHomeState extends State<StyleHubHome> {
         return _addPromo;
       case 4:
         return _checkout;
+      case 5:
+        return () => _sendAi('compose un look été');
       default:
         return null;
     }
@@ -272,23 +326,32 @@ class _StyleHubHomeState extends State<StyleHubHome> {
   IconData get _fabIcon {
     if (_tab == 0 || _tab == 4) return Icons.payment;
     if (_tab == 2) return Icons.add_shopping_cart;
+    if (_tab == 5) return Icons.auto_awesome;
     return Icons.add;
   }
 
   @override
   void dispose() {
     _searchCtrl.dispose();
+    _aiInput.dispose();
+    _chatScroll.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final secondary = Theme.of(context).colorScheme.secondary;
+    final aiPicks = aiRecommendFashion(_products, 'été tendance', cart: _cart);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('🛍️ StyleHub'),
         actions: [
+          IconButton(
+            onPressed: () => setState(() => _tab = 5),
+            icon: const Icon(Icons.smart_toy_outlined),
+            tooltip: 'StyleBot IA',
+          ),
           Stack(alignment: Alignment.topRight, children: [
             IconButton(
               onPressed: () => setState(() => _tab = 4),
@@ -319,7 +382,7 @@ class _StyleHubHomeState extends State<StyleHubHome> {
           ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 88), children: [
             Text('StyleHub Fashion', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
             const SizedBox(height: 4),
-            Text('Boutique vêtements · stock dynamique · panier', style: TextStyle(color: secondary)),
+            Text('Boutique · panier · StyleBot IA', style: TextStyle(color: secondary)),
             const SizedBox(height: 14),
             GridView.count(
               crossAxisCount: 2, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
@@ -343,6 +406,24 @@ class _StyleHubHomeState extends State<StyleHubHome> {
                 ),
               ),
             ],
+            const SizedBox(height: 16),
+            Row(children: [
+              const Expanded(child: Text('🤖 Picks StyleBot', style: TextStyle(fontWeight: FontWeight.w700))),
+              TextButton(onPressed: () => setState(() => _tab = 5), child: const Text('Chat IA')),
+            ]),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 150,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: aiPicks.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 10),
+                itemBuilder: (context, i) {
+                  final p = aiPicks[i];
+                  return _ProductMini(product: p, onAdd: () => _addToCart(p));
+                },
+              ),
+            ),
             const SizedBox(height: 16),
             const Text('Meilleures ventes', style: TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
@@ -555,6 +636,58 @@ class _StyleHubHomeState extends State<StyleHubHome> {
                     ),
                   ),
                 ]),
+          Column(children: [
+            Expanded(
+              child: ListView.builder(
+                controller: _chatScroll,
+                padding: const EdgeInsets.all(16),
+                itemCount: _chat.length + (_aiThinking ? 1 : 0),
+                itemBuilder: (context, i) {
+                  if (_aiThinking && i == _chat.length) {
+                    return const Padding(padding: EdgeInsets.all(8), child: Text('StyleBot réfléchit…'));
+                  }
+                  final m = _chat[i];
+                  final isAi = m.role == 'ai';
+                  return Align(
+                    alignment: isAi ? Alignment.centerLeft : Alignment.centerRight,
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      constraints: const BoxConstraints(maxWidth: 320),
+                      decoration: BoxDecoration(
+                        color: isAi ? Theme.of(context).colorScheme.surface : Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: secondary.withValues(alpha: 0.3)),
+                      ),
+                      child: Text(m.text, style: TextStyle(color: isAi ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onPrimary)),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+              child: Wrap(spacing: 6, runSpacing: 6, children: [
+                ActionChip(label: const Text('Look été'), onPressed: () => _sendAi('look été')),
+                ActionChip(label: const Text('Budget'), onPressed: () => _sendAi('pas cher budget')),
+                ActionChip(label: const Text('Panier'), onPressed: () => _sendAi('analyse mon panier')),
+                ActionChip(label: const Text('Promo'), onPressed: () => _sendAi('codes promo')),
+                ActionChip(label: const Text('Look IA'), onPressed: _aiFillLook),
+              ]),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: Row(children: [
+                Expanded(child: TextField(
+                  controller: _aiInput,
+                  decoration: const InputDecoration(hintText: 'Demandez à StyleBot…', border: OutlineInputBorder()),
+                  onSubmitted: (_) => _sendAi(),
+                )),
+                const SizedBox(width: 8),
+                FilledButton(onPressed: () => _sendAi(), child: const Icon(Icons.send)),
+              ]),
+            ),
+          ]),
         ],
       ),
       bottomNavigationBar: Material(
@@ -563,12 +696,14 @@ class _StyleHubHomeState extends State<StyleHubHome> {
         child: SafeArea(
           top: false,
           child: BottomNavigationBar(
-            currentIndex: _tab > 3 ? 4 : _tab,
+            currentIndex: _tab,
             onTap: (i) => setState(() => _tab = i),
             type: BottomNavigationBarType.fixed,
             selectedItemColor: Theme.of(context).colorScheme.primary,
             unselectedItemColor: secondary,
             showUnselectedLabels: true,
+            selectedFontSize: 11,
+            unselectedFontSize: 10,
             items: [
               const BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), label: 'Boutique'),
               const BottomNavigationBarItem(icon: Icon(Icons.checkroom_outlined), label: 'Catalogue'),
@@ -582,6 +717,7 @@ class _StyleHubHomeState extends State<StyleHubHome> {
                 ),
                 label: 'Panier',
               ),
+              const BottomNavigationBarItem(icon: Icon(Icons.smart_toy_outlined), label: 'IA'),
             ],
           ),
         ),

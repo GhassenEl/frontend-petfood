@@ -9,6 +9,7 @@ App Flutter : vente de vêtements en ligne (catalogue, commandes, promos).
 - **Commandes** : statuts colorés cliquables
 - **Promos** : appliquer un code sur le panier
 - **Panier** : quantités, remise, checkout
+- **StyleBot IA** : chat looks, budget, analyse panier, promos, stock, composition auto de look
 - Thème noir & blanc · pied de page visible · FAB +
 
 ## Lancer
