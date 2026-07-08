@@ -16,11 +16,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **TravelHub — Centre de voyage** | `flutter/travelhub_agency/` | 5527 |
 | **FunPark — Parc d'attractions** | `flutter/funpark_attractions/` | 5528 |
 | **TouristHub — Centre de tourisme** | `flutter/touristhub_center/` | 5529 |
+| **RideShop — Trottinettes & vélos** | `flutter/rideshop_mobility/` | 5530 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-rideshop` | Vente trottinettes & vélos |
 | `project-touristhub` | Centre de tourisme |
 | `project-travelhub` | Centre de voyage |
 | `project-funpark` | Parc d'attractions |
