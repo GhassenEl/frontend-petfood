@@ -4,10 +4,11 @@ App Flutter : vente de vêtements en ligne (catalogue, commandes, promos).
 
 ## Fonctionnalités
 
-- **Boutique** : KPIs, commandes en cours, CA
-- **Catalogue** : homme, femme, enfant, chaussures, accessoires — tap pour vendre
-- **Commandes** : statuts cliquables (En attente → Livrée)
-- **Promos** : codes soldes et livraison
+- **Boutique** : KPIs, alertes stock bas, meilleures ventes, panier rapide
+- **Catalogue** : recherche + filtres (Homme/Femme/Enfant/…) · panier +
+- **Commandes** : statuts colorés cliquables
+- **Promos** : appliquer un code sur le panier
+- **Panier** : quantités, remise, checkout
 - Thème noir & blanc · pied de page visible · FAB +
 
 ## Lancer
