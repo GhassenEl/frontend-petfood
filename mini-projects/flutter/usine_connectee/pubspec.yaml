@@ -1,0 +1,22 @@
+name: usine_connectee
+description: "FactoryLink — usine connectée IoT : lignes, machines, capteurs, maintenance, alertes et IA."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  qr_flutter: ^4.1.0
+  intl: ^0.20.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
