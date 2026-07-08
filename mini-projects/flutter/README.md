@@ -32,6 +32,7 @@
 | **ActPharma** | `actpharma_smart/` | Pharmacie intelligente Act Pharma (IoT, stock, QR) |
 | **Calcify** | `calcify_app/` | Calculatrice (ops, √, historique) |
 | **SpendWise** | `spendwise_budget/` | Gestionnaire dépenses, graphiques, PDF |
+| **ParkSmart** | `parksmart_parking/` | Smart parking: carte, résa, paiement, QR |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 

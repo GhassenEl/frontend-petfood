@@ -36,11 +36,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **ActPharma — Pharmacie intelligente (Act Pharma)** | `flutter/actpharma_smart/` | 5547 |
 | **Calcify — Calculatrice** | `flutter/calcify_app/` | 5548 |
 | **SpendWise — Gestionnaire de dépenses** | `flutter/spendwise_budget/` | 5549 |
+| **ParkSmart — Smart Parking** | `flutter/parksmart_parking/` | 5550 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-parksmart` | Smart Parking |
 | `project-spendwise` | Gestionnaire dépenses / graphiques / PDF |
 | `project-calcify` | Calculatrice |
 | `project-actpharma` | Pharmacie intelligente Act Pharma |
