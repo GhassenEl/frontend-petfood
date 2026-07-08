@@ -17,11 +17,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **FunPark — Parc d'attractions** | `flutter/funpark_attractions/` | 5528 |
 | **TouristHub — Centre de tourisme** | `flutter/touristhub_center/` | 5529 |
 | **RideShop — Trottinettes & vélos** | `flutter/rideshop_mobility/` | 5530 |
+| **TaxiGo — Taxi & Uber** | `flutter/taxigo_rides/` | 5531 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-taxigo` | Application taxi type Uber |
 | `project-rideshop` | Vente trottinettes & vélos |
 | `project-touristhub` | Centre de tourisme |
 | `project-travelhub` | Centre de voyage |

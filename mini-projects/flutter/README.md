@@ -13,6 +13,7 @@
 | **FunPark** | `funpark_attractions/` | Parc d'attractions |
 | **TouristHub** | `touristhub_center/` | Centre de tourisme (circuits, guides) |
 | **RideShop** | `rideshop_mobility/` | Vente trottinettes & vélos |
+| **TaxiGo** | `taxigo_rides/` | Application taxi type Uber |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 
