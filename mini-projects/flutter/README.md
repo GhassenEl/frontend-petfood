@@ -12,6 +12,7 @@
 | **TravelHub** | `travelhub_agency/` | Centre de voyage |
 | **FunPark** | `funpark_attractions/` | Parc d'attractions |
 | **TouristHub** | `touristhub_center/` | Centre de tourisme (circuits, guides) |
+| **RideShop** | `rideshop_mobility/` | Vente trottinettes & vélos |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 
