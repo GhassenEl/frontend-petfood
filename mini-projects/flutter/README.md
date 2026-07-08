@@ -11,6 +11,7 @@
 | **LinguaHub** | `linguahub_center/` | Centre de langues étrangères |
 | **TravelHub** | `travelhub_agency/` | Centre de voyage |
 | **FunPark** | `funpark_attractions/` | Parc d'attractions |
+| **TouristHub** | `touristhub_center/` | Centre de tourisme (circuits, guides) |
 
 Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
 
