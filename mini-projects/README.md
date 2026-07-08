@@ -31,11 +31,13 @@ Projets Flutter **indépendants** · thème noir & blanc · données dynamiques.
 | **Carthage Land — Parc d'attractions** | `flutter/carthage_land/` | 5542 |
 | **WildZoo — Zoo animaux** | `flutter/wildzoo_animals/` | 5543 |
 | **StyleHub — Boutique vêtements + IA** | `flutter/stylehub_fashion/` | 5544 |
+| **KidsCircle — Jardin d'enfants + IA** | `flutter/kidscircle_nursery/` | 5545 |
 
 ## Branches GitHub
 
 | Branche | Projet |
 |---------|--------|
+| `project-kidscircle` | Jardin d'enfants / crèche |
 | `project-stylehub` | Boutique de vêtements |
 | `project-wildzoo` | Zoo animaux |
 | `project-carthageland` | Parc d'attractions Carthage Land |
