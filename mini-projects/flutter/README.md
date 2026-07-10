@@ -1,47 +1,54 @@
-# Mini-projets Flutter autonomes
+# Mini-projects Flutter
 
-| Application | Dossier | Description |
-|-------------|---------|-------------|
-| FitClub Gym | `fitclub_gym/` | Salle de sport |
-| FitConnect | `fitconnect_platform/` | Plateforme fitness |
-| **QuickBite** | `quickbite_fastfood/` | Fast-food dynamique |
-| **AutoPilot** | `autopilot_ecole/` | Auto-école dynamique |
-| **MediLink** | `medilink_clinique/` | Clinique RDV + médicaments |
-| **DriveRent** | `driverent_location/` | Location voitures |
-| **LinguaHub** | `linguahub_center/` | Centre de langues étrangères |
-| **TravelHub** | `travelhub_agency/` | Centre de voyage |
-| **FunPark** | `funpark_attractions/` | Parc d'attractions |
-| **TouristHub** | `touristhub_center/` | Centre de tourisme (circuits, guides) |
-| **RideShop** | `rideshop_mobility/` | Vente trottinettes & vélos |
-| **TaxiGo** | `taxigo_rides/` | Application taxi type Uber |
-| **HRHub** | `hrhub_platform/` | Plateforme RH (employés, congés, recrutement) |
-| **StreamAI** | `streamai_netflix/` | Netflix dynamique + assistant IA |
-| **GreenLeaf** | `greenleaf_plants/` | Boutique plantes en ligne + GreenBot IA |
-| **UniCampus** | `unicampus_edu/` | Éducation en ligne profs & étudiants |
-| **MatchUp** | `matchup_sports/` | Matchs amicaux football & basket |
-| **BankFlow** | `bankflow_app/` | Application bancaire |
-| **LexHub** | `lexhub_avocat/` | Cabinet avocat, RDV, tribunal, secrétariat, IA |
-| **LibHub** | `libhub_books/` | Bibliothèque en ligne (livres, journaux, Coran) |
-| **StayHub** | `stayhub_hotels/` | Réservation hôtels |
-| **TrailHub** | `trailhub_excursions/` | Randonnées et excursions |
-| **Carthage Land** | `carthage_land/` | Parc d'attractions Carthage Land |
-| **WildZoo** | `wildzoo_animals/` | Zoo animaux |
-| **StyleHub** | `stylehub_fashion/` | Boutique de vêtements + StyleBot IA |
-| **KidsCircle** | `kidscircle_nursery/` | Jardin d'enfants, crèche, activités, IA |
-| **SummerStay** | `summerstay_rentals/` | Location maisons d'été, bungalows, villas + IA |
-| **ActPharma** | `actpharma_smart/` | Pharmacie intelligente Act Pharma (IoT, stock, QR) |
-| **Calcify** | `calcify_app/` | Calculatrice (ops, √, historique) |
-| **SpendWise** | `spendwise_budget/` | Gestionnaire dépenses, graphiques, PDF |
-| **ParkSmart** | `parksmart_parking/` | Smart parking: carte, résa, paiement, QR |
-| **GarageSmart** | `garagesmart_auto/` | Smart garage: atelier, IoT, alertes, QR |
-| **NoteHub** | `notehub_app/` | Notes CRUD, recherche, SQLite local |
-| **FitCoach** | `fitcoach_pro/` | Coach sportif IA, calories, montre connectée |
-| **DentiHub** | `dentihub_cabinet/` | Cabinet dentaire, téléconsultation, SQLite, IA |
+Chaque application Flutter a son **propre dépôt GitHub** (repo séparé).
 
-Thème noir & blanc · bascule clair/sombre · état mutable (ajout commandes, élèves, RDV…).
+## Repos
+
+| Projet | Repo |
+|--------|------|
+| ActPharma | https://github.com/GhassenEl/actpharma-smart |
+| AIHub | https://github.com/GhassenEl/aihub-assistant |
+| Autopilot | https://github.com/GhassenEl/autopilot-ecole |
+| BankFlow | https://github.com/GhassenEl/bankflow-app |
+| Calcify | https://github.com/GhassenEl/calcify-app |
+| Carthage Land | https://github.com/GhassenEl/carthage-land |
+| DentiHub | https://github.com/GhassenEl/dentihub-cabinet |
+| DriveRent | https://github.com/GhassenEl/driverent-location |
+| FitClub | https://github.com/GhassenEl/fitclub-gym |
+| FitCoach | https://github.com/GhassenEl/fitcoach-pro |
+| FitConnect | https://github.com/GhassenEl/fitconnect-platform |
+| FunPark | https://github.com/GhassenEl/funpark-attractions |
+| GarageSmart | https://github.com/GhassenEl/garagesmart-auto |
+| GreenLeaf | https://github.com/GhassenEl/greenleaf-plants |
+| HRHub | https://github.com/GhassenEl/hrhub-platform |
+| KidsCircle | https://github.com/GhassenEl/kidscircle-nursery |
+| LexHub | https://github.com/GhassenEl/lexhub-avocat |
+| LibHub | https://github.com/GhassenEl/libhub-books |
+| LinguaHub | https://github.com/GhassenEl/linguahub-center |
+| MatchUp | https://github.com/GhassenEl/matchup-sports |
+| MediLink | https://github.com/GhassenEl/medilink-clinique |
+| NoteHub | https://github.com/GhassenEl/notehub-app |
+| ParkSmart | https://github.com/GhassenEl/parksmart-parking |
+| QuickBite | https://github.com/GhassenEl/quickbite-fastfood |
+| RideShop | https://github.com/GhassenEl/rideshop-mobility |
+| SpendWise | https://github.com/GhassenEl/spendwise-budget |
+| StayHub | https://github.com/GhassenEl/stayhub-hotels |
+| StreamAI | https://github.com/GhassenEl/streamai-netflix |
+| StyleHub | https://github.com/GhassenEl/stylehub-fashion |
+| SummerStay | https://github.com/GhassenEl/summerstay-rentals |
+| TaxiGo | https://github.com/GhassenEl/taxigo-rides |
+| TouristHub | https://github.com/GhassenEl/touristhub-center |
+| TrailHub | https://github.com/GhassenEl/trailhub-excursions |
+| TravelHub | https://github.com/GhassenEl/travelhub-agency |
+| UniCampus | https://github.com/GhassenEl/unicampus-edu |
+| Usine Connectée | https://github.com/GhassenEl/usine-connectee |
+| WildZoo | https://github.com/GhassenEl/wildzoo-animals |
+
+## Cloner un projet
 
 ```bash
-cd medilink_clinique
+git clone https://github.com/GhassenEl/calcify-app.git
+cd calcify-app
 flutter pub get
 flutter run -d chrome
 ```
