@@ -1,6 +1,6 @@
-# Mini-projects Flutter
+﻿# Mini-projects Flutter
 
-Chaque application Flutter a son **propre dépôt GitHub** (repo séparé).
+Chaque application Flutter a son **propre dÃ©pÃ´t GitHub** (repo sÃ©parÃ©).
 
 ## Repos
 
@@ -41,8 +41,9 @@ Chaque application Flutter a son **propre dépôt GitHub** (repo séparé).
 | TrailHub | https://github.com/GhassenEl/trailhub-excursions |
 | TravelHub | https://github.com/GhassenEl/travelhub-agency |
 | UniCampus | https://github.com/GhassenEl/unicampus-edu |
-| Usine Connectée | https://github.com/GhassenEl/usine-connectee |
+| Usine ConnectÃ©e | https://github.com/GhassenEl/usine-connectee |
 | WildZoo | https://github.com/GhassenEl/wildzoo-animals |
+| SalatTime | https://github.com/GhassenEl/salattime-app |
 
 ## Cloner un projet
 
