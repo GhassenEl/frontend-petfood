@@ -44,6 +44,7 @@ Chaque application Flutter a son **propre dÃ©pÃ´t GitHub** (repo sÃ©parÃ�
 | Usine ConnectÃ©e | https://github.com/GhassenEl/usine-connectee |
 | WildZoo | https://github.com/GhassenEl/wildzoo-animals |
 | SalatTime | https://github.com/GhassenEl/salattime-app |
+| MaratHub | https://github.com/GhassenEl/marathub-app |
 
 ## Cloner un projet
 
