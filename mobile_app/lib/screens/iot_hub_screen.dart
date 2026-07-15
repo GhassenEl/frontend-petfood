@@ -11,7 +11,6 @@ import '../services/pet_service.dart';
 import '../services/repositories.dart';
 import '../services/water_repository.dart';
 import '../utils/species_catalog.dart';
-import '../widgets/iot_ecosystem_panel.dart';
 import '../widgets/iot_pet_selector_bar.dart';
 import '../widgets/pet_feeding_schedules_panel.dart';
 import 'feeder_screen.dart';
@@ -172,46 +171,12 @@ class _IotHubScreenState extends State<IotHubScreen> {
                     isLive: _hub.isLive,
                     onRefresh: () => _bootstrap(),
                   ),
-                  if (_hub.iotPack != null)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                      child: IotEcosystemPanel(
-                        pack: _hub.iotPack!,
-                        onRefresh: () => _bootstrap(),
-                      ),
-                    ),
                   if (_hub.pets.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFECFDF5),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: const Color(0xFF6EE7B7)),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.memory, size: 18, color: Color(0xFF059669)),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    _hub.isLive
-                                        ? 'Backend IoT live · /client/iot/pack · ESP32 · HX711 · MQTT'
-                                        : 'Mode démo — pack IoT simulé (backend hors ligne)',
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF065F46)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            height: 240,
-                            child: PetFeedingSchedulesPanel(
+                      child: SizedBox(
+                        height: 240,
+                        child: PetFeedingSchedulesPanel(
                           pets: _hub.pets,
                           selectedPetId: _hub.selectedPetId,
                           weightByPetId: _hub.weightByPetId,
@@ -219,9 +184,7 @@ class _IotHubScreenState extends State<IotHubScreen> {
                           scrollable: true,
                           todayGramsByPetId: _hub.todayGramsByPetId,
                           isLive: _hub.isLive,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   Expanded(

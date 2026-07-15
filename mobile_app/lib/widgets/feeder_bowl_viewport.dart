@@ -72,7 +72,7 @@ class FeederBowlViewport extends StatelessWidget {
                         height: 120,
                         decoration: BoxDecoration(
                           border: Border.all(color: const Color(0xFFCBD5E1), width: 3),
-                          borderRadius: BorderRadius.circular(0, 0, 80, 80),
+                          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(80)),
                         ),
                         child: Align(
                           alignment: Alignment.bottomCenter,

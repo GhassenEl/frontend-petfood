@@ -12,6 +12,26 @@ body,
   min-height: 100%;
 }
 
+/* Masquer Google Traduction (bandeau / bouton flottant) */
+.goog-te-banner-frame,
+.goog-te-balloon-frame,
+.goog-te-menu-frame,
+.goog-te-spinner-pos,
+#goog-gt-tt,
+#google_translate_element,
+.skiptranslate,
+iframe.goog-te-banner-frame,
+.VIpgJd-ZVi9od-ORHb-OEVmcd,
+body > .skiptranslate {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+}
+
+body {
+  top: 0 !important;
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans, 'Inter', 'Segoe UI', system-ui, sans-serif);

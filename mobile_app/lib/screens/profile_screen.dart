@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import '../config/api_config.dart';
 import '../services/auth_service.dart';
-import '../services/theme_preferences.dart';
 import 'login_screen.dart';
-import 'home_shell.dart';
 import 'pets_screen.dart';
 import 'delivery_tracking_screen.dart';
 import 'qr_scan_screen.dart';
@@ -19,7 +17,7 @@ class ProfileScreen extends StatelessWidget {
     await auth.logout();
     if (!context.mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => HomeShell(auth: auth)),
+      MaterialPageRoute(builder: (_) => LoginScreen(auth: auth)),
       (_) => false,
     );
   }
@@ -105,7 +103,7 @@ class ProfileScreen extends StatelessWidget {
                   title: const Text('Notifications push'),
                   subtitle: const Text('Alertes IoT et livraison'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _open(context, const NotificationsScreen()),
+                  onTap: () => _open(context, NotificationsScreen(auth: auth)),
                 ),
                 const Divider(height: 1),
                 ListTile(
@@ -116,22 +114,6 @@ class ProfileScreen extends StatelessWidget {
                   onTap: () => _open(context, FoodQualityScreen(auth: auth)),
                 ),
               ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Card(
-            child: ListenableBuilder(
-              listenable: ThemePreferences.instance,
-              builder: (context, _) {
-                final mono = ThemePreferences.instance.isMonochrome;
-                return SwitchListTile(
-                  secondary: Text(mono ? '🎨' : '◐', style: const TextStyle(fontSize: 22)),
-                  title: const Text('Mode noir & blanc'),
-                  subtitle: Text(mono ? 'Couleurs désactivées sur toute l\'app' : 'Interface en couleurs'),
-                  value: mono,
-                  onChanged: (_) => ThemePreferences.instance.toggle(),
-                );
-              },
             ),
           ),
           const SizedBox(height: 16),

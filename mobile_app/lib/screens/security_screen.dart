@@ -27,7 +27,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final pack = await _service.loadPack();
+      final pack = await _service.loadPack(role: widget.auth.role);
       if (mounted) setState(() => _pack = pack);
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -66,6 +66,11 @@ class _SecurityScreenState extends State<SecurityScreen> {
                     const Chip(
                       avatar: Icon(Icons.science, size: 16),
                       label: Text('Mode démo — backend sécurité indisponible'),
+                    )
+                  else if (_pack!.mode == 'client')
+                    const Chip(
+                      avatar: Icon(Icons.verified_user, size: 16),
+                      label: Text('Session client — posture sécurité locale'),
                     ),
                   _ScoreCard(score: _pack!.securityScore),
                   const SizedBox(height: 16),

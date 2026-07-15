@@ -99,6 +99,45 @@ class IotAnomaly {
       );
 }
 
+/// Alerte IoT API (`/client/iot/pack` → alerts[]) — ESP32 / fontaine / cam.
+class IotAlert {
+  const IotAlert({
+    required this.id,
+    required this.title,
+    required this.message,
+    this.source = 'feeder',
+    this.severity = 'medium',
+    this.deviceId,
+    this.petName,
+    this.at,
+  });
+
+  final String id;
+  final String title;
+  final String message;
+  final String source;
+  final String severity;
+  final String? deviceId;
+  final String? petName;
+  final DateTime? at;
+
+  factory IotAlert.fromJson(Map<String, dynamic> json) {
+    DateTime? at;
+    final raw = json['at'] ?? json['createdAt'] ?? json['timestamp'];
+    if (raw is String) at = DateTime.tryParse(raw);
+    return IotAlert(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? json['type']?.toString() ?? 'Alerte IoT',
+      message: json['message']?.toString() ?? '',
+      source: json['source']?.toString() ?? json['type']?.toString() ?? 'feeder',
+      severity: json['severity']?.toString() ?? json['level']?.toString() ?? 'medium',
+      deviceId: json['deviceId']?.toString(),
+      petName: json['petName']?.toString(),
+      at: at,
+    );
+  }
+}
+
 class IotPack {
   const IotPack({
     this.mode = 'demo',
@@ -106,6 +145,7 @@ class IotPack {
     this.counts = const IotCounts(),
     this.devices = const [],
     this.anomalies = const [],
+    this.alerts = const [],
   });
 
   final String mode;
@@ -113,6 +153,7 @@ class IotPack {
   final IotCounts counts;
   final List<IotDevice> devices;
   final List<IotAnomaly> anomalies;
+  final List<IotAlert> alerts;
 
   bool get isLive => mode == 'live' || mode == 'api';
 
@@ -121,6 +162,7 @@ class IotPack {
   factory IotPack.fromJson(Map<String, dynamic> json) {
     final devicesRaw = json['devices'] as List? ?? [];
     final anomaliesRaw = json['anomalies'] as List? ?? [];
+    final alertsRaw = json['alerts'] as List? ?? [];
     return IotPack(
       mode: json['mode']?.toString() ?? 'live',
       healthScore: (json['healthScore'] as num?)?.toInt() ?? 0,
@@ -130,6 +172,9 @@ class IotPack {
           .toList(),
       anomalies: anomaliesRaw
           .map((e) => IotAnomaly.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList(),
+      alerts: alertsRaw
+          .map((e) => IotAlert.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
     );
   }

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PetfoodTN — Gestion Sprints (Jira / Trello)</title>
+  <style>
+    :root {
+      --bg0: #0b1220;
+      --bg1: #122033;
+      --panel: #152238;
+      --panel2: #1a2b44;
+      --line: #2a3f5c;
+      --text: #e8eef7;
+      --muted: #8fa3bf;
+      --accent: #0d9488;
+      --accent2: #14b8a6;
+      --blue: #38bdf8;
+      --green: #34d399;
+      --amber: #fbbf24;
+      --rose: #fb7185;
+      --shadow: 0 8px 24px rgba(0,0,0,.28);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background:
+        radial-gradient(900px 420px at 12% -10%, rgba(13,148,136,.22), transparent 55%),
+        radial-gradient(700px 380px at 90% 0%, rgba(56,189,248,.12), transparent 50%),
+        linear-gradient(165deg, var(--bg0), var(--bg1) 55%, #0c1628);
+    }
+    header {
+      position: sticky; top: 0; z-index: 40;
+      padding: 1rem 1.25rem .9rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(11,18,32,.88);
+      backdrop-filter: blur(10px);
+    }
+    .top {
+      display: flex; flex-wrap: wrap; gap: .75rem 1rem;
+      align-items: flex-start; justify-content: space-between;
+    }
+    h1 { margin: 0; font-size: 1.25rem; letter-spacing: -.02em; }
+    h1 em { color: var(--accent2); font-style: normal; }
+    .meta { color: var(--muted); font-size: .84rem; margin-top: .3rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: .45rem; }
+    button, .btn {
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      color: var(--text);
+      border-radius: 9px;
+      padding: .45rem .75rem;
+      font-size: .82rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover, .btn:hover { border-color: var(--accent2); }
+    button.primary {
+      background: linear-gradient(135deg, #0f766e, #0d9488);
+      border-color: transparent;
+    }
+    button.ghost { background: transparent; color: var(--muted); }
+    .tabs { display: flex; gap: .4rem; margin-top: .85rem; flex-wrap: wrap; }
+    .tab {
+      border-radius: 999px;
+      padding: .35rem .8rem;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+      font-size: .8rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .tab.active {
+      background: rgba(13,148,136,.2);
+      color: var(--accent2);
+      border-color: rgba(20,184,166,.55);
+    }
+    .toolbar {
+      display: flex; flex-wrap: wrap; gap: .55rem;
+      align-items: center;
+      padding: .85rem 1.25rem 0;
+    }
+    select, input[type="search"], input[type="text"], input[type="number"], textarea {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      color: var(--text);
+      border-radius: 8px;
+      padding: .45rem .65rem;
+      font: inherit;
+    }
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: .65rem;
+      padding: .85rem 1.25rem 0;
+    }
+    .kpi {
+      background: rgba(21,34,56,.9);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: .7rem .85rem;
+    }
+    .kpi .v { font-size: 1.35rem; font-weight: 800; color: var(--accent2); }
+    .kpi .l { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(250px, 1fr));
+      gap: .85rem;
+      padding: 1rem 1.25rem 2rem;
+      overflow-x: auto;
+      min-height: 55vh;
+    }
+    .column {
+      background: rgba(21,34,56,.85);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: .65rem;
+      min-height: 460px;
+      display: flex;
+      flex-direction: column;
+    }
+    .column.drag-over { border-color: var(--accent2); box-shadow: inset 0 0 0 1px rgba(20,184,166,.35); }
+    .column h2 {
+      margin: 0 0 .65rem;
+      font-size: .74rem;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .count {
+      background: #0b1220;
+      color: var(--blue);
+      border-radius: 999px;
+      padding: .1rem .45rem;
+      font-size: .72rem;
+    }
+    .cards { flex: 1; min-height: 80px; }
+    .card {
+      background: #0e1a2c;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: .7rem;
+      margin-bottom: .55rem;
+      cursor: grab;
+      box-shadow: var(--shadow);
+      transition: border-color .15s, transform .15s;
+    }
+    .card:active { cursor: grabbing; }
+    .card.dragging { opacity: .45; transform: scale(.98); }
+    .card:hover { border-color: rgba(56,189,248,.55); }
+    .card .row { display: flex; justify-content: space-between; gap: .5rem; align-items: center; }
+    .card .key { font-size: .72rem; color: var(--blue); font-weight: 800; }
+    .card .title { font-size: .9rem; font-weight: 650; margin: .35rem 0 .45rem; line-height: 1.35; }
+    .labels { display: flex; flex-wrap: wrap; gap: .28rem; }
+    .label {
+      font-size: .65rem; font-weight: 800; padding: .12rem .4rem;
+      border-radius: 4px; text-transform: uppercase;
+    }
+    .l-frontend { background: #1d4ed8; }
+    .l-backend { background: #047857; }
+    .l-mobile { background: #0f766e; }
+    .l-ml { background: #b45309; }
+    .l-iot { background: #0e7490; }
+    .l-security { background: #be123c; }
+    .l-bi { background: #1e40af; }
+    .l-docs { background: #475569; }
+    .prio {
+      font-size: .65rem; font-weight: 800;
+      padding: .1rem .35rem; border-radius: 4px;
+    }
+    .p-high { background: rgba(251,113,133,.18); color: var(--rose); }
+    .p-med { background: rgba(251,191,36,.16); color: var(--amber); }
+    .p-low { background: rgba(52,211,153,.14); color: var(--green); }
+    .story { color: var(--muted); font-size: .72rem; margin-top: .4rem; }
+    .card-actions { display: flex; gap: .3rem; margin-top: .45rem; }
+    .card-actions button {
+      padding: .2rem .45rem;
+      font-size: .68rem;
+      background: transparent;
+      color: var(--muted);
+    }
+    .panel-view { padding: 1rem 1.25rem 2rem; }
+    .sprint-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: .85rem;
+    }
+    .sprint-card {
+      background: rgba(21,34,56,.9);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem;
+    }
+    .sprint-card.active { border-color: rgba(20,184,166,.65); }
+    .sprint-card h3 { margin: 0 0 .35rem; font-size: 1rem; }
+    .bar {
+      height: 8px; border-radius: 999px; background: #0b1220; overflow: hidden; margin: .65rem 0;
+    }
+    .bar > span {
+      display: block; height: 100%;
+      background: linear-gradient(90deg, #0f766e, #38bdf8);
+    }
+    .burndown-wrap {
+      background: rgba(21,34,56,.9);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem;
+      margin-top: .85rem;
+    }
+    .burndown-wrap svg { width: 100%; height: 220px; display: block; }
+    .hidden { display: none !important; }
+    .modal-bg {
+      position: fixed; inset: 0; z-index: 80;
+      background: rgba(0,0,0,.55);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .modal {
+      width: min(520px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem;
+      box-shadow: var(--shadow);
+    }
+    .modal h3 { margin: 0 0 .75rem; }
+    .form-grid { display: grid; gap: .55rem; }
+    .form-grid label { display: grid; gap: .25rem; font-size: .78rem; color: var(--muted); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; }
+    footer {
+      padding: .5rem 1.25rem 1.5rem;
+      color: var(--muted);
+      font-size: .78rem;
+    }
+    @media (max-width: 900px) {
+      .board { grid-template-columns: 1fr 1fr; }
+      .kpis { grid-template-columns: 1fr 1fr; }
+    }
+    @media print {
+      body { background: #fff; color: #111; }
+      header, .column, .card, .kpi, .sprint-card { background: #fff !important; color: #111; border-color: #ccc; }
+      .actions, .card-actions, button { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="top">
+      <div>
+        <h1>Petfood<em>TN</em> — Gestion Sprints</h1>
+        <div class="meta">Board Agile type Jira / Trello · Scrum · Drag &amp; drop · Persistance locale · Rapport 2025–2026</div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="btn-add">+ Ticket</button>
+        <button id="btn-export">Export CSV Jira</button>
+        <button id="btn-reset" class="ghost">Réinitialiser</button>
+        <button onclick="window.print()" class="ghost">Imprimer</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-view="board">Sprint Board</button>
+      <button class="tab" data-view="roadmap">Roadmap sprints</button>
+      <button class="tab" data-view="backlog">Product Backlog</button>
+      <button class="tab" data-view="stats">Vélocité &amp; burndown</button>
+    </div>
+  </header>
+
+  <div class="toolbar" id="board-toolbar">
+    <label>
+      <span class="meta">Sprint actif</span>
+      <select id="sprint-select"></select>
+    </label>
+    <input type="search" id="search" placeholder="Rechercher ticket / epic…" style="min-width:220px" />
+    <select id="filter-epic">
+      <option value="">Tous les epics</option>
+    </select>
+    <select id="filter-prio">
+      <option value="">Toutes priorités</option>
+      <option value="high">High</option>
+      <option value="med">Medium</option>
+      <option value="low">Low</option>
+    </select>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div id="view-board">
+    <div class="board" id="kanban"></div>
+  </div>
+  <div id="view-roadmap" class="panel-view hidden">
+    <div class="sprint-grid" id="roadmap"></div>
+  </div>
+  <div id="view-backlog" class="panel-view hidden">
+    <div class="board" id="backlog-board" style="padding:0;grid-template-columns:1fr"></div>
+  </div>
+  <div id="view-stats" class="panel-view hidden">
+    <div class="sprint-grid" id="velocity"></div>
+    <div class="burndown-wrap">
+      <h3 style="margin:0 0 .5rem;font-size:.95rem">Burndown Sprint actif (idéal vs restant)</h3>
+      <svg id="burndown" viewBox="0 0 640 220" aria-label="Burndown chart"></svg>
+    </div>
+  </div>
+
+  <footer>
+    Données synchronisées avec <code>jira-import-petfoodtn.csv</code> · Stockage navigateur <code>petfoodtn_sprint_board_v1</code> ·
+    Équivalent méthodologique : Backlog → To Do → In Progress → Done.
+  </footer>
+
+  <div id="modal" class="modal-bg hidden" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h3 id="modal-title">Nouveau ticket</h3>
+      <div class="form-grid">
+        <label>Titre<input id="f-title" type="text" maxlength="160" /></label>
+        <div class="form-row">
+          <label>Priorité
+            <select id="f-prio">
+              <option value="high">High</option>
+              <option value="med" selected>Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </label>
+          <label>Story points<input id="f-points" type="number" min="1" max="21" value="5" /></label>
+        </div>
+        <div class="form-row">
+          <label>Sprint
+            <select id="f-sprint"></select>
+          </label>
+          <label>Statut
+            <select id="f-col">
+              <option value="backlog">Backlog</option>
+              <option value="todo">To Do</option>
+              <option value="progress">In Progress</option>
+              <option value="done">Done</option>
+            </select>
+          </label>
+        </div>
+        <label>Epic<input id="f-epic" type="text" list="epic-list" /></label>
+        <datalist id="epic-list"></datalist>
+        <label>Labels (séparés par virgule)<input id="f-labels" type="text" placeholder="frontend, iot" /></label>
+        <input type="hidden" id="f-key" />
+        <div class="actions" style="justify-content:flex-end;margin-top:.35rem">
+          <button class="ghost" id="modal-cancel">Annuler</button>
+          <button class="primary" id="modal-save">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'petfoodtn_sprint_board_v1';
+    const COLS = [
+      { id: 'backlog', title: 'Backlog' },
+      { id: 'todo', title: 'To Do' },
+      { id: 'progress', title: 'In Progress' },
+      { id: 'done', title: 'Done' },
+    ];
+    const SPRINTS = [
+      { n: 1, name: 'Sprint 1 — Socle plateforme', goal: 'Auth, API, catalogue' },
+      { n: 2, name: 'Sprint 2 — Mobile & logistique', goal: 'Flutter + livreur' },
+      { n: 3, name: 'Sprint 3 — Santé animale', goal: 'Vétérinaire + stock' },
+      { n: 4, name: 'Sprint 4 — IA & BI', goal: 'ML + dashboards' },
+      { n: 5, name: 'Sprint 5 — IoT', goal: 'Mangeoire + qualité + froid' },
+      { n: 6, name: 'Sprint 6 — Sécurité & soutenance', goal: 'Audit, démo, rapport' },
+      { n: 7, name: 'Sprint 7 — Qualité & CI', goal: 'Perf, CI/CD, PDF' },
+    ];
+
+    const DEFAULT_TICKETS = [
+      { key: 'PTN-1', title: 'Auth multi-rôles (admin, client, livreur, vétérinaire, vendeur)', col: 'done', labels: ['backend', 'security'], prio: 'high', points: 8, sprint: 1, epic: 'Core plateforme' },
+      { key: 'PTN-2', title: 'Catalogue produits & panier client', col: 'done', labels: ['frontend'], prio: 'high', points: 5, sprint: 1, epic: 'E-commerce' },
+      { key: 'PTN-3', title: 'CRUD admin produits / commandes / utilisateurs', col: 'done', labels: ['frontend', 'backend'], prio: 'high', points: 8, sprint: 1, epic: 'E-commerce' },
+      { key: 'PTN-4', title: 'Module avis & réclamations', col: 'done', labels: ['frontend'], prio: 'med', points: 5, sprint: 2, epic: 'E-commerce' },
+      { key: 'PTN-5', title: 'Espace livreur + suivi livraisons', col: 'done', labels: ['frontend', 'mobile'], prio: 'high', points: 8, sprint: 2, epic: 'Logistique' },
+      { key: 'PTN-6', title: 'Application Flutter mobile client', col: 'done', labels: ['mobile'], prio: 'high', points: 13, sprint: 2, epic: 'Mobile' },
+      { key: 'PTN-7', title: 'API Nest/Express + Prisma SQLite/SQL', col: 'done', labels: ['backend'], prio: 'high', points: 8, sprint: 1, epic: 'Core plateforme' },
+      { key: 'PTN-8', title: 'Stock & alertes rupture', col: 'done', labels: ['frontend', 'backend'], prio: 'med', points: 5, sprint: 3, epic: 'E-commerce' },
+      { key: 'PTN-9', title: 'Module vétérinaire (dossiers, téléconsult)', col: 'done', labels: ['frontend'], prio: 'high', points: 13, sprint: 3, epic: 'Santé animale' },
+      { key: 'PTN-10', title: 'Recommandations ML nutrition / santé', col: 'done', labels: ['ml'], prio: 'high', points: 13, sprint: 4, epic: 'Intelligence artificielle' },
+      { key: 'PTN-11', title: 'Agent IA client & admin (NLP)', col: 'done', labels: ['ml', 'frontend'], prio: 'med', points: 8, sprint: 4, epic: 'Intelligence artificielle' },
+      { key: 'PTN-12', title: 'Power BI / tableaux de bord BI', col: 'done', labels: ['bi'], prio: 'med', points: 5, sprint: 4, epic: 'Business Intelligence' },
+      { key: 'PTN-13', title: 'IoT mangeoire & anomalies', col: 'done', labels: ['iot'], prio: 'high', points: 8, sprint: 5, epic: 'IoT' },
+      { key: 'PTN-14', title: 'Surveillance qualité alimentaire (caméra)', col: 'done', labels: ['iot', 'ml'], prio: 'high', points: 8, sprint: 5, epic: 'IoT' },
+      { key: 'PTN-15', title: 'Chaîne du froid livraisons', col: 'done', labels: ['iot', 'frontend'], prio: 'med', points: 5, sprint: 5, epic: 'Logistique' },
+      { key: 'PTN-16', title: 'Sécurité plateforme & audit', col: 'done', labels: ['security'], prio: 'high', points: 8, sprint: 6, epic: 'Sécurité' },
+      { key: 'PTN-17', title: 'Page démo jury & landing marketing', col: 'done', labels: ['frontend', 'docs'], prio: 'high', points: 5, sprint: 6, epic: 'Livrables rapport' },
+      { key: 'PTN-18', title: 'Scripts Windows démarrage multi-services', col: 'done', labels: ['docs'], prio: 'low', points: 3, sprint: 6, epic: 'Livrables rapport' },
+      { key: 'PTN-19', title: 'Tests E2E Playwright parcours critique', col: 'progress', labels: ['frontend'], prio: 'med', points: 5, sprint: 6, epic: 'Qualité' },
+      { key: 'PTN-20', title: 'Rédaction rapport : architecture & UML', col: 'progress', labels: ['docs'], prio: 'high', points: 8, sprint: 6, epic: 'Livrables rapport' },
+      { key: 'PTN-21', title: 'Rédaction rapport : gestion de projet (board)', col: 'progress', labels: ['docs'], prio: 'high', points: 3, sprint: 6, epic: 'Livrables rapport' },
+      { key: 'PTN-22', title: 'Optimisation perf admin (lazy routes)', col: 'todo', labels: ['frontend'], prio: 'med', points: 5, sprint: 7, epic: 'Qualité' },
+      { key: 'PTN-23', title: 'CI/CD GitHub Actions backend + frontend', col: 'todo', labels: ['backend'], prio: 'med', points: 8, sprint: 7, epic: 'Core plateforme' },
+      { key: 'PTN-24', title: 'Export PDF factures & historique client', col: 'todo', labels: ['frontend'], prio: 'low', points: 3, sprint: 7, epic: 'E-commerce' },
+      { key: 'PTN-25', title: 'Notifications push mobile ESP32', col: 'backlog', labels: ['mobile', 'iot'], prio: 'low', points: 5, sprint: null, epic: 'Mobile' },
+      { key: 'PTN-26', title: 'Marketplace multi-vendeurs avancé', col: 'backlog', labels: ['backend'], prio: 'med', points: 13, sprint: null, epic: 'E-commerce' },
+      { key: 'PTN-27', title: 'Jumeau numérique animal', col: 'backlog', labels: ['ml'], prio: 'low', points: 8, sprint: null, epic: 'Intelligence artificielle' },
+    ];
+
+    let state = loadState();
+    let dragKey = null;
+    let editKey = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed?.tickets?.length) return parsed;
+        }
+      } catch (_) {}
+      return { activeSprint: 6, tickets: structuredClone(DEFAULT_TICKETS) };
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function nextKey() {
+      const nums = state.tickets.map(t => Number(String(t.key).replace(/\D/g, '')) || 0);
+      return 'PTN-' + ((Math.max(0, ...nums) || 0) + 1);
+    }
+
+    function matchesFilters(t) {
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      const epic = document.getElementById('filter-epic').value;
+      const prio = document.getElementById('filter-prio').value;
+      if (epic && t.epic !== epic) return false;
+      if (prio && t.prio !== prio) return false;
+      if (!q) return true;
+      return [t.key, t.title, t.epic, ...(t.labels || [])].join(' ').toLowerCase().includes(q);
+    }
+
+    function cardHtml(t) {
+      return `<article class="card" draggable="true" data-key="${t.key}">
+        <div class="row">
+          <span class="key">${t.key} · ${t.points} pts</span>
+          <span class="prio p-${t.prio}">${t.prio.toUpperCase()}</span>
+        </div>
+        <div class="title">${escapeHtml(t.title)}</div>
+        <div class="labels">${(t.labels || []).map(l => `<span class="label l-${l}">${l}</span>`).join('')}</div>
+        <div class="story">Epic : ${escapeHtml(t.epic)}${t.sprint ? ' · Sprint ' + t.sprint : ' · Non planifié'}</div>
+        <div class="card-actions">
+          <button type="button" data-edit="${t.key}">Éditer</button>
+          <button type="button" data-del="${t.key}">Suppr.</button>
+        </div>
+      </article>`;
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function filteredForBoard() {
+      const sprint = Number(state.activeSprint);
+      return state.tickets.filter(t => {
+        if (!matchesFilters(t)) return false;
+        if (t.col === 'backlog' && t.sprint == null) return true;
+        return t.sprint === sprint || (t.col === 'backlog' && t.sprint === sprint);
+      });
+    }
+
+    function renderKpis() {
+      const sprint = Number(state.activeSprint);
+      const inSprint = state.tickets.filter(t => t.sprint === sprint);
+      const committed = inSprint.reduce((a, t) => a + t.points, 0);
+      const done = inSprint.filter(t => t.col === 'done').reduce((a, t) => a + t.points, 0);
+      const progress = inSprint.filter(t => t.col === 'progress').length;
+      const pct = committed ? Math.round((done / committed) * 100) : 0;
+      document.getElementById('kpis').innerHTML = `
+        <div class="kpi"><div class="v">S${sprint}</div><div class="l">Sprint actif</div></div>
+        <div class="kpi"><div class="v">${committed}</div><div class="l">Points commités</div></div>
+        <div class="kpi"><div class="v">${done}</div><div class="l">Points Done</div></div>
+        <div class="kpi"><div class="v">${pct}% · ${progress}</div><div class="l">Avancement · In progress</div></div>`;
+    }
+
+    function renderBoard() {
+      const items = filteredForBoard();
+      const root = document.getElementById('kanban');
+      root.innerHTML = COLS.map(c => {
+        const list = items.filter(t => t.col === c.id);
+        const pts = list.reduce((a, t) => a + t.points, 0);
+        return `<section class="column" data-col="${c.id}">
+          <h2>${c.title} <span class="count">${list.length} · ${pts} pts</span></h2>
+          <div class="cards">${list.map(cardHtml).join('')}</div>
+        </section>`;
+      }).join('');
+      bindCardEvents(root);
+      bindColumnDrop(root);
+    }
+
+    function renderRoadmap() {
+      const root = document.getElementById('roadmap');
+      root.innerHTML = SPRINTS.map(s => {
+        const items = state.tickets.filter(t => t.sprint === s.n);
+        const total = items.reduce((a, t) => a + t.points, 0);
+        const done = items.filter(t => t.col === 'done').reduce((a, t) => a + t.points, 0);
+        const pct = total ? Math.round((done / total) * 100) : 0;
+        const active = s.n === Number(state.activeSprint) ? ' active' : '';
+        return `<article class="sprint-card${active}">
+          <h3>${s.name}</h3>
+          <div class="story">${escapeHtml(s.goal)}</div>
+          <div class="bar"><span style="width:${pct}%"></span></div>
+          <div class="row" style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)">
+            <span>${done}/${total} pts · ${pct}%</span>
+            <span>${items.length} tickets</span>
+          </div>
+          <div style="margin-top:.65rem">${items.slice(0, 4).map(t => `<div class="story">• ${t.key} — ${escapeHtml(t.title)}</div>`).join('')}
+          ${items.length > 4 ? `<div class="story">+ ${items.length - 4} autres…</div>` : ''}
+          </div>
+          <button style="margin-top:.7rem" data-activate="${s.n}">Ouvrir ce sprint</button>
+        </article>`;
+      }).join('');
+      root.querySelectorAll('[data-activate]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.activeSprint = Number(btn.dataset.activate);
+          saveState();
+          document.getElementById('sprint-select').value = String(state.activeSprint);
+          switchView('board');
+          refresh();
+        });
+      });
+    }
+
+    function renderBacklog() {
+      const items = state.tickets.filter(t => t.col === 'backlog' || t.sprint == null).filter(matchesFilters);
+      const root = document.getElementById('backlog-board');
+      root.innerHTML = `<section class="column"><h2>Product Backlog <span class="count">${items.length}</span></h2>
+        <div class="cards">${items.map(cardHtml).join('')}</div></section>`;
+      bindCardEvents(root);
+    }
+
+    function renderStats() {
+      const root = document.getElementById('velocity');
+      root.innerHTML = SPRINTS.map(s => {
+        const items = state.tickets.filter(t => t.sprint === s.n);
+        const done = items.filter(t => t.col === 'done').reduce((a, t) => a + t.points, 0);
+        const committed = items.reduce((a, t) => a + t.points, 0);
+        return `<article class="sprint-card">
+          <h3>Sprint ${s.n}</h3>
+          <div class="kpi" style="border:0;padding:.35rem 0"><div class="v">${done}</div><div class="l">Vélocité (pts Done)</div></div>
+          <div class="story">Engagé : ${committed} pts · ${items.length} issues</div>
+        </article>`;
+      }).join('');
+
+      const sprint = Number(state.activeSprint);
+      const inSprint = state.tickets.filter(t => t.sprint === sprint);
+      const total = inSprint.reduce((a, t) => a + t.points, 0) || 1;
+      const remaining = inSprint.filter(t => t.col !== 'done').reduce((a, t) => a + t.points, 0);
+      const days = 10;
+      const w = 640, h = 220, pad = 28;
+      const ideal = (i) => total * (1 - i / (days - 1));
+      const actual = Array.from({ length: days }, (_, i) => {
+        const progress = i / (days - 1);
+        return Math.max(0, total - (total - remaining) * Math.min(1, progress * 1.05));
+      });
+      const x = (i) => pad + (i / (days - 1)) * (w - pad * 2);
+      const y = (v) => pad + (1 - v / total) * (h - pad * 2);
+      const path = (arr) => arr.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+      const idealPts = Array.from({ length: days }, (_, i) => ideal(i));
+      document.getElementById('burndown').innerHTML = `
+        <rect x="0" y="0" width="${w}" height="${h}" fill="transparent"/>
+        <text x="${pad}" y="16" fill="#8fa3bf" font-size="11">Points restants</text>
+        <text x="${w - pad}" y="${h - 8}" fill="#8fa3bf" font-size="11" text-anchor="end">Jours sprint</text>
+        <path d="${path(idealPts)}" fill="none" stroke="#64748b" stroke-dasharray="5 4" stroke-width="2"/>
+        <path d="${path(actual)}" fill="none" stroke="#14b8a6" stroke-width="3"/>
+        <circle cx="${x(days - 1)}" cy="${y(remaining)}" r="4" fill="#38bdf8"/>
+        <text x="${x(days - 1) - 8}" y="${y(remaining) - 8}" fill="#38bdf8" font-size="11" text-anchor="end">Reste ${remaining} pts</text>`;
+    }
+
+    function bindCardEvents(root) {
+      root.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+          dragKey = card.dataset.key;
+          card.classList.add('dragging');
+          e.dataTransfer.setData('text/plain', dragKey);
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        card.addEventListener('dragend', () => card.classList.remove('dragging'));
+      });
+      root.querySelectorAll('[data-edit]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openModal(btn.dataset.edit);
+        });
+      });
+      root.querySelectorAll('[data-del]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!confirm('Supprimer ' + btn.dataset.del + ' ?')) return;
+          state.tickets = state.tickets.filter(t => t.key !== btn.dataset.del);
+          saveState();
+          refresh();
+        });
+      });
+    }
+
+    function bindColumnDrop(root) {
+      root.querySelectorAll('.column').forEach(col => {
+        col.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          col.classList.add('drag-over');
+        });
+        col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+        col.addEventListener('drop', (e) => {
+          e.preventDefault();
+          col.classList.remove('drag-over');
+          const key = e.dataTransfer.getData('text/plain') || dragKey;
+          const ticket = state.tickets.find(t => t.key === key);
+          if (!ticket) return;
+          ticket.col = col.dataset.col;
+          if (ticket.col !== 'backlog' && ticket.sprint == null) {
+            ticket.sprint = Number(state.activeSprint);
+          }
+          if (ticket.col === 'backlog') ticket.sprint = null;
+          saveState();
+          refresh();
+        });
+      });
+    }
+
+    function fillSelects() {
+      const sprintSelect = document.getElementById('sprint-select');
+      sprintSelect.innerHTML = SPRINTS.map(s =>
+        `<option value="${s.n}" ${s.n === Number(state.activeSprint) ? 'selected' : ''}>${s.name}</option>`
+      ).join('');
+      const fSprint = document.getElementById('f-sprint');
+      fSprint.innerHTML = `<option value="">Non planifié</option>` + SPRINTS.map(s =>
+        `<option value="${s.n}">Sprint ${s.n}</option>`
+      ).join('');
+      const epics = [...new Set(state.tickets.map(t => t.epic))].sort();
+      document.getElementById('filter-epic').innerHTML =
+        `<option value="">Tous les epics</option>` + epics.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+      document.getElementById('epic-list').innerHTML = epics.map(e => `<option value="${escapeHtml(e)}"></option>`).join('');
+    }
+
+    function openModal(key) {
+      editKey = key || null;
+      const t = key ? state.tickets.find(x => x.key === key) : null;
+      document.getElementById('modal-title').textContent = t ? 'Éditer ' + t.key : 'Nouveau ticket';
+      document.getElementById('f-key').value = t?.key || '';
+      document.getElementById('f-title').value = t?.title || '';
+      document.getElementById('f-prio').value = t?.prio || 'med';
+      document.getElementById('f-points').value = t?.points || 5;
+      document.getElementById('f-sprint').value = t?.sprint ?? '';
+      document.getElementById('f-col').value = t?.col || 'todo';
+      document.getElementById('f-epic').value = t?.epic || '';
+      document.getElementById('f-labels').value = (t?.labels || []).join(', ');
+      document.getElementById('modal').classList.remove('hidden');
+      document.getElementById('f-title').focus();
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+      editKey = null;
+    }
+
+    function saveModal() {
+      const title = document.getElementById('f-title').value.trim();
+      if (!title) { alert('Titre requis'); return; }
+      const sprintVal = document.getElementById('f-sprint').value;
+      const payload = {
+        key: document.getElementById('f-key').value || nextKey(),
+        title,
+        prio: document.getElementById('f-prio').value,
+        points: Number(document.getElementById('f-points').value) || 1,
+        sprint: sprintVal === '' ? null : Number(sprintVal),
+        col: document.getElementById('f-col').value,
+        epic: document.getElementById('f-epic').value.trim() || 'Divers',
+        labels: document.getElementById('f-labels').value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
+      };
+      if (editKey) {
+        const i = state.tickets.findIndex(t => t.key === editKey);
+        if (i >= 0) state.tickets[i] = { ...state.tickets[i], ...payload, key: editKey };
+      } else {
+        state.tickets.push(payload);
+      }
+      saveState();
+      closeModal();
+      refresh();
+    }
+
+    function exportCsv() {
+      const statusMap = { backlog: 'Backlog', todo: 'To Do', progress: 'In Progress', done: 'Done' };
+      const prioMap = { high: 'High', med: 'Medium', low: 'Low' };
+      const rows = [
+        ['Summary', 'Issue Type', 'Issue key', 'Priority', 'Story Points', 'Sprint', 'Epic Link', 'Labels', 'Status'],
+        ...state.tickets.map(t => [
+          `"${t.title.replace(/"/g, '""')}"`,
+          'Story',
+          t.key,
+          prioMap[t.prio] || 'Medium',
+          t.points,
+          t.sprint ? `Sprint ${t.sprint}` : '',
+          t.epic,
+          `"${(t.labels || []).join(';')}"`,
+          statusMap[t.col] || t.col,
+        ]),
+      ];
+      const blob = new Blob([rows.map(r => r.join(',')).join('\n')], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'jira-import-petfoodtn-export.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function switchView(view) {
+      document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+      document.getElementById('view-board').classList.toggle('hidden', view !== 'board');
+      document.getElementById('view-roadmap').classList.toggle('hidden', view !== 'roadmap');
+      document.getElementById('view-backlog').classList.toggle('hidden', view !== 'backlog');
+      document.getElementById('view-stats').classList.toggle('hidden', view !== 'stats');
+      document.getElementById('board-toolbar').classList.toggle('hidden', view === 'stats' || view === 'roadmap');
+    }
+
+    function refresh() {
+      fillSelects();
+      renderKpis();
+      renderBoard();
+      renderRoadmap();
+      renderBacklog();
+      renderStats();
+    }
+
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchView(btn.dataset.view);
+        refresh();
+      });
+    });
+    document.getElementById('sprint-select').addEventListener('change', (e) => {
+      state.activeSprint = Number(e.target.value);
+      saveState();
+      refresh();
+    });
+    ['search', 'filter-epic', 'filter-prio'].forEach(id => {
+      document.getElementById(id).addEventListener('input', refresh);
+      document.getElementById(id).addEventListener('change', refresh);
+    });
+    document.getElementById('btn-add').addEventListener('click', () => openModal(null));
+    document.getElementById('btn-export').addEventListener('click', exportCsv);
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      if (!confirm('Réinitialiser le board aux tickets PetfoodTN par défaut ?')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      state = loadState();
+      refresh();
+    });
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    document.getElementById('modal-save').addEventListener('click', saveModal);
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target.id === 'modal') closeModal();
+    });
+
+    refresh();
+  </script>
+</body>
+</html>

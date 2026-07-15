@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PetfoodTN — Liens plateforme</title>
+  <style>
+    :root { --orange: #e67e22; --dark: #0f172a; --muted: #64748b; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      margin: 0; padding: 24px;
+      background: linear-gradient(160deg, #f8fafc, #eef2ff);
+      color: var(--dark);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.6rem; margin: 0 0 6px; }
+    .sub { color: var(--muted); margin-bottom: 28px; }
+    section {
+      background: #fff; border-radius: 16px;
+      padding: 20px 22px; margin-bottom: 18px;
+      box-shadow: 0 4px 24px rgba(15,23,42,.06);
+    }
+    h2 { font-size: 1rem; margin: 0 0 14px; color: var(--orange); text-transform: uppercase; letter-spacing: .04em; }
+    .link-row {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid #f1f5f9;
+    }
+    .link-row:last-child { border: none; }
+    .link-row strong { min-width: 140px; font-size: 14px; }
+    a.btn {
+      display: inline-block; padding: 8px 14px; border-radius: 10px;
+      background: linear-gradient(135deg, #e67e22, #d35400);
+      color: #fff; text-decoration: none; font-weight: 600; font-size: 13px;
+    }
+    a.btn:hover { opacity: .92; }
+    a.btn--ghost {
+      background: #f1f5f9; color: #334155;
+    }
+    code {
+      font-size: 12px; background: #f8fafc; padding: 3px 8px;
+      border-radius: 6px; word-break: break-all;
+    }
+    .copy {
+      border: 1px solid #e2e8f0; background: #fff; border-radius: 8px;
+      padding: 6px 10px; font-size: 12px; cursor: pointer;
+    }
+    .copy:hover { background: #f8fafc; }
+    .warn {
+      background: #fff7ed; border: 1px solid #fed7aa;
+      border-radius: 12px; padding: 14px; font-size: 13px; margin-bottom: 20px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #f1f5f9; }
+    th { color: var(--muted); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>🐾 PetfoodTN — Accès plateforme</h1>
+    <p class="sub">Ouvrez ce fichier hors Cursor (double-clic). Démarrez d’abord les serveurs avec <code>scripts\windows\4-DEMARRER-TOUT.bat</code>.</p>
+
+    <div class="warn">
+      ⚠️ Les liens <strong>localhost</strong> fonctionnent seulement si les serveurs tournent sur votre PC.
+      Voir <code>ACCES_HORS_CURSOR.md</code> pour installation et téléchargement GitHub.
+    </div>
+
+    <section>
+      <h2>🌐 Web — Frontend + Backend</h2>
+      <div class="link-row">
+        <strong>Plateforme web</strong>
+        <a class="btn" href="http://localhost:3001" target="_blank">Ouvrir :3001</a>
+        <code id="u-web">http://localhost:3001</code>
+        <button class="copy" data-copy="u-web">Copier</button>
+      </div>
+      <div class="link-row">
+        <strong>Démo jury</strong>
+        <a class="btn" href="http://localhost:3001/jury-demo" target="_blank">Ouvrir jury-demo</a>
+        <code id="u-jury">http://localhost:3001/jury-demo</code>
+        <button class="copy" data-copy="u-jury">Copier</button>
+      </div>
+      <div class="link-row">
+        <strong>Connexion</strong>
+        <a class="btn btn--ghost" href="http://localhost:3001/login" target="_blank">Login</a>
+        <code id="u-login">http://localhost:3001/login</code>
+        <button class="copy" data-copy="u-login">Copier</button>
+      </div>
+      <div class="link-row">
+        <strong>API Backend</strong>
+        <a class="btn btn--ghost" href="http://localhost:5002/api/health" target="_blank">Health :5002</a>
+        <code id="u-api">http://localhost:5002/api</code>
+        <button class="copy" data-copy="u-api">Copier</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>🧠 FastAPI — ML (port 8000)</h2>
+      <div class="link-row">
+        <strong>Service ML</strong>
+        <a class="btn" href="http://localhost:8000" target="_blank">Ouvrir :8000</a>
+        <code id="u-ml">http://localhost:8000</code>
+        <button class="copy" data-copy="u-ml">Copier</button>
+      </div>
+      <div class="link-row">
+        <strong>Swagger / Docs</strong>
+        <a class="btn" href="http://localhost:8000/docs" target="_blank">/docs</a>
+        <code id="u-docs">http://localhost:8000/docs</code>
+        <button class="copy" data-copy="u-docs">Copier</button>
+      </div>
+      <div class="link-row">
+        <strong>Santé ML</strong>
+        <a class="btn btn--ghost" href="http://localhost:8000/health" target="_blank">/health</a>
+        <code id="u-health">http://localhost:8000/health</code>
+        <button class="copy" data-copy="u-health">Copier</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>📱 Flutter — App mobile</h2>
+      <div class="link-row">
+        <strong>Flutter Web</strong>
+        <a class="btn" href="http://localhost:8080" target="_blank">Ouvrir :8080</a>
+        <code id="u-flutter">http://localhost:8080</code>
+        <button class="copy" data-copy="u-flutter">Copier</button>
+      </div>
+      <p style="font-size:13px;color:#64748b;margin:12px 0 0">
+        Lancer : <code>mobile_app\start.bat</code> ou <code>scripts\windows\3-DEMARRER-FLUTTER-WEB.bat</code><br>
+        APK release : <code>mobile_app\build\app\outputs\flutter-apk\app-release.apk</code>
+      </p>
+    </section>
+
+    <section>
+      <h2>⬇️ Télécharger le code (GitHub)</h2>
+      <div class="link-row">
+        <strong>Frontend ZIP</strong>
+        <a class="btn" href="https://github.com/GhassenEl/frontend-petfood/archive/refs/heads/mini-projects.zip" target="_blank">Télécharger</a>
+        <code id="u-zip-fe">https://github.com/GhassenEl/frontend-petfood/archive/refs/heads/mini-projects.zip</code>
+        <button class="copy" data-copy="u-zip-fe">Copier</button>
+      </div>
+      <div class="link-row">
+        <strong>Backend ZIP</strong>
+        <a class="btn" href="https://github.com/GhassenEl/backend-petfood/archive/refs/heads/main.zip" target="_blank">Télécharger</a>
+        <code id="u-zip-be">https://github.com/GhassenEl/backend-petfood/archive/refs/heads/main.zip</code>
+        <button class="copy" data-copy="u-zip-be">Copier</button>
+      </div>
+      <div class="link-row">
+        <strong>Repo frontend</strong>
+        <a class="btn btn--ghost" href="https://github.com/GhassenEl/frontend-petfood" target="_blank">GitHub</a>
+        <code id="u-git-fe">https://github.com/GhassenEl/frontend-petfood</code>
+        <button class="copy" data-copy="u-git-fe">Copier</button>
+      </div>
+      <div class="link-row">
+        <strong>Repo backend</strong>
+        <a class="btn btn--ghost" href="https://github.com/GhassenEl/backend-petfood" target="_blank">GitHub</a>
+        <code id="u-git-be">https://github.com/GhassenEl/backend-petfood</code>
+        <button class="copy" data-copy="u-git-be">Copier</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>🔑 Comptes démo</h2>
+      <table>
+        <thead><tr><th>Rôle</th><th>Email</th><th>Mot de passe</th></tr></thead>
+        <tbody>
+          <tr><td>Admin</td><td>admin@petfood.tn</td><td>PetfoodTN2024!</td></tr>
+          <tr><td>Client</td><td>client@petfood.tn</td><td>MonChat123!</td></tr>
+          <tr><td>Vendeur</td><td>vendor@petfood.tn</td><td>Vendor2024!</td></tr>
+          <tr><td>Modérateur</td><td>moderator@petfood.tn</td><td>Moderator2024!</td></tr>
+          <tr><td>Livreur</td><td>livreur@petfood.tn</td><td>Livreur123!</td></tr>
+          <tr><td>Vétérinaire</td><td>vet@petfood.tn</td><td>Vet2024!</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>🎬 Vidéos démo (fichiers locaux)</h2>
+      <p style="font-size:13px;margin:0">
+        Dossier : <code>demo-videos\</code><br>
+        • <code>petfoodtn-marketing-demo-*.mp4</code><br>
+        • <code>petfoodtn-platform-demo-*.mp4</code>
+      </p>
+    </section>
+  </div>
+
+  <script>
+    document.querySelectorAll('.copy').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-copy');
+        const text = document.getElementById(id).textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          const old = btn.textContent;
+          btn.textContent = '✓ Copié';
+          setTimeout(() => { btn.textContent = old; }, 1500);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

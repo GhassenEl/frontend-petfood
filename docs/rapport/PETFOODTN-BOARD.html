@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PetfoodTN — Board projet (Rapport)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --col: #1e293b;
+      --card: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --blue: #38bdf8;
+      --green: #4ade80;
+      --amber: #fbbf24;
+      --rose: #fb7185;
+      --violet: #a78bfa;
+      --cyan: #22d3ee;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #334155;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 { margin: 0; font-size: 1.35rem; letter-spacing: -0.02em; }
+    header h1 span { color: var(--blue); }
+    .meta { color: var(--muted); font-size: 0.88rem; margin-top: 0.35rem; }
+    .tabs { display: flex; gap: 0.5rem; margin-top: 0.9rem; flex-wrap: wrap; }
+    .tab {
+      background: #1e293b; border: 1px solid #334155; color: var(--muted);
+      padding: 0.4rem 0.85rem; border-radius: 999px; cursor: pointer; font-size: 0.85rem;
+    }
+    .tab.active { background: #0ea5e9; color: #0f172a; border-color: #0ea5e9; font-weight: 700; }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(240px, 1fr));
+      gap: 1rem;
+      padding: 1.25rem;
+      overflow-x: auto;
+    }
+    .column {
+      background: rgba(30, 41, 59, 0.9);
+      border-radius: 12px;
+      padding: 0.75rem;
+      border: 1px solid #334155;
+      min-height: 420px;
+    }
+    .column h2 {
+      margin: 0 0 0.75rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .count {
+      background: #0f172a; color: var(--blue); border-radius: 999px;
+      padding: 0.1rem 0.5rem; font-size: 0.75rem;
+    }
+    .card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 0.75rem;
+      margin-bottom: 0.6rem;
+      cursor: default;
+    }
+    .card:hover { border-color: #38bdf8; }
+    .card .key { font-size: 0.72rem; color: var(--blue); font-weight: 700; }
+    .card .title { font-size: 0.92rem; margin: 0.25rem 0 0.5rem; font-weight: 600; line-height: 1.35; }
+    .labels { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+    .label {
+      font-size: 0.68rem; font-weight: 700; padding: 0.15rem 0.45rem;
+      border-radius: 4px; text-transform: uppercase;
+    }
+    .l-frontend { background: #1d4ed8; }
+    .l-backend { background: #047857; }
+    .l-mobile { background: #7c3aed; }
+    .l-ml { background: #b45309; }
+    .l-iot { background: #0e7490; }
+    .l-security { background: #be123c; }
+    .l-bi { background: #4338ca; }
+    .l-docs { background: #475569; }
+    .prio {
+      float: right; font-size: 0.68rem; font-weight: 800;
+      padding: 0.1rem 0.4rem; border-radius: 4px;
+    }
+    .p-high { background: rgba(251,113,133,.2); color: var(--rose); }
+    .p-med { background: rgba(251,191,36,.2); color: var(--amber); }
+    .p-low { background: rgba(74,222,128,.15); color: var(--green); }
+    .story { color: var(--muted); font-size: 0.75rem; margin-top: 0.45rem; }
+    .sprint-banner {
+      margin: 0 1.25rem;
+      padding: 0.75rem 1rem;
+      background: rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 10px;
+      font-size: 0.9rem;
+    }
+    .hidden { display: none !important; }
+    footer {
+      padding: 1rem 1.5rem 2rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+    @media print {
+      body { background: #fff; color: #111; }
+      header, .column, .card { background: #fff !important; color: #111; border-color: #ccc; }
+      .meta, .story, .column h2 { color: #555; }
+      .card .key { color: #0369a1; }
+    }
+    @media (max-width: 900px) {
+      .board { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Petfood<span>TN</span> — Board Agile (style Trello / Jira)</h1>
+    <div class="meta">
+      Projet e-commerce animalier intelligent · Méthode Scrum · Outil de suivi pour rapport de projet ·
+      Équipe : Ghassen El · Année 2025–2026
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-view="kanban">Kanban (Trello)</button>
+      <button class="tab" data-view="sprints">Sprints (Jira)</button>
+      <button class="tab" data-view="epics">Epics</button>
+    </div>
+  </header>
+
+  <div id="view-kanban">
+    <p class="sprint-banner"><strong>Sprint actif :</strong> Sprint 6 — Sécurité, IoT qualité alimentaire &amp; démo jury · Vélocité cible : 34 pts · Date : Juillet 2026</p>
+    <div class="board" id="kanban-board"></div>
+  </div>
+
+  <div id="view-sprints" class="hidden">
+    <div class="board" id="sprints-board" style="grid-template-columns: repeat(3, 1fr);"></div>
+  </div>
+
+  <div id="view-epics" class="hidden">
+    <div class="board" id="epics-board" style="grid-template-columns: repeat(3, 1fr);"></div>
+  </div>
+
+  <footer>
+    Document généré pour le rapport PetfoodTN — captures d’écran autorisées (mode impression : Ctrl+P).
+    Équivalent méthodologique : Backlog → To Do → In Progress → Done (Trello) / Sprint Board + Epics (Jira).
+  </footer>
+
+  <script>
+    const tickets = [
+      { key: "PTN-1", title: "Auth multi-rôles (admin, client, livreur, vétérinaire, vendeur)", col: "done", labels: ["backend", "security"], prio: "high", points: 8, sprint: 1, epic: "Core plateforme" },
+      { key: "PTN-2", title: "Catalogue produits & panier client", col: "done", labels: ["frontend"], prio: "high", points: 5, sprint: 1, epic: "E-commerce" },
+      { key: "PTN-3", title: "CRUD admin produits / commandes / utilisateurs", col: "done", labels: ["frontend", "backend"], prio: "high", points: 8, sprint: 1, epic: "E-commerce" },
+      { key: "PTN-4", title: "Module avis & réclamations", col: "done", labels: ["frontend"], prio: "med", points: 5, sprint: 2, epic: "E-commerce" },
+      { key: "PTN-5", title: "Espace livreur + suivi livraisons", col: "done", labels: ["frontend", "mobile"], prio: "high", points: 8, sprint: 2, epic: "Logistique" },
+      { key: "PTN-6", title: "Application Flutter mobile client", col: "done", labels: ["mobile"], prio: "high", points: 13, sprint: 2, epic: "Mobile" },
+      { key: "PTN-7", title: "API Nest/Express + Prisma SQLite/SQL", col: "done", labels: ["backend"], prio: "high", points: 8, sprint: 1, epic: "Core plateforme" },
+      { key: "PTN-8", title: "Stock & alertes rupture", col: "done", labels: ["frontend", "backend"], prio: "med", points: 5, sprint: 3, epic: "E-commerce" },
+      { key: "PTN-9", title: "Module vétérinaire (dossiers, téléconsult)", col: "done", labels: ["frontend"], prio: "high", points: 13, sprint: 3, epic: "Santé animale" },
+      { key: "PTN-10", title: "Recommandations ML nutrition / santé", col: "done", labels: ["ml"], prio: "high", points: 13, sprint: 4, epic: "Intelligence artificielle" },
+      { key: "PTN-11", title: "Agent IA client & admin (NLP)", col: "done", labels: ["ml", "frontend"], prio: "med", points: 8, sprint: 4, epic: "Intelligence artificielle" },
+      { key: "PTN-12", title: "Power BI / tableaux de bord BI", col: "done", labels: ["bi"], prio: "med", points: 5, sprint: 4, epic: "Business Intelligence" },
+      { key: "PTN-13", title: "IoT mangeoire & anomalies", col: "done", labels: ["iot"], prio: "high", points: 8, sprint: 5, epic: "IoT" },
+      { key: "PTN-14", title: "Surveillance qualité alimentaire (caméra)", col: "done", labels: ["iot", "ml"], prio: "high", points: 8, sprint: 5, epic: "IoT" },
+      { key: "PTN-15", title: "Chaîne du froid livraisons", col: "done", labels: ["iot", "frontend"], prio: "med", points: 5, sprint: 5, epic: "Logistique" },
+      { key: "PTN-16", title: "Sécurité plateforme & audit", col: "done", labels: ["security"], prio: "high", points: 8, sprint: 6, epic: "Sécurité" },
+      { key: "PTN-17", title: "Page démo jury & landing marketing", col: "done", labels: ["frontend", "docs"], prio: "high", points: 5, sprint: 6, epic: "Livrables rapport" },
+      { key: "PTN-18", title: "Scripts Windows démarrage multi-services", col: "done", labels: ["docs"], prio: "low", points: 3, sprint: 6, epic: "Livrables rapport" },
+      { key: "PTN-19", title: "Tests E2E Playwright parcours critique", col: "progress", labels: ["frontend"], prio: "med", points: 5, sprint: 6, epic: "Qualité" },
+      { key: "PTN-20", title: "Rédaction rapport : architecture & UML", col: "progress", labels: ["docs"], prio: "high", points: 8, sprint: 6, epic: "Livrables rapport" },
+      { key: "PTN-21", title: "Rédaction rapport : gestion de projet (ce board)", col: "progress", labels: ["docs"], prio: "high", points: 3, sprint: 6, epic: "Livrables rapport" },
+      { key: "PTN-22", title: "Optimisation perf admin (lazy routes)", col: "todo", labels: ["frontend"], prio: "med", points: 5, sprint: 7, epic: "Qualité" },
+      { key: "PTN-23", title: "CI/CD GitHub Actions backend + frontend", col: "todo", labels: ["backend"], prio: "med", points: 8, sprint: 7, epic: "Core plateforme" },
+      { key: "PTN-24", title: "Export PDF factures & historique client", col: "todo", labels: ["frontend"], prio: "low", points: 3, sprint: 7, epic: "E-commerce" },
+      { key: "PTN-25", title: "Backlog : notifications push mobile", col: "backlog", labels: ["mobile"], prio: "low", points: 5, sprint: null, epic: "Mobile" },
+      { key: "PTN-26", title: "Backlog : marketplace multi-vendeurs avancé", col: "backlog", labels: ["backend"], prio: "med", points: 13, sprint: null, epic: "E-commerce" },
+      { key: "PTN-27", title: "Backlog : jumeau numérique animal", col: "backlog", labels: ["ml"], prio: "low", points: 8, sprint: null, epic: "Intelligence artificielle" },
+    ];
+
+    const cols = [
+      { id: "backlog", title: "Backlog" },
+      { id: "todo", title: "To Do" },
+      { id: "progress", title: "In Progress" },
+      { id: "done", title: "Done" },
+    ];
+
+    function labelClass(l) {
+      return "label l-" + l;
+    }
+
+    function cardHtml(t) {
+      return `<article class="card">
+        <span class="prio p-${t.prio}">${t.prio.toUpperCase()}</span>
+        <div class="key">${t.key} · ${t.points} pts</div>
+        <div class="title">${t.title}</div>
+        <div class="labels">${t.labels.map(l => `<span class="${labelClass(l)}">${l}</span>`).join("")}</div>
+        <div class="story">Epic : ${t.epic}${t.sprint ? " · Sprint " + t.sprint : ""}</div>
+      </article>`;
+    }
+
+    function renderKanban() {
+      const root = document.getElementById("kanban-board");
+      root.innerHTML = cols.map(c => {
+        const items = tickets.filter(t => t.col === c.id);
+        return `<section class="column"><h2>${c.title} <span class="count">${items.length}</span></h2>${items.map(cardHtml).join("")}</section>`;
+      }).join("");
+    }
+
+    function renderSprints() {
+      const root = document.getElementById("sprints-board");
+      const sprints = [
+        { n: "Sprints 1–2", desc: "Socle : auth, e-commerce, mobile Flutter", filter: t => t.sprint === 1 || t.sprint === 2 },
+        { n: "Sprints 3–4", desc: "Vétérinaire, ML, BI", filter: t => t.sprint === 3 || t.sprint === 4 },
+        { n: "Sprints 5–6", desc: "IoT, sécurité, démo & rapport", filter: t => t.sprint === 5 || t.sprint === 6 },
+      ];
+      root.innerHTML = sprints.map(s => {
+        const items = tickets.filter(s.filter);
+        const pts = items.reduce((a, t) => a + t.points, 0);
+        return `<section class="column"><h2>${s.n} <span class="count">${pts} pts</span></h2>
+          <p class="story" style="margin-bottom:0.75rem">${s.desc}</p>
+          ${items.map(cardHtml).join("")}</section>`;
+      }).join("");
+    }
+
+    function renderEpics() {
+      const root = document.getElementById("epics-board");
+      const epics = [...new Set(tickets.map(t => t.epic))];
+      root.innerHTML = epics.map(e => {
+        const items = tickets.filter(t => t.epic === e);
+        const done = items.filter(t => t.col === "done").length;
+        return `<section class="column"><h2>${e} <span class="count">${done}/${items.length}</span></h2>${items.map(cardHtml).join("")}</section>`;
+      }).join("");
+    }
+
+    document.querySelectorAll(".tab").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const v = btn.dataset.view;
+        document.getElementById("view-kanban").classList.toggle("hidden", v !== "kanban");
+        document.getElementById("view-sprints").classList.toggle("hidden", v !== "sprints");
+        document.getElementById("view-epics").classList.toggle("hidden", v !== "epics");
+      });
+    });
+
+    renderKanban();
+    renderSprints();
+    renderEpics();
+  </script>
+</body>
+</html>

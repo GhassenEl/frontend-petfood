@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'services/auth_service.dart';
+import 'services/theme_preferences.dart';
 import 'screens/splash_screen.dart';
+import 'screens/login_screen.dart';
 import 'screens/home_shell.dart';
+import 'screens/client_home_shell.dart';
+import 'screens/clients_list_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -30,11 +34,28 @@ class _PetfoodTnAppState extends State<PetfoodTnApp> {
   Future<void> _init() async {
     try {
       setState(() => _splashMessage = 'Préparation de l\'espace…');
-      await _auth.loadSession().timeout(const Duration(seconds: 8));
+      await Future.wait([
+        _auth.loadSession().timeout(const Duration(seconds: 8)),
+        ThemePreferences.instance.load(),
+      ]);
     } catch (_) {
-      await _auth.enterDemoMode();
+      await ThemePreferences.instance.load();
     }
     if (mounted) setState(() => _ready = true);
+  }
+
+  Widget _home() {
+    if (!_auth.isAuthenticated) {
+      return LoginScreen(auth: _auth);
+    }
+    final role = _auth.userRole ?? 'client';
+    if (role == 'admin' || role == 'vendor' || role == 'vet') {
+      return ClientsListScreen(auth: _auth);
+    }
+    if (role == 'client') {
+      return ClientHomeShell(auth: _auth);
+    }
+    return HomeShell(auth: _auth);
   }
 
   @override
@@ -46,11 +67,27 @@ class _PetfoodTnAppState extends State<PetfoodTnApp> {
       );
     }
 
-    return MaterialApp(
-      title: 'PetfoodTN',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      home: HomeShell(auth: _auth),
+    return ListenableBuilder(
+      listenable: ThemePreferences.instance,
+      builder: (context, _) {
+        final mono = ThemePreferences.instance.isMonochrome;
+        return MaterialApp(
+          title: 'PetfoodTN',
+          debugShowCheckedModeBanner: false,
+          theme: mono ? AppTheme.monochrome() : AppTheme.light(),
+          builder: (context, child) {
+            Widget content = child ?? const SizedBox.shrink();
+            if (mono) {
+              content = ColorFiltered(
+                colorFilter: const ColorFilter.matrix(ThemePreferences.grayscaleMatrix),
+                child: content,
+              );
+            }
+            return content;
+          },
+          home: _home(),
+        );
+      },
     );
   }
 }

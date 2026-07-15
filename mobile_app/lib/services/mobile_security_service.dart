@@ -5,7 +5,10 @@ class MobileSecurityService {
   MobileSecurityService(this.api);
   final ApiClient api;
 
-  Future<SecurityPack> loadPack() async {
+  /// [role] : client n’a pas accès aux routes admin/modo (/threats, /sessions).
+  Future<SecurityPack> loadPack({String role = 'client'}) async {
+    final isStaff = role == 'admin' || role == 'moderator';
+
     Map<String, dynamic>? status;
     List<dynamic> threatsRaw = [];
     List<dynamic> sessionsRaw = [];
@@ -14,24 +17,33 @@ class MobileSecurityService {
       status = Map<String, dynamic>.from(await api.get('/security/status') as Map);
     } catch (_) {}
 
-    try {
-      final t = await api.get('/security/threats', query: {'limit': '15'});
-      threatsRaw = t is Map ? (t['threats'] as List? ?? []) : (t is List ? t : []);
-    } catch (_) {}
+    if (isStaff) {
+      try {
+        final t = await api.get('/security/threats', query: {'limit': '15'});
+        threatsRaw = t is Map ? (t['threats'] as List? ?? []) : (t is List ? t : []);
+      } catch (_) {}
 
-    try {
-      final s = await api.get('/security/sessions');
-      sessionsRaw = s is Map ? (s['sessions'] as List? ?? []) : [];
-    } catch (_) {}
+      try {
+        final s = await api.get('/security/sessions');
+        sessionsRaw = s is Map ? (s['sessions'] as List? ?? []) : [];
+      } catch (_) {}
+    }
 
-    if (status != null || sessionsRaw.isNotEmpty) {
-      return _fromApi(status, threatsRaw, sessionsRaw);
+    if (status != null || sessionsRaw.isNotEmpty || threatsRaw.isNotEmpty) {
+      return _fromApi(status, threatsRaw, sessionsRaw, liveStaff: isStaff);
     }
     return _demoPack();
   }
 
-  SecurityPack _fromApi(Map<String, dynamic>? status, List threatsRaw, List sessionsRaw) {
-    final threats = threatsRaw.map((e) => SecurityThreat.fromJson(Map<String, dynamic>.from(e))).toList();
+  SecurityPack _fromApi(
+    Map<String, dynamic>? status,
+    List threatsRaw,
+    List sessionsRaw, {
+    required bool liveStaff,
+  }) {
+    final threats = threatsRaw
+        .map((e) => SecurityThreat.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
     final sessions = sessionsRaw.isNotEmpty
         ? sessionsRaw.map((e) => SecuritySession.fromJson(Map<String, dynamic>.from(e))).toList()
         : _demoSessions();
@@ -82,7 +94,7 @@ class MobileSecurityService {
       checks: checks,
       sessions: sessions,
       threats: threats.isNotEmpty ? threats : _demoThreats(),
-      mode: 'live',
+      mode: liveStaff ? 'live' : 'client',
       idsEvents24h: status?['ids']?['eventsLast24h'] ?? 0,
       signatureCount: status?['signatureCount'] ?? 0,
     );

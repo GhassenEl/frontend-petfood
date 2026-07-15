@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.angular/
+.dart_tool/
+build/
+*.sqlite
+*.sqlite-journal
+.idea/
+.vscode/
+*.log
+.DS_Store
+mobile/.flutter-plugins-dependencies

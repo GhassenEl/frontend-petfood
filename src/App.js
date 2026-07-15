@@ -130,6 +130,7 @@ import ClientPetsPage from './pages/ClientPetsPage';
 import ClientPetPassportPage from './pages/ClientPetPassportPage';
 import PlatformServicesPage from './pages/PlatformServicesPage';
 import MarketingLandingPage from './pages/MarketingLandingPage';
+import JuryDemoPage from './pages/JuryDemoPage';
 import PublicLayout from './layouts/PublicLayout';
 import VendorHubPage from './pages/VendorHubPage';
 import ModeratorHubPage from './pages/ModeratorHubPage';
@@ -265,6 +266,7 @@ const App = () => {
         <Route path="/big-data" element={<BigDataPlatformPage />} />
         <Route path="/devops" element={<DevOpsPlatformPage />} />
         <Route path="/premium" element={<PremiumFeaturesPage />} />
+        <Route path="/jury-demo" element={<JuryDemoPage />} />
         <Route path="*" element={<SafeFallbackRedirect />} />
       </Routes>
       </Suspense>
@@ -303,6 +305,7 @@ const App = () => {
       <Route path="/big-data" element={<BigDataPlatformPage />} />
       <Route path="/devops" element={<DevOpsPlatformPage />} />
       <Route path="/premium" element={<PremiumFeaturesPage />} />
+      <Route path="/jury-demo" element={<JuryDemoPage />} />
       <Route path="/search" element={<RoleLayoutShell user={user}><PlatformSearchPage /></RoleLayoutShell>} />
 
       <Route path="/admin/dashboard" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminDashboard /></AdminLayout></RoleRoute>} />

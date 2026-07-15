@@ -1,0 +1,50 @@
+═══════════════════════════════════════════════════════════
+  PETFOODTN — LIENS À COPIER (sans Cursor)
+═══════════════════════════════════════════════════════════
+
+── WEB (frontend + backend) ──
+http://localhost:3001
+http://localhost:3001/jury-demo
+http://localhost:3001/login
+
+── FLUTTER WEB (app mobile navigateur) ──
+http://localhost:8080
+
+── OUVRIR WEB + FLUTTER (double-clic) ──
+scripts\windows\OUVRIR-WEB-ET-FLUTTER.bat
+scripts\windows\DEMARRER-ET-OUVRIR-WEB-FLUTTER.bat   (demarre + ouvre)
+
+── TÉLÉCHARGER LE CODE (GitHub ZIP) ──
+Frontend : https://github.com/GhassenEl/frontend-petfood/archive/refs/heads/mini-projects.zip
+Backend  : https://github.com/GhassenEl/backend-petfood/archive/refs/heads/main.zip
+
+── CLONE GIT ──
+git clone -b mini-projects https://github.com/GhassenEl/frontend-petfood.git
+git clone https://github.com/GhassenEl/backend-petfood.git backend
+
+── COMPTES DÉMO ──
+admin@petfood.tn       / PetfoodTN2024!
+client@petfood.tn      / MonChat123!
+vendor@petfood.tn      / Vendor2024!
+moderator@petfood.tn   / Moderator2024!
+livreur@petfood.tn     / Livreur123!
+vet@petfood.tn         / Vet2024!
+
+── DÉMARRAGE WINDOWS (double-clic) ──
+scripts\windows\6-INSTALLER-PREREQUIS.bat   (1ère fois)
+scripts\windows\4-DEMARRER-TOUT.bat         (web + backend + ML)
+scripts\windows\3-DEMARRER-FLUTTER-WEB.bat (app Flutter)
+ACCES_PLATEFORME.html                       (page liens + copier)
+
+── VIDÉOS DÉMO MP4 ──
+demo-videos\petfoodtn-marketing-demo-*.mp4
+demo-videos\petfoodtn-platform-demo-*.mp4
+
+── APK FLUTTER (téléphone) ──
+mobile_app\build\app\outputs\flutter-apk\app-release.apk
+(générer : cd mobile_app && flutter build apk --release)
+
+── CHEMIN PROJET SUR CE PC ──
+C:\Users\GHASSEN\Desktop\GitHub (1)\GitHub\GitHub\frontend Lido
+
+═══════════════════════════════════════════════════════════

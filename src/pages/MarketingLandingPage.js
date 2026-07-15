@@ -123,6 +123,7 @@ const MarketingLandingPage = () => {
           <Link to="/contact" className="mkt-nav__link mkt-nav__link--hide-mobile">Contact</Link>
           <Link to="/vendor" className="mkt-nav__link mkt-nav__link--hide-mobile">Vendeur</Link>
           <Link to="/moderator" className="mkt-nav__link mkt-nav__link--hide-mobile">Modération</Link>
+          <Link to="/jury-demo" className="mkt-nav__link mkt-nav__link--hide-mobile mkt-nav__link--jury">Démo jury</Link>
           <a href="#digital" className="mkt-nav__link mkt-nav__link--hide-mobile">Services digitaux</a>
           <a href="#temoignages" className="mkt-nav__link mkt-nav__link--hide-mobile">Avis</a>
           <a href="#faq" className="mkt-nav__link mkt-nav__link--hide-mobile">FAQ</a>
@@ -143,6 +144,9 @@ const MarketingLandingPage = () => {
             </p>
             <div className="mkt-hero__cta">
               <Link to="/register" className="mkt-btn mkt-btn--primary">Commencer gratuitement</Link>
+              <Link to="/jury-demo" className="mkt-btn mkt-btn--ghost mkt-btn--hero-ghost">
+                Démo jury PFE →
+              </Link>
               <a href="#comment-ca-marche" className="mkt-btn mkt-btn--ghost mkt-btn--hero-ghost">
                 Comment ça marche
               </a>

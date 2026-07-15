@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useLayoutEffect } from 'react';
+import React, { createContext, useContext, useState, useLayoutEffect, useCallback } from 'react';
 
 const THEME_DARK_KEY = 'petfoodtn-theme-dark';
+const THEME_MONO_KEY = 'petfoodtn-theme-monochrome';
 
 const ThemeContext = createContext();
 
@@ -24,22 +25,24 @@ const readStored = (key) => {
 
 export const ThemeProvider = ({ children }) => {
   const [isDark, setIsDark] = useState(() => readStored(THEME_DARK_KEY));
+  const [isMonochrome, setIsMonochrome] = useState(() => readStored(THEME_MONO_KEY));
 
   useLayoutEffect(() => {
     document.body.classList.toggle('dark', isDark);
-    document.documentElement.classList.remove('monochrome');
-    document.body.classList.remove('monochrome');
+    document.documentElement.classList.toggle('monochrome', isMonochrome);
+    document.body.classList.toggle('monochrome', isMonochrome);
     try {
       window.localStorage.setItem(THEME_DARK_KEY, isDark ? '1' : '0');
-      window.localStorage.removeItem('petfoodtn-theme-monochrome');
+      window.localStorage.setItem(THEME_MONO_KEY, isMonochrome ? '1' : '0');
     } catch {
       /* ignore */
     }
-  }, [isDark]);
+  }, [isDark, isMonochrome]);
 
-  const toggleDark = () => setIsDark((v) => !v);
+  const toggleDark = useCallback(() => setIsDark((v) => !v), []);
+  const toggleMonochrome = useCallback(() => setIsMonochrome((v) => !v), []);
 
-  const value = { isDark, toggleDark };
+  const value = { isDark, toggleDark, isMonochrome, toggleMonochrome };
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };

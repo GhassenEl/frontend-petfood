@@ -14,10 +14,28 @@ class AppTheme {
       brightness: Brightness.light,
       surface: surface,
     );
+    return _base(scheme, surface, seed);
+  }
+
+  /// Thème noir & blanc (Material) — complété par ColorFilter global.
+  static ThemeData monochrome() {
+    const ink = Color(0xFF1A1A1A);
+    const paper = Color(0xFFF5F5F5);
+    final scheme = ColorScheme.fromSeed(
+      seedColor: ink,
+      brightness: Brightness.light,
+      surface: paper,
+      primary: ink,
+      secondary: const Color(0xFF525252),
+    );
+    return _base(scheme, paper, ink);
+  }
+
+  static ThemeData _base(ColorScheme scheme, Color scaffold, Color accent) {
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: surface,
+      scaffoldBackgroundColor: scaffold,
       cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -28,19 +46,19 @@ class AppTheme {
         elevation: 8,
         height: 68,
         backgroundColor: Colors.white,
-        indicatorColor: seed.withValues(alpha: 0.12),
+        indicatorColor: accent.withValues(alpha: 0.12),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return TextStyle(
             fontSize: 11,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            color: selected ? seed : const Color(0xFF64748B),
+            color: selected ? accent : const Color(0xFF64748B),
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
-            color: selected ? seed : const Color(0xFF94A3B8),
+            color: selected ? accent : const Color(0xFF94A3B8),
             size: 22,
           );
         }),

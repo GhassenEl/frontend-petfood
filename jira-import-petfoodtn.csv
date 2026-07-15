@@ -1,0 +1,28 @@
+Summary,Issue Type,Issue key,Priority,Story Points,Sprint,Epic Link,Labels,Status
+"Auth multi-rôles (admin, client, livreur, vétérinaire, vendeur)",Story,PTN-1,High,8,Sprint 1,Core plateforme,"backend;security",Done
+"Catalogue produits & panier client",Story,PTN-2,High,5,Sprint 1,E-commerce,frontend,Done
+"CRUD admin produits / commandes / utilisateurs",Story,PTN-3,High,8,Sprint 1,E-commerce,"frontend;backend",Done
+"Module avis & réclamations",Story,PTN-4,Medium,5,Sprint 2,E-commerce,frontend,Done
+"Espace livreur + suivi livraisons",Story,PTN-5,High,8,Sprint 2,Logistique,"frontend;mobile",Done
+"Application Flutter mobile client",Story,PTN-6,High,13,Sprint 2,Mobile,mobile,Done
+"API Nest/Express + Prisma",Story,PTN-7,High,8,Sprint 1,Core plateforme,backend,Done
+"Stock & alertes rupture",Story,PTN-8,Medium,5,Sprint 3,E-commerce,"frontend;backend",Done
+"Module vétérinaire (dossiers, téléconsult)",Story,PTN-9,High,13,Sprint 3,Santé animale,frontend,Done
+"Recommandations ML nutrition / santé",Story,PTN-10,High,13,Sprint 4,Intelligence artificielle,ml,Done
+"Agent IA client & admin (NLP)",Story,PTN-11,Medium,8,Sprint 4,Intelligence artificielle,"ml;frontend",Done
+"Power BI / tableaux de bord BI",Story,PTN-12,Medium,5,Sprint 4,Business Intelligence,bi,Done
+"IoT mangeoire & anomalies",Story,PTN-13,High,8,Sprint 5,IoT,iot,Done
+"Surveillance qualité alimentaire (caméra)",Story,PTN-14,High,8,Sprint 5,IoT,"iot;ml",Done
+"Chaîne du froid livraisons",Story,PTN-15,Medium,5,Sprint 5,Logistique,"iot;frontend",Done
+"Sécurité plateforme & audit",Story,PTN-16,High,8,Sprint 6,Sécurité,security,Done
+"Page démo jury & landing marketing",Story,PTN-17,High,5,Sprint 6,Livrables rapport,"frontend;docs",Done
+"Scripts Windows démarrage multi-services",Story,PTN-18,Low,3,Sprint 6,Livrables rapport,docs,Done
+"Tests E2E Playwright parcours critique",Story,PTN-19,Medium,5,Sprint 6,Qualité,frontend,In Progress
+"Rédaction rapport : architecture & UML",Story,PTN-20,High,8,Sprint 6,Livrables rapport,docs,In Progress
+"Rédaction rapport : gestion de projet",Story,PTN-21,High,3,Sprint 6,Livrables rapport,docs,In Progress
+"Optimisation perf admin (lazy routes)",Story,PTN-22,Medium,5,Sprint 7,Qualité,frontend,To Do
+"CI/CD GitHub Actions",Story,PTN-23,Medium,8,Sprint 7,Core plateforme,backend,To Do
+"Export PDF factures",Story,PTN-24,Low,3,Sprint 7,E-commerce,frontend,To Do
+"Notifications push mobile",Story,PTN-25,Low,5,,Mobile,mobile,Backlog
+"Marketplace multi-vendeurs avancé",Story,PTN-26,Medium,13,,E-commerce,backend,Backlog
+"Jumeau numérique animal",Story,PTN-27,Low,8,,Intelligence artificielle,ml,Backlog

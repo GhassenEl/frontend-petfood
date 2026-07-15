@@ -9,7 +9,6 @@
 | **Application** | http://localhost:3001 |
 | **Connexion** | `/login` |
 | **Source code** | `src/config/demoAccounts.js` |
-
 ---
 
 ## Comptes principaux (tous les acteurs)

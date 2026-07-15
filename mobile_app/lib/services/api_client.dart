@@ -15,6 +15,8 @@ class ApiClient {
 
   String? token;
 
+  bool get hasAuth => token != null && token!.isNotEmpty;
+
   Map<String, String> get _headers => {
         'Content-Type': 'application/json',
         if (token != null) 'Authorization': 'Bearer $token',
