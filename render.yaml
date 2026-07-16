@@ -1,4 +1,4 @@
-# PetfoodTN — Blueprint Render (stack complet, builds Git — pas de GHCR requis)
+# PetfoodTN — Blueprint Render (stack complet, monorepo production)
 # Dashboard : New → Blueprint → GhassenEl/frontend-petfood → render.yaml → Apply
 
 databases:
@@ -8,14 +8,14 @@ databases:
     user: petfood
 
 services:
-  # ── API Express (repo backend public) ──
+  # ── API Express (dossier backend du monorepo) ──
   - type: web
     name: petfoodtn-api
     runtime: node
     plan: free
-    repo: https://github.com/GhassenEl/backend-petfood
-    branch: main
-    buildCommand: npm ci && npx prisma generate && npx prisma db push
+    rootDir: backend
+    branch: mini-projects
+    buildCommand: sed -i 's/provider = "sqlite"/provider = "postgresql"/' prisma/schema.prisma && npm ci && npx prisma generate && npx prisma db push --accept-data-loss
     startCommand: npm start
     healthCheckPath: /health
     envVars:
@@ -24,7 +24,9 @@ services:
       - key: PORT
         value: 5002
       - key: DEMO_MODE
-        value: 'true'
+        value: 'false'
+      - key: ALLOW_DEMO_LOGIN
+        value: 'false'
       - key: RUN_SEED
         value: 'true'
       - key: DATABASE_URL
@@ -35,6 +37,8 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         value: https://petfoodtn-web.onrender.com,https://ghassenel.github.io
+      - key: FRONTEND_URL
+        value: https://petfoodtn-web.onrender.com
       - key: FASTAPI_URL
         value: https://petfoodtn-ml.onrender.com
       - key: STRIPE_MOCK
@@ -42,16 +46,19 @@ services:
       - key: MCP_ENABLE
         value: 'false'
 
-  # ── ML FastAPI (sous-dossier de ce repo) ──
+  # ── ML FastAPI ──
   - type: web
     name: petfoodtn-ml
     runtime: python
     plan: free
     rootDir: fastapi_service
-    buildCommand: pip install -r requirements.txt
+    branch: mini-projects
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
+      - key: PYTHON_VERSION
+        value: '3.12.8'
       - key: TZ
         value: Africa/Tunis
 
@@ -60,6 +67,7 @@ services:
     name: petfoodtn-web
     runtime: static
     plan: free
+    branch: mini-projects
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
     routes:
@@ -73,5 +81,7 @@ services:
         value: https://petfoodtn-api.onrender.com/api
       - key: VITE_SOCKET_URL
         value: https://petfoodtn-api.onrender.com
+      - key: VITE_STRICT_LIVE
+        value: 'true'
       - key: VITE_APP_RELEASE
         value: petfoodtn@render
