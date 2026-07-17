@@ -1,0 +1,122 @@
+[
+  {
+    "ID": "1",
+    "Prenom": "ALICE",
+    "Nom": "JONHSON",
+    "Email": "alice@gmail.com",
+    "Telephone": "55-888-952",
+    "DateNaissance": "1998-11-25",
+    "MontantAchat": 150.0,
+    "MontantAchat_Raw": "150,00",
+    "DateInscription": "2022-01-15",
+    "Commentaire": "doublon avec 7"
+  },
+  {
+    "ID": "2",
+    "Prenom": "BOB",
+    "Nom": "MARLEY",
+    "Email": "bob@gmail.com",
+    "Telephone": "22-889-963",
+    "DateNaissance": "1996-11-01",
+    "MontantAchat": 200.5,
+    "MontantAchat_Raw": "200,50",
+    "DateInscription": "2021-10-02",
+    "Commentaire": "telephone non valide"
+  },
+  {
+    "ID": "3",
+    "Prenom": "CAROL",
+    "Nom": "BROWN",
+    "Email": "carol@gmail.com",
+    "Telephone": "25-357-951",
+    "DateNaissance": null,
+    "MontantAchat": 75.2,
+    "MontantAchat_Raw": "75,20",
+    "DateInscription": "2023-03-10",
+    "Commentaire": "date naissance manquante"
+  },
+  {
+    "ID": "4",
+    "Prenom": null,
+    "Nom": "SIRINE",
+    "Email": "sirine@gmail.com",
+    "Telephone": "26-368-2511",
+    "DateNaissance": "1995-12-30",
+    "MontantAchat": 320.75,
+    "MontantAchat_Raw": "320,75",
+    "DateInscription": "2020-12-05",
+    "Commentaire": "prenom manquant"
+  },
+  {
+    "ID": "5",
+    "Prenom": "DAVID",
+    "Nom": "GUETTA",
+    "Email": "davidgmail.com",
+    "Telephone": "28-214-287",
+    "DateNaissance": "2000-08-05",
+    "MontantAchat": 50.0,
+    "MontantAchat_Raw": "50,00",
+    "DateInscription": null,
+    "Commentaire": "email non valide"
+  },
+  {
+    "ID": "6",
+    "Prenom": "AHMED",
+    "Nom": "NAFFATI",
+    "Email": "ahmed@gmail.com",
+    "Telephone": "20-100-250",
+    "DateNaissance": "1996-11-15",
+    "MontantAchat": null,
+    "MontantAchat_Raw": "-1000,00",
+    "DateInscription": "2023-02-20",
+    "Commentaire": "montant aberrant outlier"
+  },
+  {
+    "ID": "7",
+    "Prenom": "ALICE",
+    "Nom": "JONHSON",
+    "Email": "alice@gmail.com",
+    "Telephone": "55-888-952",
+    "DateNaissance": "1998-11-25",
+    "MontantAchat": 150.0,
+    "MontantAchat_Raw": "150,00",
+    "DateInscription": "2022-01-15",
+    "Commentaire": "doublon avec 1"
+  },
+  {
+    "ID": "8",
+    "Prenom": "MARIEM",
+    "Nom": "JOHNSON",
+    "Email": "mariem@gmailcom",
+    "Telephone": "27-256-987",
+    "DateNaissance": "1997-05-25",
+    "MontantAchat": 150.0,
+    "MontantAchat_Raw": "150,00",
+    "DateInscription": "2022-01-15",
+    "Commentaire": "enregistrement valide"
+  },
+  {
+    "ID": "9",
+    "Prenom": "SARA",
+    "Nom": "BEN ALI",
+    "Email": "sara@gmail.com",
+    "Telephone": "21-111-222",
+    "DateNaissance": "1999-01-10",
+    "MontantAchat": null,
+    "MontantAchat_Raw": "99999,99",
+    "DateInscription": "2024-01-01",
+    "Commentaire": "montant outlier haut"
+  },
+  {
+    "ID": "10",
+    "Prenom": "OMAR",
+    "Nom": "TRABELSI",
+    "Email": "omar@gmail.com",
+    "Telephone": "22-333-444",
+    "DateNaissance": "1994-06-20",
+    "MontantAchat": 12.5,
+    "MontantAchat_Raw": "12,5",
+    "DateInscription": "2023-05-01",
+    "Commentaire": "ok"
+  }
+]

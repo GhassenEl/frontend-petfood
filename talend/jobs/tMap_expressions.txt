@@ -1,0 +1,29 @@
+# Expressions tMap — Job_Nettoyage_Clients
+
+## Colonnes out1
+
+```
+out1.ID            = row1.ID
+out1.Prenom        = DataQualityUtils.toUpperName(row1.Prenom)
+out1.Nom           = DataQualityUtils.toUpperName(row1.Nom)
+out1.Email         = StringHandling.TRIM(row1.Email)
+out1.Telephone     = StringHandling.TRIM(row1.Telephone)
+out1.DateNaissance = row1.DateNaissance
+out1.MontantAchat  = DataQualityUtils.normalizeMontant(row1.MontantAchat)
+out1.DateInscription = row1.DateInscription
+out1.Commentaire   = row1.Commentaire
+```
+
+## Alternative sans routine (expressions natives)
+
+```
+// Prix Double (virgule → point)
+Double.parseDouble(StringHandling.EREPLACE(StringHandling.TRIM(row1.MontantAchat), ",", "."))
+
+// UPPER
+StringHandling.UPCASE(StringHandling.TRIM(row1.Prenom))
+StringHandling.UPCASE(StringHandling.TRIM(row1.Nom))
+
+// Outlier → null
+(montant != null && montant >= 0 && montant <= 10000) ? montant : null
+```

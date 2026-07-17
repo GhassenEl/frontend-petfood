@@ -1,0 +1,11 @@
+ID;Prenom;Nom;Email;Telephone;DateNaissance;MontantAchat;DateInscription;Commentaire
+1;Alice;Jonhson;alice@gmail.com;55-888-952;1998-11-25;150,00;2022-01-15;doublon avec 7
+2;Bob;Marley;bob@gmail.com;22-889-963;1996-11-01;200,50;2021-10-02;telephone non valide
+3;Carol;Brown;carol@gmail.com;25-357-951;;75,20;2023-03-10;date naissance manquante
+4;;Sirine;sirine@gmail.com;26-368-2511;1995-12-30;320,75;2020-12-05;prenom manquant
+5;David;Guetta;davidgmail.com;28-214-287;2000-08-05;50,00;;email non valide
+6;Ahmed;Naffati;ahmed@gmail.com;20-100-250;1996-11-15;-1000,00;2023-02-20;montant aberrant outlier
+7;Alice;Jonhson;alice@gmail.com;55-888-952;1998-11-25;150,00;2022-01-15;doublon avec 1
+8;Mariem;johnson;mariem@gmailcom;27-256-987;1997-05-25;150,00;2022-01-15;enregistrement valide
+9;Sara;Ben Ali;sara@gmail.com;21-111-222;1999-01-10;99999,99;2024-01-01;montant outlier haut
+10;Omar;Trabelsi;omar@gmail.com;22-333-444;1994-06-20;12,5;2023-05-01;ok
