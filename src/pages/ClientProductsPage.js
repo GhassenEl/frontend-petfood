@@ -34,6 +34,16 @@ import { DEMO_NEAREST_STORE } from '../utils/clientDemoData';
 
 const VENDOR_BY_CATEGORY = {
   accessoires: { vendorId: 'v-1', vendorName: 'Animalerie Tunis — Démo' },
+  niches: { vendorId: 'v-1', vendorName: 'Animalerie Tunis — Démo' },
+  hygiene: { vendorId: 'v-1', vendorName: 'Animalerie Tunis — Démo' },
+  litiere: { vendorId: 'v-1', vendorName: 'Animalerie Tunis — Démo' },
+  toilettage: { vendorId: 'v-1', vendorName: 'Animalerie Tunis — Démo' },
+  transport: { vendorId: 'v-2', vendorName: 'Pets & Co Sfax' },
+  sante: { vendorId: 'v-1', vendorName: 'Clinique PetfoodTN — Démo' },
+  iot: { vendorId: 'v-2', vendorName: 'Pets & Co Sfax' },
+  personnalise: { vendorId: 'v-1', vendorName: 'Animalerie Tunis — Démo' },
+  packs: { vendorId: 'v-1', vendorName: 'Animalerie Tunis — Démo' },
+  aquarium: { vendorId: 'v-2', vendorName: 'Pets & Co Sfax' },
   jouets: { vendorId: 'v-2', vendorName: 'Pets & Co Sfax' },
   vetements: { vendorId: 'v-1', vendorName: 'Animalerie Tunis — Démo' },
   friandises: { vendorId: 'v-2', vendorName: 'Pets & Co Sfax' },
@@ -328,9 +338,20 @@ const ClientProductsPage = () => {
           {[
             { id: 'all', label: '🏠 Tout le catalogue' },
             { id: 'croquettes', label: '🥣 Croquettes' },
-            { id: 'accessoires', label: '🎒 Accessoires' },
-            { id: 'jouets', label: '🎾 Jouets' },
             { id: 'friandises', label: '🦴 Friandises' },
+            { id: 'jouets', label: '🎾 Jouets' },
+            { id: 'accessoires', label: '🎒 Accessoires' },
+            { id: 'niches', label: '🏠 Niches & maisons' },
+            { id: 'litiere', label: '🚽 Litière' },
+            { id: 'toilettage', label: '✂️ Toilettage' },
+            { id: 'transport', label: '🧳 Transport' },
+            { id: 'hygiene', label: '✨ Hygiène' },
+            { id: 'sante', label: '💊 Santé' },
+            { id: 'iot', label: '🤖 Innovants' },
+            { id: 'personnalise', label: '🎁 Personnalisé' },
+            { id: 'packs', label: '📦 Kits & packs' },
+            { id: 'aquarium', label: '🐠 Aquarium' },
+            { id: 'vetements', label: '👕 Vêtements' },
           ].map((chip) => (
             <button
               key={chip.id}

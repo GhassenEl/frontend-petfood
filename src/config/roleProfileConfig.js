@@ -101,7 +101,6 @@ export const ROLE_PROFILE_CONFIG = {
     extraFields: [
       { key: 'vehicleType', label: 'Type de véhicule', placeholder: 'Moto, voiture, camionnette…', type: 'text' },
       { key: 'vehiclePlate', label: 'Immatriculation', placeholder: '123 TU 4567', type: 'text' },
-      { key: 'coldChainCert', label: 'Certification chaîne du froid', placeholder: 'Oui / Non / En cours', type: 'text' },
     ],
     quickLinks: [
       { to: '/livreur/dashboard', label: 'Tableau de bord', icon: '📊' },

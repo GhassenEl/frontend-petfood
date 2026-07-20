@@ -16,10 +16,11 @@ export const VET_SIDEBAR_SECTIONS = [
       },
       { id: 'diagnostics', label: 'Détection maladie', icon: '🔬' },
       { id: 'pharmacy', label: 'Pharmacie', icon: '🏪' },
+      { id: 'health-products', label: 'Produits santé (vendeurs)', icon: '🤝', route: '/vet/health-products' },
       { id: 'clinic', label: 'Ma clinique', icon: '🏥' },
       { id: 'medical-dossiers', label: 'Dossiers médicaux', icon: '📁' },
       { id: 'vaccinations', label: 'Vaccinations', icon: '💉' },
-      { id: 'nutrition', label: 'Conseils nutrition', icon: '🥗' },
+      { id: 'nutrition', label: 'Bilan nutritionnel', icon: '🥗' },
     ],
   },
   {

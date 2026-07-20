@@ -15,7 +15,6 @@ import {
   userFromToken,
   validateTokenClaims,
 } from '../utils/jwtSecurity';
-import { useHttpOnlyAuthCookie } from '../config/authPolicy';
 import { ensureDemo2FAForUser } from '../utils/twoFactorPolicy';
 
 const SESSION_CHECK_MS = 30_000;
@@ -80,36 +79,18 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const cookieMode = useHttpOnlyAuthCookie();
         const storedToken = getStoredToken();
 
-        if (cookieMode && !storedToken) {
-          try {
-            const meRes = await api.get('/auth/me', { _skipAuthRefresh: true });
-            if (meRes.data?.user) {
-              setUser(meRes.data.user);
-              ensureDemo2FAForUser(meRes.data.user);
-              setToken('cookie');
-            }
-          } catch {
-            /* pas de session cookie */
-          }
-          return;
-        }
-
+        // Restauration locale uniquement — pas de GET /auth/me au boot
+        // (évite le 401 console si jeton expiré / démo / secret différent).
         if (storedToken) {
           const result = applySession(storedToken);
-          if (result.ok) {
-            try {
-              const meRes = await api.get('/auth/me', { _skipAuthRefresh: false });
-              if (meRes.data?.user) {
-                applySession(storedToken, meRes.data.user);
-              }
-            } catch {
-              /* token local suffit si /auth/me indisponible */
-            }
-          } else {
+          if (!result.ok) {
             console.warn('Session JWT invalide au démarrage:', result.reason);
+            clearAuthToken();
+            setToken(null);
+            setUser(null);
+            delete api.defaults.headers.common.Authorization;
           }
         }
       } catch (error) {
@@ -151,19 +132,6 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (!token || token === 'cookie') {
-      if (token === 'cookie' && useHttpOnlyAuthCookie()) {
-        const intervalId = window.setInterval(async () => {
-          try {
-            await api.get('/auth/me', { _skipAuthRefresh: true });
-          } catch {
-            logout();
-            if (!window.location.pathname.includes('/login')) {
-              window.location.assign('/login');
-            }
-          }
-        }, SESSION_CHECK_MS);
-        return () => window.clearInterval(intervalId);
-      }
       return undefined;
     }
 
@@ -207,21 +175,19 @@ export const AuthProvider = ({ children }) => {
       persistAuthToken(accessToken, rememberMe);
       const sessionUser = userFromToken(validation.decoded, apiUser);
       ensureDemo2FAForUser(sessionUser);
-      if (useHttpOnlyAuthCookie()) {
-        setToken('cookie');
-        setUser(sessionUser);
-        delete api.defaults.headers.common.Authorization;
-        return { success: true, user: sessionUser };
-      }
+      // Toujours garder Bearer : le backend n'émet pas encore de cookie de session.
       setToken(accessToken);
       setUser(sessionUser);
       api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
       return { success: true, user: sessionUser };
     } catch (error) {
       const st = error.response?.status;
-      const demo = tryDemoLogin(email, password);
+      // Mode live strict : pas de jeton démo local (provoque des 401 /auth/me)
+      const allowDemoFallback = import.meta.env.VITE_STRICT_LIVE !== 'true';
+      const demo = allowDemoFallback ? tryDemoLogin(email, password) : { success: false };
       if (demo.success) {
         const validation = validateTokenClaims(demo.token);
+        // createDemoSessionToken est rejeté par validateTokenClaims — ne pas persister
         if (validation.valid) {
           persistAuthToken(demo.token, rememberMe);
           ensureDemo2FAForUser(demo.user);

@@ -19,6 +19,13 @@ export const AUTH_EVENTS = {
 
 export const VALID_ROLES = ['admin', 'stock_manager', 'client', 'livreur', 'vet', 'vendor', 'moderator', 'visitor'];
 
+/** Accepte rôles système ou slugs custom (a-z0-9_). */
+export const isAllowedRole = (role) => {
+  if (!role || typeof role !== 'string') return false;
+  if (VALID_ROLES.includes(role)) return true;
+  return /^[a-z][a-z0-9_]{1,47}$/.test(role);
+};
+
 const ISSUER = import.meta.env.VITE_JWT_ISSUER || '';
 const AUDIENCE = import.meta.env.VITE_JWT_AUDIENCE || '';
 const EXPIRY_BUFFER_MS = Number(import.meta.env.VITE_JWT_EXPIRY_BUFFER_SEC || 60) * 1000;
@@ -64,6 +71,12 @@ export const validateTokenClaims = (token) => {
     return { valid: false, reason: 'invalid_format', decoded: null };
   }
 
+  // Jetons démo locaux (signature factice) — refusés face à l'API réelle
+  const parts = String(token).split('.');
+  if (parts[2] === 'demo' || decoded.demo === true) {
+    return { valid: false, reason: 'demo_token', decoded };
+  }
+
   if (isTokenExpired(token)) {
     return { valid: false, reason: 'expired', decoded };
   }
@@ -77,7 +90,7 @@ export const validateTokenClaims = (token) => {
   }
 
   const role = decoded.role;
-  if (role && !VALID_ROLES.includes(role)) {
+  if (role && !isAllowedRole(role)) {
     return { valid: false, reason: 'invalid_role', decoded };
   }
 

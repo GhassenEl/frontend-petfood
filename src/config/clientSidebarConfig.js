@@ -26,10 +26,13 @@ export const CLIENT_SIDEBAR_SECTIONS = [
       { id: 'client-events', label: 'Compétitions & cadeaux', icon: '🏆' },
       { id: 'pet-advice', label: 'Conseils pour pets', icon: '💡' },
       { id: 'veterinary', label: 'Santé & Vétérinaire', icon: '🩺' },
+      { id: 'bilan-nutritionnel', label: 'Bilan nutritionnel', icon: '🥗', route: '/veterinary?prefill=bilan' },
       { id: 'medical-dossier', label: 'Dossier médical', icon: '📁' },
       { id: 'client-services', label: 'Services animaliers', icon: '🐕' },
       { id: 'store-locator', label: 'Nos magasins', icon: '🏪' },
       { id: 'contact', label: 'Contact', icon: '📧' },
+      { id: 'support-agent', label: 'PetBot conseiller', icon: '🤖', route: '/support-agent' },
+      { id: 'carte-visite', label: 'Carte de visite', icon: '💳', route: '/carte-visite' },
     ],
   },
   {
@@ -37,6 +40,13 @@ export const CLIENT_SIDEBAR_SECTIONS = [
     items: [
       { id: 'recommendations', label: 'Recommandations IA', icon: '🎯', route: '/client-recommendations' },
       { id: 'client-relay-points', label: 'Points relais', icon: '📍' },
+    ],
+  },
+  {
+    title: '🔌 Maison connectée',
+    items: [
+      { id: 'client-iot', label: 'Centre IoT', icon: '📡' },
+      { id: 'pet-feeder', label: 'Gamelle intelligente', icon: '🍽️', route: '/pet-feeder' },
     ],
   },
   {

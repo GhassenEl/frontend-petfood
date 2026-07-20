@@ -14,6 +14,10 @@ import {
   updateVendorCategory,
   deleteVendorCategory,
 } from '../services/vendorService';
+import {
+  fetchVendorHealthProposals,
+  respondVendorHealthProposal,
+} from '../services/vetHealthProductsService';
 import AdminImageUpload from '../components/AdminImageUpload';
 import './VendorPages.css';
 
@@ -44,6 +48,7 @@ const VendorProductsPage = () => {
   const [tab, setTab] = useState('products');
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [healthProposals, setHealthProposals] = useState([]);
   const [demo, setDemo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
@@ -54,9 +59,13 @@ const VendorProductsPage = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, demo: isDemo } = await fetchVendorCatalog();
+    const [{ data, demo: isDemo }, proposals] = await Promise.all([
+      fetchVendorCatalog(),
+      fetchVendorHealthProposals(),
+    ]);
     setProducts(data.products || []);
     setCategories(data.categories || []);
+    setHealthProposals(proposals || []);
     setDemo(isDemo);
     setLoading(false);
   }, []);
@@ -131,18 +140,29 @@ const VendorProductsPage = () => {
     load();
   };
 
+  const respondHealth = async (id, action) => {
+    try {
+      await respondVendorHealthProposal(id, action);
+      setMsg(action === 'approve' ? 'Produit santé validé — publié en collaboration.' : 'Proposition refusée.');
+      load();
+    } catch (err) {
+      setMsg(err?.response?.data?.error || 'Action impossible');
+    }
+  };
+
   const promoProducts = products.filter((p) => Number(p.promotionPercent) > 0);
 
   return (
     <div className="vnd-page">
       <header className="vnd-hero">
         <h1><Package size={24} /> Gestion des produits {demo && <span className="vnd-demo-pill">Mode démo</span>}</h1>
-        <p>Ajouter, modifier, catégoriser, photos, stocks et promotions de votre catalogue.</p>
+        <p>Catalogue, stocks, promotions et collaborations vétérinaires (produits de santé).</p>
       </header>
 
       <div className="vnd-tabs">
         {[
           { id: 'products', label: '🏷️ Produits' },
+          { id: 'health', label: `🤝 Santé véto (${healthProposals.filter((p) => p.moderationStatus === 'pending_vendor').length})` },
           { id: 'categories', label: '📁 Catégories' },
           { id: 'promotions', label: '🏷️ Promotions' },
           { id: 'stocks', label: '📦 Stocks' },
@@ -154,6 +174,56 @@ const VendorProductsPage = () => {
       </div>
 
       {msg && <p style={{ color: '#0d9488', fontWeight: 600, marginBottom: 12 }}>{msg}</p>}
+
+      {tab === 'health' && (
+        <div className="vnd-card">
+          <h2>Propositions vétérinaires — produits de santé</h2>
+          <p style={{ color: '#64748b', fontSize: 14, marginBottom: 16 }}>
+            Antiparasitaires, vermifuges, vitamines, dents, désinfectants, lingettes, oreilles/yeux — validés avec le vétérinaire.
+          </p>
+          {!healthProposals.length ? (
+            <p style={{ color: '#94a3b8' }}>Aucune proposition pour le moment.</p>
+          ) : (
+            <div className="vnd-table-wrap">
+              <table className="vnd-table">
+                <thead>
+                  <tr>
+                    <th>Produit</th>
+                    <th>Type</th>
+                    <th>Prix</th>
+                    <th>Note</th>
+                    <th>Statut</th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {healthProposals.map((p) => (
+                    <tr key={p.id}>
+                      <td><strong>{p.product?.name || '—'}</strong></td>
+                      <td>{p.healthSubtype || '—'}</td>
+                      <td>{formatDT(p.price ?? p.product?.price)}</td>
+                      <td style={{ maxWidth: 220, fontSize: 13 }}>{p.collaborationNote || '—'}</td>
+                      <td>{p.moderationStatus}</td>
+                      <td>
+                        {p.moderationStatus === 'pending_vendor' && (
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <button type="button" className="vnd-btn vnd-btn--primary" onClick={() => respondHealth(p.id, 'approve')}>
+                              Valider
+                            </button>
+                            <button type="button" className="vnd-btn" onClick={() => respondHealth(p.id, 'reject')}>
+                              Refuser
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {tab === 'products' && (
         <>

@@ -439,3 +439,424 @@
   font-size: 12px;
   white-space: nowrap;
 }
+
+/* ——— Studio print (cartes de visite, flyers) ——— */
+.mkt-print-studio {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mkt-print-studio__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.mkt-print-studio__head h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+
+.mkt-print-studio__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mkt-print-template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.mkt-print-template {
+  text-align: left;
+  padding: 14px;
+  border-radius: 14px;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.mkt-print-template--active {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.mkt-print-template__icon {
+  font-size: 28px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.mkt-print-template__fmt {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  margin: 4px 0;
+}
+
+.mkt-print-template p {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.mkt-print-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .mkt-print-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mkt-print-form h3 {
+  margin: 0 0 12px;
+}
+
+.mkt-print-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.mkt-print-field input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.mkt-print-form__btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.mkt-print-preview-wrap {
+  background: #f1f5f9;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.mkt-print-preview__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mkt-print-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  padding: 16px;
+  overflow: auto;
+}
+
+.mkt-print-hint {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.mkt-print-cards-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
+
+.mkt-print-card {
+  width: 340px;
+  height: 220px;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #fff;
+}
+
+.mkt-print-card--front {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 45%, #7c2d12 100%);
+}
+
+.mkt-print-card--back {
+  background: linear-gradient(135deg, #1e3a8a 0%, #312e81 100%);
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.mkt-print-card__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mkt-print-card__brandname {
+  display: block;
+  font-size: 16px;
+}
+
+.mkt-print-card__tag {
+  font-size: 10px;
+  opacity: 0.9;
+}
+
+.mkt-print-card__person h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.mkt-print-card__person p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  opacity: 0.92;
+}
+
+.mkt-print-card__contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.mkt-print-card__backcopy {
+  flex: 1;
+  min-width: 140px;
+}
+
+.mkt-print-card__slogan {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.mkt-print-card__addr,
+.mkt-print-card__scan {
+  margin: 0;
+  font-size: 10px;
+  opacity: 0.85;
+}
+
+.mkt-print-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+  font-size: 10px;
+}
+
+.mkt-print-card__badges span {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 4px 8px;
+  border-radius: 20px;
+}
+
+.mkt-print-qr {
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.mkt-print-qr__grid {
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    #0f172a 0,
+    #0f172a 4px,
+    #fff 4px,
+    #fff 8px
+  );
+  border-radius: 8px;
+  opacity: 0.85;
+}
+
+.mkt-print-qr__label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.mkt-print-flyer {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+}
+
+.mkt-print-flyer__hero {
+  padding: 24px;
+  background: linear-gradient(135deg, #ecfdf5, #dbeafe);
+  text-align: center;
+}
+
+.mkt-print-flyer__hero h2 {
+  margin: 12px 0 4px;
+  color: #0f172a;
+}
+
+.mkt-print-flyer__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px;
+  font-size: 12px;
+}
+
+.mkt-print-flyer__grid h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+}
+
+.mkt-print-flyer__grid p {
+  margin: 0;
+  color: #64748b;
+}
+
+.mkt-print-flyer__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 12px;
+}
+
+.mkt-print-rollup {
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 85 / 200;
+  background: linear-gradient(180deg, #ea580c, #7c2d12);
+  border-radius: 12px;
+  padding: 20px;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.mkt-print-rollup__inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+}
+
+.mkt-print-rollup h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.mkt-print-rollup__lead {
+  font-size: 11px;
+  margin: 0;
+}
+
+.mkt-print-rollup ul {
+  text-align: left;
+  font-size: 10px;
+  margin: 8px 0;
+  padding-left: 18px;
+}
+
+.mkt-print-rollup__cta {
+  font-weight: 800;
+  font-size: 12px;
+  margin: 0;
+}
+
+.mkt-print-tag {
+  width: 200px;
+  padding: 16px;
+  background: linear-gradient(135deg, #fef3c7, #fed7aa);
+  border: 2px dashed #ea580c;
+  border-radius: 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mkt-print-tag strong {
+  font-size: 14px;
+  color: #9a3412;
+}
+
+.mkt-print-tag span {
+  font-size: 11px;
+  color: #c2410c;
+}
+
+.mkt-print-tag small {
+  font-size: 9px;
+  color: #78716c;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #mkt-print-export-area,
+  #mkt-print-export-area * {
+    visibility: visible;
+  }
+
+  #mkt-print-export-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0;
+    background: white;
+  }
+
+  .mkt-print-card {
+    width: 85mm;
+    height: 55mm;
+    page-break-inside: avoid;
+    box-shadow: none;
+  }
+
+  .mkt-print-flyer {
+    max-width: none;
+    width: 148mm;
+    box-shadow: none;
+  }
+}

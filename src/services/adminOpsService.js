@@ -8,3 +8,9 @@ export const registerForEvent = (eventId, body) =>
 
 export const fetchMyEventPrizes = () =>
   api.get('/events/my-prizes').then((r) => r.data);
+
+export const fetchBirthdaySuggestions = () =>
+  api.get('/events/birthday/suggestions').then((r) => r.data);
+
+export const reserveBirthdayEvent = (body) =>
+  api.post('/events/birthday/reserve', body).then((r) => r.data);

@@ -5,6 +5,7 @@ import api from '../utils/api';
 import { DEMO_ADMIN_EVENTS } from '../utils/adminDemoData';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { registerForEvent, fetchMyEventPrizes } from '../services/adminOpsService';
+import BirthdayReservationPanel from '../components/BirthdayReservationPanel';
 
 const EventsPage = () => {
   const { user } = useAuth(); // Get user to check role
@@ -401,6 +402,7 @@ const EventsPage = () => {
             ? 'Concours, expositions, journées d\'adoption, anniversaires et promos…'
             : 'Participez aux concours PetfoodTN et gagnez des lots : adoption gratuite, packs croquettes, bons d\'achat…'}
         </p>
+        {!isAdmin && <BirthdayReservationPanel />}
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
           <FilterChip active={eventCategoryFilter === 'all'} onClick={() => setEventCategoryFilter('all')} label="Tous" />
           <FilterChip active={eventCategoryFilter === 'animal'} onClick={() => setEventCategoryFilter('animal')} label="Événements animaliers" />

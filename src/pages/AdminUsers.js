@@ -8,12 +8,14 @@ import {
   validatePassword,
   validateStrongPassword,
 } from '../utils/loginValidation';
+import { fetchRoles } from '../services/adminRolesService';
+import { registerCustomRoleHomes } from '../config/roleConfig';
 
 const emptyForm = { name: '', email: '', phone: '', address: '', role: 'client', password: '' };
 
 const userIdOf = (user) => user?.id || user?._id;
 
-const ROLE_CONFIG = {
+const BASE_ROLE_CONFIG = {
   all: { label: 'Tous les rôles', emoji: '👥' },
   admin: { label: 'Admin', emoji: '🔴', bg: '#fee2e2', color: '#991b1b' },
   client: { label: 'Client', emoji: '🔵', bg: '#dbeafe', color: '#1e40af' },
@@ -21,6 +23,7 @@ const ROLE_CONFIG = {
   vet: { label: 'Vétérinaire', emoji: '🩺', bg: '#e0e7ff', color: '#3730a3' },
   vendor: { label: 'Vendeur', emoji: '🏬', bg: '#ccfbf1', color: '#0f766e' },
   moderator: { label: 'Modérateur', emoji: '🛡️', bg: '#fef3c7', color: '#92400e' },
+  stock_manager: { label: 'Stock', emoji: '📦', bg: '#fce7f3', color: '#9d174d' },
 };
 
 const AdminUsers = () => {
@@ -37,10 +40,33 @@ const AdminUsers = () => {
   const [formData, setFormData] = useState(emptyForm);
   const [formErrors, setFormErrors] = useState({});
   const [flash, setFlash] = useState(null);
+  const [customRoles, setCustomRoles] = useState([]);
 
   useEffect(() => {
     fetchUsers();
+    fetchRoles()
+      .then((list) => {
+        const custom = (Array.isArray(list) ? list : []).filter((r) => !r.isSystem && r.isActive !== false);
+        setCustomRoles(custom);
+        registerCustomRoleHomes(
+          custom.map((r) => ({ slug: r.slug, homeRoute: r.homeRoute }))
+        );
+      })
+      .catch(() => setCustomRoles([]));
   }, []);
+
+  const ROLE_CONFIG = useMemo(() => {
+    const cfg = { ...BASE_ROLE_CONFIG };
+    customRoles.forEach((r) => {
+      cfg[r.slug] = {
+        label: r.label,
+        emoji: '🔐',
+        bg: '#ede9fe',
+        color: '#5b21b6',
+      };
+    });
+    return cfg;
+  }, [customRoles]);
 
   const showFlash = (type, text) => {
     setFlash({ type, text });
@@ -406,8 +432,20 @@ const AdminUsers = () => {
                     <option value="vet">Vétérinaire</option>
                     <option value="vendor">Vendeur marketplace</option>
                     <option value="moderator">Modérateur</option>
+                    <option value="stock_manager">Gestionnaire de stock</option>
+                    {customRoles.map((r) => (
+                      <option key={r.slug} value={r.slug}>
+                        {r.label} (custom)
+                      </option>
+                    ))}
                     {canAssignAdmin && <option value="admin">Admin (unique)</option>}
                   </select>
+                  {customRoles.length > 0 && (
+                    <p style={{ margin: '6px 0 0', fontSize: 12, color: '#64748b' }}>
+                      Rôles custom : définis dans{' '}
+                      <a href="/admin/roles" style={{ color: '#0f766e' }}>Rôles & permissions</a>
+                    </p>
+                  )}
                 </div>
               </div>
               <div>

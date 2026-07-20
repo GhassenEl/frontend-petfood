@@ -85,6 +85,50 @@ class FeederLog {
       );
 }
 
+class FeederStats {
+  FeederStats({
+    this.todayGrams = 0,
+    this.weekGrams = 0,
+    this.dispenseCount = 0,
+    this.refillCount = 0,
+  });
+
+  final int todayGrams;
+  final int weekGrams;
+  final int dispenseCount;
+  final int refillCount;
+
+  factory FeederStats.fromJson(Map<String, dynamic> j) => FeederStats(
+        todayGrams: (j['todayGrams'] as num?)?.toInt() ?? 0,
+        weekGrams: (j['weekGrams'] as num?)?.toInt() ?? 0,
+        dispenseCount: (j['dispenseCount'] as num?)?.toInt() ?? 0,
+        refillCount: (j['refillCount'] as num?)?.toInt() ?? 0,
+      );
+}
+
+class FeederAlert {
+  FeederAlert({
+    required this.code,
+    required this.title,
+    required this.message,
+    this.level = 'warning',
+  });
+
+  final String code;
+  final String title;
+  final String message;
+  final String level;
+
+  bool get isCritical => level == 'critical' || code == 'low_food';
+
+  factory FeederAlert.fromJson(Map<String, dynamic> j) => FeederAlert(
+        code: j['code']?.toString() ?? '',
+        title: j['title']?.toString() ?? 'Alerte',
+        message: j['message']?.toString() ?? '',
+        level: j['level']?.toString() ?? 'warning',
+      );
+}
+
 class NutritionPlan {
   NutritionPlan({this.petName, required this.dailyGrams, required this.portionGrams, required this.mealsPerDay});
 

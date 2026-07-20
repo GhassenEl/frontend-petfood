@@ -64,7 +64,7 @@ const VendorFeederIoTPage = () => {
         <span><Radio size={14} /> {feeders.filter((f) => f.status === 'online').length}/{feeders.length} en ligne</span>
         <span><CircuitBoard size={14} /> PCB PF-TN-CTRL-v1</span>
         <span>Firmware {EMBEDDED_FIRMWARE[0]?.version}</span>
-        <Link to="/client-hardware-pcb">Docs PCB →</Link>
+        <Link to="/hardware-pcb">Docs PCB →</Link>
       </div>
 
       <div className="vfeeder-fleet">

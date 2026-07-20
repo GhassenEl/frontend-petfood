@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Écran de démarrage — évite l'affichage direct de la page login.
+/// Écran de démarrage (optionnel) — l'app ouvre d'abord [LoginScreen].
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key, this.message = 'Chargement…'});
 

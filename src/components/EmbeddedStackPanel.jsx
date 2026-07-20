@@ -1,12 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Cpu, CircuitBoard, Radio, ChevronRight, Zap } from 'lucide-react';
+import { Cpu, Radio, ChevronRight, Zap } from 'lucide-react';
 import {
   EMBEDDED_STACK_LAYERS,
   EMBEDDED_FIRMWARE,
   buildEmbeddedStackSummary,
 } from '../config/embeddedPlatformCatalog';
-import { PCB_BOARDS } from '../config/pcbHardwareCatalog';
 
 const EmbeddedStackPanel = ({ pack = {}, compact = false }) => {
   const summary = buildEmbeddedStackSummary(pack);
@@ -20,7 +19,7 @@ const EmbeddedStackPanel = ({ pack = {}, compact = false }) => {
             <Cpu size={22} /> Stack PetFoodIoT
           </h2>
           <p className="embedded-stack__subtitle">
-            ESP32 · PCB ARES · MQTT · capteurs industriels — de la carte imprimée au dashboard live.
+            ESP32 · MQTT · capteurs — télémétrie edge-to-cloud et contrôle temps réel.
           </p>
         </div>
         <div className="embedded-stack__score" aria-label="Score dominance embarqué">
@@ -32,7 +31,6 @@ const EmbeddedStackPanel = ({ pack = {}, compact = false }) => {
       <div className="embedded-stack__metrics">
         <Metric label="Capteurs" value={summary.sensorCount} />
         <Metric label="Firmware" value={summary.firmwareBuilds} />
-        <Metric label="Cartes PCB" value={summary.pcbBoards} />
         <Metric label="Topics MQTT" value={summary.mqttTopics} />
         <Metric label="En ligne" value={`${summary.devicesOnline}/${summary.devicesTotal || '—'}`} highlight />
         <Metric label="Latence edge" value={`${summary.edgeLatencyMs} ms`} />
@@ -75,28 +73,9 @@ const EmbeddedStackPanel = ({ pack = {}, compact = false }) => {
             </div>
           </div>
 
-          <div className="embedded-stack__pcb">
-            <h3><CircuitBoard size={18} /> Cartes PCB</h3>
-            <div className="embedded-stack__pcb-grid">
-              {PCB_BOARDS.map((board) => (
-                <Link key={board.id} to="/client-hardware-pcb" className="embedded-stack__pcb-card">
-                  <span>{board.icon}</span>
-                  <div>
-                    <strong>{board.shortLabel}</strong>
-                    <p>{board.ref} · {board.dimensions}</p>
-                  </div>
-                  <ChevronRight size={16} />
-                </Link>
-              ))}
-            </div>
-          </div>
-
           <div className="embedded-stack__links">
             <Link to="/pet-feeder" className="embedded-stack__link">
-              <Radio size={16} /> Distributeur ESP32 <ChevronRight size={14} />
-            </Link>
-            <Link to="/client-hardware-pcb" className="embedded-stack__link">
-              <CircuitBoard size={16} /> Documentation PCB <ChevronRight size={14} />
+              <Radio size={16} /> Gamelle intelligente <ChevronRight size={14} />
             </Link>
             <Link to="/client-iot?tab=food-quality" className="embedded-stack__link">
               <Cpu size={16} /> ESP32-CAM qualité <ChevronRight size={14} />

@@ -136,10 +136,10 @@ const ClientIoTHubPage = () => {
       >
         <div className="iot-hub-hero__inner">
           <div className="iot-hub-hero__copy">
-            <h1>🔌 PetFoodIoT — Plateforme embarquée</h1>
+            <h1>🔌 PetFoodIoT — Maison connectée</h1>
             <p>
-              ESP32 · PCB ARES · MQTT · capteurs industriels — distributeur intelligent, vision ESP32-CAM,
-              cartes imprimées et télémétrie edge-to-cloud en temps réel.
+              Gamelle intelligente MQTT, vision ESP32-CAM, colliers santé et fontaine —
+              télémétrie edge-to-cloud et alertes comportementales multi-sources.
             </p>
             {!loading && d.healthScore != null && (
               <div className="iot-hub-hero__scores">
@@ -320,8 +320,8 @@ const ClientIoTHubPage = () => {
                 <IoTModuleCard
                   to="/pet-feeder"
                   icon="🍽️"
-                  title="Distributeur ESP32"
-                  subtitle="Portions automatiques, capteurs niveau et balance."
+                  title="Gamelle intelligente"
+                  subtitle="Contrôle MQTT, portions pesées, planning et alertes réservoir."
                   status={`${c.feedersOnline || 0} en ligne`}
                   statusColor="#059669"
                   badge={d.mode === 'demo' ? 'Démo' : null}
@@ -344,16 +344,7 @@ const ClientIoTHubPage = () => {
                   badge="Temps réel"
                 />
                 <IoTModuleCard
-                  to="/client-hardware-pcb"
-                  icon="🟢"
-                  title="Cartes PCB imprimées"
-                  subtitle="PCB contrôle ESP32 + carte d'alimentation 5 V — ARES, BOM, Gerber."
-                  status="Documentation hardware"
-                  statusColor="#059669"
-                  badge="ARES"
-                />
-                <IoTModuleCard
-                  to="/client-smart-water"
+                  to="/client-iot?tab=water"
                   icon="💧"
                   title="Consommation eau"
                   subtitle="Fontaine connectée, hydratation et réservoir."
@@ -396,7 +387,7 @@ const ClientIoTHubPage = () => {
                   <Cpu size={20} color="#1e40af" /> Connecter un ESP32
                 </h3>
                 <ol style={{ margin: 0, paddingLeft: 20, color: '#475569', fontSize: 14, lineHeight: 1.7 }}>
-                  <li>Créez un distributeur dans <Link to="/pet-feeder" style={{ color: '#2563eb', fontWeight: 700 }}>Distributeur IoT</Link></li>
+                  <li>Associez votre gamelle dans <Link to="/pet-feeder" style={{ color: '#2563eb', fontWeight: 700 }}>Gamelle intelligente</Link></li>
                   <li>Copiez la <strong>clé appareil</strong> (device key)</li>
                   <li>Flashez le firmware <code>firmware/esp32/PetFeederESP32</code></li>
                   <li>Vérifiez le statut <Wifi size={14} style={{ verticalAlign: 'middle' }} /> En ligne</li>

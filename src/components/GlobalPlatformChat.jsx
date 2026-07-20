@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import ChatAssistant from './ChatAssistant';
+import PetBotAvatar from './PetBotAvatar';
 
 const ROLE_VARIANT = {
   admin: 'admin',
@@ -13,7 +14,7 @@ const ROLE_VARIANT = {
   visitor: 'visitor',
 };
 
-/** Préfixes où un layout monte déjà ChatAssistant */
+/** Préfixes où un layout monte déjà le chat / PetBot */
 const LAYOUT_CHAT_PREFIXES = [
   '/admin/',
   '/client',
@@ -22,9 +23,18 @@ const LAYOUT_CHAT_PREFIXES = [
   '/vendor',
   '/moderator',
   '/contact',
+  '/support-agent',
+  '/carte-visite',
+  '/checkout',
+  '/veterinary',
+  '/medical-dossier',
+  '/store-locator',
+  '/pet-advice',
+  '/pet-feeder',
+  '/recommendations',
+  '/capabilities',
 ];
 
-/** Pages auth sans chatbot flottant */
 const NO_CHAT_EXACT_PATHS = new Set([
   '/login',
   '/register',
@@ -34,24 +44,28 @@ const NO_CHAT_EXACT_PATHS = new Set([
 
 const pathHasLayoutChat = (pathname) =>
   LAYOUT_CHAT_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`) || pathname.startsWith(prefix),
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`) || pathname.startsWith(prefix)
   );
 
-const pathBlocksGlobalChat = (pathname) => NO_CHAT_EXACT_PATHS.has(pathname);
-
 /**
- * Chatbot global pour les pages sans layout dédié (accueil, enterprise, etc.).
- * Masqué sur login / register / mot de passe.
+ * Un seul avatar public : PetBot.
+ * ChatAssistant réservé aux rôles staff (admin/vendor/…) hors layouts dédiés.
  */
 const GlobalPlatformChat = () => {
   const { user } = useAuth();
   const { pathname } = useLocation();
 
-  if (pathHasLayoutChat(pathname) || pathBlocksGlobalChat(pathname)) return null;
+  if (NO_CHAT_EXACT_PATHS.has(pathname)) return null;
+  if (pathHasLayoutChat(pathname)) return null;
 
   const role = user?.role || user?.type;
-  const variant = ROLE_VARIANT[role] || 'visitor';
+  const isClientLike = !role || role === 'client' || role === 'visitor';
 
+  if (isClientLike) {
+    return <PetBotAvatar autoOpen />;
+  }
+
+  const variant = ROLE_VARIANT[role] || 'visitor';
   return <ChatAssistant variant={variant} />;
 };
 

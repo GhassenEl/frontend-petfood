@@ -10,6 +10,16 @@ export const ROLE_HOMES = {
   moderator: '/moderator/dashboard',
 };
 
-export const getRoleHome = (role) => ROLE_HOMES[role] || '/';
+/** Homes des rôles custom (remplis au runtime depuis l’API admin). */
+const customRoleHomes = {};
+
+export const registerCustomRoleHomes = (roles = []) => {
+  roles.forEach((r) => {
+    if (r?.slug && r?.homeRoute) customRoleHomes[r.slug] = r.homeRoute;
+  });
+};
+
+export const getRoleHome = (role) =>
+  ROLE_HOMES[role] || customRoleHomes[role] || '/';
 
 export const PLATFORM_ROLES = Object.keys(ROLE_HOMES);

@@ -62,7 +62,43 @@ const PetFeederPage = () => {
   const [firebaseEnabled, setFirebaseEnabled] = useState(false);
   const [firebaseRecordedAt, setFirebaseRecordedAt] = useState(null);
   const [demoMode, setDemoMode] = useState(false);
+  const [mlAnomalies, setMlAnomalies] = useState([]);
+  const [mlLoading, setMlLoading] = useState(false);
+  const [mlMeta, setMlMeta] = useState(null);
   const pollRef = useRef(null);
+
+  const loadBehaviorMl = useCallback(async () => {
+    if (demoMode) {
+      setMlAnomalies([
+        {
+          id: 'demo-anom-1',
+          severity: 'medium',
+          score: 0.62,
+          coldStart: false,
+          factorsJson: JSON.stringify([{ signal: 'feeding_drop', detail: 'Alimentation 48 % de l’objectif (démo)' }]),
+          modelVersion: 'behavior_demo_v1',
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      setMlMeta({ disclaimer: 'Indicateur comportemental — ne remplace pas un avis vétérinaire' });
+      return;
+    }
+    setMlLoading(true);
+    try {
+      const { data } = await api.post('/behavior/analyze');
+      setMlMeta({
+        model: data?.model,
+        coldStartPets: data?.coldStartPets,
+        disclaimer: 'Indicateur comportemental — ne remplace pas un avis vétérinaire',
+      });
+      const listed = await api.get('/behavior/anomalies', { params: { limit: 8 } });
+      setMlAnomalies(listed.data?.anomalies || []);
+    } catch {
+      setMlAnomalies([]);
+    } finally {
+      setMlLoading(false);
+    }
+  }, [demoMode]);
 
   const applyDemoBundle = useCallback((bundle) => {
     setFeeder(bundle.feeder);
@@ -144,6 +180,10 @@ const PetFeederPage = () => {
     return () => clearInterval(pollRef.current);
   }, [selectedId, loadFeederDetail, demoMode]);
 
+  useEffect(() => {
+    loadBehaviorMl();
+  }, [loadBehaviorMl, selectedId]);
+
   const realtimeAlerts = alerts;
 
   const registerFeeder = async () => {
@@ -153,7 +193,7 @@ const PetFeederPage = () => {
     }
     setActionLoading(true);
     try {
-      const { data } = await api.post('/feeder', { name: 'Mon distributeur' });
+      const { data } = await api.post('/feeder', { name: 'Gamelle intelligente PetfoodTN' });
       await loadFeeders();
       setSelectedId(data.id);
     } catch (e) {
@@ -412,10 +452,10 @@ const PetFeederPage = () => {
         }}
       >
         <h1 style={{ margin: '0 0 8px', fontSize: 32, fontWeight: 800, color: '#1e40af' }}>
-          🍽️ Distributeur ESP32
+          🍽️ Gamelle intelligente
         </h1>
         <p style={{ margin: 0, color: '#64748b' }}>
-          Distribution automatique de nourriture — capteurs niveau, balance et déclenchement IR.
+          Contrôle immédiat MQTT, planning, portions pesées, niveau réservoir et détection comportementale multi-sources.
         </p>
         <div style={{ marginTop: 14, display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link to="/client-iot" style={{ fontSize: 13, fontWeight: 700, color: '#2563eb', textDecoration: 'none', padding: '8px 14px', background: 'white', borderRadius: 10, border: '1px solid #bfdbfe' }}>
@@ -740,16 +780,78 @@ const PetFeederPage = () => {
                     ))
                   )}
                 </Card>
+
+              <Card title="Comportement ML (multi-sources)" wide>
+                <p style={{ margin: '0 0 12px', fontSize: 13, color: '#64748b' }}>
+                  Gamelle + collier/activité + hydratation — scores et facteurs explicatifs.
+                  {mlMeta?.disclaimer ? ` ${mlMeta.disclaimer}.` : ''}
+                </p>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={loadBehaviorMl}
+                    disabled={mlLoading}
+                    style={{
+                      padding: '8px 12px', borderRadius: 10, border: '1px solid #bfdbfe',
+                      background: '#eff6ff', color: '#1d4ed8', fontWeight: 700, cursor: 'pointer',
+                    }}
+                  >
+                    {mlLoading ? 'Analyse…' : 'Relancer l’analyse'}
+                  </button>
+                  {mlMeta?.model && (
+                    <span style={{ fontSize: 12, color: '#94a3b8', alignSelf: 'center' }}>
+                      Modèle {mlMeta.model}
+                    </span>
+                  )}
+                </div>
+                {mlAnomalies.length === 0 ? (
+                  <p style={{ color: '#94a3b8', margin: 0 }}>Aucune anomalie ouverte.</p>
+                ) : (
+                  mlAnomalies.slice(0, 6).map((a) => {
+                    const factors = (() => {
+                      try {
+                        return typeof a.factorsJson === 'string'
+                          ? JSON.parse(a.factorsJson)
+                          : (a.factors || []);
+                      } catch {
+                        return [];
+                      }
+                    })();
+                    return (
+                      <div
+                        key={a.id || `${a.petId}-${a.createdAt}`}
+                        style={{
+                          padding: '12px 0',
+                          borderBottom: '1px solid #f1f5f9',
+                          fontSize: 13,
+                        }}
+                      >
+                        <div style={{ fontWeight: 700, color: '#334155' }}>
+                          Score {Math.round((a.score || 0) * 100)} · {a.severity || 'medium'}
+                          {a.coldStart ? ' · cold-start' : ''}
+                        </div>
+                        <div style={{ color: '#64748b' }}>
+                          {(factors[0] && (factors[0].detail || factors[0].signal)) || 'Signal comportemental'}
+                        </div>
+                        {a.createdAt && (
+                          <div style={{ color: '#94a3b8', fontSize: 11 }}>
+                            {new Date(a.createdAt).toLocaleString('fr-FR')}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </Card>
               </div>
             </>
           )}
         </>
       )}
 
-      <div style={{ marginTop: 32, padding: 20, background: '#fffbeb', borderRadius: 16, border: '1px solid #fde68a', fontSize: 14, color: '#92400e' }}>
-        <strong>ESP32 :</strong> HC-SR04, IR, HX711, DHT11, Servo, Moteur DC, LED RGB — voir{' '}
-        <Link to="/client-hardware-pcb" style={{ color: '#b45309', fontWeight: 700 }}>Cartes PCB &amp; alimentation</Link>
-        {' '}et <code>firmware/README.md</code>
+      <div style={{ marginTop: 32, padding: 20, background: '#f8fafc', borderRadius: 16, border: '1px solid #e2e8f0', fontSize: 14, color: '#475569' }}>
+        <strong>Matériel :</strong> ESP32 · HX711 · moteur/servo · HC-SR04 — firmware MQTT dans{' '}
+        <code>firmware/esp32/PetFeederESP32</code>. Documentation PCB réservée admin/vendeur.
       </div>
     </div>
   );

@@ -17,10 +17,12 @@ import {
   saveProfilePrefs,
   saveStoredAvatar,
 } from '../../utils/profileExtrasStorage';
+import DigitalBusinessCard from '../DigitalBusinessCard';
 import './ActorProfilePage.css';
 
 const TABS = [
   { id: 'profile', label: 'Profil', icon: '👤' },
+  { id: 'card', label: 'Carte de visite', icon: '💳' },
   { id: 'password', label: 'Sécurité', icon: '🔐' },
   { id: 'preferences', label: 'Préférences', icon: '🔔' },
 ];
@@ -398,6 +400,40 @@ const ActorProfilePage = ({ role: roleProp }) => {
                   {saving ? 'Enregistrement…' : 'Enregistrer le profil'}
                 </button>
               </form>
+            )}
+
+            {tab === 'card' && (
+              <div>
+                <h2 className="actor-profile__card-title">Carte de visite digitale</h2>
+                <p className="actor-profile__card-desc">
+                  Partagez votre identité PetfoodTN, exportez un fichier vCard ou copiez le lien.
+                </p>
+                <DigitalBusinessCard
+                  profile={{
+                    personName: profile.name,
+                    role: config.badge || role,
+                    email: profile.email,
+                    phone: profile.phone,
+                    address: profile.address,
+                    photoUrl: avatarUrl,
+                    brandName: 'PetfoodTN',
+                  }}
+                />
+                <div style={{ marginTop: 20 }}>
+                  <h3 className="actor-profile__card-title" style={{ fontSize: '1rem' }}>
+                    PetBot — conseiller avatar
+                  </h3>
+                  <p className="actor-profile__card-desc">
+                    Avatar unique : voix, panier, RDV toilettage, suivi commande, FR / AR / EN.
+                  </p>
+                  <DigitalBusinessCard showAgent />
+                  <p style={{ marginTop: 12, fontSize: 13 }}>
+                    <Link to="/support-agent" style={{ color: accent || '#0d9488', fontWeight: 700 }}>
+                      Ouvrir PetBot →
+                    </Link>
+                  </p>
+                </div>
+              </div>
             )}
 
             {tab === 'password' && (

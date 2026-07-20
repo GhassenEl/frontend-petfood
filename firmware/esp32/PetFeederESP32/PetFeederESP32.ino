@@ -1,18 +1,21 @@
 /**
- * PetfoodTN — Distributeur intelligent ESP32
+ * PetfoodTN — Gamelle intelligente ESP32 (MQTT principal + fallback HTTP)
  *
- * Bibliothèques Arduino (Gestionnaire) :
+ * Bibliothèques Arduino :
+ *   - PubSubClient (Nick O'Leary)
  *   - HX711 by Bogdan Necula
  *   - DHT sensor library by Adafruit
  *   - LiquidCrystal I2C by Frank de Brabander
  *   - ArduinoJson by Benoit Blanchon
  *   - WiFi / HTTPClient (intégrés ESP32)
  *
- * Copiez config.example.h → config.h et renseignez WiFi + DEVICE_KEY
+ * Copiez config.example.h → config.h
+ * Matériel : ESP32 + HX711 + moteur/servo + HC-SR04 (+ IR, DHT, LED RGB)
  */
 
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
@@ -20,13 +23,34 @@
 #include "HX711.h"
 #include "config.h"
 
-// ——— Brochage (ESP32) ———
+#ifndef USE_MQTT
+#define USE_MQTT 1
+#endif
+#ifndef MQTT_TOPIC_PREFIX
+#define MQTT_TOPIC_PREFIX "petfood/"
+#endif
+#ifndef DEVICE_ID
+#define DEVICE_ID ""
+#endif
+#ifndef LOCAL_SCHEDULE_1
+#define LOCAL_SCHEDULE_1 "08:00"
+#endif
+#ifndef LOCAL_SCHEDULE_2
+#define LOCAL_SCHEDULE_2 "19:00"
+#endif
+#ifndef LOCAL_PORTION_G
+#define LOCAL_PORTION_G 30.0f
+#endif
+#ifndef FIRMWARE_VERSION
+#define FIRMWARE_VERSION "mqtt-1.0.0"
+#endif
+
 #define TRIG_PIN        5
 #define ECHO_PIN        18
 #define IR_PIN          19
 #define DHT_PIN         23
 #define SERVO_PIN       13
-#define MOTOR_PIN       14      // via relais ou transistor
+#define MOTOR_PIN       14
 #define LED_R_PIN       25
 #define LED_G_PIN       26
 #define LED_B_PIN       27
@@ -43,13 +67,24 @@
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 DHT dht(DHT_PIN, DHT11);
 HX711 scale;
+WiFiClient wifiClient;
+PubSubClient mqttClient(wifiClient);
 
 unsigned long lastHeartbeat = 0;
 unsigned long lastPoll = 0;
 String lastCommandId = "";
 bool lowFood = false;
+String lastLocalSlot = "";
 
-// ——— Servo logic (ESP32 LEDC) ———
+String deviceTopicId() {
+  if (strlen(DEVICE_ID) > 0) return String(DEVICE_ID);
+  return String(DEVICE_KEY);
+}
+
+String topicBase() {
+  return String(MQTT_TOPIC_PREFIX) + "feeder/" + deviceTopicId() + "/";
+}
+
 void servoWrite(int angle) {
   int duty = map(angle, 0, 180, 26, 128);
   ledcWrite(0, duty);
@@ -61,7 +96,6 @@ void setupServo() {
   servoWrite(SERVO_CLOSED);
 }
 
-// ——— Capteurs ———
 float readUltrasonicCm() {
   digitalWrite(TRIG_PIN, LOW);
   delayMicroseconds(2);
@@ -74,7 +108,7 @@ float readUltrasonicCm() {
 }
 
 bool animalDetected() {
-  return digitalRead(IR_PIN) == LOW; // actif bas selon module
+  return digitalRead(IR_PIN) == LOW;
 }
 
 float readFoodGrams() {
@@ -130,37 +164,6 @@ bool getJson(const String& url, String& response) {
   response = http.getString();
   http.end();
   return code >= 200 && code < 300;
-}
-
-void sendHeartbeat(float reservoirCm, float foodGrams, float temp, float hum, bool animal) {
-  StaticJsonDocument<384> doc;
-  doc["reservoirCm"] = reservoirCm;
-  doc["foodGrams"] = foodGrams;
-  doc["temperature"] = temp;
-  doc["humidity"] = hum;
-  doc["animalPresent"] = animal;
-  doc["isLowFood"] = lowFood;
-  doc["macAddress"] = WiFi.macAddress();
-
-  String body, resp;
-  serializeJson(doc, body);
-  String url = String(API_BASE) + "/api/feeder/device/heartbeat";
-  postJson(url, body, resp);
-}
-
-void ackCommand(const String& cmdId, bool success, float grams, const String& msg) {
-  StaticJsonDocument<256> doc;
-  doc["commandId"] = cmdId;
-  doc["success"] = success;
-  doc["portionGrams"] = grams;
-  doc["animalDetected"] = animalDetected();
-  doc["foodGrams"] = readFoodGrams();
-  doc["reservoirCm"] = readUltrasonicCm();
-  doc["message"] = msg;
-
-  String body, resp;
-  serializeJson(doc, body);
-  postJson(String(API_BASE) + "/api/feeder/device/ack", body, resp);
 }
 
 bool dispenseGrams(float targetGrams) {
@@ -220,24 +223,134 @@ void updateLowFoodState(float reservoirCm, float foodGrams) {
   }
 }
 
-void pollServerCommands() {
+void publishMqttJson(const String& suffix, const String& json) {
+  if (!mqttClient.connected()) return;
+  String topic = topicBase() + suffix;
+  mqttClient.publish(topic.c_str(), json.c_str(), false);
+}
+
+void publishTelemetry(float reservoirCm, float foodGrams, float temp, float hum, bool animal) {
+  StaticJsonDocument<512> doc;
+  doc["deviceKey"] = DEVICE_KEY;
+  doc["deviceId"] = deviceTopicId();
+  doc["firmwareVersion"] = FIRMWARE_VERSION;
+  doc["reservoirCm"] = reservoirCm;
+  doc["foodGrams"] = foodGrams;
+  doc["temperature"] = temp;
+  doc["humidity"] = hum;
+  doc["animalPresent"] = animal;
+  doc["isLowFood"] = lowFood;
+  doc["macAddress"] = WiFi.macAddress();
+
+  String body;
+  serializeJson(doc, body);
+
+#if USE_MQTT
+  if (mqttClient.connected()) {
+    publishMqttJson("telemetry", body);
+    return;
+  }
+#endif
+  String resp;
+  postJson(String(API_BASE) + "/api/feeder/device/heartbeat", body, resp);
+}
+
+void ackCommand(const String& cmdId, bool success, float grams, const String& msg) {
+  StaticJsonDocument<384> doc;
+  doc["deviceKey"] = DEVICE_KEY;
+  doc["commandId"] = cmdId;
+  doc["success"] = success;
+  doc["portionGrams"] = grams;
+  doc["animalDetected"] = animalDetected();
+  doc["foodGrams"] = readFoodGrams();
+  doc["reservoirCm"] = readUltrasonicCm();
+  doc["message"] = msg;
+
+  String body;
+  serializeJson(doc, body);
+
+#if USE_MQTT
+  if (mqttClient.connected()) {
+    publishMqttJson("ack", body);
+    return;
+  }
+#endif
+  String resp;
+  postJson(String(API_BASE) + "/api/feeder/device/ack", body, resp);
+}
+
+void handleCommandJson(JsonObject cmd) {
+  if (cmd.isNull()) return;
+  String cmdId = cmd["id"] | cmd["commandId"] | "";
+  String action = cmd["action"] | "";
+  float grams = cmd["grams"] | cmd["portionGrams"] | 30.0f;
+  if (action == "dispense" && cmdId.length() > 0 && cmdId != lastCommandId) {
+    lastCommandId = cmdId;
+    bool ok = dispenseGrams(grams);
+    ackCommand(cmdId, ok, grams, ok ? "Distribution OK" : "Echec distribution");
+  }
+}
+
+void mqttCallback(char* topic, byte* payload, unsigned int length) {
+  StaticJsonDocument<1024> doc;
+  DeserializationError err = deserializeJson(doc, payload, length);
+  if (err) return;
+  if (doc.containsKey("command") && doc["command"].is<JsonObject>()) {
+    handleCommandJson(doc["command"].as<JsonObject>());
+  } else {
+    handleCommandJson(doc.as<JsonObject>());
+  }
+}
+
+bool reconnectMqtt() {
+#if !USE_MQTT
+  return false;
+#else
+  if (WiFi.status() != WL_CONNECTED) return false;
+  if (mqttClient.connected()) return true;
+
+  String clientId = "petfeeder-" + String((uint32_t)ESP.getEfuseMac(), HEX);
+  bool ok;
+  if (strlen(MQTT_USER) > 0) {
+    ok = mqttClient.connect(clientId.c_str(), MQTT_USER, MQTT_PASSWORD);
+  } else {
+    ok = mqttClient.connect(clientId.c_str());
+  }
+  if (ok) {
+    String cmdTopic = topicBase() + "commands";
+    mqttClient.subscribe(cmdTopic.c_str(), 1);
+    lcdShow("MQTT OK", cmdTopic.substring(0, 16));
+  }
+  return ok;
+#endif
+}
+
+void pollHttpCommands() {
   String resp;
   if (!getJson(String(API_BASE) + "/api/feeder/device/commands", resp)) return;
-
   StaticJsonDocument<1024> doc;
   if (deserializeJson(doc, resp)) return;
+  handleCommandJson(doc["command"].as<JsonObject>());
+}
 
-  JsonObject cmd = doc["command"];
-  if (!cmd.isNull()) {
-    String cmdId = cmd["id"] | "";
-    String action = cmd["action"] | "";
-    float grams = cmd["grams"] | 30.0f;
+String currentHhMm() {
+  // Horloge locale approximative basée sur millis depuis boot (pas de NTP requis pour démo).
+  // Pour prod, activer configTime() NTP.
+  unsigned long totalMin = (millis() / 60000UL) % (24UL * 60UL);
+  int hh = (totalMin / 60) % 24;
+  int mm = totalMin % 60;
+  char buf[6];
+  snprintf(buf, sizeof(buf), "%02d:%02d", hh, mm);
+  return String(buf);
+}
 
-    if (action == "dispense" && cmdId != lastCommandId) {
-      lastCommandId = cmdId;
-      bool ok = dispenseGrams(grams);
-      ackCommand(cmdId, ok, grams, ok ? "Distribution OK" : "Echec distribution");
-    }
+void maybeLocalSchedule() {
+  if (mqttClient.connected()) return; // broker OK → schedules cloud
+  String now = currentHhMm();
+  if (now == lastLocalSlot) return;
+  if (now == String(LOCAL_SCHEDULE_1) || now == String(LOCAL_SCHEDULE_2)) {
+    lastLocalSlot = now;
+    dispenseGrams(LOCAL_PORTION_G);
   }
 }
 
@@ -257,7 +370,7 @@ void setup() {
   Wire.begin(21, 22);
   lcd.init();
   lcd.backlight();
-  lcdShow("PetfoodTN", "Demarrage...");
+  lcdShow("PetfoodTN", "Gamelle MQTT...");
 
   dht.begin();
   scale.begin(HX711_DOUT, HX711_SCK);
@@ -273,9 +386,15 @@ void setup() {
   }
 
   if (WiFi.status() == WL_CONNECTED) {
-    lcdShow("Connecte", WiFi.localIP().toString());
+    lcdShow("WiFi OK", WiFi.localIP().toString());
     setRgb(false, true, false);
     beepOk();
+#if USE_MQTT
+    mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
+    mqttClient.setCallback(mqttCallback);
+    mqttClient.setBufferSize(1024);
+    reconnectMqtt();
+#endif
   } else {
     lcdShow("WiFi ERREUR", "Mode local");
     setRgb(true, false, false);
@@ -293,10 +412,17 @@ void loop() {
 
   updateLowFoodState(reservoirCm, foodGrams);
 
+#if USE_MQTT
+  if (!mqttClient.connected()) {
+    reconnectMqtt();
+  }
+  mqttClient.loop();
+#endif
+
   if (millis() - lastHeartbeat > HEARTBEAT_MS) {
     lastHeartbeat = millis();
     if (WiFi.status() == WL_CONNECTED) {
-      sendHeartbeat(reservoirCm, foodGrams, temp, hum, animal);
+      publishTelemetry(reservoirCm, foodGrams, temp, hum, animal);
     }
     lcdShow("T:" + String(temp, 0) + "C H:" + String(hum, 0),
             "Niv:" + String(reservoirCm, 0) + "cm");
@@ -304,16 +430,23 @@ void loop() {
 
   if (millis() - lastPoll > POLL_MS) {
     lastPoll = millis();
-    if (WiFi.status() == WL_CONNECTED) {
-      pollServerCommands();
+#if USE_MQTT
+    if (!mqttClient.connected() && WiFi.status() == WL_CONNECTED) {
+      pollHttpCommands();
     }
+#else
+    if (WiFi.status() == WL_CONNECTED) {
+      pollHttpCommands();
+    }
+#endif
   }
 
-  // Distribution locale si animal détecté + bouton (option GPIO 0)
+  maybeLocalSchedule();
+
   if (animal && !lowFood && digitalRead(0) == LOW) {
     dispenseGrams(30);
     delay(1000);
   }
 
-  delay(100);
+  delay(50);
 }

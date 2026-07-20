@@ -3,7 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import ResponsiveShell from './ResponsiveShell';
 import ClientSidebar from '../components/ClientSidebar';
-import ChatAssistant from '../components/ChatAssistant';
+import PetBotAvatar from '../components/PetBotAvatar';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
 import MobileBottomNav, { CLIENT_MOBILE_NAV } from '../components/MobileBottomNav';
@@ -19,10 +19,9 @@ const readStoredCart = () => {
 };
 
 const ClientLayout = ({ children }) => {
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const chatKey = user?._id || user?.id || 'client';
   const [cart, setCart] = useState(readStoredCart);
   const [showCart, setShowCart] = useState(false);
 
@@ -65,9 +64,12 @@ const ClientLayout = ({ children }) => {
 
     window.addEventListener('addToCart', handleAddToCart);
     window.addEventListener('petfood:clear-cart', clearCart);
+    const openCart = () => setShowCart(true);
+    window.addEventListener('petfood:open-cart', openCart);
     return () => {
       window.removeEventListener('addToCart', handleAddToCart);
       window.removeEventListener('petfood:clear-cart', clearCart);
+      window.removeEventListener('petfood:open-cart', openCart);
     };
   }, []);
 
@@ -115,7 +117,7 @@ const ClientLayout = ({ children }) => {
           onCheckout={openCheckout}
         />
       )}
-      <ChatAssistant key={chatKey} variant="client" />
+      <PetBotAvatar autoOpen />
     </ResponsiveShell>
   );
 };

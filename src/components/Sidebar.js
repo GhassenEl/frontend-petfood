@@ -57,6 +57,7 @@ const Sidebar = ({ onNavigate, onLogout, user }) => {
         { id: 'stock', label: 'Gestion stock', icon: '📦' },
         { id: 'promotions', label: 'Promotions & coupons', icon: '🎟️' },
         { id: 'users', label: 'Utilisateurs', icon: '👥' },
+        { id: 'roles', label: 'Rôles & permissions', icon: '🔐', route: '/admin/roles' },
         { id: 'leave-requests', label: 'Congés / maladie', icon: '🏖️' },
         { id: 'messages', label: 'Messages', icon: '💬' },
         { id: 'veterinary', label: 'Suivi vétérinaire', icon: '🩺' },

@@ -1,0 +1,282 @@
+.aha-fab {
+  position: fixed;
+  right: 22px;
+  bottom: 96px;
+  z-index: 9990;
+  width: 68px;
+  height: 68px;
+  border: none;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  box-shadow: 0 10px 28px rgba(15, 118, 110, 0.35);
+}
+
+.aha-fab__photo {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #14b8a6;
+  display: block;
+}
+
+.aha-fab__badge {
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  transform: translateX(-50%);
+  background: #f59e0b;
+  color: #78350f;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.aha-fab__pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(20, 184, 166, 0.5);
+  animation: aha-pulse 2s ease-out infinite;
+  pointer-events: none;
+}
+
+.aha-fab--talking .aha-fab__photo {
+  box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.55);
+}
+
+@keyframes aha-pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.25); opacity: 0; }
+}
+
+.aha-panel {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9991;
+  width: min(380px, calc(100vw - 24px));
+  height: min(560px, calc(100vh - 40px));
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.aha-panel__header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 12px 10px;
+  background: linear-gradient(135deg, #0f766e, #0d9488);
+  color: #ecfdf5;
+}
+
+.aha-avatar {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.aha-avatar img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+
+.aha-avatar--talking img {
+  box-shadow: 0 0 0 3px #fbbf24;
+}
+
+.aha-avatar__wave {
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2px solid #fbbf24;
+  animation: aha-pulse 1s ease-out infinite;
+}
+
+.aha-panel__meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.aha-panel__meta strong {
+  font-size: 0.95rem;
+}
+
+.aha-panel__meta span {
+  font-size: 0.72rem;
+  opacity: 0.9;
+}
+
+.aha-panel__meta em {
+  font-size: 0.68rem;
+  opacity: 0.8;
+  font-style: normal;
+}
+
+.aha-panel__tools {
+  display: flex;
+  gap: 4px;
+}
+
+.aha-panel__tools button {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.aha-panel__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.aha-msg {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  max-width: 92%;
+}
+
+.aha-msg--user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.aha-msg__face {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.aha-msg__bubble {
+  background: white;
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #1e293b;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.aha-msg--user .aha-msg__bubble {
+  background: linear-gradient(135deg, #0d9488, #0f766e);
+  color: white;
+}
+
+.aha-msg__bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.aha-msg__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.aha-msg__quick button {
+  border: 1px solid #99f6e4;
+  background: #f0fdfa;
+  color: #0f766e;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.aha-typing {
+  font-size: 0.8rem;
+  color: #64748b;
+  padding-left: 8px;
+}
+
+.aha-panel__form {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid #e2e8f0;
+  background: white;
+}
+
+.aha-panel__form input {
+  flex: 1;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  outline: none;
+}
+
+.aha-mic,
+.aha-send {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.aha-mic {
+  background: #f1f5f9;
+  color: #0f766e;
+}
+
+.aha-mic--on {
+  background: #fef3c7;
+  color: #b45309;
+  animation: aha-pulse 1.2s ease-out infinite;
+}
+
+.aha-send {
+  background: #0d9488;
+  color: white;
+}
+
+.aha-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .aha-fab {
+    right: 14px;
+    bottom: 88px;
+  }
+  .aha-panel {
+    right: 8px;
+    left: 8px;
+    width: auto;
+    bottom: 8px;
+  }
+}

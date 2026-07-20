@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Megaphone, BarChart3, Mail, Share2, Search, RefreshCw, ExternalLink, Plug, Radio,
+  Megaphone, BarChart3, Mail, Share2, Search, RefreshCw, ExternalLink, Plug, Radio, CreditCard,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -9,6 +9,7 @@ import {
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import { fetchDigitalMarketingPack } from '../services/digitalMarketingService';
 import MarketingAudienceBiPanel from '../components/MarketingAudienceBiPanel';
+import MarketingPrintStudio from '../components/MarketingPrintStudio';
 import './AdminDigitalMarketing.css';
 
 const TABS = [
@@ -18,6 +19,7 @@ const TABS = [
   { id: 'channels', label: 'Canaux', icon: Mail },
   { id: 'social', label: 'Social & SEO', icon: Share2 },
   { id: 'newsletter', label: 'Newsletter', icon: Mail },
+  { id: 'print', label: 'Supports print', icon: CreditCard },
 ];
 
 const fmt = (n) => Number(n || 0).toLocaleString('fr-FR');
@@ -81,13 +83,17 @@ const AdminDigitalMarketingPage = () => {
         </button>
       </div>
 
-      {loading && !pack ? (
+      {loading && !pack && tab !== 'print' ? (
         <p style={{ color: '#94a3b8' }}>Chargement marketing digital…</p>
-      ) : !pack ? (
+      ) : !pack && tab !== 'print' ? (
         <p style={{ color: '#dc2626' }}>Données marketing indisponibles.</p>
       ) : (
         <>
-          {tab === 'overview' && (
+          {tab === 'print' && (
+            <MarketingPrintStudio title="Cartes de visite & supports print" />
+          )}
+
+          {pack && tab === 'overview' && (
             <>
               <div className="mkt-kpi-grid">
                 <Kpi label="Impressions" value={fmt(k.impressions)} />
@@ -161,7 +167,7 @@ const AdminDigitalMarketingPage = () => {
             </>
           )}
 
-          {tab === 'audience' && (
+          {pack && tab === 'audience' && (
             <>
               <MarketingAudienceBiPanel pack={pack} />
               <div className="mkt-grid-2" style={{ marginTop: 16 }}>
@@ -197,7 +203,7 @@ const AdminDigitalMarketingPage = () => {
             </>
           )}
 
-          {tab === 'campaigns' && (
+          {pack && tab === 'campaigns' && (
             <>
               <p style={{ margin: '0 0 16px', color: '#047857', fontWeight: 600 }}>
                 {pack.marketingSummary}
@@ -220,7 +226,7 @@ const AdminDigitalMarketingPage = () => {
             </>
           )}
 
-          {tab === 'channels' && (
+          {pack && tab === 'channels' && (
             <div className="mkt-grid-2">
               {(pack.channels || []).map((ch) => (
                 <article key={ch.id} className="mkt-channel">
@@ -236,7 +242,7 @@ const AdminDigitalMarketingPage = () => {
             </div>
           )}
 
-          {tab === 'social' && (
+          {pack && tab === 'social' && (
             <div className="mkt-grid-2">
               <div className="mkt-panel">
                 <h3><Share2 size={18} style={{ verticalAlign: 'middle' }} /> Calendrier social</h3>
@@ -287,7 +293,7 @@ const AdminDigitalMarketingPage = () => {
             </div>
           )}
 
-          {tab === 'newsletter' && (
+          {pack && tab === 'newsletter' && (
             <>
               <div className="mkt-kpi-grid">
                 <Kpi label="Abonnés" value={fmt(pack.newsletter?.total)} />

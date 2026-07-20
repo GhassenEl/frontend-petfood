@@ -105,7 +105,6 @@ export const computeLivreurEcoDashboard = () => ({
   greenTips: [
     'Regrouper les colis du même quartier',
     'Privilégier les créneaux hors pointe',
-    'Vérifier la chaîne du froid pour limiter le gaspillage',
     'Signaler les points de collecte recyclage sur la tournée',
   ],
 });

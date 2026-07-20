@@ -6,11 +6,80 @@ import { ROLE_HOMES } from './roleConfig';
 import { MARKETING_DIGITAL_FEATURES } from './marketingContent';
 
 export const JURY_DEMO_SECTIONS = [
+  { id: 'videos', label: 'Vidéos combinées', icon: '🎞️' },
   { id: 'overview', label: 'Vue d\'ensemble', icon: '🏛️' },
   { id: 'actors', label: 'Acteurs & interfaces', icon: '👥' },
   { id: 'marketing', label: 'Marketing digital', icon: '📣' },
   { id: 'chatbot', label: 'Chatbot & IA', icon: '🤖' },
   { id: 'tour', label: 'Parcours live', icon: '🎬' },
+];
+
+/**
+ * Trilogie soutenance : vidéo commerciale → plateforme web → Flutter.
+ * Fichiers servis depuis public/demo-videos/ (hard-link vers demo-videos/).
+ */
+export const JURY_COMBINED_VIDEOS = [
+  {
+    id: 'commercial',
+    order: 1,
+    title: 'Vidéo commerciale',
+    subtitle: 'Marketing digital & image de marque',
+    durationHint: '~1–2 min',
+    src: '/demo-videos/PFE-1-video-commerciale.mp4',
+    file: 'PFE-1-video-commerciale.mp4',
+    accent: '#e67e22',
+    talkingPoints: [
+      'Positionnement PetfoodTN et proposition de valeur',
+      'Landing, newsletter, hub marketing admin & vendeur',
+      'Campagnes IA, SEO, audience',
+    ],
+    liveActions: [
+      { label: 'Landing publique', path: '/', kind: 'link' },
+      { label: 'Marketing admin', path: '/admin/digital-marketing', kind: 'login', role: 'admin' },
+      { label: 'Marketing vendeur', path: '/vendor/marketing', kind: 'login', role: 'vendor' },
+    ],
+  },
+  {
+    id: 'plateforme',
+    order: 2,
+    title: 'Plateforme web',
+    subtitle: '7 acteurs · IA · IoT · chatbot',
+    durationHint: '~2–3 min',
+    src: '/demo-videos/PFE-2-plateforme.mp4',
+    file: 'PFE-2-plateforme.mp4',
+    accent: '#2563eb',
+    talkingPoints: [
+      'Parcours multi-acteurs (admin, client, vendeur, vet, livreur…)',
+      'Recommandations hybrides, chatbot multilingue',
+      'IoT feeder / cold chain / intelligence clinique',
+    ],
+    liveActions: [
+      { label: 'Boutique client', path: '/client-products', kind: 'login', role: 'client' },
+      { label: 'Dashboard admin', path: '/admin/dashboard', kind: 'login', role: 'admin' },
+      { label: 'Espace vétérinaire', path: '/vet/dashboard', kind: 'login', role: 'vet' },
+      { label: 'Smart Hub', path: '/client-smart-hub', kind: 'login', role: 'client' },
+    ],
+  },
+  {
+    id: 'flutter',
+    order: 3,
+    title: 'Application Flutter',
+    subtitle: 'Companion mobile Android / iOS',
+    durationHint: '~1 min',
+    src: '/demo-videos/PFE-3-flutter.mp4',
+    file: 'PFE-3-flutter.mp4',
+    accent: '#059669',
+    talkingPoints: [
+      'App mobile synchronisée avec l\'API Node',
+      'Modules IoT, livraison, notifications, profil animal',
+      'Build web Flutter pour démo navigateur si besoin',
+    ],
+    liveActions: [
+      { label: 'Page app mobile', path: '/mobile', kind: 'link' },
+      { label: 'Hub IoT client', path: '/client-iot', kind: 'login', role: 'client' },
+      { label: 'Feeder IoT', path: '/pet-feeder', kind: 'login', role: 'client' },
+    ],
+  },
 ];
 
 /** Interfaces à montrer au jury par acteur */

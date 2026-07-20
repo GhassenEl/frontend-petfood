@@ -16,6 +16,10 @@ import {
   draftMedicalReport,
   enrichVetIntelligencePack,
 } from '../utils/vetClinicalIntelligenceEngine';
+import {
+  runPrescriptionAssistApi,
+  runDiagnosticAssistApi,
+} from './vetMlAssistService';
 
 export const VET_CLINICAL_QUICK_PROMPTS = [
   'Rédiger un compte rendu de consultation dermatologique',
@@ -151,9 +155,16 @@ export async function loadVetIntelligenceHubPack() {
   return pack;
 }
 
-export async function runDiagnosticAnalysis({ symptoms, pet, ownerNotes }) {
+export async function runDiagnosticAnalysis({ symptoms, pet, ownerNotes, ownerId, petId, petName }) {
   try {
-    const { data } = await api.post('/vet/ml/diagnostic-assist', { symptoms, pet, ownerNotes });
+    const data = await runDiagnosticAssistApi({
+      symptoms,
+      ownerNotes,
+      ownerId,
+      petId,
+      petName,
+      pet,
+    });
     if (data?.diagnosticHypotheses?.length) return { ...data, source: 'api' };
   } catch {
     /* local */
@@ -163,8 +174,8 @@ export async function runDiagnosticAnalysis({ symptoms, pet, ownerNotes }) {
 
 export async function runPrescriptionAssist(input) {
   try {
-    const { data } = await api.post('/vet/ml/prescription-assist', input);
-    if (data?.medications?.length) return { ...data, source: 'api' };
+    const data = await runPrescriptionAssistApi(input);
+    if (data?.medications?.length) return { ...data, source: data.source || 'api' };
   } catch {
     /* local */
   }

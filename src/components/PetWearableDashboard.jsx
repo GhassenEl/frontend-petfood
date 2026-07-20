@@ -153,10 +153,10 @@ const PetCollarCard = ({
       <PulseWave active={pulse} />
 
       <div className="wear-vitals-grid">
-        <VitalGauge label="Respiration" value={m.respiratoryRate} unit="/min" status={vs.respiratory} icon={Wind} range={ranges.respiratory} />
-        <VitalGauge label="Température" value={m.bodyTempC} unit="°C" status={vs.bodyTemp} icon={Thermometer} range={ranges.bodyTemp} />
-        <VitalGauge label="Stress" value={m.stressIndex} unit="/100" status={vs.stress} icon={Activity} range={ranges.stress} />
-        <VitalGauge label="FC repos" value={m.heartRateBpm} unit="bpm" status={vs.heartRate} icon={Heart} range={ranges.heartRate} />
+        <VitalGauge label="Température" value={m.bodyTempC ?? m.temperatureC} unit="°C" status={vs.bodyTemp || vs.temperature} icon={Thermometer} range={ranges.bodyTemp} />
+        <VitalGauge label="Humidité" value={m.humidityPct} unit="%" status={vs.humidity} icon={Wind} range="30–70 %" />
+        <VitalGauge label="FC" value={m.heartRateBpm} unit="bpm" status={vs.heartRate} icon={Heart} range={ranges.heartRate} />
+        <VitalGauge label="Ambiance" value={m.ambientTempC} unit="°C" status="ok" icon={Thermometer} range="18–28 °C" />
       </div>
 
       {expanded && (

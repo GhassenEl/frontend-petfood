@@ -467,6 +467,165 @@
   text-decoration: none;
 }
 
+/* —— Vidéos combinées jury —— */
+.jury-videos__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+  margin-bottom: 20px;
+}
+
+.jury-videos__chain {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #475569;
+  cursor: pointer;
+}
+
+.jury-videos__status {
+  margin: 0;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 600;
+  color: #059669;
+}
+
+.jury-videos__chapters {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.jury-videos__chapter {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  text-align: left;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.jury-videos__chapter:hover {
+  border-color: var(--chapter-accent, #e67e22);
+}
+
+.jury-videos__chapter--active {
+  border-color: var(--chapter-accent, #e67e22);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+}
+
+.jury-videos__order {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--chapter-accent, #e67e22);
+}
+
+.jury-videos__chapter-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.jury-videos__chapter-text strong {
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.jury-videos__chapter-text em {
+  font-style: normal;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.jury-videos__chapter-text small {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.jury-videos__player-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(240px, 0.8fr);
+  gap: 16px;
+  margin-bottom: 24px;
+  align-items: start;
+}
+
+.jury-videos__player {
+  width: 100%;
+  max-height: min(62vh, 520px);
+  background: #0f172a;
+  border-radius: 16px;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+}
+
+.jury-videos__now {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #e67e22;
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+.jury-videos__now h3 {
+  margin: 10px 0 4px;
+  font-size: 1.15rem;
+}
+
+.jury-videos__now > p {
+  margin: 0 0 12px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.jury-videos__points {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: #334155;
+}
+
+.jury-videos__live h3 {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+}
+
+.jury-videos__live-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 860px) {
+  .jury-videos__chapters {
+    grid-template-columns: 1fr;
+  }
+
+  .jury-videos__player-wrap {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
   .jury-interface-row {
     flex-direction: column;

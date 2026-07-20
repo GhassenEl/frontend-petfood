@@ -1,0 +1,332 @@
+.petbot-fab {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 960;
+  width: 68px;
+  height: 68px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(15, 118, 110, 0.35);
+  background: #0f766e;
+  overflow: visible;
+}
+
+.petbot-fab__photo {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.petbot-fab__pulse {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(15, 118, 110, 0.45);
+  animation: petbot-pulse 2s ease-out infinite;
+  pointer-events: none;
+}
+
+.petbot-fab__label {
+  position: absolute;
+  right: 74px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #0f766e;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 999px;
+  white-space:nowrap;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.petbot-fab--talk .petbot-fab__photo,
+.petbot-avatar--talk img {
+  animation: petbot-talk 0.35s ease-in-out infinite alternate;
+}
+
+.petbot-fab--smile .petbot-fab__photo,
+.petbot-avatar--smile img {
+  filter: saturate(1.1) brightness(1.05);
+}
+
+.petbot-fab--listen {
+  box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.45), 0 12px 28px rgba(15, 118, 110, 0.35);
+}
+
+@keyframes petbot-pulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  100% { transform: scale(1.25); opacity: 0; }
+}
+
+@keyframes petbot-talk {
+  from { transform: scale(1); }
+  to { transform: scale(1.03); }
+}
+
+.petbot-panel {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 970;
+  width: min(400px, calc(100vw - 24px));
+  height: min(620px, calc(100vh - 32px));
+  background: linear-gradient(180deg, #ecfdf5 0%, #fff 28%);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #99f6e4;
+}
+
+.petbot-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #ccfbf1;
+}
+
+.petbot-avatar {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.petbot-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #14b8a6;
+}
+
+.petbot-avatar__mouth {
+  display: none;
+}
+
+.petbot-avatar--talk .petbot-avatar__mouth {
+  display: block;
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  width: 10px;
+  height: 6px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.35);
+  animation: petbot-mouth 0.28s infinite alternate;
+}
+
+@keyframes petbot-mouth {
+  from { height: 3px; }
+  to { height: 8px; }
+}
+
+.petbot-avatar__emo {
+  position: absolute;
+  right: -4px;
+  bottom: -2px;
+  font-size: 14px;
+}
+
+.petbot-panel__meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.petbot-panel__meta strong {
+  font-size: 0.95rem;
+  color: #134e4a;
+}
+
+.petbot-panel__meta span {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.petbot-panel__tools {
+  display: flex;
+  gap: 4px;
+}
+
+.petbot-panel__tools button {
+  border: none;
+  background: #f0fdfa;
+  color: #0f766e;
+  border-radius: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.petbot-panel__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.petbot-msg {
+  max-width: 92%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.petbot-msg p {
+  margin: 0;
+}
+
+.petbot-msg--assistant {
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  border-bottom-left-radius: 4px;
+}
+
+.petbot-msg--user {
+  align-self: flex-end;
+  background: #0f766e;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.petbot-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.petbot-quick button {
+  border: 1px solid #99f6e4;
+  background: #f0fdfa;
+  color: #0f766e;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.petbot-products {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.petbot-product {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.petbot-product img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.petbot-product em {
+  font-style: normal;
+  color: #0f766e;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.petbot-panel__foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px;
+  border-top: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.petbot-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f766e;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.petbot-icon-btn.is-listening {
+  background: #fff7ed;
+  border-color: #fb923c;
+  color: #c2410c;
+  animation: petbot-pulse 1s infinite;
+}
+
+.petbot-input-form {
+  flex: 1;
+  display: flex;
+  gap: 6px;
+}
+
+.petbot-input-form input {
+  flex: 1;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+}
+
+.petbot-input-form button {
+  border: none;
+  background: #0f766e;
+  color: #fff;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .petbot-fab__label {
+    display: none;
+  }
+  .petbot-panel {
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+}

@@ -15,7 +15,7 @@ const haversineKm = (a, b) => {
   return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
 };
 
-const SENSITIVE_KEYWORDS = ['lait', 'médicament', 'medicament', 'vaccin', 'réfrig', 'refrig', 'frais'];
+const SENSITIVE_KEYWORDS = ['lait', 'médicament', 'medicament', 'vaccin', 'frais', 'fragile'];
 
 export const isSensitiveOrder = (order) => {
   if (order.sensitive || order.urgent) return true;
@@ -191,7 +191,7 @@ export const prioritizeParcels = (orders = []) => {
       recommendation: urgent
         ? 'Livrer en premier — fenêtre client limitée'
         : sensitive
-          ? 'Priorité haute — chaîne du froid / fragile'
+          ? 'Priorité haute — produit sensible / fragile'
           : 'Ordre optimisé par tournée',
     };
   });

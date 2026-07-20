@@ -1,0 +1,54 @@
+# PetfoodTN — Google Cloud Run (région europe-west9 = Paris)
+#
+# Prérequis :
+#   1. Compte Google Cloud + facturation activée
+#   2. gcloud auth login && gcloud config set project PROJECT_ID
+#   3. powershell -File scripts/devops/gcp-deploy.ps1
+#
+# Stack :
+#   Cloud Run  → frontend / backend / ml
+#   Cloud SQL  → PostgreSQL (db-f1-micro)
+#   Artifact Registry → images Docker
+
+substitutions:
+  _REGION: europe-west9
+  _REPO: petfoodtn
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    id: build-backend
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/backend:$SHORT_SHA
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/backend:latest
+      - ./backend
+
+  - name: gcr.io/cloud-builders/docker
+    id: build-ml
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/ml:$SHORT_SHA
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/ml:latest
+      - ./fastapi_service
+
+  - name: gcr.io/cloud-builders/docker
+    id: push-backend
+    waitFor: [build-backend]
+    args: [push, --all-tags, ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/backend]
+
+  - name: gcr.io/cloud-builders/docker
+    id: push-ml
+    waitFor: [build-ml]
+    args: [push, --all-tags, ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/ml]
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/backend
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/ml
+
+timeout: 1800s
+options:
+  logging: CLOUD_LOGGING_ONLY

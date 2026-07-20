@@ -20,6 +20,7 @@ import AdminReviews from './pages/AdminReviews';
 import AdminComplaints from './pages/AdminComplaints';
 import AdminProducts from './pages/AdminProducts';
 import AdminUsers from './pages/AdminUsers';
+import AdminRolesPage from './pages/AdminRolesPage';
 import AdminLivreurs from './pages/AdminLivreurs';
 import AdminMessages from './pages/AdminMessages';
 import AdminInvoices from './pages/AdminInvoices';
@@ -67,9 +68,11 @@ import EventsPage from './pages/EventsPage';
 import FoundMePage from './pages/FoundMePage';
 import ClientPurchaseNeedsPage from './pages/ClientPurchaseNeedsPage';
 import ContactPage from './pages/ContactPage';
+import DigitalCardPage from './pages/DigitalCardPage';
 import StoreLocatorPage from './pages/StoreLocatorPage';
 import VeterinaryPage from './pages/VeterinaryPage';
 import PetFeederPage from './pages/PetFeederPage';
+import ClientIoTHubPage from './pages/ClientIoTHubPage';
 import HardwarePcbPage from './pages/HardwarePcbPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
@@ -108,6 +111,7 @@ import VetProfilePage from './pages/VetProfilePage';
 import VetPetDiagnosticsPage from './pages/VetPetDiagnosticsPage';
 import VetMedicalDossiersPage from './pages/VetMedicalDossiersPage';
 import VetPharmacyPage from './pages/VetPharmacyPage';
+import VetHealthProductsPage from './pages/VetHealthProductsPage';
 import VetMedicalDossierDetailPage from './pages/VetMedicalDossierDetailPage';
 import VetClinicPage from './pages/VetClinicPage';
 import VetVaccinationsPage from './pages/VetVaccinationsPage';
@@ -154,6 +158,7 @@ import ModeratorFraudCenterPage from './pages/ModeratorFraudCenterPage';
 import ModeratorMessagesPage from './pages/ModeratorMessagesPage';
 import ModeratorIntelligenceHubPage from './pages/ModeratorIntelligenceHubPage';
 import VendorProfilePage from './pages/VendorProfilePage';
+import VendorSalesChannelsPage from './pages/VendorSalesChannelsPage';
 import ModeratorProfilePage from './pages/ModeratorProfilePage';
 import ServiceClientProfilePage from './pages/ServiceClientProfilePage';
 import ServiceClientLayout from './layouts/ServiceClientLayout';
@@ -250,6 +255,8 @@ const App = () => {
         <Route path="/login" element={<AuthMobileRoute title="Connexion"><LoginPage /></AuthMobileRoute>} />
         <Route path="/visitor/*" element={<Navigate to="/" replace />} />
         <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
+        <Route path="/carte-visite" element={<DigitalCardPage mode="card" />} />
+        <Route path="/support-agent" element={<DigitalCardPage mode="agent" />} />
         <Route path="/vendor" element={<VendorHubPage />} />
         <Route path="/moderator" element={<ModeratorHubPage />} />
         <Route path="/capabilities" element={<CapabilitiesRoute user={null} />} />
@@ -329,6 +336,7 @@ const App = () => {
       <Route path="/admin/delivery-cold-chain" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><DeliveryColdChainSurveillancePage role="admin" /></AdminLayout></RoleRoute>} />
       <Route path="/admin/sales" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminSalesPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/users" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminUsers /></AdminLayout></RoleRoute>} />
+      <Route path="/admin/roles" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminRolesPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/livreurs" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminLivreurs /></AdminLayout></RoleRoute>} />
       <Route path="/admin/vendors" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVendorsPage /></AdminLayout></RoleRoute>} />
       <Route path="/admin/vendors/:id" element={<RoleRoute user={user} roles={['admin']}><AdminLayout><AdminVendorDetailPage /></AdminLayout></RoleRoute>} />
@@ -428,19 +436,21 @@ const App = () => {
       <Route path="/client-relay-points" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientRelayPointsPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-product-packs" element={<Navigate to="/client-products#packs-produits" replace />} />
       <Route path="/client-traceability" element={<Navigate to="/client-products" replace />} />
-      <Route path="/client-iot" element={<Navigate to="/client-products" replace />} />
-      <Route path="/client-esp32cam-food-quality" element={<Navigate to="/client-products" replace />} />
-      <Route path="/client-smart-water" element={<Navigate to="/client-products" replace />} />
+      <Route path="/client-iot" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientIoTHubPage /></ClientLayout></RoleRoute>} />
+      <Route path="/client-esp32cam-food-quality" element={<Navigate to="/client-iot?tab=food-quality" replace />} />
+      <Route path="/client-smart-water" element={<Navigate to="/client-iot?tab=water" replace />} />
       <Route path="/client-smart-delivery" element={<Navigate to="/client-orders" replace />} />
       <Route path="/contact" element={
         user?.role === 'client'
           ? <RoleRoute user={user} roles={['client']}><ClientLayout><ContactPage /></ClientLayout></RoleRoute>
           : <PublicLayout><ContactPage /></PublicLayout>
       } />
+      <Route path="/carte-visite" element={<DigitalCardPage mode="card" />} />
+      <Route path="/support-agent" element={<DigitalCardPage mode="agent" />} />
       <Route path="/store-locator" element={<RoleRoute user={user} roles={['client']}><ClientLayout><StoreLocatorPage /></ClientLayout></RoleRoute>} />
       <Route path="/client-cities" element={<RoleRoute user={user} roles={['client']}><ClientLayout><PlatformCitiesPage /></ClientLayout></RoleRoute>} />
-      <Route path="/pet-feeder" element={<RoleRoute user={user} roles={['admin', 'vendor']}><RoleLayoutShell user={user}><PetFeederPage /></RoleLayoutShell></RoleRoute>} />
-      <Route path="/client-hardware-pcb" element={<Navigate to="/client-products" replace />} />
+      <Route path="/pet-feeder" element={<RoleRoute user={user} roles={['client', 'admin', 'vendor']}><RoleLayoutShell user={user}><PetFeederPage /></RoleLayoutShell></RoleRoute>} />
+      <Route path="/client-hardware-pcb" element={<Navigate to="/client-iot" replace />} />
       <Route path="/hardware-pcb" element={<RoleRoute user={user} roles={['admin', 'vendor']}><RoleLayoutShell user={user}><HardwarePcbPage /></RoleLayoutShell></RoleRoute>} />
       <Route path="/veterinary" element={<RoleRoute user={user} roles={['client']}><ClientLayout><VeterinaryPage /></ClientLayout></RoleRoute>} />
       <Route path="/medical-dossier" element={<RoleRoute user={user} roles={['client']}><ClientLayout><ClientMedicalDossierPage /></ClientLayout></RoleRoute>} />
@@ -477,6 +487,7 @@ const App = () => {
       <Route path="/vet/prescriptions" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetPrescriptionsPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/medication-recommendations" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetMedicationRecommendPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/pharmacy" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetPharmacyPage /></VetLayout></RoleRoute>} />
+      <Route path="/vet/health-products" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetHealthProductsPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/diagnostics" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetPetDiagnosticsPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/clinic" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetClinicPage /></VetLayout></RoleRoute>} />
       <Route path="/vet/vaccinations" element={<RoleRoute user={user} roles={['vet']}><VetLayout><VetVaccinationsPage /></VetLayout></RoleRoute>} />
@@ -507,6 +518,7 @@ const App = () => {
       <Route path="/vendor/dashboard" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorDashboardPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/products" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorProductsPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/orders" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorOrdersPage /></VendorLayout></RoleRoute>} />
+      <Route path="/vendor/sales-channels" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorSalesChannelsPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/sales" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorSalesPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/returns" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorReturnsPage /></VendorLayout></RoleRoute>} />
       <Route path="/vendor/communication" element={<RoleRoute user={user} roles={['vendor', 'admin']}><VendorLayout><VendorCommunicationPage /></VendorLayout></RoleRoute>} />

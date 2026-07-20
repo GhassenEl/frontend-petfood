@@ -1,6 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Megaphone, Share2, Bell, Handshake, RefreshCw, ExternalLink } from 'lucide-react';
+import { Megaphone, Share2, Bell, Handshake, RefreshCw, ExternalLink, CreditCard } from 'lucide-react';
+import MarketingPrintStudio from '../components/MarketingPrintStudio';
+import { VENDOR_PRINT_DEFAULTS } from '../config/marketingPrintCatalog';
+import '../pages/AdminDigitalMarketing.css';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import { DEMO_ADMIN_REGIONS } from '../utils/adminDemoData';
 import {
@@ -18,6 +21,7 @@ const TABS = [
   { id: 'social', label: 'Réseaux sociaux', icon: Share2 },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'partner', label: 'Candidature partenaire', icon: Handshake },
+  { id: 'print', label: 'Cartes & print', icon: CreditCard },
 ];
 
 const statusLabel = {
@@ -153,11 +157,26 @@ const VendorMarketingPage = () => {
         </button>
       </div>
 
-      {loading && !pack ? (
+      {loading && !pack && tab !== 'print' ? (
         <p style={{ color: '#64748b' }}>Chargement…</p>
       ) : (
         <>
-          {tab === 'marketing' && (
+          {tab === 'print' && (
+            <MarketingPrintStudio
+              defaults={{
+                ...VENDOR_PRINT_DEFAULTS,
+                brandName: partnerForm.shopName || VENDOR_PRINT_DEFAULTS.brandName,
+                personName: partnerForm.ownerName || VENDOR_PRINT_DEFAULTS.personName,
+                phone: partnerForm.phone || VENDOR_PRINT_DEFAULTS.phone,
+                email: partnerForm.email || VENDOR_PRINT_DEFAULTS.email,
+                address: partnerForm.address || VENDOR_PRINT_DEFAULTS.address,
+              }}
+              title="Cartes de visite boutique"
+              storageKey="petfoodtn_vendor_print_profile_v1"
+            />
+          )}
+
+          {tab === 'marketing' && pack && (
             <div className="vnd-marketing-grid">
               <section className="vnd-card">
                 <h2>Campagnes en cours</h2>

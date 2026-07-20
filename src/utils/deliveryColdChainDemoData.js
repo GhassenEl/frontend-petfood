@@ -160,11 +160,6 @@ export const getClientDeliverySurveillance = (orderId) => {
   };
 };
 
-export const getLivreurDeliverySurveillance = () => ({
-  ...DEMO_DELIVERY_SURVEILLANCE,
-  deliveries: DEMO_DELIVERY_SURVEILLANCE.deliveries.filter((d) => d.stage !== 'delivered'),
-});
-
 export const getVendorDeliverySurveillance = () => ({
   ...DEMO_DELIVERY_SURVEILLANCE,
   deliveries: DEMO_DELIVERY_SURVEILLANCE.deliveries.filter(

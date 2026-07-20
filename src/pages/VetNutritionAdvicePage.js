@@ -156,10 +156,11 @@ const VetNutritionAdvicePage = () => {
       }}
       >
         <h1 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8, fontSize: '1.5rem' }}>
-          <Utensils size={24} color="#16a34a" /> Conseils nutritionnels
+          <Utensils size={24} color="#16a34a" /> Bilan nutritionnel
         </h1>
         <p style={{ margin: '8px 0 0', color: '#64748b', maxWidth: 560 }}>
-          Générez un plan alimentaire pour <strong>n&apos;importe quel animal</strong> : patient enregistré ou profil libre (chien, chat, NAC, oiseau, reptile…).
+          Réalisez un <strong>bilan nutritionnel vétérinaire</strong> : analyse du régime, calories et plan alimentaire
+          pour tout patient (chien, chat, NAC, oiseau, reptile…).
         </p>
       </header>
 
@@ -292,14 +293,14 @@ const VetNutritionAdvicePage = () => {
           }}
         >
           <Sparkles size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-          {loading ? 'Analyse en cours…' : 'Générer le plan nutritionnel'}
+          {loading ? 'Analyse en cours…' : 'Générer le bilan nutritionnel'}
         </button>
       </form>
 
       {advice && (
         <>
           <div style={{ ...card, background: 'linear-gradient(135deg,#fff,#f0fdf4)' }}>
-            <h2 style={{ margin: '0 0 12px' }}>Plan — {advice.petName || petName}</h2>
+            <h2 style={{ margin: '0 0 12px' }}>Bilan — {advice.petName || petName}</h2>
             <p style={{ color: '#475569', lineHeight: 1.6 }}>{advice.summary || advice.notes}</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginTop: 16 }}>
               <StatBox icon={<Scale size={18} />} label="Apport journalier" value={`${advice.calories?.dailyKcal || advice.dailyCalories || '—'} kcal`} />

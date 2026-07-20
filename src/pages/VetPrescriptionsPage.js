@@ -19,6 +19,7 @@ import {
 } from '../utils/vetPharmacyAlerts';
 import { emitVetPharmacyAlert } from '../services/vetPharmacyNotificationService';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
+import { exportPrescriptionPdf } from '../utils/prescriptionPdf';
 import './VetPages.css';
 
 const STATUS_LABELS = {
@@ -286,10 +287,28 @@ const VetPrescriptionsPage = () => {
                   </div>
                 )}
                 {rx.instructions && <p style={{ fontSize: '0.85rem', color: '#777' }}>{rx.instructions}</p>}
-                <span style={{ fontSize: '0.75rem', color: '#0ea5e9' }}>
-                  {new Date(rx.createdAt).toLocaleDateString('fr-FR')}
-                  {rx.validUntil ? ` · valide jusqu'au ${new Date(rx.validUntil).toLocaleDateString('fr-FR')}` : ''}
-                </span>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 8, flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    style={{ fontSize: 13, padding: '6px 12px' }}
+                    onClick={() =>
+                      exportPrescriptionPdf({
+                        petName: rx.petName,
+                        ownerName: rx.owner?.name,
+                        medications: meds,
+                        instructions: rx.instructions,
+                        diagnosis: rx.diagnosis,
+                      })
+                    }
+                  >
+                    📄 Exporter PDF
+                  </button>
+                  <span style={{ fontSize: '0.75rem', color: '#0ea5e9' }}>
+                    {new Date(rx.createdAt).toLocaleDateString('fr-FR')}
+                    {rx.validUntil ? ` · valide jusqu'au ${new Date(rx.validUntil).toLocaleDateString('fr-FR')}` : ''}
+                  </span>
+                </div>
               </div>
             );
           })

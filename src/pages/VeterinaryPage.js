@@ -167,22 +167,54 @@ const VeterinaryPage = () => {
     }));
   }, [selectedPet]);
 
-  // Prefill contact form when coming from Nutri flow
+  // Prefill contact / RDV when coming from Nutri flow or Bilan nutritionnel
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
       const prefill = params.get('prefill');
-      if (prefill === 'nutri' || prefill === 'nutripro') {
-        const message = sessionStorage.getItem('nutripro:message') || sessionStorage.getItem('nutri:message') || params.get('message') || '';
-        const pet = JSON.parse(sessionStorage.getItem('nutripro:pet') || sessionStorage.getItem('nutri:pet') || 'null');
-        const subjectBase = prefill === 'nutripro' ? 'Validation NutriPro' : 'Validation plan nutritionnel';
+      if (prefill === 'nutri' || prefill === 'nutripro' || prefill === 'bilan') {
+        const message =
+          sessionStorage.getItem('nutripro:message')
+          || sessionStorage.getItem('nutri:message')
+          || sessionStorage.getItem('bilan:message')
+          || params.get('message')
+          || '';
+        const pet = JSON.parse(
+          sessionStorage.getItem('nutripro:pet')
+          || sessionStorage.getItem('nutri:pet')
+          || sessionStorage.getItem('bilan:pet')
+          || 'null',
+        );
+        const subjectBase =
+          prefill === 'bilan'
+            ? 'Bilan nutritionnel vétérinaire'
+            : prefill === 'nutripro'
+              ? 'Validation NutriPro'
+              : 'Validation plan nutritionnel';
+        const defaultMessage =
+          prefill === 'bilan'
+            ? 'Je souhaite un bilan nutritionnel complet pour mon animal : analyse du régime actuel, besoins caloriques, recommandations alimentaires et plan personnalisé.'
+            : '';
         setContactForm((cf) => ({
           ...cf,
           petName: pet?.name || cf.petName || '',
           animalType: pet?.type || cf.animalType || 'dog',
           subject: `${subjectBase}${pet?.name ? ` — ${pet.name}` : ''}`,
-          message: message || cf.message || '',
+          message: message || defaultMessage || cf.message || '',
         }));
+        setAppointmentForm((af) => ({
+          ...af,
+          petName: pet?.name || af.petName || '',
+          animalType: pet?.type || af.animalType || 'dog',
+          type: prefill === 'bilan' ? 'nutrition_bilan' : af.type,
+          notes:
+            prefill === 'bilan'
+              ? (message || defaultMessage || 'Demande de bilan nutritionnel vétérinaire.')
+              : af.notes,
+        }));
+        if (prefill === 'bilan') {
+          setClientTab('sante');
+        }
       }
     } catch (e) {
       // ignore
@@ -396,7 +428,7 @@ const VeterinaryPage = () => {
         <Stethoscope size={48} style={{ color: '#e67e22', marginBottom: '12px' }} />
         <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 800 }}>Santé & vétérinaire</h1>
         <p style={{ margin: '8px 0 0', color: '#777' }}>
-          Demande de consultation pour vos animaux, vétérinaire le plus proche, assistant santé et suivi médical.
+          Demande de consultation, bilan nutritionnel, vétérinaire le plus proche, assistant santé et suivi médical.
         </p>
         {!isVet && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 18, justifyContent: 'center' }}>
@@ -430,6 +462,41 @@ const VeterinaryPage = () => {
               }}
             >
               🗓️ Prendre rendez-vous
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setContactForm((cf) => ({
+                  ...cf,
+                  subject: cf.subject?.includes('Bilan nutritionnel')
+                    ? cf.subject
+                    : `Bilan nutritionnel vétérinaire${cf.petName ? ` — ${cf.petName}` : ''}`,
+                  message:
+                    cf.message?.trim()
+                    || 'Je souhaite un bilan nutritionnel complet pour mon animal : analyse du régime actuel, besoins caloriques, recommandations alimentaires et plan personnalisé.',
+                }));
+                setAppointmentForm((af) => ({
+                  ...af,
+                  type: 'nutrition_bilan',
+                  notes:
+                    af.notes?.trim()
+                    || 'Demande de bilan nutritionnel vétérinaire.',
+                }));
+                setClientTab('sante');
+                setToast({ message: 'Formulaire prérempli — Bilan nutritionnel', type: 'success' });
+              }}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, #16a34a, #059669)',
+                border: 'none',
+                color: 'white',
+                fontWeight: 800,
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              🥗 Bilan nutritionnel
             </button>
             <button
               type="button"

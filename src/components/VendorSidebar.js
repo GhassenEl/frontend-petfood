@@ -26,6 +26,7 @@ const VendorSidebar = ({ onLogout, user, onNavigate }) => {
       title: '📦 Commandes',
       items: [
         { to: '/vendor/orders', label: 'Commandes actives', icon: '📦' },
+        { to: '/vendor/sales-channels', label: 'Canaux de vente', icon: '🛒' },
         { to: '/vendor/sales', label: 'Historique ventes', icon: '📜' },
       ],
     },

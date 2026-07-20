@@ -12,6 +12,8 @@ dist/
 .env.*.local
 .env.docker
 .env.render
+.env.gcp
+.env.aws
 
 # Logs
 *.log
@@ -51,6 +53,8 @@ CLAUDE.md
 # Test artifacts
 .playwright-mcp/
 playwright-report/
+.linkedin-browser-profile/
+linkedin/publish-state.json
 test-results/
 
 # Backup files

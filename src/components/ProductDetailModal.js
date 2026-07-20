@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShoppingCart, Star, Package, Tag, Beaker, BookOpen, Sparkles, Store } from 'lucide-react';
+import { X, ShoppingCart, Star, Package, Tag, Beaker, BookOpen, Sparkles, Store, Wifi } from 'lucide-react';
 import { getProductDetailFields, getEffectiveDiscount, getPromoPrice } from '../utils/productDetails';
 import VerifiedPriceBadge from './VerifiedPriceBadge';
 import ProductReviewAiPanel from './ProductReviewAiPanel';
@@ -231,6 +232,34 @@ const ProductDetailModal = ({ product, onClose, onAddToCart, onOrder, onVendor, 
                 Ajouter au panier
               </button>
             </div>
+
+            {(product.productKind === 'iot_device'
+              || (Array.isArray(product.tags) && product.tags.some((t) => /gamelle|iot|feeder|connect/i.test(String(t))))
+              || /gamelle intelligente/i.test(String(product.name || ''))) && (
+              <div style={{
+                marginTop: 16, padding: 14, borderRadius: 14,
+                background: 'linear-gradient(135deg,#eff6ff,#ecfeff)',
+                border: '1px solid #bfdbfe',
+              }}
+              >
+                <p style={{ margin: '0 0 10px', fontSize: 14, color: '#1e40af', fontWeight: 700 }}>
+                  Après achat — associez votre appareil
+                </p>
+                <p style={{ margin: '0 0 12px', fontSize: 13, color: '#64748b' }}>
+                  Enregistrez la gamelle avec la clé ESP32, planifiez les repas et activez les alertes ML.
+                </p>
+                <Link
+                  to="/pet-feeder"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    padding: '10px 14px', borderRadius: 12, background: '#2563eb', color: 'white',
+                    fontWeight: 700, textDecoration: 'none', fontSize: 13,
+                  }}
+                >
+                  <Wifi size={16} /> Associer la gamelle intelligente
+                </Link>
+              </div>
+            )}
 
             <p style={{ margin: '14px 0 0', fontSize: 12, color: '#94a3b8' }}>Réf. {id?.slice?.(-8) || id}</p>
           </div>

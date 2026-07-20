@@ -18,22 +18,32 @@ Système embarqué de distribution nutritionnelle pour animaux, connecté à l'a
 | LCD 16x2 I2C | Affichage local | SDA=21, SCL=22 |
 | Alimentation 5V | Alim carte + actionneurs | — |
 
-**Cartes PCB (Proteus + Gerber)** : voir `hardware/proteus/` et `hardware/gerber/` — page web `/client-hardware-pcb`.
+**Cartes PCB (Proteus + Gerber)** : doc technique admin/vendeur sur `/hardware-pcb` (hors espace client).
+
+## Transport MQTT
+
+- Broker : Mosquitto (`docker compose -f docker-compose.iot.yml up -d mqtt`)
+- Topics :
+  - `petfood/feeder/{deviceId}/telemetry` — télémétrie (clé `deviceKey` obligatoire)
+  - `petfood/feeder/{deviceId}/ack` — ACK distribution
+  - `petfood/feeder/{deviceId}/commands` — commandes backend
+- Fallback HTTP conservé si `USE_MQTT=0` ou broker offline
+- Simulateur sans matériel : `npm run simulate:smart-feeder`
 
 ## Fonctionnement
 
 1. Le capteur **IR** détecte l'animal devant la gamelle.
 2. Le **servo** ouvre la trappe, le **moteur DC** fait tourner le distributeur.
-3. La **cellule de charge (HX711)** mesure la quantité servie.
+3. La **cellule de charge (HX711)** mesure la quantité servie (boucle fermée + tare au boot).
 4. Le **HC-SR04** surveille le niveau du réservoir.
 5. **LED verte** = distribution OK · **LED rouge** = réservoir vide.
-6. L'**ESP32** envoie la télémétrie au backend et reçoit les commandes (manuelles ou planifiées).
+6. L'**ESP32** publie la télémétrie MQTT et reçoit les commandes ; horaires locaux de secours si broker offline.
 
 ## Installation firmware
 
 1. Installer [Arduino IDE](https://www.arduino.cc/) + carte **ESP32** (Espressif).
-2. Installer les bibliothèques listées en tête du fichier `.ino`.
-3. Copier `config.example.h` → `config.h` et configurer Wi-Fi + `DEVICE_KEY`.
+2. Installer les bibliothèques listées en tête du fichier `.ino` (dont **PubSubClient**).
+3. Copier `config.example.h` → `config.h` : Wi-Fi, `DEVICE_KEY`, `MQTT_BROKER`, optionnel `DEVICE_ID`.
 4. Flasher `PetFeederESP32.ino` sur l'ESP32.
 
 ## Liaison avec l'application

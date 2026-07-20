@@ -11,6 +11,9 @@ import '../utils/species_catalog.dart';
 import '../widgets/pet_feeding_schedules_panel.dart';
 import '../widgets/feeder_bowl_viewport.dart';
 import '../widgets/feeder_pipeline_strip.dart';
+import '../services/feeder_notifications_service.dart';
+import '../widgets/feeder_scale_card.dart';
+import '../widgets/feeder_history_panel.dart';
 import '../widgets/feeder_weekly_bars.dart';
 
 class FeederScreen extends StatefulWidget {
@@ -25,14 +28,25 @@ class FeederScreen extends StatefulWidget {
   State<FeederScreen> createState() => _FeederScreenState();
 }
 
-class _FeederScreenState extends State<FeederScreen> {
+class _FeederScreenState extends State<FeederScreen> with SingleTickerProviderStateMixin {
   late final FeederRepository _repo = FeederRepository(widget.auth.api);
+  late final FeederNotificationService _feederNotify = FeederNotificationService();
+  late final TabController _tabs = TabController(length: 3, vsync: this);
   List<PetFeeder> _feeders = [];
   PetFeeder? _selected;
   NutritionPlan? _plan;
   bool _loading = true;
   double _grams = 30;
   Timer? _pollTimer;
+  List<Map<String, dynamic>> _anomalies = [];
+  bool _mlLoading = false;
+  List<FeederLog> _history = [];
+  FeederStats? _stats;
+  List<FeederAlert> _alerts = [];
+  String _historyFilter = 'all';
+  TimeOfDay _newScheduleTime = const TimeOfDay(hour: 8, minute: 0);
+  double _newScheduleGrams = 30;
+  bool _dispensing = false;
 
   static const _pollInterval = Duration(seconds: 15);
 
@@ -48,7 +62,45 @@ class _FeederScreenState extends State<FeederScreen> {
   @override
   void dispose() {
     _pollTimer?.cancel();
+    _tabs.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadFeederExtras(PetFeeder feeder) async {
+    final results = await Future.wait([
+      _repo.getHistory(feeder.id, limit: 50),
+      _repo.getStats(feeder.id),
+      _repo.getAlerts(feeder.id),
+    ]);
+    if (!mounted) return;
+    setState(() {
+      _history = results[0] as List<FeederLog>;
+      _stats = results[1] as FeederStats;
+      _alerts = results[2] as List<FeederAlert>;
+    });
+    await _feederNotify.checkFeeder(_repo, feeder);
+  }
+
+  double? _lastPortionGrams(PetFeeder f) {
+    for (final log in [...f.logs, ..._history]) {
+      if (log.eventType == 'dispense' && log.portionGrams != null) {
+        return log.portionGrams;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _loadBehaviorMl({bool silent = false}) async {
+    if (!silent && mounted) setState(() => _mlLoading = true);
+    try {
+      await _repo.analyzeBehavior();
+      final anomalies = await _repo.listBehaviorAnomalies();
+      if (mounted) setState(() => _anomalies = anomalies);
+    } catch (_) {
+      // Keep feeder UX usable if ML backend is offline
+    } finally {
+      if (mounted) setState(() => _mlLoading = false);
+    }
   }
 
   Future<void> _load({bool silent = false}) async {
@@ -60,11 +112,13 @@ class _FeederScreenState extends State<FeederScreen> {
         sel = await _repo.getFeeder(sel.id);
         _plan = await _repo.nutritionPlan(sel.id);
         _grams = _plan?.portionGrams.toDouble() ?? 30;
+        await _loadFeederExtras(sel);
       }
       setState(() {
         _feeders = list;
         _selected = sel;
       });
+      if (!silent) await _loadBehaviorMl(silent: true);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -86,24 +140,71 @@ class _FeederScreenState extends State<FeederScreen> {
         _plan = plan;
         _grams = plan.portionGrams.toDouble();
       });
+      await _loadFeederExtras(detail);
     } finally {
       setState(() => _loading = false);
     }
   }
 
   Future<void> _dispense() async {
-    if (_selected == null) return;
+    if (_selected == null || _dispensing) return;
+    setState(() => _dispensing = true);
     try {
       await _repo.dispense(_selected!.id, _grams);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Commande envoyée : ${_grams.toInt()} g'), backgroundColor: Colors.green),
+        SnackBar(
+          content: Text('Commande mobile envoyée : ${_grams.toInt()} g'),
+          backgroundColor: Colors.green,
+        ),
       );
       await _selectFeeder(_selected!);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+    } finally {
+      if (mounted) setState(() => _dispensing = false);
     }
+  }
+
+  Future<void> _markRefill() async {
+    if (_selected == null) return;
+    try {
+      await _repo.markRefill(_selected!.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Réservoir marqué comme rechargé'), backgroundColor: Colors.green),
+      );
+      await _selectFeeder(_selected!);
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+    }
+  }
+
+  Future<void> _addSchedule() async {
+    if (_selected == null) return;
+    final time =
+        '${_newScheduleTime.hour.toString().padLeft(2, '0')}:${_newScheduleTime.minute.toString().padLeft(2, '0')}';
+    try {
+      await _repo.addSchedule(
+        _selected!.id,
+        time: time,
+        portionGrams: _newScheduleGrams,
+        label: 'Repas',
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Créneau $time ajouté'), backgroundColor: Colors.green),
+      );
+      await _selectFeeder(_selected!);
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+    }
+  }
+
+  Future<void> _pickScheduleTime() async {
+    final picked = await showTimePicker(context: context, initialTime: _newScheduleTime);
+    if (picked != null) setState(() => _newScheduleTime = picked);
   }
 
   Future<void> _addFeeder() async {
@@ -162,6 +263,18 @@ class _FeederScreenState extends State<FeederScreen> {
     await _dispense();
   }
 
+  String _anomalyDetail(Map<String, dynamic> a) {
+    const fallback = 'Signal comportemental';
+    final factors = a['factors'];
+    if (factors is List && factors.isNotEmpty && factors.first is Map) {
+      final first = Map<String, dynamic>.from(factors.first as Map);
+      return first['detail']?.toString() ?? first['signal']?.toString() ?? fallback;
+    }
+    final raw = a['factorsJson']?.toString() ?? '';
+    final match = RegExp(r'"detail"\s*:\s*"([^"]+)"').firstMatch(raw);
+    return match?.group(1) ?? fallback;
+  }
+
   double? _reservoirPercent(PetFeeder f) {
     if (f.reservoirCm == null) return null;
     return (f.reservoirCm! / 30 * 100).clamp(0, 100);
@@ -197,8 +310,32 @@ class _FeederScreenState extends State<FeederScreen> {
         slivers: [
           if (!widget.embedded)
             SliverAppBar.large(
-              title: const Text('Distributeur IoT'),
+              title: const Text('Gamelle intelligente'),
               backgroundColor: const Color(0xFFDBEAFE),
+              bottom: TabBar(
+                controller: _tabs,
+                labelColor: const Color(0xFF1E40AF),
+                tabs: const [
+                  Tab(icon: Icon(Icons.phone_android), text: 'Contrôle'),
+                  Tab(icon: Icon(Icons.schedule), text: 'Auto'),
+                  Tab(icon: Icon(Icons.history), text: 'Historique'),
+                ],
+              ),
+            )
+          else
+            SliverToBoxAdapter(
+              child: Material(
+                color: const Color(0xFFDBEAFE),
+                child: TabBar(
+                  controller: _tabs,
+                  labelColor: const Color(0xFF1E40AF),
+                  tabs: const [
+                    Tab(text: 'Contrôle'),
+                    Tab(text: 'Auto'),
+                    Tab(text: 'Historique'),
+                  ],
+                ),
+              ),
             ),
           if (_loading && f == null)
             const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
@@ -229,12 +366,12 @@ class _FeederScreenState extends State<FeederScreen> {
                       children: [
                         const Icon(Icons.pets, size: 64, color: Colors.grey),
                         const SizedBox(height: 16),
-                        const Text('Aucun distributeur ESP32'),
+                        const Text('Aucune gamelle intelligente'),
                         const SizedBox(height: 8),
                         Text(
                           widget.embedded
                               ? 'Les horaires ci-dessus restent actifs pour chaque animal.'
-                              : 'Ajoutez un distributeur pour déclencher les repas.',
+                              : 'Associez une gamelle après achat pour contrôler portions et alertes.',
                           textAlign: TextAlign.center,
                           style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                         ),
@@ -242,7 +379,7 @@ class _FeederScreenState extends State<FeederScreen> {
                         FilledButton.icon(
                           onPressed: _addFeeder,
                           icon: const Icon(Icons.add),
-                          label: const Text('Ajouter ESP32'),
+                          label: const Text('Associer gamelle'),
                         ),
                       ],
                     ),
@@ -271,74 +408,14 @@ class _FeederScreenState extends State<FeederScreen> {
               ),
             ),
             if (f != null)
-              SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    if (widget.hub?.selectedPetType != null)
-                      Card(
-                        child: ListTile(
-                          leading: Text(SpeciesCatalog.emoji(widget.hub!.selectedPetType), style: const TextStyle(fontSize: 22)),
-                          title: Text('Animal hub : ${SpeciesCatalog.label(widget.hub!.selectedPetType)}'),
-                          subtitle: const Text('Portions limitées selon espèce'),
-                        ),
-                      ),
-                    if (f.isLowFood)
-                      Card(
-                        color: Colors.red.shade50,
-                        child: const ListTile(
-                          leading: Icon(Icons.warning, color: Colors.red),
-                          title: Text('Réservoir bas — LED rouge'),
-                        ),
-                      ),
-                    FeederPipelineStrip(
-                      isOnline: f.isOnline,
-                      animalPresent: f.animalPresent,
-                      lastWeightG: f.foodGrams,
-                    ),
-                    const SizedBox(height: 12),
-                    if (_plan != null)
-                      FeederBowlViewport(
-                        petName: _plan!.petName ?? f.name,
-                        reservoirPercent: _reservoirPercent(f),
-                        todayGrams: FeederAutoEngine.todayGramsFromLogs(_logLites(f)),
-                        dailyTarget: _plan!.dailyGrams,
-                        isLowFood: f.isLowFood,
-                        animalPresent: f.animalPresent,
-                        isOnline: f.isOnline,
-                      ),
-                    const SizedBox(height: 12),
-                    _liveEventsStrip(f),
-                    if (_plan != null) ...[
-                      _nutritionScoreCard(f),
-                      const SizedBox(height: 12),
-                    ],
-                    if (_suggestedPortion(f) != null) ...[
-                      _autoPortionCard(f, _suggestedPortion(f)!),
-                      const SizedBox(height: 12),
-                    ],
-                    if (_plan != null) ...[
-                      _nextMealCard(f),
-                      const SizedBox(height: 12),
-                      _depletionCard(f),
-                      const SizedBox(height: 12),
-                      FeederWeeklyBars(gramsByDay: _weeklyGrams(f), dailyTarget: _plan!.dailyGrams),
-                      const SizedBox(height: 12),
-                    ],
-                    _statusCard(f),
-                    const SizedBox(height: 12),
-                    _dispenseCard(f),
-                    if (_plan != null) ...[
-                      const SizedBox(height: 12),
-                      _planCard(_plan!),
-                    ],
-                    const SizedBox(height: 12),
-                    _schedulesCard(f),
-                    const SizedBox(height: 12),
-                    _logsCard(f),
-                    const SizedBox(height: 12),
-                    _deviceKeyCard(f),
-                  ]),
+              SliverFillRemaining(
+                child: TabBarView(
+                  controller: _tabs,
+                  children: [
+                    _buildControlTab(f),
+                    _buildAutoTab(f),
+                    _buildHistoryTab(f),
+                  ],
                 ),
               ),
             ],
@@ -347,6 +424,235 @@ class _FeederScreenState extends State<FeederScreen> {
       ),
     );
   }
+
+  Widget _buildControlTab(PetFeeder f) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        ..._alertBanners(f),
+        FeederScaleCard(
+          foodGrams: f.foodGrams,
+          lastPortionGrams: _lastPortionGrams(f),
+          animalPresent: f.animalPresent,
+        ),
+        const SizedBox(height: 12),
+        FeederPipelineStrip(
+          isOnline: f.isOnline,
+          animalPresent: f.animalPresent,
+          lastWeightG: f.foodGrams,
+        ),
+        const SizedBox(height: 12),
+        if (_plan != null)
+          FeederBowlViewport(
+            petName: _plan!.petName ?? f.name,
+            reservoirPercent: _reservoirPercent(f),
+            todayGrams: _stats?.todayGrams ?? FeederAutoEngine.todayGramsFromLogs(_logLites(f)),
+            dailyTarget: _plan!.dailyGrams,
+            isLowFood: f.isLowFood,
+            animalPresent: f.animalPresent,
+            isOnline: f.isOnline,
+          ),
+        const SizedBox(height: 12),
+        if (_plan != null) _nutritionScoreCard(f),
+        const SizedBox(height: 12),
+        _dispenseCard(f),
+        const SizedBox(height: 12),
+        _statusCard(f),
+        const SizedBox(height: 12),
+        _deviceKeyCard(f),
+        const SizedBox(height: 12),
+        _mlCard(),
+      ],
+    );
+  }
+
+  Widget _buildAutoTab(PetFeeder f) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Card(
+          color: const Color(0xFFEFF6FF),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.schedule_send, color: Color(0xFF2563EB)),
+                    SizedBox(width: 8),
+                    Text('Distribution automatique', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'L\'ESP32 distribue aux horaires programmés. La balance vérifie chaque portion.',
+                  style: TextStyle(fontSize: 13, color: Colors.black54),
+                ),
+                const SizedBox(height: 12),
+                if (_plan != null)
+                  OutlinedButton.icon(
+                    onPressed: _applyPlan,
+                    icon: const Icon(Icons.auto_fix_high),
+                    label: const Text('Appliquer planning 8h / 18h'),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        _nextMealCard(f),
+        const SizedBox(height: 12),
+        if (_suggestedPortion(f) != null) _autoPortionCard(f, _suggestedPortion(f)!),
+        const SizedBox(height: 12),
+        _schedulesCard(f),
+        const SizedBox(height: 12),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text('Ajouter un créneau', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _pickScheduleTime,
+                  icon: const Icon(Icons.access_time),
+                  label: Text(
+                    '${_newScheduleTime.hour.toString().padLeft(2, '0')}:${_newScheduleTime.minute.toString().padLeft(2, '0')}',
+                  ),
+                ),
+                Slider(
+                  value: _newScheduleGrams,
+                  min: 5,
+                  max: 120,
+                  divisions: 23,
+                  label: '${_newScheduleGrams.toInt()} g',
+                  onChanged: (v) => setState(() => _newScheduleGrams = v),
+                ),
+                FilledButton.icon(
+                  onPressed: _addSchedule,
+                  icon: const Icon(Icons.add_alarm),
+                  label: const Text('Programmer ce repas'),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (_plan != null) ...[
+          const SizedBox(height: 12),
+          _depletionCard(f),
+          const SizedBox(height: 12),
+          FeederWeeklyBars(gramsByDay: _weeklyGrams(f), dailyTarget: _plan!.dailyGrams),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildHistoryTab(PetFeeder f) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        FeederHistoryPanel(
+          logs: _history.isNotEmpty ? _history : f.logs,
+          filter: _historyFilter,
+          onFilterChanged: (v) => setState(() => _historyFilter = v),
+          todayGrams: _stats?.todayGrams ?? 0,
+          weekGrams: _stats?.weekGrams ?? 0,
+          dispenseCount: _stats?.dispenseCount ?? 0,
+        ),
+        const SizedBox(height: 12),
+        if (_alerts.isNotEmpty)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Alertes actives', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const SizedBox(height: 8),
+                  ..._alerts.map((a) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(
+                          a.isCritical ? Icons.warning : Icons.info_outline,
+                          color: a.isCritical ? Colors.red : Colors.orange,
+                        ),
+                        title: Text(a.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        subtitle: Text(a.message),
+                      )),
+                ],
+              ),
+            ),
+          ),
+        const SizedBox(height: 12),
+        _liveEventsStrip(f),
+      ],
+    );
+  }
+
+  List<Widget> _alertBanners(PetFeeder f) {
+    final widgets = <Widget>[];
+    if (f.isLowFood) {
+      widgets.add(
+        Card(
+          color: Colors.red.shade50,
+          margin: const EdgeInsets.only(bottom: 12),
+          child: ListTile(
+            leading: const Icon(Icons.notifications_active, color: Colors.red),
+            title: const Text('Réservoir vide ou bas', style: TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Text(
+              _reservoirPercent(f) != null
+                  ? 'Niveau ~${_reservoirPercent(f)!.toStringAsFixed(0)} % — rechargez les croquettes'
+                  : 'LED rouge active sur la gamelle',
+            ),
+            trailing: TextButton(onPressed: _markRefill, child: const Text('Rechargé')),
+          ),
+        ),
+      );
+    }
+    return widgets;
+  }
+
+  Widget _mlCard() => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text('Comportement ML', style: TextStyle(fontWeight: FontWeight.w700)),
+                  ),
+                  TextButton(
+                    onPressed: _mlLoading ? null : () => _loadBehaviorMl(),
+                    child: Text(_mlLoading ? 'Analyse…' : 'Analyser'),
+                  ),
+                ],
+              ),
+              const Text(
+                'Indicateur multi-sources — ne remplace pas un avis vétérinaire.',
+                style: TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+              if (_anomalies.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: Text('Aucune anomalie ouverte.', style: TextStyle(fontSize: 13)),
+                )
+              else
+                ..._anomalies.take(3).map((a) {
+                  final score = ((a['score'] as num?)?.toDouble() ?? 0) * 100;
+                  return ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text('Score ${score.round()} · ${a['severity'] ?? 'medium'}'),
+                    subtitle: Text(_anomalyDetail(a)),
+                  );
+                }),
+            ],
+          ),
+        ),
+      );
 
   Widget _liveEventsStrip(PetFeeder f) {
     if (f.logs.isEmpty) return const SizedBox.shrink();
@@ -500,9 +806,9 @@ class _FeederScreenState extends State<FeederScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Distribution manuelle', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const Text('Contrôle via l\'application', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 8),
-              const Text('IR → servo → moteur → balance vérifie la quantité'),
+              const Text('Envoyez une commande MQTT à la gamelle — la balance HX711 confirme la portion.'),
               Slider(
                 value: _grams,
                 min: 5,
@@ -523,34 +829,21 @@ class _FeederScreenState extends State<FeederScreen> {
               ),
               const SizedBox(height: 8),
               FilledButton.icon(
-                onPressed: f.isLowFood ? null : _dispense,
-                icon: const Icon(Icons.play_arrow),
-                label: const Text('Distribuer maintenant'),
+                onPressed: f.isLowFood || _dispensing ? null : _dispense,
+                icon: _dispensing
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.play_arrow),
+                label: Text(_dispensing ? 'Envoi…' : 'Distribuer maintenant'),
                 style: FilledButton.styleFrom(backgroundColor: const Color(0xFF059669)),
               ),
-            ],
-          ),
-        ),
-      );
-
-  Widget _planCard(NutritionPlan p) => Card(
-        color: Colors.orange.shade50,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Plan nutritionnel', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              const SizedBox(height: 8),
-              if (p.petName != null) Text('Animal : ${p.petName}'),
-              Text('Besoin : ${p.dailyGrams} g/jour'),
-              Text('Par repas : ${p.portionGrams} g × ${p.mealsPerDay}'),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: _applyPlan,
-                icon: const Icon(Icons.schedule),
-                label: const Text('Appliquer planning auto'),
-              ),
+              if (f.isLowFood) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _markRefill,
+                  icon: const Icon(Icons.inventory_2),
+                  label: const Text('Marquer réservoir rechargé'),
+                ),
+              ],
             ],
           ),
         ),
@@ -595,27 +888,6 @@ class _FeederScreenState extends State<FeederScreen> {
                   );
                 }),
               ],
-            ],
-          ),
-        ),
-      );
-
-  Widget _logsCard(PetFeeder f) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Journal', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              const SizedBox(height: 8),
-              if (f.logs.isEmpty)
-                const Text('Aucun événement', style: TextStyle(color: Colors.grey))
-              else
-                ...f.logs.take(10).map((log) => ListTile(
-                      dense: true,
-                      title: Text(_logLabel(log)),
-                      subtitle: Text(log.message ?? ''),
-                    )),
             ],
           ),
         ),

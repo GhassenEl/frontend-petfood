@@ -1,4 +1,11 @@
 /** Réponses locales questions — assistant vétérinaire avant consultation */
+import {
+  buildAfterHoursEmergencyReply,
+  isUrgentOrAfterHoursQuery,
+  DEMO_HOME_CLINIC,
+} from './vetEmergencyAfterHours';
+import { DEMO_NEARBY_VETS } from './clientDemoData';
+
 const QUESTIONS = [
   {
     keys: ['vomit', 'vomir', 'vomissement', 'vomi'],
@@ -25,12 +32,6 @@ const QUESTIONS = [
     urgent: false,
   },
   {
-    keys: ['urgence', 'sang', 'convulsion', 'empoison', 'accident', 'fracture', 'ne respire', 'inconscient'],
-    reply: () =>
-      '⚠️ Situation potentiellement urgente : contactez immédiatement un cabinet d\'urgences vétérinaires (ex. Urgences Vet Tunis Lac, ouvert jusqu\'à 22h). Ne donnez pas de médicament humain sans avis vétérinaire.',
-    urgent: true,
-  },
-  {
     keys: ['poids', 'maigrir', 'grossir', 'surpoids', 'obèse'],
     reply: (pet) =>
       `${pet?.name || 'Votre animal'} : pesez régulièrement et comparez à la courbe de race. Perte >10 % en 1 mois ou gain rapide → bilan vétérinaire. Ajustez les portions (voir Nutrition IA) et l\'activité quotidienne.`,
@@ -51,11 +52,11 @@ const QUESTIONS = [
 ];
 
 export const VET_QUICK_QUESTIONS = [
+  'Urgence : mon animal saigne, cabinet fermé ?',
+  'Quels vétérinaires d\'astreinte à Nabeul ?',
   'Mon chien vomit depuis hier, que faire ?',
-  'Quand faire le rappel vaccinal ?',
   'Mon chat ne mange plus depuis ce matin',
-  'Comment traiter les puces ?',
-  'Mon animal a pris du poids, conseils ?',
+  'Quand faire le rappel vaccinal ?',
 ];
 
 const normalize = (s) =>
@@ -64,29 +65,68 @@ const normalize = (s) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
 
-export const getLocalVetAssistantReply = (message, pet = null) => {
+/**
+ * @param {string} message
+ * @param {object|null} pet
+ * @param {{ region?: string, clinic?: object, nearbyVets?: array, forceClosed?: boolean }} [context]
+ */
+export const getLocalVetAssistantReply = (message, pet = null, context = {}) => {
+  const {
+    region = '',
+    clinic = DEMO_HOME_CLINIC,
+    nearbyVets = DEMO_NEARBY_VETS,
+    forceClosed = false,
+  } = context;
+
+  if (isUrgentOrAfterHoursQuery(message)) {
+    return buildAfterHoursEmergencyReply({
+      message,
+      pet,
+      region,
+      clinic,
+      nearbyVets,
+      forceClosed,
+    });
+  }
+
   const hay = normalize(message);
   for (const questionEntry of QUESTIONS) {
     if (questionEntry.keys.some((k) => hay.includes(normalize(k)))) {
-      return {
+      const base = {
         message: questionEntry.reply(pet),
         urgent: questionEntry.urgent,
         source: 'local-questions',
         shouldShowVetCTA: questionEntry.urgent,
         quickReplies: questionEntry.urgent
-          ? ['Trouver un vétérinaire urgent', 'Prendre RDV téléconsultation']
+          ? ['Urgence : cabinet fermé ?', 'Trouver un vétérinaire urgent', 'Prendre RDV téléconsultation']
           : ['Autre question', 'Prendre RDV préventif'],
       };
+      if (questionEntry.urgent) {
+        const afterHours = buildAfterHoursEmergencyReply({
+          message,
+          pet,
+          region,
+          clinic,
+          nearbyVets,
+          forceClosed,
+        });
+        return {
+          ...afterHours,
+          message: `${questionEntry.reply(pet)}\n\n———\n${afterHours.message}`,
+          source: 'local-questions+after-hours',
+        };
+      }
+      return base;
     }
   }
 
   return {
     message:
-      `Merci pour votre question concernant ${pet?.name || 'votre animal'}. En l'absence de connexion à l'IA cloud, voici une orientation générale : observez l'évolution 24–48 h, notez symptômes (appétit, selles, énergie) et consultez un vétérinaire si aggravation. Ce conseil ne remplace pas un examen clinique.`,
+      `Merci pour votre question concernant ${pet?.name || 'votre animal'}. En l'absence de connexion à l'IA cloud, voici une orientation générale : observez l'évolution 24–48 h, notez symptômes (appétit, selles, énergie) et consultez un vétérinaire si aggravation. Ce conseil ne remplace pas un examen clinique.\n\nSi c'est urgent ou si le cabinet est fermé, écrivez « urgence » ou « cabinet fermé » pour obtenir les numéros d'astreinte par région.`,
     urgent: false,
     source: 'local-fallback',
     shouldShowVetCTA: true,
-    quickReplies: ['Trouver un vétérinaire', 'Questions fréquentes vaccination'],
+    quickReplies: ['Urgence : cabinet fermé ?', 'Trouver un vétérinaire', 'Questions fréquentes vaccination'],
   };
 };
 

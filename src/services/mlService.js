@@ -43,6 +43,15 @@ export const postVetClinicalApplyDossier = (analysisId) =>
 export const postVetClinicalApplyPrescription = (analysisId) =>
   api.post(`/ml/vet/clinical/analyses/${analysisId}/apply-prescription`).then((r) => r.data);
 
+export const postVetAnimalDetect = (body) =>
+  api.post('/vet/ml/animal-detect', body).then((r) => r.data);
+
+export const fetchVetSpeciesProfiles = () =>
+  api.get('/vet/ml/species-profiles').then((r) => r.data);
+
+export const postVetPrescriptionAssist = (body) =>
+  api.post('/vet/ml/prescription-assist', body).then((r) => r.data);
+
 export const fetchNlpModelBenchmark = () =>
   api.get('/ml/admin/nlp-models/benchmark').then((r) => r.data);
 

@@ -149,6 +149,10 @@ api.interceptors.response.use(
         return Promise.reject(error);
       }
       const requestUrl = error.config?.url || '';
+      // /auth/me sans cookie valide : ne pas forcer la redirection login
+      if (requestUrl.includes('/auth/me')) {
+        return Promise.reject(error);
+      }
       if (!requestUrl.includes('/auth/login') && !requestUrl.includes('/auth/register')) {
         if (!window.location.pathname.includes('/login')) {
           console.warn('Non autorisé (401) — redirection vers login');

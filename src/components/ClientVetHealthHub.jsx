@@ -62,6 +62,37 @@ const ClientVetHealthHub = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={card}>
+        <h2 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 800 }}>🥗 Bilan nutritionnel vétérinaire</h2>
+        <p style={{ margin: '0 0 14px', color: '#6b7280', fontSize: 14, lineHeight: 1.5 }}>
+          Analyse du régime, besoins caloriques et plan alimentaire personnalisé — réalisé par un vétérinaire PetfoodTN
+          (pas un produit boutique).
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            setContactForm((f) => ({
+              ...f,
+              subject: `Bilan nutritionnel vétérinaire${f.petName ? ` — ${f.petName}` : ''}`,
+              message:
+                'Je souhaite un bilan nutritionnel complet pour mon animal : analyse du régime actuel, besoins caloriques, recommandations alimentaires et plan personnalisé.',
+            }));
+          }}
+          style={{
+            padding: '12px 18px',
+            borderRadius: 12,
+            border: 'none',
+            background: 'linear-gradient(135deg, #16a34a, #059669)',
+            color: 'white',
+            fontWeight: 800,
+            fontSize: 14,
+            cursor: 'pointer',
+          }}
+        >
+          Demander un bilan nutritionnel
+        </button>
+      </div>
+
+      <div style={card}>
         <h2 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 800 }}>🐾 Mes animaux</h2>
         <p style={{ margin: '0 0 16px', color: '#6b7280', fontSize: 14 }}>
           Sélectionnez un compagnon pour pré-remplir votre demande de consultation santé.{' '}

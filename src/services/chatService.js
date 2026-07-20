@@ -17,3 +17,13 @@ export async function sendVetHealthAssist({ message, mode, pet }) {
       : null,
   });
 }
+
+/** Message public / hors session (agent hors horaires). */
+export async function sendPublicMessage(message, meta = {}) {
+  try {
+    const { data } = await api.post('/chat/public', { message, ...meta });
+    return data;
+  } catch {
+    return null;
+  }
+}

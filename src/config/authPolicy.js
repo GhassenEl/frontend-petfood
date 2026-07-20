@@ -1,8 +1,8 @@
-/** Politique auth — cookies HttpOnly en production. */
-
+/** Politique auth — cookies HttpOnly uniquement si explicitement activés.
+ *  Le backend PetfoodTN authentifie via Bearer JWT (Authorization header).
+ *  Ne pas déduire PROD → cookies : cela provoque des GET /auth/me 401 au démarrage.
+ */
 export const useHttpOnlyAuthCookie = () => {
   const raw = import.meta.env.VITE_AUTH_HTTPONLY;
-  if (raw === 'true' || raw === '1') return true;
-  if (raw === 'false' || raw === '0') return false;
-  return import.meta.env.PROD;
+  return raw === 'true' || raw === '1';
 };

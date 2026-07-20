@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import PetfoodLogo from '../components/PetfoodLogo';
+import JuryCombinedVideosPanel from '../components/JuryCombinedVideosPanel';
 import {
   JURY_DEMO_SECTIONS,
   ACTOR_DEMO_INTERFACES,
@@ -13,7 +14,7 @@ import { MARKETING_PFE_CONTEXT, MARKETING_TECH_STACK } from '../config/marketing
 import './JuryDemoPage.css';
 
 const JuryDemoPage = () => {
-  const [section, setSection] = useState('overview');
+  const [section, setSection] = useState('videos');
   const [loginBusy, setLoginBusy] = useState(null);
   const [loginError, setLoginError] = useState('');
   const { login, user } = useAuth();
@@ -43,6 +44,18 @@ const JuryDemoPage = () => {
     [login, navigate],
   );
 
+  const handleVideoLiveAction = useCallback(
+    (action) => {
+      const actor = ACTOR_DEMO_INTERFACES.find((a) => a.role === action.role);
+      if (actor) {
+        loginAsRole(actor, action.path);
+      } else {
+        navigate(action.path);
+      }
+    },
+    [loginAsRole, navigate],
+  );
+
   return (
     <div className="jury-page">
       <header className="jury-hero">
@@ -50,16 +63,19 @@ const JuryDemoPage = () => {
           <PetfoodLogo size="sm" />
           <span className="jury-badge">Présentation jury · PFE PetfoodTN</span>
         </div>
-        <h1>Démonstration plateforme — acteurs &amp; marketing digital</h1>
+        <h1>Démo jury — vidéo commerciale · plateforme · Flutter</h1>
         <p>
-          Parcours guidé pour le jury : 7 acteurs, interfaces clés, hub marketing digital,
-          chatbot multilingue et système de recommandations IA.
+          Trilogie vidéo pour la soutenance, puis parcours live : 7 acteurs, marketing digital,
+          chatbot multilingue, IA et application mobile Flutter.
         </p>
         <div className="jury-hero__actions">
-          <Link to="/" className="jury-btn jury-btn--ghost">Landing publique</Link>
-          <button type="button" className="jury-btn jury-btn--primary" onClick={() => setSection('tour')}>
-            Démarrer le parcours live
+          <button type="button" className="jury-btn jury-btn--primary" onClick={() => setSection('videos')}>
+            ▶ Vidéos combinées
           </button>
+          <button type="button" className="jury-btn jury-btn--secondary" onClick={() => setSection('tour')}>
+            Parcours live
+          </button>
+          <Link to="/mobile" className="jury-btn jury-btn--ghost">App Flutter</Link>
         </div>
         {user && (
           <p className="jury-session">
@@ -83,6 +99,10 @@ const JuryDemoPage = () => {
       </nav>
 
       <main className="jury-main">
+        {section === 'videos' && (
+          <JuryCombinedVideosPanel onLiveAction={handleVideoLiveAction} />
+        )}
+
         {section === 'overview' && (
           <section className="jury-section">
             <h2>{MARKETING_PFE_CONTEXT.title}</h2>
@@ -272,10 +292,16 @@ const JuryDemoPage = () => {
           <section className="jury-section">
             <h2>Parcours live — ordre suggéré pour le jury</h2>
             <p className="jury-lead">
-              Suivez cet ordre en présentation, ou lancez l&apos;enregistrement vidéo automatique :
-              <code> npm run demo:jury</code>
+              Idéalement : d&apos;abord la section <strong>Vidéos combinées</strong>, puis ce parcours live.
+              Enregistrement auto : <code> npm run demo:jury</code>
             </p>
             <ol className="jury-tour-full">
+              <li>
+                Trilogie vidéo (commercial → plateforme → Flutter) —
+                <button type="button" className="jury-btn jury-btn--sm jury-tour-login" onClick={() => setSection('videos')}>
+                  Ouvrir
+                </button>
+              </li>
               <li>Landing <Link to="/">/</Link> — newsletter, acteurs, stack</li>
               <li>Cette page <Link to="/jury-demo">/jury-demo</Link> — vue d&apos;ensemble</li>
               {ACTOR_DEMO_INTERFACES.filter((a) => a.account).map((actor) => (
@@ -321,6 +347,7 @@ npm run demo:jury    # vidéo → demo-videos/`}
       <footer className="jury-footer">
         <Link to="/login">Connexion</Link>
         <Link to="/enterprise">Fonctionnalités</Link>
+        <Link to="/mobile">App Flutter</Link>
         <Link to="/admin/digital-marketing">Marketing digital</Link>
         <span>PetfoodTN — démo jury 2026</span>
       </footer>

@@ -37,7 +37,7 @@ const DeliveryColdChainPanel = ({
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    if (role !== 'client' && role !== 'livreur') return undefined;
+    if (role !== 'client') return undefined;
     const id = setInterval(load, 15000);
     return () => clearInterval(id);
   }, [load, role]);

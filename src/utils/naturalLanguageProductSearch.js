@@ -68,6 +68,12 @@ export const parseNaturalLanguageQuery = (query = '') => {
     intent.category = 'friandises';
   } else if (/litiere|litière/.test(q)) {
     intent.category = 'accessoires';
+  } else if (/niche|maison|igloo|cage|couverture|coussin|habitat|lit\s+chien|lit\s+chat/.test(q)) {
+    intent.category = 'niches';
+    intent.explanation.push('Type : niches & maisons');
+  } else if (/odeur|lingette|aspirateur|poil|tapis\s+anti|hygiene|hygiène|spray/.test(q)) {
+    intent.category = 'hygiene';
+    intent.explanation.push('Type : hygiène maison');
   }
 
   const allergenMatch = q.match(/sans\s+(\w+)/g);

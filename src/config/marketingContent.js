@@ -484,6 +484,11 @@ export const MARKETING_DIGITAL_FEATURES = {
       title: 'Newsletter & SEO',
       text: 'Inscription sur la landing, mots-clés tunisiens (croquettes, véto en ligne), calendrier social.',
     },
+    {
+      icon: '💳',
+      title: 'Supports print',
+      text: 'Cartes de visite, flyers A5, roll-up salon et étiquettes produit — studio intégré admin/vendeur.',
+    },
   ],
   adminRoute: '/admin/digital-marketing',
   publicTouchpoints: ['Landing /', 'Codes promo inscription', 'Formulaire newsletter', 'Hub commercial /commercial'],

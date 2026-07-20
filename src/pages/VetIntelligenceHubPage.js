@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
-  Brain, Stethoscope, FileText, Pill, Bell, TrendingUp, Bot, Utensils, RefreshCw,
+  Brain, Stethoscope, FileText, Pill, Bell, TrendingUp, Bot, Utensils, RefreshCw, PawPrint,
 } from 'lucide-react';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import DemoModePill from '../components/DemoModePill';
@@ -13,9 +13,11 @@ import VetPredictiveFollowUpPanel from '../components/VetPredictiveFollowUpPanel
 import VetHealthEvolutionPanel from '../components/VetHealthEvolutionPanel';
 import VetClinicalAssistantPanel from '../components/VetClinicalAssistantPanel';
 import VetPathologyNutritionPanel from '../components/VetPathologyNutritionPanel';
+import VetAnimalDetectionPanel from '../components/VetAnimalDetectionPanel';
 import './VetIntelligenceHub.css';
 
 const TABS = [
+  { id: 'detection', label: 'Détection animal', icon: PawPrint },
   { id: 'diagnostic', label: 'Diagnostic', icon: Stethoscope },
   { id: 'dossier', label: 'Dossier médical', icon: FileText },
   { id: 'prescription', label: 'Ordonnances', icon: Pill },
@@ -65,7 +67,7 @@ const VetIntelligenceHubPage = () => {
         Intelligence clinique vétérinaire
       </h1>
       <p className="vetih-lead">
-        Assistant diagnostic, analyse dossier, ordonnances assistées, suivi prédictif, courbes de santé,
+        Assistant diagnostic, détection espèce ML, analyse dossier, ordonnances assistées dynamiques, suivi prédictif, courbes de santé,
         rédaction de comptes rendus et nutrition pathologique — hub IA unifié pour la clinique.
       </p>
 
@@ -108,6 +110,10 @@ const VetIntelligenceHubPage = () => {
           <RefreshCw size={16} aria-hidden /> Actualiser
         </button>
       </div>
+
+      {tab === 'detection' && (
+        <VetAnimalDetectionPanel patients={pack?.patients} loading={loading} />
+      )}
 
       {tab === 'diagnostic' && (
         <VetDiagnosticAssistantPanel

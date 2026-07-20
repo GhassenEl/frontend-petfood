@@ -270,9 +270,13 @@ export const generateWearableInsights = (collar = {}) => {
 /** Enrichit un collier avec scores, timeline et conseils. */
 export const enrichCollar = (collar, historyExtra) => {
   const petType = collar.petType || 'dog';
+  const raw = collar.metrics || {};
   const metrics = {
-    ...collar.metrics,
-    animalState: collar.metrics?.animalState || computeAnimalState(collar.metrics, petType),
+    ...raw,
+    bodyTempC: raw.bodyTempC ?? raw.temperatureC,
+    humidityPct: raw.humidityPct,
+    ambientTempC: raw.ambientTempC,
+    animalState: raw.animalState || computeAnimalState(raw, petType),
   };
   const vitalsStatus = collar.vitalsStatus || {
     spo2: assessVitalStatus('spo2', metrics.spo2Percent, petType),
@@ -280,6 +284,10 @@ export const enrichCollar = (collar, historyExtra) => {
     respiratory: assessVitalStatus('respiratory', metrics.respiratoryRate, petType),
     bodyTemp: assessVitalStatus('bodyTemp', metrics.bodyTempC, petType),
     stress: assessVitalStatus('stress', metrics.stressIndex, petType),
+    humidity:
+      metrics.humidityPct != null && (metrics.humidityPct > 75 || metrics.humidityPct < 25)
+        ? 'warn'
+        : 'ok',
   };
   const enriched = {
     ...collar,

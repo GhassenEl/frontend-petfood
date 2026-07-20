@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'services/auth_service.dart';
 import 'services/theme_preferences.dart';
-import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_shell.dart';
 import 'screens/client_home_shell.dart';
@@ -22,8 +21,7 @@ class PetfoodTnApp extends StatefulWidget {
 
 class _PetfoodTnAppState extends State<PetfoodTnApp> {
   final AuthService _auth = AuthService();
-  bool _ready = false;
-  String _splashMessage = 'Chargement…';
+  bool _booting = true;
 
   @override
   void initState() {
@@ -33,7 +31,6 @@ class _PetfoodTnAppState extends State<PetfoodTnApp> {
 
   Future<void> _init() async {
     try {
-      setState(() => _splashMessage = 'Préparation de l\'espace…');
       await Future.wait([
         _auth.loadSession().timeout(const Duration(seconds: 8)),
         ThemePreferences.instance.load(),
@@ -41,11 +38,12 @@ class _PetfoodTnAppState extends State<PetfoodTnApp> {
     } catch (_) {
       await ThemePreferences.instance.load();
     }
-    if (mounted) setState(() => _ready = true);
+    if (mounted) setState(() => _booting = false);
   }
 
+  /// Après session chargée : home selon le rôle. Sinon login (premier écran).
   Widget _home() {
-    if (!_auth.isAuthenticated) {
+    if (_booting || !_auth.isAuthenticated) {
       return LoginScreen(auth: _auth);
     }
     final role = _auth.userRole ?? 'client';
@@ -60,13 +58,6 @@ class _PetfoodTnAppState extends State<PetfoodTnApp> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_ready) {
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: SplashScreen(message: _splashMessage),
-      );
-    }
-
     return ListenableBuilder(
       listenable: ThemePreferences.instance,
       builder: (context, _) {

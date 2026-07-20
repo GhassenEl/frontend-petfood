@@ -13,6 +13,11 @@ import {
 import { getLocalVetAssistantReply, VET_QUICK_QUESTIONS } from '../utils/vetAssistantEngine';
 import { getMarketplaceRecommendation, VET_SPECIALTY_LABELS } from '../utils/intelligentVetMarketplace';
 import { predictFutureNeeds } from '../utils/futureNeedsPredictor';
+import {
+  DEMO_HOME_CLINIC,
+  getClinicOpenStatus,
+  DEMO_EMERGENCY_VETS_BY_REGION,
+} from '../utils/vetEmergencyAfterHours';
 
 const DEFAULT_CENTER = { lat: 36.8065, lng: 10.1815 };
 
@@ -29,7 +34,28 @@ const getPosition = () =>
     );
   });
 
-export async function askVetAssistant({ message, pet, history = [] }) {
+export async function askVetAssistant({
+  message,
+  pet,
+  history = [],
+  region = '',
+  clinic = null,
+  nearbyVets = null,
+  forceClosed = false,
+} = {}) {
+  const context = {
+    region,
+    clinic: clinic || DEMO_HOME_CLINIC,
+    nearbyVets: nearbyVets?.length ? nearbyVets : DEMO_NEARBY_VETS,
+    forceClosed,
+  };
+
+  // Urgences / cabinet fermé : priorité à l'agent local (numéros + suggestions)
+  const localFirst = getLocalVetAssistantReply(message, pet, context);
+  if (localFirst?.source?.includes('after-hours') || localFirst?.clinicClosed) {
+    return localFirst;
+  }
+
   try {
     const data = await vetChat24({
       message,
@@ -42,6 +68,7 @@ export async function askVetAssistant({ message, pet, history = [] }) {
         source: 'api-vet-chat',
         shouldShowVetCTA: !!data.shouldShowVetCTA,
         quickReplies: data.quickReplies || [],
+        urgent: !!data.urgent,
       };
     }
   } catch {
@@ -60,13 +87,14 @@ export async function askVetAssistant({ message, pet, history = [] }) {
         source: 'api-chat',
         shouldShowVetCTA: !!data.shouldShowVetCTA,
         quickReplies: data.quickReplies || [],
+        urgent: !!data.urgent,
       };
     }
   } catch {
     /* local */
   }
 
-  return getLocalVetAssistantReply(message, pet);
+  return localFirst;
 }
 
 export async function loadVetIntelligencePack(options = {}) {
@@ -134,6 +162,9 @@ export async function loadVetIntelligencePack(options = {}) {
     specialties: Object.entries(VET_SPECIALTY_LABELS).map(([id, label]) => ({ id, label })),
     quickQuestions: VET_QUICK_QUESTIONS,
     futureByPet,
+    clinic: DEMO_HOME_CLINIC,
+    clinicStatus: getClinicOpenStatus(DEMO_HOME_CLINIC),
+    emergencyRegions: DEMO_EMERGENCY_VETS_BY_REGION,
   };
 }
 

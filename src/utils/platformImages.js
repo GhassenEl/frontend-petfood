@@ -59,11 +59,17 @@ export const isValidImageUrl = (url) => {
   return true;
 };
 
-/** URLs Unsplash retirées / 404 — remplacées par photos locales */
+/** URLs Unsplash retirées / 404 — remplacées par photos locales ou fallback */
 const BROKEN_REMOTE_IMAGE_FRAGMENTS = [
   'photo-1585110396000-f9e815c5c35f',
+  'photo-1585110396000-c9ffd4e4b69f',
   'photo-1552728080-b656399553ba',
   'photo-1524704656165-b5c4abb5f90b',
+  'photo-1583511655857-d19b40a0a54e',
+  'photo-1516734212186-a967f81a0b22',
+  'photo-1513201099705-ce310b73ea6f',
+  'photo-1522069169879-c036186b7a1c',
+  'photo-1535591273668-7136ddc9d8e1',
 ];
 
 const PLACEHOLDER_SVG_FRAGMENTS = [

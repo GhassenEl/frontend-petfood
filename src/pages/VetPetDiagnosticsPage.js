@@ -5,6 +5,7 @@ import {
   postVetClinicalAnalyze,
   postVetClinicalApplyDossier,
   postVetClinicalApplyPrescription,
+  postVetAnimalDetect,
 } from '../services/mlService';
 import { fetchVetPatientContext } from '../services/vetPatientContextService';
 import { mergeVetClients } from '../utils/vetDemoData';
@@ -148,6 +149,8 @@ const VetPetDiagnosticsPage = () => {
   const [animalType, setAnimalType] = useState('dog');
   const [symptoms, setSymptoms] = useState('');
   const [vitals, setVitals] = useState({ temperature: '', weight: '', heartRate: '' });
+  const [speciesDetect, setSpeciesDetect] = useState(null);
+  const [detectingSpecies, setDetectingSpecies] = useState(false);
 
   const loadClients = useCallback(async () => {
     try {
@@ -298,6 +301,31 @@ const VetPetDiagnosticsPage = () => {
       }));
     } finally {
       setAnalyzing(false);
+    }
+  };
+
+  const runSpeciesDetection = async () => {
+    const desc = [petName, symptoms].filter(Boolean).join(' — ');
+    if (!desc.trim()) {
+      setError('Renseignez au moins le nom ou les symptômes pour la détection ML.');
+      return;
+    }
+    setDetectingSpecies(true);
+    setError('');
+    try {
+      const data = await postVetAnimalDetect({
+        description: desc,
+        weightKg: vitals.weight ? Number(vitals.weight) : undefined,
+        temperatureC: vitals.temperature ? Number(vitals.temperature) : undefined,
+        ownerId: ownerId || undefined,
+        petId: petId || undefined,
+      });
+      setSpeciesDetect(data);
+      if (data?.detectedSpeciesCode) setAnimalType(data.detectedSpeciesCode);
+    } catch {
+      setError('Détection espèce indisponible — vérifiez la connexion API.');
+    } finally {
+      setDetectingSpecies(false);
     }
   };
 
@@ -564,9 +592,40 @@ const VetPetDiagnosticsPage = () => {
 
           {error && <p style={{ color: '#b91c1c', fontSize: '0.9rem' }}>{error}</p>}
 
-          <button type="submit" className="btn btn-primary" disabled={analyzing}>
-            {analyzing ? 'Analyse en cours…' : '🔍 Analyser symptômes & risque'}
-          </button>
+          {speciesDetect && (
+            <div
+              style={{
+                marginBottom: 16,
+                padding: 12,
+                borderRadius: 10,
+                background: '#ecfeff',
+                border: '1px solid #7dd3fc',
+                fontSize: 14,
+              }}
+            >
+              <strong>🐾 Détection ML :</strong> {speciesDetect.detectedLabel}{' '}
+              ({Math.round((speciesDetect.confidence || 0) * 100)} %)
+              {speciesDetect.source && (
+                <span style={{ marginLeft: 8, color: '#64748b', fontSize: 12 }}>
+                  [{speciesDetect.source === 'python' ? 'FastAPI' : 'local'}]
+                </span>
+              )}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 8 }}>
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={runSpeciesDetection}
+              disabled={detectingSpecies || analyzing}
+            >
+              {detectingSpecies ? 'Détection…' : '🐾 Détecter espèce (ML base)'}
+            </button>
+            <button type="submit" className="btn btn-primary" disabled={analyzing}>
+              {analyzing ? 'Analyse en cours…' : '🔍 Analyser symptômes & risque'}
+            </button>
+          </div>
         </form>
 
         <aside style={cardStyle}>

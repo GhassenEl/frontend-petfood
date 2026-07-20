@@ -138,6 +138,18 @@
   color: #475569;
 }
 
+.vetih-form-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.vetih-btn--outline {
+  background: #fff;
+  color: #0369a1;
+  border: 1px solid #7dd3fc;
+}
+
 .vetih-form input,
 .vetih-form select,
 .vetih-form textarea {

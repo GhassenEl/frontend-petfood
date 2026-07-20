@@ -1,17 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Stethoscope, MessageCircle, Store, TrendingUp, RefreshCw, Pill } from 'lucide-react';
+import { Stethoscope, MessageCircle, Store, TrendingUp, RefreshCw, Pill, Siren } from 'lucide-react';
 import PetHealthRecommendationPanel from '../components/PetHealthRecommendationPanel';
 import usePlatformRefresh from '../hooks/usePlatformRefresh';
 import { loadVetIntelligencePack } from '../services/vetIntelligenceService';
 import { getMarketplaceRecommendation } from '../utils/intelligentVetMarketplace';
 import VetConversationalAssistant from '../components/VetConversationalAssistant';
+import VetAfterHoursEmergencyPanel from '../components/VetAfterHoursEmergencyPanel';
 import IntelligentVetMarketplacePanel from '../components/IntelligentVetMarketplacePanel';
 import FutureNeedsPredictionPanel from '../components/FutureNeedsPredictionPanel';
 import './ClientVetIntelligence.css';
 
 const TABS = [
   { id: 'assistant', label: 'Assistant IA', icon: MessageCircle },
+  { id: 'urgences', label: 'Urgences hors horaires', icon: Siren },
   { id: 'health', label: 'Symptômes & traitements', icon: Pill },
   { id: 'marketplace', label: 'Marketplace véto', icon: Store },
   { id: 'predictions', label: 'Besoins futurs', icon: TrendingUp },
@@ -23,6 +25,7 @@ const ClientVetIntelligencePage = () => {
   const [pack, setPack] = useState(null);
   const [specialty, setSpecialty] = useState('');
   const [petIndex, setPetIndex] = useState(0);
+  const assistantRef = useRef(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -65,8 +68,8 @@ const ClientVetIntelligencePage = () => {
         Intelligence vétérinaire
       </h1>
       <p className="vetintel-lead">
-        Assistant conversationnel pré-consultation, marketplace vétérinaire intelligente
-        et prédiction de vos futurs achats selon la consommation et le profil animal.
+        Assistant pré-consultation, agent IA urgences hors horaires (numéros cabinet &amp; région),
+        marketplace vétérinaire et prédiction de vos besoins.
       </p>
 
       <div className="vetintel-toolbar">
@@ -89,8 +92,24 @@ const ClientVetIntelligencePage = () => {
 
       {tab === 'assistant' && (
         <VetConversationalAssistant
+          ref={assistantRef}
           pets={pack?.pets || []}
           quickQuestions={pack?.quickQuestions || []}
+          region={pack?.profileRegion || ''}
+          clinic={pack?.clinic}
+          nearbyVets={pack?.allVets}
+        />
+      )}
+
+      {tab === 'urgences' && (
+        <VetAfterHoursEmergencyPanel
+          clinic={pack?.clinic}
+          clinicStatus={pack?.clinicStatus}
+          region={pack?.profileRegion || 'Grand Tunis'}
+          onAskAssistant={(q) => {
+            setTab('assistant');
+            setTimeout(() => assistantRef.current?.ask?.(q), 80);
+          }}
         />
       )}
 
@@ -123,10 +142,7 @@ const ClientVetIntelligencePage = () => {
               ))}
             </select>
           </label>
-          <FutureNeedsPredictionPanel
-            prediction={futurePrediction}
-            petName={pack?.pets?.[petIndex]?.name}
-          />
+          <FutureNeedsPredictionPanel prediction={futurePrediction} />
         </>
       )}
     </div>
